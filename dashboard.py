@@ -139,7 +139,6 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
-        """ 
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -158,6 +157,8 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        """ 
+
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
         self.dashboard_icon = Icons.get_image('dashboard_icon',size=(22,22))
@@ -1169,8 +1170,8 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= self.refresh_treeview)
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
-        self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
-                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,)
+        self.add_customer._command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c', button=self.add_customer)
         self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
@@ -1412,7 +1413,6 @@ class services_frame(ctk.CTkFrame):
         self.svc_item_treeview.update_table(database.fetch_data(sql_commands.load_svc_item))
         
     def update_table(self):
-        return
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
         return
@@ -3468,4 +3468,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'admin', datetime.datetime.now)
+#dashboard(None, 'admin', datetime.datetime.now)

@@ -952,7 +952,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 return super().place(**kwargs)
             finally:
                 count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
-                if count_temp != self.total_transaction_count:
+                if count_temp != self.total_transaction_count or count_temp == 0:
                     self.service_treeview.pack_forget()
                     self.item_treeview.pack_forget()
                     self.update_service()
@@ -967,7 +967,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         
         def update_service(self):
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test)
-
             self.service_treeview.update_table([(s[1], s[2]) for s in raw_data])
 
         def update_items_stocks(self):
