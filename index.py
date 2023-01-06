@@ -9,6 +9,9 @@ root_panel.geometry('500x500')
 #GUI variables
 
 def signIn():
+    if(len(password_entry.get()) == 0 or len(username_entry.get()) == 0):
+        info_label.configure(text = 'Fill the required field')
+
     hash_encryptor = hashlib.new('sha256')
     #encryption variable
 
@@ -18,14 +21,15 @@ def signIn():
         db_cur.execute('SELECT slt FROM login_credentials WHERE usn COLLATE LATIN1_GENERAL_CS = ?', (username_entry.get(),))
         salt = str(db_cur.fetchall()[0][0]).encode('utf-8')
     except IndexError:
-        tkinter.messagebox.showinfo('error', 'incorrect username or password')
+        #tkinter.messagebox.showinfo('error', 'incorrect username or password')
+        info_label.configure(text = 'Incorrect username or password')
         return
     except mariadb.Error:
         tkinter.messagebox.showinfo('error', 'error connecting in database')
     else:
         db_cur.close()
         db_con.close()
-    # get the salt from the db
+    # get the salt from the db, prompt incorrect credentials if theres no result of username, and promt error if it's failed to connect to db
 
     hash_encryptor.update(password_entry.get().encode('utf-8') + salt)
     encrypted_pass = hash_encryptor.hexdigest()
@@ -50,9 +54,11 @@ def signIn():
     #find the credentials based on the username, generated password and the salt. returns true if it finds any and false if there's none
 
     if(does_have):
+        info_label.configure(text = '')
         tkinter.messagebox.showinfo('Welcome', 'Welcome')
     else:
-        tkinter.messagebox.showinfo('error', 'incorrect username or password')
+        info_label.configure(text = 'Incorrect username or password')
+        #tkinter.messagebox.showinfo('error', 'incorrect username or password')
 
 
 #button function of sign in
@@ -62,9 +68,14 @@ username_entry.pack(pady=(130, 0))
 #setup the username entry
 
 password_entry = customtkinter.CTkEntry(root_panel, 280, 34, show='●', placeholder_text="Password", corner_radius=25)
-password_entry.pack(pady=(20, 40))
+password_entry.pack(pady=15)
 #setup the password entry
+
+info_label = customtkinter.CTkLabel(root_panel, text='', text_color='red')
+info_label.pack(pady=10)
 
 signin_button = customtkinter.CTkButton(root_panel, 140, 28, 12, text='Sign in', command=signIn)
 signin_button.pack()
+#setup the button
+
 root_panel.mainloop()
