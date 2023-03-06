@@ -129,6 +129,7 @@ class dashboard(ctk.CTk):
                                        text_color=Color.Grey_Bright, wraplength=180, justify='left')
         self.logo_label.pack(side="right",padx=(5,0))
 
+
         self.dasbboard_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                               text="    Dashboard",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
                                               image=self.dashboard_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
@@ -165,7 +166,7 @@ class dashboard(ctk.CTk):
         self.report_button.pack()
 
         '''Top Frame'''
-        self.top_frame = ctk.CTkFrame(self, height=round(height * 0.09), width=round(width* 0.825),
+        self.top_frame = ctk.CTkFrame(self, height=round(height * 0.1), width=round(width* 0.825),
                                       corner_radius=0,fg_color=Color.White_Ghost)
         self.top_frame.grid(row=0, column=1, sticky="nsew")
         self.top_frame.grid_propagate(False)
@@ -176,19 +177,21 @@ class dashboard(ctk.CTk):
         self.title_label = ctk.CTkLabel(self.top_frame, text="", font=("Poppins Medium", 16), text_color=Color.Blue_Maastricht)
         self.title_label.grid(row = 0, column=0,sticky='w', padx= width * 0.02)
 
-        self.notif_btn = ctk.CTkButton(master= self.top_frame, width= self.top_frame.winfo_reqheight(), text= "", image= self.notif_icon,
-                                              fg_color=Color.White_Ghost, height= self.top_frame.winfo_reqheight(), border_width=0, corner_radius=0,
-                                              font=("Poppinds Medium", 16), command= show_notif_menubar)
+        self.notif_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()*0.5), text= "", image= self.notif_icon,
+                                              fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight() *0.5), border_width=0, corner_radius=5,
+                                              font=("Poppinds Medium", 16),hover_color=Color.White_Platinum,
+                                              command= show_notif_menubar,)
         self.notif_btn.grid(row=0, column= 1, sticky='w')
-        self.settings_btn = ctk.CTkButton(master= self.top_frame, width= self.top_frame.winfo_reqheight(), text= "", image= self.settings_icon,
-                                              fg_color=Color.White_Ghost, height= self.top_frame.winfo_reqheight(), border_width=0, corner_radius=0,
-                                              font=("Poppinds Medium", 16), command= show_settings_menubar)
+        self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= self.settings_icon,
+                                              fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
+                                              font=("Poppinds Medium", 16),hover_color=Color.White_Platinum, 
+                                              command= show_settings_menubar)
         self.settings_btn.grid(row=0, column= 2, sticky='w')
-        self.acc_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqwidth() * .13), text= "Jose dela Cruz",
-                                              image= self.acc_icon, fg_color=Color.White_Ghost, height= self.top_frame.winfo_reqheight(), border_width=0,
-                                              corner_radius=0, font=("Poppinds Medium", 16), text_color=Color.Blue_Maastricht,
+        self.acc_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqwidth() * .12), text= "Juan dela Cruz",
+                                              image= self.acc_icon, fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()*0.5), border_width=0,
+                                              corner_radius=5, font=("Poppins Medium", 16), text_color=Color.Blue_Maastricht, hover_color=Color.White_Platinum,
                                               command= show_acc_menubar)
-        self.acc_btn.grid(row=0, column= 3, sticky='e')
+        self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
 
         '''Main Frame'''
         self.main_frame = ctk.CTkFrame(self,corner_radius=0,fg_color=Color.White_Platinum)
