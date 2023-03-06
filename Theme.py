@@ -3,7 +3,8 @@ class Color:
     White_Milk = "#FFFDF6"
     White_Platinum = "#E5E5E5"
     White_Ghost = "#F9F9F9"
-
+    White_Gray = "#EFEFEF"
+    
     Blue_Oxford = "#0A2647"
     Blue_Maastricht = "#06283D"
     Blue_Cobalt = "#205295"
