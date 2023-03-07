@@ -217,6 +217,4 @@ class dashboard(ctk.CTk):
         self.mainloop()
 
 if __name__ == "__main__":
-    print('test')
-    print('test123')
     dashboard()
