@@ -81,7 +81,7 @@ class dashboard(ctk.CTk):
                                 anchor = 'c')
             self.current_opened_menu_bar = self.notif_menu_bar
             '''content code here'''
-            
+
         '''Switch Value'''
         switch_var_darkmode = ctk.StringVar(value="lightmode")
         def show_settings_menubar():
@@ -98,7 +98,7 @@ class dashboard(ctk.CTk):
             self.settings_menu_bar.place(relx= self.settings_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
                                         rely = self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2+0.005,
                                         anchor = 'c')
-            
+
             self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,width=round(width * default_menubar_width/2), height=round(height * .12),text="Dark Mode",
                                                              font=("Poppins Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
                                                              variable = switch_var_darkmode, onvalue="darkmode", offvalue="lightmode",
@@ -196,7 +196,7 @@ class dashboard(ctk.CTk):
         self.notif_btn.grid(row=0, column= 1, sticky='w')
         self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= self.settings_icon,
                                               fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
-                                              font=("Poppinds Medium", 16),hover_color=Color.White_Gray, 
+                                              font=("Poppinds Medium", 16),hover_color=Color.White_Gray,
                                               command= show_settings_menubar)
         self.settings_btn.grid(row=0, column= 2, sticky='w')
         self.acc_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqwidth() * .12), text= "Juan dela Cruz",
@@ -217,4 +217,5 @@ class dashboard(ctk.CTk):
         self.mainloop()
 
 if __name__ == "__main__":
+    print('test')
     dashboard()
