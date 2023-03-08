@@ -217,4 +217,5 @@ class dashboard(ctk.CTk):
         self.mainloop()
 
 if __name__ == "__main__":
+    #lock
     dashboard()
