@@ -217,9 +217,4 @@ class dashboard(ctk.CTk):
         self.mainloop()
 
 if __name__ == "__main__":
-    #comment for testing
-    #testing again
-    #testing again
-    #testing again
-    #testing again
     dashboard()
