@@ -1,5 +1,9 @@
 import customtkinter as ctk
 import tkinter as tk
+from tk import *
+import _tkinter;
+
+
 
 from functools import partial
 from tkextrafont import Font
@@ -19,8 +23,11 @@ class dashboard(ctk.CTkToplevel):
         #makes the form full screen and removing the default tab bar
 
         '''Import Font'''
-        #Font(file="Font/Poppins-Medium.ttf")
-        #Font(file="Font/Poppins-Regular.ttf")
+        try:
+            Font(file="Font/Poppins-Medium.ttf")
+            Font(file="Font/Poppins-Regular.ttf")
+        except _tkinter.TclError:
+            pass
 
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo_1.png"),size=(37,35))
