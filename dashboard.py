@@ -11,7 +11,7 @@ from PIL import Image
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
 
-class dashboard(ctk.CTk):
+class dashboard(ctk.CTkToplevel):
     def __init__(self):
         super().__init__()
         self.state("zoomed")
@@ -19,8 +19,8 @@ class dashboard(ctk.CTk):
         #makes the form full screen and removing the default tab bar
 
         '''Import Font'''
-        Font(file="Font/Poppins-Medium.ttf")
-        Font(file="Font/Poppins-Regular.ttf")
+        #Font(file="Font/Poppins-Medium.ttf")
+        #Font(file="Font/Poppins-Regular.ttf")
 
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo_1.png"),size=(37,35))
@@ -213,6 +213,3 @@ class dashboard(ctk.CTk):
         change_active_event(self.dasbboard_button)
 
         self.mainloop()
-
-if __name__ == "__main__":
-    dashboard()
