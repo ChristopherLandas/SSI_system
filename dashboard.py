@@ -68,17 +68,19 @@ class dashboard(ctk.CTkToplevel):
             print(switch_var_darkmode.get())
 
         '''menubars'''
+        self.current_opened_menu_bar = None
         self.notif_menu_bar = None
         self.settings_menu_bar = None
-        self.current_opened_menu_bar = None
         self.acc_menu_bar = None
+        self.active_btn_menu_bar = None
 
         def show_notif_menubar():
             if(self.current_opened_menu_bar is not None):
                 self.current_opened_menu_bar.destroy()
+                self.active_btn_menu_bar.configure(fg_color=Color.White_Ghost)
+                self.active_btn_menu_bar = None
                 if(str(self.current_opened_menu_bar) == str(self.notif_menu_bar)):
                     self.current_opened_menu_bar = None
-                    self.notif_btn.configure(fg_color=Color.White_Ghost)
                     return
             self.notif_btn.configure(fg_color = Color.White_Platinum)
             self.notif_menu_bar= ctk.CTkFrame(self, width * default_menubar_width, height * default_menubar_height,
@@ -86,6 +88,7 @@ class dashboard(ctk.CTkToplevel):
             self.notif_menu_bar.place(relx = self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
                                 rely= self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                 anchor = 'c')
+            self.active_btn_menu_bar = self.notif_btn
 
             self.current_opened_menu_bar = self.notif_menu_bar
             '''content code here'''
@@ -95,6 +98,8 @@ class dashboard(ctk.CTkToplevel):
         def show_settings_menubar():
             if(self.current_opened_menu_bar is not None):
                 self.current_opened_menu_bar.destroy()
+                self.active_btn_menu_bar.configure(fg_color=Color.White_Ghost)
+                self.active_btn_menu_bar = None
                 if(str(self.current_opened_menu_bar) == str(self.settings_menu_bar)):
                     self.current_opened_menu_bar = None
                     self.settings_btn.configure(fg_color=Color.White_Ghost)
@@ -106,6 +111,8 @@ class dashboard(ctk.CTkToplevel):
             self.settings_menu_bar.place(relx= self.settings_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
                                         rely = self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2+0.005,
                                         anchor = 'c')
+            self.active_btn_menu_bar = self.settings_btn
+
 
             self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,width=round(width * default_menubar_width/2), height=round(height * .12),text="Dark Mode",
                                                              font=("Poppins Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
@@ -118,6 +125,8 @@ class dashboard(ctk.CTkToplevel):
         def show_acc_menubar():
             if(self.current_opened_menu_bar is not None):
                 self.current_opened_menu_bar.destroy()
+                self.active_btn_menu_bar.configure(fg_color=Color.White_Ghost)
+                self.active_btn_menu_bar = None
                 if(str(self.current_opened_menu_bar) == str(self.acc_menu_bar)):
                     self.current_opened_menu_bar = None
                     self.acc_btn.configure(fg_color=Color.White_Ghost)
@@ -128,6 +137,8 @@ class dashboard(ctk.CTkToplevel):
             self.acc_menu_bar.place(relx = 1 - acc_menubar_width/2,
                                     rely= self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                     anchor = 'c')
+            self.active_btn_menu_bar = self.acc_btn
+
             ctk.CTkLabel(self.acc_menu_bar, text='test').pack(anchor = 'e')
             self.current_opened_menu_bar = self.acc_menu_bar
 
@@ -221,3 +232,5 @@ class dashboard(ctk.CTkToplevel):
         change_active_event(self.dasbboard_button)
 
         self.mainloop()
+
+dashboard()
