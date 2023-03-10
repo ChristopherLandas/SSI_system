@@ -1,9 +1,11 @@
 import customtkinter as ctk
-import tkinter as tk
+from tkinter import messagebox
 from tkextrafont import Font
 from PIL import Image
 from Theme import Color
-import dashboard
+from dashboard import dashboard
+from constants import db
+from util import *
 
 
 class loginUI(ctk.CTk):
@@ -19,7 +21,20 @@ class loginUI(ctk.CTk):
 
         '''functions and processes'''
         def login():
-            dashboard.dashboard()
+            try:
+                salt = database.fetch_data(f'SELECT {db.acc_cred.SALT} FROM {db.acc_cred.TABLE} WHERE {db.acc_cred.USERNAME} = ?',
+                                        (self.user_entry.get(), ), database.fetch_db_profile())[0][0]
+            except IndexError:
+                messagebox.showinfo('Username Or Password Incorrect')
+                return
+            count = database.fetch_data(f'SELECT COUNT(*) FROM {db.acc_cred.TABLE} WHERE {db.acc_cred.USERNAME} = ? AND {db.acc_cred.PASSWORD} = ?',
+                                        (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']),
+                                        database.fetch_db_profile())
+            if count[0][0] == 0:
+                messagebox.showinfo('Username Or Password Incorrect')
+            else:
+                self.withdraw()
+                dashboard()
 
         '''Import Icons and Images'''
         self.bg_img = ctk.CTkImage(light_image=Image.open("image/bg.png"),size=(1920,1080))
@@ -42,7 +57,6 @@ class loginUI(ctk.CTk):
         self.title(title_name)
         self.geometry('%dx%d+%d+%d' % (root_w,root_h,pos_x,pos_y))
         self.minsize(root_w,root_h)
-        print(self.state())
         self.configure(fg_color=Color.Blue_Oxford)
 
         '''Background Image'''

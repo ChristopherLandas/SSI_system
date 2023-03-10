@@ -9,8 +9,8 @@ from constants import db
 test = {"name" : "chris"}
 
 class encrypt:
-    def pass_encrypt(pss):
-        salt = base64.urlsafe_b64encode(uuid.uuid4().bytes)
+    def pass_encrypt(pss, slt):
+        salt = base64.urlsafe_b64encode(uuid.uuid4().bytes) if slt == None else slt.encode('utf-8')
         encryptor = hashlib.sha256()
         encryptor.update(str(pss).encode('utf-8') + salt)
         encrypted_password = encryptor.hexdigest()
@@ -32,10 +32,10 @@ class database:
             pass
         return None
 
-    def fetch_data(cmd, db_con):
+    def fetch_data(cmd, tup, db_con):
         try:
             db_cur = db_con.cursor()
-            db_cur.execute(cmd)
+            db_cur.execute(cmd, tup)
             return db_cur.fetchall()
         except mariadb.Error as e:
             print(e)
@@ -55,8 +55,8 @@ class database:
             db_con.commit()
 
 
-#data = database.fetch_data(f'SELECT * FROM {db.acc_cred.TABLE}', database.fetch_db_profile())
-#print(data)
-usn = 'Chris1'
-pss = encrypt.pass_encrypt('trisha_mae')
+''' example of inserting data
+usn = 'admin'
+pss = encrypt.pass_encrypt('admin', None)
 database.exec_nonquery([[f'INSERT INTO {db.acc_cred.TABLE} VALUES (?, ?, ?)', (usn, pss["pass"], pss['salt'])]], database.fetch_db_profile())
+'''
