@@ -220,6 +220,4 @@ class dashboard(ctk.CTkToplevel):
         '''setting default events'''
         change_active_event(self.dasbboard_button)
 
-
-        #test
         self.mainloop()
