@@ -79,6 +79,7 @@ class dashboard(ctk.CTkToplevel):
             self.notif_menu_bar.place(relx = self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
                                 rely= self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                 anchor = 'c')
+
             self.current_opened_menu_bar = self.notif_menu_bar
             '''content code here'''
 
@@ -212,4 +213,6 @@ class dashboard(ctk.CTkToplevel):
         '''setting default events'''
         change_active_event(self.dasbboard_button)
 
+
+        #test
         self.mainloop()
