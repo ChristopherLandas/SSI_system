@@ -212,8 +212,6 @@ class dashboard(ctk.CTk):
         '''setting default events'''
         change_active_event(self.dasbboard_button)
 
-        self.update()
-
         self.mainloop()
 
 if __name__ == "__main__":
