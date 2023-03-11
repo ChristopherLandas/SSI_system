@@ -240,7 +240,6 @@ class dashboard(ctk.CTkToplevel):
 class dashboard_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
-        print(width)
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.date_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, corner_radius= 12)
         self.date_frame.grid(row=0, column=0, padx = (width * .025, 0), pady= (height * .025, 0), sticky='nsew')
