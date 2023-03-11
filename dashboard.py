@@ -2,9 +2,6 @@ import customtkinter as ctk
 import tkinter as tk
 from tk import *
 import _tkinter;
-
-
-
 from functools import partial
 from tkextrafont import Font
 from Theme import Color
@@ -52,12 +49,18 @@ class dashboard(ctk.CTkToplevel):
         selected_btn_color = Color.Blue_Steel
 
         self.active_win = None
+        self.main_frames = [dashboard_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self)]
+        self.active_main_frame = None
 
         '''events'''
-        def change_active_event(cur):
+        def change_active_event(cur, cur_frame):
             if(self.active_win is not None):
                 self.active_win.configure(fg_color = unselected_btn_color)
                 self.active_win.configure(hover=True)
+            if(self.active_main_frame is not None):
+                self.active_main_frame.grid_forget()
+            self.active_main_frame = self.main_frames[cur_frame]
+            self.main_frames[cur_frame].grid(row=1, column=1, sticky="nsew")
             self.active_win = cur
             self.title_label.configure(text=f"{self.active_win.cget('text').strip().upper()}")
             cur.configure(fg_color = selected_btn_color)
@@ -161,39 +164,39 @@ class dashboard(ctk.CTkToplevel):
         self.logo_label.pack(side="right",padx=(5,0))
 
 
-        self.dasbboard_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
+        self.dashboard_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                               text="    Dashboard",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
                                               image=self.dashboard_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
                                               fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.dasbboard_button.configure(command=partial(change_active_event, self.dasbboard_button))
-        self.dasbboard_button.pack()
+        self.dashboard_button.configure(command=partial(change_active_event, self.dashboard_button, 0))
+        self.dashboard_button.pack()
 
         self.sales_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                               text="   Sales",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
                                               image=self.sales_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
                                               fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.sales_button.configure(command=partial(change_active_event, self.sales_button))
+        self.sales_button.configure(command=partial(change_active_event, self.sales_button, 1))
         self.sales_button.pack()
 
         self.inventory_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                               text="   Inventory",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
                                               image=self.inventory_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
                                               fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.inventory_button.configure(command=partial(change_active_event, self.inventory_button))
+        self.inventory_button.configure(command=partial(change_active_event, self.inventory_button, 2))
         self.inventory_button.pack()
 
         self.patient_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                               text="   Patient Info",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
                                               image=self.patient_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
                                               fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.patient_button.configure(command=partial(change_active_event, self.patient_button))
+        self.patient_button.configure(command=partial(change_active_event, self.patient_button, 3))
         self.patient_button.pack()
 
         self.report_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                               text="   Reports",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
                                               image=self.report_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
                                               fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.report_button.configure(command=partial(change_active_event, self.report_button))
+        self.report_button.configure(command=partial(change_active_event, self.report_button, 4))
         self.report_button.pack()
 
         '''Top Frame'''
@@ -224,13 +227,41 @@ class dashboard(ctk.CTkToplevel):
                                               command= show_acc_menubar)
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
 
-        '''Main Frame'''
-        self.main_frame = ctk.CTkFrame(self,corner_radius=0,fg_color=Color.White_Platinum)
-        self.main_frame.grid(row=1, column=1, sticky="nsew")
-
         '''setting default events'''
-        change_active_event(self.dasbboard_button)
+        change_active_event(self.dashboard_button, 0)
 
         self.mainloop()
+
+class dashboard_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        self.label = ctk.CTkLabel(self, text='1').pack(anchor='w')
+        self.grid_forget()
+
+class sales_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        self.label = ctk.CTkLabel(self, text='2').pack(anchor='w')
+        self.grid_forget()
+
+class inventory_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        self.label = ctk.CTkLabel(self, text='3').pack(anchor='w')
+        self.grid_forget()
+
+class patient_info_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        self.label = ctk.CTkLabel(self, text='4').pack(anchor='w')
+        self.grid_forget()
+
+class reports_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        self.label = ctk.CTkLabel(self, text='5').pack(anchor='w')
+        self.grid_forget()
+
+
 
 dashboard()
