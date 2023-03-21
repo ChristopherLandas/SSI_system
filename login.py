@@ -6,6 +6,7 @@ from Theme import Color
 from dashboard import dashboard
 from constants import db
 from util import *
+from os import walk
 
 
 class loginUI(ctk.CTk):
@@ -15,12 +16,18 @@ class loginUI(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        '''Import Font'''
+        '''Import Font
         Font(file="Font/Poppins-Medium.ttf")
         Font(file="Font/Poppins-Regular.ttf")
+        '''
+
+        '''load all fonts'''
+        for i in next(walk('font'))[2]:
+            Font(file= f'Font/{i}')
+
 
         '''functions and processes'''
-        def login():
+        def login(_):
             try:
                 salt = database.fetch_data(f'SELECT {db.acc_cred.SALT} FROM {db.acc_cred.TABLE} WHERE {db.acc_cred.USERNAME} = ?',
                                         (self.user_entry.get(), ), database.fetch_db_profile())[0][0]
@@ -132,12 +139,14 @@ class loginUI(ctk.CTk):
         self.login_button = ctk.CTkButton(self.main_frame, text="LOGIN", height=50,
                                           font=('Poppins Medium',20),text_color='#FFFFFF',
                                           fg_color=Color.Blue_Cobalt,corner_radius=5,
-                                          command= login
+                                          command= partial(login, None)
                                           )
         self.login_button.grid(row=7, column=0, sticky='nsew', padx=(42,35),pady=(0,35))
 
-    '''For showing the password'''
+        '''shortcut key'''
+        self.bind('<Return>', login)
 
+    '''For showing the password'''
     def show_pass(self):
         if self.__is_PasswordVisible is True:
             self.password_entry.configure(show="")
@@ -147,6 +156,7 @@ class loginUI(ctk.CTk):
             self.password_entry.configure(show="*")
             self.show_pass_btn.configure(image=self.hide_icon)
             self.__is_PasswordVisible = True
+
 
 
 if __name__ == '__main__':
