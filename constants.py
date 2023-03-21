@@ -1,5 +1,3 @@
-import mariadb
-
 class db:
     DB = 'ssi'
     PORT = 3306

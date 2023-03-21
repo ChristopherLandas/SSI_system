@@ -6,11 +6,14 @@ from functools import partial
 from tkextrafont import Font
 from Theme import Color
 from PIL import Image
-
+from datetime import date
+from util import sequence
 
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
+width = 0
+height = 0
 
 class dashboard(ctk.CTkToplevel):
     def __init__(self):
@@ -23,6 +26,7 @@ class dashboard(ctk.CTkToplevel):
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
+            Font(file='Font/Poppins-Bold.ttf')
         except _tkinter.TclError:
             pass
 
@@ -37,6 +41,7 @@ class dashboard(ctk.CTkToplevel):
         self.settings_icon = ctk.CTkImage(light_image=Image.open("image/setting.png"),size=(25,25))
         self.acc_icon = ctk.CTkImage(light_image=Image.open("image/acc.png"),size=(40,40))
 
+        global width, height
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
         side_frame_w = round(width * 0.175)
@@ -125,25 +130,27 @@ class dashboard(ctk.CTkToplevel):
             '''content code here'''
             self.current_opened_menu_bar = self.settings_menu_bar
 
-        def show_acc_menubar():
+        def show_acc_menubar(_):
             if(self.current_opened_menu_bar is not None):
                 self.current_opened_menu_bar.destroy()
                 self.active_btn_menu_bar.configure(fg_color=Color.White_Ghost)
                 self.active_btn_menu_bar = None
+                sequence.bind_event((self.acc_btn, self.dp, self.acc_name, self.position), self.acc_btn,  Color.White_Gray, Color.White_Ghost)
                 if(str(self.current_opened_menu_bar) == str(self.acc_menu_bar)):
                     self.current_opened_menu_bar = None
-                    self.acc_btn.configure(fg_color=Color.White_Ghost)
+                    self.acc_btn.configure(fg_color=Color.White_Gray)
                     return
+            sequence.unbind_event((self.acc_btn, self.dp, self.acc_name, self.position))
             self.acc_btn.configure(fg_color=Color.White_Platinum)
             self.acc_menu_bar = ctk.CTkFrame(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost)
             self.acc_menu_bar.pack_propagate(0)
             self.acc_menu_bar.place(relx = 1 - acc_menubar_width/2,
                                     rely= self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                     anchor = 'c')
-            self.active_btn_menu_bar = self.acc_btn
 
-            ctk.CTkLabel(self.acc_menu_bar, text='test').pack(anchor = 'e')
+            self.active_btn_menu_bar = self.acc_btn
             self.current_opened_menu_bar = self.acc_menu_bar
+            return
 
         self.grid_rowconfigure(1,weight=1)
         self.side_frame = ctk.CTkFrame(self, height= height, width = side_frame_w,
@@ -221,11 +228,26 @@ class dashboard(ctk.CTkToplevel):
                                               font=("Poppinds Medium", 16),hover_color=Color.White_Gray,
                                               command= show_settings_menubar)
         self.settings_btn.grid(row=0, column= 2, sticky='w')
+        '''
         self.acc_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqwidth() * .12), text= "Juan dela Cruz",
                                               image= self.acc_icon, fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()*0.5), border_width=0,
                                               corner_radius=5, font=("Poppins Medium", 16), text_color=Color.Blue_Maastricht, hover_color=Color.White_Gray,
                                               command= show_acc_menubar)
+        '''
+        self.acc_btn = ctk.CTkFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12), round(self.top_frame.winfo_reqheight()*.5),
+                                    5, fg_color=Color.White_Ghost)
+        self.acc_btn.grid_propagate(0)
+        self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
+        self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
+        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text='Juan dela Cruz', font=("Poppins Medium", 16))
+        self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = 0)
+        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text='Owner', font=("Poppins Medium", 12))
+        self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
+
+        sequence.bind_command((self.acc_btn, self.dp, self.acc_name, self.position), show_acc_menubar)
+        sequence.bind_event((self.acc_btn, self.dp, self.acc_name, self.position), self.acc_btn,  Color.White_Gray, Color.White_Ghost)
+        #acc_btn self events
 
         '''setting default events'''
         change_active_event(self.dashboard_button, 0)
@@ -233,35 +255,60 @@ class dashboard(ctk.CTkToplevel):
         self.mainloop()
 
 class dashboard_frame(ctk.CTkFrame):
+    global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='1').pack(anchor='w')
+        self.date_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, corner_radius= 12)
+        self.date_frame.grid(row=0, column=0, padx = (width * .025, 0), pady= (height * .025, 0), sticky='nsew')
+        ctk.CTkLabel(self.date_frame, text=date.today().strftime('%B %d, %Y'), font=("Poppins Medium", 16)).pack(anchor='c', padx = width * .015, pady = height * .01)
+
+        self.inventory_stat_frame = ctk.CTkFrame(self, width * .37, height * .35,  fg_color=Color.White_Ghost, corner_radius= 12)
+        self.inventory_stat_frame.pack_propagate(0)
+        self.inventory_stat_frame.grid(row=1, column=0, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
+        ctk.CTkLabel(self.inventory_stat_frame, text= 'Inventory Status', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
+
+        self.daily_income_frame = ctk.CTkFrame(self, width * .37, height * .35,  fg_color=Color.White_Ghost, corner_radius= 12)
+        self.daily_income_frame.pack_propagate(0)
+        self.daily_income_frame.grid(row=1, column=1, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
+        ctk.CTkLabel(self.daily_income_frame, text= 'Daily Income', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
+
+        self.recent_client_frame = ctk.CTkFrame(self, width * .37, height * .3,  fg_color=Color.White_Ghost, corner_radius= 12)
+        self.recent_client_frame.pack_propagate(0)
+        self.recent_client_frame.grid(row=2, column=0, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
+        ctk.CTkLabel(self.recent_client_frame, text= 'Recent Client', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
+
+        self.scheduled_client_frame = ctk.CTkFrame(self, width * .37, height * .3,  fg_color=Color.White_Ghost, corner_radius= 12)
+        self.scheduled_client_frame.pack_propagate(0)
+        self.scheduled_client_frame.grid(row=2, column=1, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
+        ctk.CTkLabel(self.scheduled_client_frame, text= 'Scheduled Client', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
         self.grid_forget()
 
 class sales_frame(ctk.CTkFrame):
+    global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='2').pack(anchor='w')
         self.grid_forget()
 
 class inventory_frame(ctk.CTkFrame):
+    global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='3').pack(anchor='w')
         self.grid_forget()
 
 class patient_info_frame(ctk.CTkFrame):
+    global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='4').pack(anchor='w')
         self.grid_forget()
 
 class reports_frame(ctk.CTkFrame):
+    global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='5').pack(anchor='w')
         self.grid_forget()
-
-
 
 dashboard()
