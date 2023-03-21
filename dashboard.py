@@ -228,7 +228,7 @@ class dashboard(ctk.CTkToplevel):
                                               font=("Poppinds Medium", 16),hover_color=Color.White_Gray,
                                               command= show_settings_menubar)
         self.settings_btn.grid(row=0, column= 2, sticky='w')
-        '''
+
         self.acc_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqwidth() * .12), text= "Juan dela Cruz",
                                               image= self.acc_icon, fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()*0.5), border_width=0,
                                               corner_radius=5, font=("Poppins Medium", 16), text_color=Color.Blue_Maastricht, hover_color=Color.White_Gray,
