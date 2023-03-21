@@ -22,13 +22,13 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         #makes the form full screen and removing the default tab bar
 
-        '''Import Font'''
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
             Font(file='Font/Poppins-Bold.ttf')
         except _tkinter.TclError:
             pass
+        #for testing purposes, might delete after the development
 
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo_1.png"),size=(37,35))
@@ -313,5 +313,5 @@ class reports_frame(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text='5').pack(anchor='w')
         self.grid_forget()
 
-dashboard()
+#dashboard()
 '''last edited by the lead programmer'''
