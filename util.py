@@ -4,7 +4,8 @@ import base64
 import re
 import mariadb
 from constants import db
-
+from functools import partial
+from Theme import *
 
 test = {"name" : "chris"}
 
@@ -19,7 +20,7 @@ class encrypt:
         for _ in range(int(re.findall(r'\d{2}', encrypted_password)[0]) + len(pss)):
             encryptor.update(str(encrypted_password).encode('utf-8') + salt)
             encrypted_password = encryptor.hexdigest()
-        #repeatedly encrypt thep pass at the certain time
+        #repeatedly encrypt the pass at the certain time
 
         return {"pass": encrypted_password, "salt": salt}
 
@@ -53,6 +54,22 @@ class database:
             print(e)
         else:
             db_con.commit()
+
+class sequence:
+    def bind_command(tup, cmd):
+        for o in tup:
+            o.bind('<Button-1>', lambda _: cmd(None))
+
+
+    def bind_event(tup, master, color_hover, color_hover_exit):
+        for o in tup:
+            o.bind('<Enter>', lambda _: master.configure(fg_color = color_hover))
+            o.bind('<Leave>', lambda _: master.configure(fg_color = color_hover_exit))
+
+    def unbind_event(tup):
+        for o in tup:
+            o.unbind('<Enter>', None)
+            o.unbind('<Leave>', None)
 
 
 ''' example of inserting data
