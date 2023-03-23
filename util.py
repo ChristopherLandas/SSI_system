@@ -58,7 +58,8 @@ class database:
             db_con.commit()
 
 ''' example of inserting data
-usn = 'admin'
+usn = 'admin1'
 pss = encrypt.pass_encrypt('admin', None)
 database.exec_nonquery([[f'INSERT INTO {db.acc_cred.TABLE} VALUES (?, ?, ?)', (usn, pss["pass"], pss['salt'])]], database.fetch_db_profile())
+#database.exec_nonquery([[f'DELETE FROM {db.acc_cred.TABLE} where {db.acc_cred.USERNAME} = ?', ('admin1',)]], database.fetch_db_profile())
 '''

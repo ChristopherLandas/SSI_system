@@ -7,7 +7,6 @@ from tkextrafont import Font
 from Theme import Color
 from PIL import Image
 from datetime import date
-from util import sequence
 from customcustomtkinter import customcustomtkinter as cctk
 
 
@@ -304,5 +303,3 @@ class reports_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='5').pack(anchor='w')
         self.grid_forget()
-
-dashboard()

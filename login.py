@@ -157,8 +157,6 @@ class loginUI(ctk.CTk):
             self.show_pass_btn.configure(image=self.hide_icon)
             self.__is_PasswordVisible = True
 
-
-
 if __name__ == '__main__':
     app = loginUI()
     app.mainloop()
