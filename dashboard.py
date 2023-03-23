@@ -8,6 +8,7 @@ from Theme import Color
 from PIL import Image
 from datetime import date
 from util import sequence
+from util import customcustomtkinter as cctk
 
 
 ctk.set_appearance_mode('light')
@@ -135,12 +136,13 @@ class dashboard(ctk.CTkToplevel):
                 self.current_opened_menu_bar.destroy()
                 self.active_btn_menu_bar.configure(fg_color=Color.White_Ghost)
                 self.active_btn_menu_bar = None
-                sequence.bind_event((self.acc_btn, self.dp, self.acc_name, self.position), self.acc_btn,  Color.White_Gray, Color.White_Ghost)
+                self.acc_btn.configure_extras(hover = False)
+                #sequence.bind_event((self.acc_btn, self.dp, self.acc_name, self.position), self.acc_btn,  Color.White_Gray, Color.White_Ghost)
                 if(str(self.current_opened_menu_bar) == str(self.acc_menu_bar)):
                     self.current_opened_menu_bar = None
                     self.acc_btn.configure(fg_color=Color.White_Gray)
                     return
-            sequence.unbind_event((self.acc_btn, self.dp, self.acc_name, self.position))
+            #sequence.unbind_event((self.acc_btn, self.dp, self.acc_name, self.position))
             self.acc_btn.configure(fg_color=Color.White_Platinum)
             self.acc_menu_bar = ctk.CTkFrame(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost)
             self.acc_menu_bar.pack_propagate(0)
@@ -236,6 +238,8 @@ class dashboard(ctk.CTkToplevel):
                                               corner_radius=5, font=("Poppins Medium", 16), text_color=Color.Blue_Maastricht, hover_color=Color.White_Gray,
                                               command= show_acc_menubar)
         '''
+
+        '''old acc button na ginawa ko nung tue
         self.acc_btn = ctk.CTkFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12), round(self.top_frame.winfo_reqheight()*.5),
                                     5, fg_color=Color.White_Ghost)
         self.acc_btn.grid_propagate(0)
@@ -249,11 +253,25 @@ class dashboard(ctk.CTkToplevel):
 
         sequence.bind_command((self.acc_btn, self.dp, self.acc_name, self.position), show_acc_menubar)
         sequence.bind_event((self.acc_btn, self.dp, self.acc_name, self.position), self.acc_btn,  Color.White_Gray, Color.White_Ghost)
-        #acc_btn self events
+        '''
+
+        self.acc_btn = cctk.ctkButtonFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12),
+                                           round(self.top_frame.winfo_reqheight()*.5), 5,
+                                           fg_color=Color.White_Ghost, command= show_acc_menubar,
+                                           hover_color= Color.White_Gray,)
+        self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
+        self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
+        self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
+        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text='Juan dela Cruz', font=("Poppins Medium", 16))
+        self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = 0)
+        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text='Owner', font=("Poppins Medium", 12))
+        self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
+        self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
+        self.acc_btn.update_children()
+
 
         '''setting default events'''
         change_active_event(self.dashboard_button, 0)
-
         self.mainloop()
 
 class dashboard_frame(ctk.CTkFrame):
@@ -313,5 +331,4 @@ class reports_frame(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text='5').pack(anchor='w')
         self.grid_forget()
 
-#dashboard()
-'''last edited by the lead programmer'''
+dashboard()
