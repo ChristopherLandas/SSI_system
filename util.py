@@ -6,10 +6,8 @@ import mariadb
 from constants import db
 from functools import partial
 from Theme import *
-import customtkinter as ctk
 from typing import *
 
-test = {"name" : "chris"}
 
 class encrypt:
     def pass_encrypt(pss, slt):
