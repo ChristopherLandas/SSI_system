@@ -8,7 +8,7 @@ from Theme import Color
 from PIL import Image
 from datetime import date
 from util import sequence
-from util import customcustomtkinter as cctk
+from customcustomtkinter import customcustomtkinter as cctk
 
 
 ctk.set_appearance_mode('light')
@@ -136,14 +136,12 @@ class dashboard(ctk.CTkToplevel):
                 self.current_opened_menu_bar.destroy()
                 self.active_btn_menu_bar.configure(fg_color=Color.White_Ghost)
                 self.active_btn_menu_bar = None
-                self.acc_btn.configure_extras(hover = False)
-                #sequence.bind_event((self.acc_btn, self.dp, self.acc_name, self.position), self.acc_btn,  Color.White_Gray, Color.White_Ghost)
+                self.acc_btn.configure(hover= True)
                 if(str(self.current_opened_menu_bar) == str(self.acc_menu_bar)):
                     self.current_opened_menu_bar = None
                     self.acc_btn.configure(fg_color=Color.White_Gray)
                     return
-            #sequence.unbind_event((self.acc_btn, self.dp, self.acc_name, self.position))
-            self.acc_btn.configure(fg_color=Color.White_Platinum)
+            self.acc_btn.configure(hover= False, fg_color=Color.White_Platinum)
             self.acc_menu_bar = ctk.CTkFrame(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost)
             self.acc_menu_bar.pack_propagate(0)
             self.acc_menu_bar.place(relx = 1 - acc_menubar_width/2,
