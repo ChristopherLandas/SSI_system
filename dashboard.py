@@ -51,7 +51,7 @@ class dashboard(ctk.CTkToplevel):
         self.services_icon = ctk.CTkImage(light_image=Image.open("image/services.png"),size=(22,22))
         self.user_setting_icon = ctk.CTkImage(light_image=Image.open("image/usersetting.png"),size=(24,27))
         self.histlog_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"),size=(22,25))
-        
+
         global width, height
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
@@ -72,15 +72,15 @@ class dashboard(ctk.CTkToplevel):
         def change_active_event(cur, cur_frame, *args, **kwargs):
             if(self.active_win is not None):
                 self.active_win.configure(fg_color = unselected_btn_color)
-                self.active_win.winfo_children()[0].configure(fg_color="transparent")  
+                self.active_win.winfo_children()[0].configure(fg_color="transparent")
                 self.active_win.configure(hover=True)
             if(self.active_main_frame is not None):
                 self.active_main_frame.grid_forget()
             self.active_main_frame = self.main_frames[cur_frame]
             self.main_frames[cur_frame].grid(row=1, column=1, sticky="nsew")
-            self.active_win = cur 
+            self.active_win = cur
             #print(self.active_win.winfo_children()[0])
-            self.active_win.winfo_children()[0].configure(fg_color=Color.White_Ghost)  
+            self.active_win.winfo_children()[0].configure(fg_color=Color.White_Ghost)
             self.title_label.configure(text=f"{self.active_win.winfo_children()[2].cget('text').strip().upper()}")
             cur.configure(fg_color = selected_btn_color)
             cur.configure(hover=False)
@@ -183,16 +183,6 @@ class dashboard(ctk.CTkToplevel):
                                        text_color=Color.Grey_Bright, wraplength=180, justify='left')
         self.logo_label.pack(side="right",padx=(5,0))
 
-
-        '''
-        self.dashboard_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
-                                              text="    Dashboard",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
-                                              image=self.dashboard_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
-                                              fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.dashboard_button.configure(command=partial(change_active_event, self.dashboard_button, 0))
-        self.dashboard_button.pack() 
-        '''
-        
         self.db_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -206,7 +196,8 @@ class dashboard(ctk.CTkToplevel):
         self.db_label.pack(side="left")
         self.db_button.pack()
         self.db_button.update_children()
-        
+
+
         self.transact_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -220,8 +211,8 @@ class dashboard(ctk.CTkToplevel):
         self.transact_label.pack(side="left")
         self.transact_button.pack()
         self.transact_button.update_children()
-        
-        
+
+
         self.services_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -235,15 +226,8 @@ class dashboard(ctk.CTkToplevel):
         self.services_label.pack(side="left")
         self.services_button.pack()
         self.services_button.update_children()
-        
-        '''
-        self.sales_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
-                                              text="   Sales",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
-                                              image=self.sales_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
-                                              fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.sales_button.configure(command=partial(change_active_event, self.sales_button, 1))
-        self.sales_button.pack()
-        '''
+
+
         self.sales_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -257,15 +241,7 @@ class dashboard(ctk.CTkToplevel):
         self.sales_label.pack(side="left")
         self.sales_button.pack()
         self.sales_button.update_children()
-        
-        '''
-        self.inventory_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
-                                              text="   Inventory",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
-                                              image=self.inventory_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
-                                              fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.inventory_button.configure(command=partial(change_active_event, self.inventory_button, 2))
-        self.inventory_button.pack()
-        '''
+
 
         self.inventory_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
@@ -280,16 +256,8 @@ class dashboard(ctk.CTkToplevel):
         self.inventory_label.pack(side="left")
         self.inventory_button.pack()
         self.inventory_button.update_children()
-        
-        '''
-        self.patient_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
-                                              text="   Patient Info",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
-                                              image=self.patient_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
-                                              fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.patient_button.configure(command=partial(change_active_event, self.patient_button, 3))
-        self.patient_button.pack()
-        '''
-        
+
+
         self.patient_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -303,16 +271,8 @@ class dashboard(ctk.CTkToplevel):
         self.patient_label.pack(side="left")
         self.patient_button.pack()
         self.patient_button.update_children()
-        
-        '''
-        self.report_button = ctk.CTkButton(self.side_frame, width=side_frame_w, height=round(height * 0.07),
-                                              text="   Reports",font=("Poppins Medium", 16),text_color=Color.Grey_Bright,
-                                              image=self.report_icon, anchor='w',border_spacing=round(width * 0.01), border_width=0,corner_radius=0,
-                                              fg_color=unselected_btn_color,hover_color=Color.Blue_LapisLazuli_1,)
-        self.report_button.configure(command=partial(change_active_event, self.report_button, 4))
-        self.report_button.pack()
-        '''
-        
+
+
         self.report_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -326,7 +286,8 @@ class dashboard(ctk.CTkToplevel):
         self.report_label.pack(side="left")
         self.report_button.pack()
         self.report_button.update_children()
-        
+
+
         self.user_setting_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -340,7 +301,8 @@ class dashboard(ctk.CTkToplevel):
         self.user_setting_label.pack(side="left")
         self.user_setting_button.pack()
         self.user_setting_button.update_children()
-        
+
+
         self.histlog_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
@@ -354,7 +316,8 @@ class dashboard(ctk.CTkToplevel):
         self.histlog_label.pack(side="left")
         self.histlog_button.pack()
         self.histlog_button.update_children()
-        
+
+
         '''Top Frame'''
         self.top_frame = ctk.CTkFrame(self, height=round(height * 0.1), width=round(width* 0.825),
                                       corner_radius=0,fg_color=Color.White_Ghost)
@@ -382,7 +345,7 @@ class dashboard(ctk.CTkToplevel):
                                            round(self.top_frame.winfo_reqheight()*.5), 5,
                                            fg_color=Color.White_Ghost, command= show_acc_menubar,
                                            hover_color= Color.White_Gray,cursor="hand2")
-        
+
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
         self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
@@ -403,11 +366,11 @@ class dashboard_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Chinese)
         self.data =[1457,2688]
-        
+
         def show_pie(master):
             labels = ["Items", "Service"]
-             
-                
+
+
             data = self.data
             pie_figure= Figure(figsize=(frame_width*0.006,frame_height*0.013), dpi=100)
             pie_figure.set_facecolor(Color.White_Ghost)
@@ -416,43 +379,43 @@ class dashboard_frame(ctk.CTkFrame):
                    textprops={'fontsize':18, 'color': Color.White_Ghost, 'family':'monospace', 'weight':'bold' },)
             ax.legend(labels, loc=8, ncol=2, bbox_to_anchor=(0.5,-0.12),prop={'family':"monospace", "size": 13}, labelcolor=Color.Blue_Maastricht, frameon=0)
             pie_figure.subplots_adjust(top=1,left=0,right=1, bottom=0)
-                    
+
             canvas = FigureCanvasTkAgg(pie_figure, master)
             canvas.draw()
-            canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 5) 
-            
-            
-        
+            canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 5)
+
+
+
         self.date_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, corner_radius= 5)
         self.date_frame.grid(row=0, column=7, padx = (width * .025, width * .01), pady= (height * .01), sticky='e')
         self.date_label = ctk.CTkLabel(self.date_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 14))
         self.date_label.pack(anchor='c', padx = width * .015, pady = height * .01)
-        
+
         self.income_summary_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.income_summary_frame.grid(row=1, column=0, columnspan=4, padx= (width*.01 ,width*(.005)))
         self.income_summary_frame.grid_propagate(0)
-        
+
         frame_width, frame_height = self.income_summary_frame.cget('width'), self.income_summary_frame.cget("height")
-        
+
         self.income_summary_frame.grid_columnconfigure((0,1), weight=1)
         self.income_summary_frame.grid_rowconfigure((2,3,4), weight=1)
         self.income_summary_label = ctk.CTkLabel(self.income_summary_frame,text="Daily Income Summary",fg_color="transparent", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht,)
         self.income_summary_label.grid(row=0, column=0, sticky="ew", pady=(frame_height*0.04,0))
         self.income_summary_sub = ctk.CTkLabel(self.income_summary_frame,text=f"as of {date.today().strftime('%B %d, %Y')}", font=("DM Sans Medium", 14), text_color=Color.Grey_Davy)
         self.income_summary_sub.grid(row=1, column=0, sticky="ew")
-        
+
         self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
         self.items_sales_frame.grid(row=2, column=0, sticky="nsew", padx=(frame_width*0.03), pady=(frame_height*0.05, frame_height*.015),)
         self.items_sales_frame.pack_propagate(0)
         self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(frame_width*.025,0))
         self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,frame_width*.025))
-        
+
         self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
         self.services_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(frame_width*0.03),pady=( frame_height*.015))
         self.services_sales_frame.pack_propagate(0)
         self.services_sales_label = ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(frame_width*.025,0))
         self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,frame_width*.025))
-        
+
         self.total_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
         self.total_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(frame_width*0.03),pady=(frame_height*.015,0))
         self.total_sales_frame.pack_propagate(0)
@@ -460,42 +423,21 @@ class dashboard_frame(ctk.CTkFrame):
         self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,frame_width*.025))
         #Watermelon Pie
         show_pie(self.income_summary_frame)
-        
+
         self.view_more_button = ctk.CTkButton(self.income_summary_frame, text='View More',width= frame_width*0.2, height=frame_height*0.07, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.White_Ghost,
                                               fg_color=Color.Blue_Steel, command=lambda:print("Go To Report Section"))
         self.view_more_button.grid(row=5, column=1, sticky="e", padx=frame_width*0.02,pady=(0,frame_height*0.035))
-        
-        
+
+
         self.inventory_stat_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.inventory_stat_frame.grid(row=1, column=4, columnspan=4, padx= (width*(.005) ,width * .01))
-        
+
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.sched_client_frame.grid(row=2, column=0, columnspan=4, padx= (width*.01 ,width*(.005)), pady=(height*0.017))
-        
+
         self.log_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.log_history_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005) ,width * .01), pady=(height*0.017))
-        '''
-        self.inventory_stat_frame = ctk.CTkFrame(self, width * .37, height * .35,  fg_color=Color.White_Ghost, corner_radius= 12)
-        self.inventory_stat_frame.pack_propagate(0)
-        self.inventory_stat_frame.grid(row=1, column=0, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
-        ctk.CTkLabel(self.inventory_stat_frame, text= 'Inventory Status', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
 
-        self.daily_income_frame = ctk.CTkFrame(self, width * .37, height * .35,  fg_color=Color.White_Ghost, corner_radius= 12)
-        self.daily_income_frame.pack_propagate(0)
-        self.daily_income_frame.grid(row=1, column=1, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
-        ctk.CTkLabel(self.daily_income_frame, text= 'Daily Income', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
-
-        self.recent_client_frame = ctk.CTkFrame(self, width * .37, height * .3,  fg_color=Color.White_Ghost, corner_radius= 12)
-        self.recent_client_frame.pack_propagate(0)
-        self.recent_client_frame.grid(row=2, column=0, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
-        ctk.CTkLabel(self.recent_client_frame, text= 'Recent Client', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
-
-        self.scheduled_client_frame = ctk.CTkFrame(self, width * .37, height * .3,  fg_color=Color.White_Ghost, corner_radius= 12)
-        self.scheduled_client_frame.pack_propagate(0)
-        self.scheduled_client_frame.grid(row=2, column=1, padx = (width * .025, 0), pady= (height * .03, 0), sticky='nsew')
-        ctk.CTkLabel(self.scheduled_client_frame, text= 'Scheduled Client', font=('Poppins Bold', 16)).pack(padx=(width * .01), pady=(height * .01), anchor = 'w')
-        self.grid_forget()
-        '''
 class transaction_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
@@ -537,7 +479,7 @@ class reports_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='7').pack(anchor='w')
         self.grid_forget()
-        
+
 class user_setting_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
@@ -551,5 +493,5 @@ class histlog_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget()
-        
+
 dashboard()
