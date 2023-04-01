@@ -1,6 +1,9 @@
 import customtkinter as ctk
 import tkinter as tk
 from typing import *
+from functools import partial
+from functools import wraps
+from util import brighten_color
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -18,6 +21,7 @@ class customcustomtkinter:
             self.og_color = self._fg_color
             self._hover_color = hover_color
             self._command = command
+            self._commands = [command]
             self._hover = hover
             #make a reference/encapsulation from extended arguents
 
@@ -40,7 +44,8 @@ class customcustomtkinter:
             child = self.winfo_children()
             for i in child:
                 i.unbind('<Button-1>', None)
-                i.bind('<Button-1>', self._command)
+                for c in self._commands:
+                    i.bind('<Button-1>', c)
                 if(self._hover):
                     i.bind('<Enter>', lambda _: self.configure(fg_color = self._hover_color))
                     i.bind('<Leave>', lambda _: self.configure(fg_color = self.og_color))
@@ -53,8 +58,10 @@ class customcustomtkinter:
                       hover_color: Optional[Union[str, Tuple[str, str]]] = None, **kwargs):
             if(command is not None):
                 self._command = command
+                self._commands.append(command)
                 self.unbind('<Button-1>', None)
-                self.bind('<Button-1>', self._command)
+                for c in self._commands:
+                    self.bind('<Button-1>', c)
                 self.update_children()
             if(hover_color is not None):
                 self._hover_color = hover_color
@@ -66,3 +73,37 @@ class customcustomtkinter:
                 self.update_children()
             return super().configure(require_redraw, **kwargs)
         #override configure function of frame, allowing to add those external arguments
+
+    class button_manager:
+        def __init__(self, buttons: list = None, hold_color: str = 'transparent', og_color: str = 'green',
+                     default_active: Optional[int] = None, commands: tuple = (lambda: print('disable'), lambda: print('enable'))):
+            self.active = None
+            self._command = commands
+            self._og_color = og_color
+            self._hold_color = hold_color
+            self._buttons = buttons
+            self._default_active = default_active
+            #setup variables
+
+            for i in range(len(buttons)):
+                buttons[i].bind('<Button-1>', partial(self.click, i))
+                if(isinstance(buttons[i], customcustomtkinter.ctkButtonFrame)):
+                    buttons[i].configure(command = partial(self.click, i))
+
+        def click(self, i: int, _):
+            if(isinstance(self._buttons[i], customcustomtkinter.ctkButtonFrame)):
+                og = self._buttons[i]._fg_color
+                click_color = brighten_color(og, 1.25) if isinstance(og, tuple) else (brighten_color(og, 1.25), brighten_color(og, .75))
+                self._buttons[i].configure(fg_color = click_color)
+                self._buttons[i].update()
+                self._buttons[i].after(50, None)
+
+            if(self.active is not None):
+                self.active.configure(fg_color = self._og_color)
+                self.active.configure(hover = True)
+                self._command[0]()
+            self.active = self._buttons[i]
+            self.active.configure(hover = False)
+            self.active.configure(fg_color = self._hold_color)
+            self._command[1]()
+        #setup click variable

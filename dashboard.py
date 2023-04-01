@@ -69,7 +69,8 @@ class dashboard(ctk.CTkToplevel):
         self.active_main_frame = None
 
         '''events'''
-        def change_active_event(cur, cur_frame, *args, **kwargs):
+        '''
+        def change_active_event(cur, cur_frame):
             if(self.active_win is not None):
                 self.active_win.configure(fg_color = unselected_btn_color)
                 self.active_win.winfo_children()[0].configure(fg_color="transparent")
@@ -84,6 +85,14 @@ class dashboard(ctk.CTkToplevel):
             self.title_label.configure(text=f"{self.active_win.winfo_children()[2].cget('text').strip().upper()}")
             cur.configure(fg_color = selected_btn_color)
             cur.configure(hover=False)
+        '''
+
+        def load_main_frame(title: str, cur_frame: int, e):
+            self.title_label.configure(text= title.upper())
+            if self.active_main_frame is not None:
+                self.active_main_frame.grid_forget()
+            self.active_main_frame = self.main_frames[cur_frame]
+            self.active_main_frame.grid(row =1, column =1, sticky = 'nsew')
 
         '''commands'''
         def switch_darkmode():
@@ -186,7 +195,8 @@ class dashboard(ctk.CTkToplevel):
         self.db_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.db_button.configure(command=partial(change_active_event, self.db_button, 0))
+        #self.db_button.configure(command=partial(change_active_event, self.db_button, 0))
+        self.db_button.configure(command=partial(load_main_frame, 'dashboard', 0))
         self.db_button.pack()
         self.db_wbar = ctk.CTkLabel(self.db_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.db_wbar.pack(side="left")
@@ -201,7 +211,8 @@ class dashboard(ctk.CTkToplevel):
         self.transact_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.transact_button.configure(command=partial(change_active_event, self.transact_button, 1))
+        #self.transact_button.configure(command=partial(change_active_event, self.transact_button, 1))
+        self.transact_button.configure(command=partial(load_main_frame, 'Transactions', 1))
         self.transact_button.pack()
         self.transact_wbar = ctk.CTkLabel(self.transact_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.transact_wbar.pack(side="left")
@@ -216,7 +227,8 @@ class dashboard(ctk.CTkToplevel):
         self.services_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.services_button.configure(command=partial(change_active_event, self.services_button, 2))
+        #self.services_button.configure(command=partial(change_active_event, self.services_button, 2))
+        self.services_button.configure(command=partial(load_main_frame, 'Services', 2))
         self.services_button.pack()
         self.services_wbar = ctk.CTkLabel(self.services_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.services_wbar.pack(side="left")
@@ -231,7 +243,8 @@ class dashboard(ctk.CTkToplevel):
         self.sales_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.sales_button.configure(command=partial(change_active_event, self.sales_button, 3))
+        #self.sales_button.configure(command=partial(change_active_event, self.sales_button, 3))
+        self.sales_button.configure(command=partial(load_main_frame, 'Sales', 3))
         self.sales_button.pack()
         self.sales_wbar = ctk.CTkLabel(self.sales_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.sales_wbar.pack(side="left")
@@ -246,7 +259,8 @@ class dashboard(ctk.CTkToplevel):
         self.inventory_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.inventory_button.configure(command=partial(change_active_event, self.inventory_button, 4))
+        #self.inventory_button.configure(command=partial(change_active_event, self.inventory_button, 4))
+        self.inventory_button.configure(command=partial(load_main_frame, 'Inventory', 4))
         self.inventory_button.pack()
         self.inventory_wbar = ctk.CTkLabel(self.inventory_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.inventory_wbar.pack(side="left")
@@ -261,7 +275,8 @@ class dashboard(ctk.CTkToplevel):
         self.patient_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.patient_button.configure(command=partial(change_active_event, self.patient_button, 5))
+        #self.patient_button.configure(command=partial(change_active_event, self.patient_button, 5))
+        self.patient_button.configure(command=partial(load_main_frame, 'Patient', 5))
         self.patient_button.pack()
         self.patient_wbar = ctk.CTkLabel(self.patient_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.patient_wbar.pack(side="left")
@@ -276,7 +291,8 @@ class dashboard(ctk.CTkToplevel):
         self.report_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.report_button.configure(command=partial(change_active_event, self.report_button, 6))
+        #self.report_button.configure(command=partial(change_active_event, self.report_button, 6))
+        self.report_button.configure(command=partial(load_main_frame, 'Report', 6))
         self.report_button.pack()
         self.report_wbar = ctk.CTkLabel(self.report_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.report_wbar.pack(side="left")
@@ -291,7 +307,8 @@ class dashboard(ctk.CTkToplevel):
         self.user_setting_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.user_setting_button.configure(command=partial(change_active_event, self.user_setting_button, 7))
+        #self.user_setting_button.configure(command=partial(change_active_event, self.user_setting_button, 7))
+        self.user_setting_button.configure(command=partial(load_main_frame, 'User Settings', 7))
         self.user_setting_button.pack()
         self.user_setting_wbar = ctk.CTkLabel(self.user_setting_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.user_setting_wbar.pack(side="left")
@@ -306,7 +323,8 @@ class dashboard(ctk.CTkToplevel):
         self.histlog_button = cctk.ctkButtonFrame(self.side_frame,  width=side_frame_w, height=round(height * 0.07),
                                              fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                              corner_radius=0, cursor="hand2",)
-        self.histlog_button.configure(command=partial(change_active_event, self.histlog_button, 8))
+        #self.histlog_button.configure(command=partial(change_active_event, self.histlog_button, 8))
+        self.histlog_button.configure(command=partial(load_main_frame, 'History Log', 8))
         self.histlog_button.pack()
         self.histlog_wbar = ctk.CTkLabel(self.histlog_button,text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
         self.histlog_wbar.pack(side="left")
@@ -316,6 +334,13 @@ class dashboard(ctk.CTkToplevel):
         self.histlog_label.pack(side="left")
         self.histlog_button.pack()
         self.histlog_button.update_children()
+
+        self.sidebar_btn_mngr = cctk.button_manager([self.db_button, self.transact_button, self.services_button, self.sales_button,
+                                                     self.inventory_button, self.patient_button, self.report_button, self.user_setting_button,
+                                                     self.histlog_button], selected_btn_color, unselected_btn_color, 0)
+        self.sidebar_btn_mngr._command = (lambda: self.sidebar_btn_mngr.active.winfo_children()[0].configure(fg_color="transparent"),
+                                          lambda: self.sidebar_btn_mngr.active.winfo_children()[0].configure(fg_color=Color.White_Ghost))
+        self.sidebar_btn_mngr.click(self.sidebar_btn_mngr._default_active, None)
 
 
         '''Top Frame'''
@@ -358,7 +383,8 @@ class dashboard(ctk.CTkToplevel):
 
 
         '''setting default events'''
-        change_active_event(self.db_button, 0)
+        load_main_frame('Dashboard', 0, None)
+        #change_active_event(self.db_button, 0)
         self.mainloop()
 
 class dashboard_frame(ctk.CTkFrame):
