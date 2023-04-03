@@ -49,7 +49,7 @@ class dashboard(ctk.CTkToplevel):
         self.settings_icon = ctk.CTkImage(light_image=Image.open("image/setting.png"),size=(25,25))
         self.acc_icon = ctk.CTkImage(light_image=Image.open("image/acc.png"),size=(40,40))
         self.transact_icon = ctk.CTkImage(light_image=Image.open("image/transact.png"),size=(22,20))
-        self.services_icon = ctk.CTkImage(light_image=Image.open("image/services.png"),size=(22,22))
+        self.services_icon = ctk.CTkImage(light_image=Image.open("image/services.png"),size=(24,26))
         self.user_setting_icon = ctk.CTkImage(light_image=Image.open("image/usersetting.png"),size=(24,27))
         self.histlog_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"),size=(22,25))
 
