@@ -66,7 +66,7 @@ def brighten_color(hexcode: str, i: int = 1):
     r = 00 if r * i < 0 else 255 if r * i > 255 else round(r * i)
     g = 00 if g * i < 0 else 255 if g * i > 255 else round(g * i)
     b = 00 if b * i < 0 else 255 if b * i > 255 else round(b * i)
-    return '#'+('00' if r < 1 else '{0:x}'.format(r))+('00' if g < 1 else '{0:x}'.format(g))+('00' if g < 1 else '{0:x}'.format(b))
+    return "#%02x%02x%02x" % (r,g,b)
 
 ''' example of inserting data
 usn = 'admin1'
