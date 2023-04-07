@@ -391,19 +391,20 @@ class dashboard_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Chinese)
-        self.data =[1457,2688]
+        #Test data
+        data =[1457,2688]
 
-        def show_pie(master):
+        def show_pie(master, data):
             labels = ["Items", "Service"]
 
+            data = data
+            pie_figure= Figure(figsize=(income_frame_width*0.006,income_frame_height*0.013), dpi=100)
 
-            data = self.data
-            pie_figure= Figure(figsize=(frame_width*0.006,frame_height*0.013), dpi=100)
             pie_figure.set_facecolor(Color.White_Ghost)
-            ax =pie_figure.add_subplot(111)
+            ax = pie_figure.add_subplot(111)
             ax.pie(data, autopct='%1.1f%%', startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Red_Tulip, Color.Light_Green],
                    textprops={'fontsize':18, 'color': Color.White_Ghost, 'family':'monospace', 'weight':'bold' },)
-            ax.legend(labels, loc=8, ncol=2, bbox_to_anchor=(0.5,-0.12),prop={'family':"monospace", "size": 13}, labelcolor=Color.Blue_Maastricht, frameon=0)
+            ax.legend(labels, loc=8, ncol=2, bbox_to_anchor=(0.5,-0.12),prop={'family':"monospace", "size": 12}, labelcolor=Color.Blue_Maastricht, frameon=0)
             pie_figure.subplots_adjust(top=1,left=0,right=1, bottom=0)
 
             canvas = FigureCanvasTkAgg(pie_figure, master)
@@ -421,42 +422,91 @@ class dashboard_frame(ctk.CTkFrame):
         self.income_summary_frame.grid(row=1, column=0, columnspan=4, padx= (width*.01 ,width*(.005)))
         self.income_summary_frame.grid_propagate(0)
 
-        frame_width, frame_height = self.income_summary_frame.cget('width'), self.income_summary_frame.cget("height")
+        income_frame_width, income_frame_height = self.income_summary_frame.cget('width'), self.income_summary_frame.cget("height")
 
         self.income_summary_frame.grid_columnconfigure((0,1), weight=1)
         self.income_summary_frame.grid_rowconfigure((2,3,4), weight=1)
         self.income_summary_label = ctk.CTkLabel(self.income_summary_frame,text="Daily Income Summary",fg_color="transparent", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht,)
-        self.income_summary_label.grid(row=0, column=0, sticky="ew", pady=(frame_height*0.04,0))
+        self.income_summary_label.grid(row=0, column=0, sticky="ew", pady=(income_frame_height*0.04,0))
         self.income_summary_sub = ctk.CTkLabel(self.income_summary_frame,text=f"as of {date.today().strftime('%B %d, %Y')}", font=("DM Sans Medium", 14), text_color=Color.Grey_Davy)
         self.income_summary_sub.grid(row=1, column=0, sticky="ew")
 
-        self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
-        self.items_sales_frame.grid(row=2, column=0, sticky="nsew", padx=(frame_width*0.03), pady=(frame_height*0.05, frame_height*.015),)
+        self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
+        self.items_sales_frame.grid(row=2, column=0, sticky="nsew", padx=(income_frame_width*0.03), pady=(income_frame_height*0.05, income_frame_height*.015),)
         self.items_sales_frame.pack_propagate(0)
-        self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(frame_width*.025,0))
-        self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,frame_width*.025))
+        self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
+        self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
 
-        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
-        self.services_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(frame_width*0.03),pady=( frame_height*.015))
+        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
+        self.services_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(income_frame_width*0.03),pady=( income_frame_height*.015))
         self.services_sales_frame.pack_propagate(0)
-        self.services_sales_label = ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(frame_width*.025,0))
-        self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,frame_width*.025))
+        self.services_sales_label = ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
+        self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
 
-        self.total_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
-        self.total_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(frame_width*0.03),pady=(frame_height*.015,0))
+        self.total_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
+        self.total_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(income_frame_width*0.03),pady=(income_frame_height*.015,0))
         self.total_sales_frame.pack_propagate(0)
-        self.total_sales_label = ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(frame_width*.025,0))
-        self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,frame_width*.025))
+        self.total_sales_label = ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
+        self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
         #Watermelon Pie
-        show_pie(self.income_summary_frame)
+        show_pie(self.income_summary_frame,data)
 
-        self.view_more_button = ctk.CTkButton(self.income_summary_frame, text='View More',width= frame_width*0.2, height=frame_height*0.07, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.White_Ghost,
-                                              fg_color=Color.Blue_Steel, command=lambda:print("Go To Report Section"))
-        self.view_more_button.grid(row=5, column=1, sticky="e", padx=frame_width*0.02,pady=(0,frame_height*0.035))
+        self.view_more_button = ctk.CTkButton(self.income_summary_frame, text='View More',width= income_frame_width*0.16, height=income_frame_height*0.06, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.Blue_Maastricht,
+                                              fg_color=Color.Platinum,hover_color=Color.White_AntiFlash, command=lambda:print("Go To Report Section"))
+        self.view_more_button.grid(row=5, column=1, sticky="e", padx=income_frame_width*0.02,pady=(0,income_frame_height*0.035))
 
-
+        '''Inventory Stat Frame'''
         self.inventory_stat_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
+        self.inventory_stat_frame.grid_propagate(0)
         self.inventory_stat_frame.grid(row=1, column=4, columnspan=4, padx= (width*(.005) ,width * .01))
+        self.inventory_stat_frame.grid_rowconfigure((1,2,3,4), weight=1)
+        self.inventory_stat_frame.grid_columnconfigure(1, weight=1)
+        
+        inventory_frame_width, inventory_frame_height = self.inventory_stat_frame.cget('width'), self.inventory_stat_frame.cget('height')
+        print(f"{inventory_frame_width}x{inventory_frame_height}")
+        '''Inventory Stat Frame Contents'''
+        self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
+        self.inventory_stat_label.grid(row=0, column=1, sticky="w", padx=(inventory_frame_width*0.04,0),pady=(inventory_frame_height*0.04,inventory_frame_height*0.02))
+        
+        self.reorder_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.Platinum,hover_color=Color.White_AntiFlash,corner_radius=5,cursor="hand2")
+        self.reorder_level_button.grid(row=1, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
+        self.reorder_label = ctk.CTkLabel(self.reorder_level_button, text="Reorder Level Items", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.reorder_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
+        self.reorder_light = ctk.CTkLabel(self.reorder_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color=Color.Orange_Dandelion)
+        self.reorder_light.pack(side="right", padx=(inventory_frame_width*0.025,inventory_frame_width*0.05))
+        self.reorder_count = ctk.CTkLabel(self.reorder_level_button, text="8", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.reorder_count.pack(side="right")
+        self.reorder_level_button.update_children()
+        
+        self.critical_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.Platinum,hover_color=Color.White_AntiFlash,corner_radius=5,cursor="hand2")
+        self.critical_level_button.grid(row=2, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
+        self.critical_label = ctk.CTkLabel(self.critical_level_button, text="Critical Level Items", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.critical_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
+        self.critical_light = ctk.CTkLabel(self.critical_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color=Color.Red_Pastel)
+        self.critical_light.pack(side="right", padx=(inventory_frame_width*0.025,inventory_frame_width*0.05))
+        self.critical_count = ctk.CTkLabel(self.critical_level_button, text="10", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.critical_count.pack(side="right")
+        self.critical_level_button.update_children()
+        
+        self.nearly_expired_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.Platinum,hover_color=Color.White_AntiFlash,corner_radius=5,cursor="hand2")
+        self.nearly_expired_level_button.grid(row=3, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0, inventory_frame_height*0.02))
+        self.nearly_expired_label = ctk.CTkLabel(self.nearly_expired_level_button, text="Nearly Expired Level Items", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.nearly_expired_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
+        self.nearly_expired_light = ctk.CTkLabel(self.nearly_expired_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color=Color.Orange_Dandelion)
+        self.nearly_expired_light.pack(side="right", padx=(inventory_frame_width*0.025,inventory_frame_width*0.05))
+        self.nearly_expired_count = ctk.CTkLabel(self.nearly_expired_level_button, text="5", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.nearly_expired_count.pack(side="right")
+        self.nearly_expired_level_button.update_children()
+        
+        self.expired_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.Platinum,hover_color=Color.White_AntiFlash,corner_radius=5,cursor="hand2")
+        self.expired_level_button.grid(row=4, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0, inventory_frame_height*0.05))
+        self.expired_label = ctk.CTkLabel(self.expired_level_button, text="Expired Level Items", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.expired_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
+        self.expired_light = ctk.CTkLabel(self.expired_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color=Color.Red_Pastel)
+        self.expired_light.pack(side="right", padx=(inventory_frame_width*0.025,inventory_frame_width*0.05))
+        self.expired_count = ctk.CTkLabel(self.expired_level_button, text="3", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+        self.expired_count.pack(side="right")
+        self.expired_level_button.update_children()
 
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.sched_client_frame.grid(row=2, column=0, columnspan=4, padx= (width*.01 ,width*(.005)), pady=(height*0.017))
