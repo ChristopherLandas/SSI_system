@@ -385,7 +385,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.total_sales_label = ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
         self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
         #Watermelon Pie
-        show_pie(self.income_summary_frame, data)
+        show_pie(self.income_summary_frame, self.data)
 
         self.view_more_button = ctk.CTkButton(self.income_summary_frame, text='View More',width= income_frame_width*0.16, height=income_frame_height*0.06, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.Blue_Maastricht,
                                               fg_color=Color.White_AntiFlash,hover_color=Color.Platinum, command=lambda:print("Go To Report Section"))
