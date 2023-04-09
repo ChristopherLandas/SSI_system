@@ -6,6 +6,7 @@ class Color:
     White_Gray = "#EFEFEF"
     White_Chinese = "#E0E0E0"
     White_AntiFlash = "#F1F1F1"
+    White_SilverSand = "#C5C5C5"
     
     Blue_Oxford = "#0A2647"
     Blue_Maastricht = "#06283D"
@@ -28,4 +29,12 @@ class Color:
     Red_Pastel = "#FF6464"
     
     Orange_Dandelion = "#FFD966"
+    
+    '''Dark Colors'''
+    
+    Dark_Charcoal = "#313131"
+    Dark_Arsenic = "#414141"
+    Dark_DavyGrey = "#525252"
+    Dark_GraniteGrey = "#626262"
+    Dark_Nickel = "#727272"
     
