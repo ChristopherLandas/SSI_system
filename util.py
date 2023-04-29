@@ -11,7 +11,7 @@ from typing import *
 
 class encrypt:
     def pass_encrypt(pss, slt):
-        salt = base64.urlsafe_b64encode(uuid.uuid4().bytes) if slt == None else slt.encode('utf-8')
+        salt = base64.urlsafe_b64encode(uuid.uuid4().bytes) if slt == None else str(slt).encode('utf-8')
         encryptor = hashlib.sha256()
         encryptor.update(str(pss).encode('utf-8') + salt)
         encrypted_password = encryptor.hexdigest()

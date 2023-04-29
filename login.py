@@ -43,10 +43,13 @@ class loginUI(ctk.CTk):
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
             else:
                 current_datetime = datetime.datetime.now();
+                data_key = encrypt.pass_encrypt(self.password_entry.get(), datetime.datetime.now())['pass']
                 database.exec_nonquery([[f"INSERT INTO {db.LOG_HIST} VALUES (?, ?, ?, ?)",
-                                        (self.user_entry.get(), current_datetime.date(), current_datetime.time(), current_datetime.time())]])
+                                        (self.user_entry.get(), current_datetime.date(), current_datetime.time(), current_datetime.time())],
+                                        [f"UPDATE {db.ACC_CRED} set {db.acc_cred.ENTRY_OTP} = ? where {db.USERNAME} = ?",
+                                        (data_key, self.user_entry.get())]])
                 self.withdraw()
-                dashboard(self, self.user_entry.get(), current_datetime)
+                dashboard(self, data_key, current_datetime)
 
         '''Import Icons and Images'''
         self.bg_img = ctk.CTkImage(light_image=Image.open("image/bg.png"),size=(1920,1080))

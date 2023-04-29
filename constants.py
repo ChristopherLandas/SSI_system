@@ -10,6 +10,7 @@ class db:
     class acc_cred:
         PASSWORD = 'pss'
         SALT = 'slt'
+        ENTRY_OTP = 'entry_OTP'
 
     ACC_INFO = 'acc_info'
     class acc_info:
