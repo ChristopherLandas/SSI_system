@@ -1,8 +1,10 @@
 import customtkinter as ctk
 import tkinter as tk
 import matplotlib.pyplot as plt
-from tkinter import *
-import _tkinter;
+import datetime;
+import _tkinter
+from tkinter import messagebox
+from util import *
 from functools import partial
 from tkextrafont import Font
 from Theme import Color
@@ -18,13 +20,20 @@ ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
 width = 0
 height = 0
+acc = ()
+date_logged = None
 
 class dashboard(ctk.CTkToplevel):
-    def __init__(self):
+    def __init__(self, master:ctk.CTk, usn: str, _date_logged: datetime):
         super().__init__()
         self.state("zoomed")
         self.attributes("-fullscreen", True)
         #makes the form full screen and removing the default tab bar
+
+        global acc, date_logged
+        date_logged = _date_logged;
+        acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (usn, ))
+        self._master = master
 
         try:
             Font(file="Font/Poppins-Medium.ttf")
@@ -76,6 +85,14 @@ class dashboard(ctk.CTkToplevel):
                 self.active_main_frame.grid_forget()
             self.active_main_frame = self.main_frames[cur_frame]
             self.active_main_frame.grid(row =1, column =1, sticky = 'nsew')
+
+        def log_out():
+            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?')
+            if b:
+                database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
+                                        (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
+                self._master.deiconify()
+                self.destroy()
 
         '''commands'''
         def switch_darkmode():
@@ -282,9 +299,9 @@ class dashboard(ctk.CTkToplevel):
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
         self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
-        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text='Maria Leonora Teresa Agoncillo III', font=("Poppins Medium", 15))
+        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc[0][1]).upper(), font=("Poppins Medium", 15))
         self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = (5,0))
-        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text='Owner', font=("Poppins Medium", 12))
+        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc[0][2]).upper(), font=("Poppins Medium", 12))
         self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.acc_btn.update_children()
@@ -317,6 +334,7 @@ class dashboard(ctk.CTkToplevel):
         '''setting default events'''
         load_main_frame('Dashboard', 0)
         #change_active_event(self.db_button, 0)
+        self.protocol("WM_DELETE_WINDOW", log_out)
         self.mainloop()
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''main frames'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -395,13 +413,12 @@ class dashboard_frame(ctk.CTkFrame):
         self.inventory_stat_frame.grid(row=1, column=4, columnspan=4, padx= (width*(.005) ,width * .01))
         self.inventory_stat_frame.grid_rowconfigure((1,2,3,4), weight=1)
         self.inventory_stat_frame.grid_columnconfigure(1, weight=1)
-        
+
         inventory_frame_width, inventory_frame_height = self.inventory_stat_frame.cget('width'), self.inventory_stat_frame.cget('height')
-        #print(f"{inventory_frame_width}x{inventory_frame_height}")
         '''Inventory Stat Frame Contents'''
         self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
         self.inventory_stat_label.grid(row=0, column=1, sticky="w", padx=(inventory_frame_width*0.04,0),pady=(inventory_frame_height*0.04,inventory_frame_height*0.02))
-        
+
         self.reorder_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
         self.reorder_level_button.configure(command=lambda: print("Show Items need reordering"))
         self.reorder_level_button.grid(row=1, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
@@ -412,7 +429,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.reorder_count = ctk.CTkLabel(self.reorder_level_button, text="8", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.reorder_count.pack(side="right")
         self.reorder_level_button.update_children()
-        
+
         self.critical_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
         self.critical_level_button.configure(command=lambda: print("Show Items critical level"))
         self.critical_level_button.grid(row=2, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
@@ -423,7 +440,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.critical_count = ctk.CTkLabel(self.critical_level_button, text="10", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.critical_count.pack(side="right")
         self.critical_level_button.update_children()
-        
+
         self.nearly_expired_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
         self.nearly_expired_level_button.configure(command=lambda: print("Show nearly expired items"))
         self.nearly_expired_level_button.grid(row=3, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0, inventory_frame_height*0.02))
@@ -434,7 +451,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.nearly_expired_count = ctk.CTkLabel(self.nearly_expired_level_button, text="5", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.nearly_expired_count.pack(side="right")
         self.nearly_expired_level_button.update_children()
-        
+
         self.expired_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum, corner_radius=5,cursor="hand2")
         self.expired_level_button.configure(command=lambda: print("Show expired items"))
         self.expired_level_button.grid(row=4, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0, inventory_frame_height*0.05))
@@ -445,7 +462,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.expired_count = ctk.CTkLabel(self.expired_level_button, text="3", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.expired_count.pack(side="right")
         self.expired_level_button.update_children()
-        
+
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.sched_client_frame.grid(row=2, column=0, columnspan=4, padx= (width*.01 ,width*(.005)), pady=(height*0.017))
 
@@ -477,7 +494,11 @@ class inventory_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='5').pack(anchor='w')
+
+        self.data_view = cctk.cctkTreeView(self, [(1,2,3,4,5,6), (6,5,4,3,2,1)], width= width * .8, height= height * .8,
+                                           column_format=f'/No:{int(width*.05)}-#/Name:x-t/Stock:{int(width*.07)}-t/Price:{int(width*.07)}-t/ExpirationDate:{int(width*.1)}-t/Status:{int(width*.08)}-t!50!30')
+        self.data_view.pack();
+
         self.grid_forget()
 
 class patient_info_frame(ctk.CTkFrame):
@@ -512,4 +533,4 @@ class histlog_frame(ctk.CTkFrame):
 #tba
 
 
-dashboard()
+#dashboard()

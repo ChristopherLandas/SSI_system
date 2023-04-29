@@ -125,7 +125,6 @@ class customcustomtkinter:
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
 
-
             if not re.fullmatch(r'(\/\w+:(x|\d+)-(\w+|\#))+\!\d+\!\d+', column_format):
                 ctk.CTkLabel(self, text='Wrong format\nCheck for errors').place(relx = .5, rely = .5, anchor = 'c')
                 return;
@@ -141,7 +140,7 @@ class customcustomtkinter:
             self.data_frames = []
             self._data = []
             self.data_grid_btn_mng = None
-            self.column_widths = [x_width if s == 'x' else int(s) for s in re.findall(r'\:(x|\d+)', self._column_format)]
+            self.column_widths = [x_width - 1 if s == 'x' else int(s) - 1 for s in re.findall(r'\:(x|\d+)', self._column_format)]
             self._header_heights = int(re.findall(r'\!(\d+)', column_format)[0])
             self._data_grid_heights = int(re.findall(r'\!(\d+)', column_format)[1])
             self._header_color = header_color
@@ -159,12 +158,12 @@ class customcustomtkinter:
                     btn = customcustomtkinter.ctkButtonFrame(self, self.column_widths[i], self._header_heights, 0,
                                                             fg_color= self._header_color, hover_color= brighten_color(self._header_color, 1.75),)
                     title = ctk.CTkLabel(btn, text=self.column_titles[i])
-                    title.place(relx = .5, rely = .5, anchor = 'c')
+                    title.place(relx = .5, rely = .5, anchor = 'c',)
                     btn.update_children()
                 else:
                     btn = ctk.CTkLabel(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                        text=self.column_titles[i])
-                btn.grid(row = 0, column = i, sticky='we')
+                btn.grid(row = 0, column = i, sticky='we', padx = (1,0))
             #generate the header bar
 
             self.contents = ctk.CTkScrollableFrame(self, corner_radius=0, fg_color='#333333')
@@ -178,7 +177,7 @@ class customcustomtkinter:
             #additional button that will serve as go to top/down of a scroll bar
 
             '''initial generation here'''
-            customcustomtkinterutil.add_data(self, data)
+            self.add_data(data)
             #self.add_data(data)
             #generates data grid
 
@@ -224,25 +223,25 @@ class customcustomtkinter:
                 for j in range(len(self.column_widths)):
                     if self.column_types[j] in ['t', '#']:
                         temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j] in ['t'] else (i + 1), width = self.column_widths[j])
-                        temp.pack(side = tk.LEFT, fill = 'y')
+                        temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
                     else:
-                        temp = ctk.CTkFrame(self.data_frames[i], width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
-                        temp.pack(side = tk.LEFT, fill = 'y')
+                        temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
+                        temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
                         if self.column_types[j] == 'bD':
                             dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color='red' ,text='')
                             dlt_btn.configure(command = partial(self.bd_func, dlt_btn))
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
                         elif self.column_types[j] == 'id':
-                            self.spinner = customcustomtkinter.cctkSpinnerCombo(self.data_frames[i],step_count=1, fg_color=("green", "blue"), button_color=("red", "yellow"),entry_fg_color=("red", "yellow"),
+                            self.spinner = customcustomtkinter.cctkSpinnerCombo(frm,step_count=1, fg_color=("green", "blue"), button_color=("red", "yellow"),entry_fg_color=("red", "yellow"),
                                    button_hover_color=("yellow", "red"), entry_font=("Lucida", 20), entry_text_color=("white", "black"))
                             self.spinner.place(relx = .5, rely = .5, anchor = 'c')
                     if self.column_types[j] == 't':
                         tI += 1
                 # generates the content from the frame
 
-                self.data_frames[i].update_children()
-                self.data_frames[i].pack(fill = 'x', pady = (1,0))
+                frm.update_children()
+                frm.pack(fill = 'x', pady = (1,0))
 
 class customcustomtkinterutil:
     class button_manager:

@@ -5,8 +5,19 @@ class db:
     PASSWORD = 'test123'
     USERNAME = 'ROOT'
 
+    ACC_CRED = 'acc_cred'
+    USERNAME = 'usn'
     class acc_cred:
-        TABLE = 'acc_cred'
-        USERNAME = 'usn'
         PASSWORD = 'pss'
         SALT = 'slt'
+
+    ACC_INFO = 'acc_info'
+    class acc_info:
+        NAME = 'full_name'
+        POSITION = 'job_position'
+
+    LOG_HIST = 'log_history'
+    class log_hist:
+        DATE_LOGGED = 'date_logged'
+        TIME_IN = 'time_in'
+        TIME_OUT = 'time_out'

@@ -33,7 +33,8 @@ class database:
             pass
         return None
 
-    def fetch_data(cmd, tup, db_con):
+    def fetch_data(cmd, tup):
+        db_con = database.fetch_db_profile()
         try:
             db_cur = db_con.cursor()
             db_cur.execute(cmd, tup)
@@ -42,18 +43,21 @@ class database:
             print(e)
         return None
 
-    def exec_nonquery(cmds, db_con):
+    def exec_nonquery(cmds):
+        db_con = database.fetch_db_profile()
         try:
             db_cur = db_con.cursor()
             for i in range(len(cmds)):
                 try:
                     db_cur.execute(cmds[i][0], cmds[i][1])
+                    db_con.commit()
                 except mariadb.IntegrityError:
                     print(f'command {i+1} error pushing')
         except mariadb.Error as e:
             print(e)
-        else:
-            db_con.commit()
+            return
+        db_cur.close()
+        db_con.close()
 
 def brighten_color(hexcode: str, i: int = 1):
     c = re.findall(r'[\d\w]{2}', hexcode)
@@ -69,8 +73,7 @@ def brighten_color(hexcode: str, i: int = 1):
     return "#%02x%02x%02x" % (r,g,b)
 
 ''' example of inserting data
-usn = 'admin1'
+usn = 'admin'
 pss = encrypt.pass_encrypt('admin', None)
-database.exec_nonquery([[f'INSERT INTO {db.acc_cred.TABLE} VALUES (?, ?, ?)', (usn, pss["pass"], pss['salt'])]], database.fetch_db_profile())
-#database.exec_nonquery([[f'DELETE FROM {db.acc_cred.TABLE} where {db.acc_cred.USERNAME} = ?', ('admin1',)]], database.fetch_db_profile())
+database.exec_nonquery([[f'INSERT INTO {db.ACC_CRED} VALUES (?, ?, ?)', (usn, pss["pass"], pss['salt'])]])
 '''

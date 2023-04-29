@@ -7,6 +7,7 @@ from dashboard import dashboard
 from constants import db
 from util import *
 from os import walk
+import datetime
 
 
 class loginUI(ctk.CTk):
@@ -29,21 +30,23 @@ class loginUI(ctk.CTk):
         '''functions and processes'''
         def login(_):
             try:
-                salt = database.fetch_data(f'SELECT {db.acc_cred.SALT} FROM {db.acc_cred.TABLE} WHERE {db.acc_cred.USERNAME} = ?',
-                                        (self.user_entry.get(), ), database.fetch_db_profile())[0][0]
+                salt = database.fetch_data(f'SELECT {db.acc_cred.SALT} FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ?',
+                                        (self.user_entry.get(), ))[0][0]
             except IndexError:
                 self.password_entry.delete(0, 999999999)
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
                 return
-            count = database.fetch_data(f'SELECT COUNT(*) FROM {db.acc_cred.TABLE} WHERE {db.acc_cred.USERNAME} = ? AND {db.acc_cred.PASSWORD} = ?',
-                                        (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']),
-                                        database.fetch_db_profile())
+            count = database.fetch_data(f'SELECT COUNT(*) FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ? AND {db.acc_cred.PASSWORD} = ?',
+                                        (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
             if count[0][0] == 0:
                 self.password_entry.delete(0, 999999999)
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
             else:
+                current_datetime = datetime.datetime.now();
+                database.exec_nonquery([[f"INSERT INTO {db.LOG_HIST} VALUES (?, ?, ?, ?)",
+                                        (self.user_entry.get(), current_datetime.date(), current_datetime.time(), current_datetime.time())]])
                 self.withdraw()
-                dashboard()
+                dashboard(self, self.user_entry.get(), current_datetime)
 
         '''Import Icons and Images'''
         self.bg_img = ctk.CTkImage(light_image=Image.open("image/bg.png"),size=(1920,1080))
