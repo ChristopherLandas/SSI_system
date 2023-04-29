@@ -30,9 +30,8 @@ class dashboard(ctk.CTkToplevel):
         self.state("zoomed")
         self.attributes("-fullscreen", True)
         #makes the form full screen and removing the default tab bar
-        '''
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
-        if not datakey:
+        if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
             return
@@ -42,13 +41,14 @@ class dashboard(ctk.CTkToplevel):
             acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
-        '''
         #for preventing security breach through python code; enable it to test it
 
+        '''
         global acc, date_logged
         date_logged = _date_logged;
         acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        '''
 
         self._master = master
         try:
@@ -550,4 +550,4 @@ class histlog_frame(ctk.CTkFrame):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''menu bars'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #tba
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, None, datetime.datetime.now)
