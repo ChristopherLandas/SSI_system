@@ -3,6 +3,7 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 import datetime;
 import _tkinter
+import sql_commands
 from tkinter import messagebox
 from util import *
 from functools import partial
@@ -24,17 +25,32 @@ acc = ()
 date_logged = None
 
 class dashboard(ctk.CTkToplevel):
-    def __init__(self, master:ctk.CTk, usn: str, _date_logged: datetime):
+    def __init__(self, master:ctk.CTk, entry_key: str, _date_logged: datetime):
         super().__init__()
         self.state("zoomed")
         self.attributes("-fullscreen", True)
         #makes the form full screen and removing the default tab bar
+        '''
+        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        if not datakey:
+            messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
+            self.destroy()
+            return
+        else:
+            global acc, date_logged
+            date_logged = _date_logged;
+            acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
+            database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
+            del datakey
+        '''
+        #for preventing security breach through python code; enable it to test it
 
         global acc, date_logged
         date_logged = _date_logged;
-        acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (usn, ))
-        self._master = master
+        acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
+        #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
 
+        self._master = master
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
@@ -495,7 +511,9 @@ class inventory_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
-        self.data_view = cctk.cctkTreeView(self, [(1,2,3,4,5,6), (6,5,4,3,2,1)], width= width * .8, height= height * .8,
+        data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
+
+        self.data_view = cctk.cctkTreeView(self, data1, width= width * .8, height= height * .8,
                                            column_format=f'/No:{int(width*.05)}-#/Name:x-t/Stock:{int(width*.07)}-t/Price:{int(width*.07)}-t/ExpirationDate:{int(width*.1)}-t/Status:{int(width*.08)}-t!50!30')
         self.data_view.pack();
 
@@ -532,5 +550,4 @@ class histlog_frame(ctk.CTkFrame):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''menu bars'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #tba
 
-
-#dashboard()
+dashboard(None, 'admin', datetime.datetime.now)
