@@ -12,3 +12,9 @@ get_inventory_by_group = f"SELECT item_general_info.name,\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
                           GROUP BY item_general_info.name\
                           ORDER BY item_general_info.UID"
+
+add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?)'
+
+update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
+update_expiry_stock = "SET Stock = STOCK + ? WHERE UID = ? AND .Expiry_Date = ?"
+add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"

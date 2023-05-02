@@ -30,6 +30,7 @@ class dashboard(ctk.CTkToplevel):
         self.state("zoomed")
         self.attributes("-fullscreen", True)
         #makes the form full screen and removing the default tab bar
+
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -48,9 +49,9 @@ class dashboard(ctk.CTkToplevel):
         date_logged = _date_logged;
         acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        self._master = master
         '''
 
-        self._master = master
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
@@ -348,7 +349,7 @@ class dashboard(ctk.CTkToplevel):
                                                           children=[self.notif_menu_bar, self.settings_menu_bar, self.acc_menu_bar])
 
         '''setting default events'''
-        load_main_frame('Dashboard', 0)
+        load_main_frame('Inventory', 4)
         #change_active_event(self.db_button, 0)
         self.protocol("WM_DELETE_WINDOW", log_out)
         self.mainloop()
@@ -511,11 +512,17 @@ class inventory_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
-        data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
 
-        self.data_view = cctk.cctkTreeView(self, data1, width= width * .8, height= height * .8,
+        self.restock_btn = ctk.CTkButton(self, width * .03, height * .03, 12,
+                                         command= lambda : self.restock_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.restock_btn.pack()
+
+        self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
+        self.data_view = cctk.cctkTreeView(self, self.data1, width= width * .8, height= height * .8,
                                            column_format=f'/No:{int(width*.05)}-#/Name:x-t/Stock:{int(width*.07)}-t/Price:{int(width*.07)}-t/ExpirationDate:{int(width*.1)}-t/Status:{int(width*.08)}-t!50!30')
         self.data_view.pack();
+
+        self.restock_popup = restock(self)
 
         self.grid_forget()
 
@@ -547,7 +554,75 @@ class histlog_frame(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget()
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''menu bars'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#tba
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''pop ups'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''inventory'''
+class restock(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, width * .8, height *.8, corner_radius= 0, fg_color='#111111')
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.grid_propagate(0)
 
-dashboard(None, None, datetime.datetime.now)
+        '''events'''
+        def reset():
+            master.restock_popup = restock(master)
+            self.destroy()
+
+        def validate_acc(_):
+            self.item_uid = database.fetch_data("SELECT uid FROM item_general_info WHERE NAME = ?", (self.item_name_entry.get(),))
+            self.item_uid = self.item_uid[0][0] if self.item_uid else None
+
+            if self.item_uid is None:
+                return
+            print(self.item_uid, database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, )))
+            if(database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, ))is not None):
+                self.expiry_date_entry.configure(state = ctk.NORMAL)
+            else:
+                self.expiry_date_entry.configure(state = ctk.DISABLED)
+            self.stock_entry.configure(state = ctk.NORMAL)
+            self.action_btn.configure(state = ctk.NORMAL)
+
+        def stock():
+            inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
+                                                 (self.item_uid, self.expiry_date_entry.get() or '1000-01-01'))
+            #if the there's no uid
+
+            if inventory_data: # if there was an already existing table; update the existing table
+                if inventory_data[0][2] is None:
+                    database.exec_nonquery([[sql_commands.update_non_expiry_stock, (int(self.stock_entry.get()), self.item_uid)]])
+                else:
+                    database.exec_nonquery([[sql_commands.update_expiry_stock, (int(self.stock_entry.get()), self.item_uid, inventory_data[0][2])]])
+            else:# if there's no exisiting table; create new instance of an item
+                database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.get(), self.expiry_date_entry.get() or None)]])
+
+        ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
+
+        self.frame = ctk.CTkFrame(self, corner_radius= 12, fg_color='#333333')
+        self.frame.grid(row = 1, column = 0, sticky = 'nsew', padx =12, pady = (0,12))
+
+        ctk.CTkLabel(self.frame, text='Item:', anchor='w').grid(row = 0, column = 0, padx = 12, sticky = 'nsew')
+        self.item_name_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Item Name')
+        self.item_name_entry.bind('<Return>', validate_acc)
+        self.item_name_entry.bind('<FocusOut>', validate_acc)
+        self.item_name_entry.grid(row = 1, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+        ctk.CTkLabel(self.frame, text='Expiration Date', anchor='w').grid(row = 2, column = 0, padx = 12, sticky = 'nsew')
+        self.expiry_date_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Expiration Date', state = ctk.DISABLED,
+                                              )
+        self.expiry_date_entry.grid(row = 3, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+        ctk.CTkLabel(self.frame, text='Stock', anchor='w').grid(row = 4, column = 0, padx = 12, sticky = 'nsew')
+        self.stock_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Stock', state = ctk.DISABLED)
+        self.stock_entry.grid(row = 5, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+        self.warning_text =  ctk.CTkLabel(self.frame, text='', anchor='w', text_color='red')
+        self.warning_text.grid(row = 6, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+        self.action_btn = ctk.CTkButton(self.frame, width * .04, height * .05, 12, text='Restock', command=stock, state=ctk.DISABLED)
+        self.action_btn.grid(row = 7, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+        self.leave_btn = ctk.CTkButton(self.frame, width * .04, height * .05, 12, text='Back', command = reset)
+        self.leave_btn.grid(row = 8, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+
+#dashboard(None, 'admin', datetime.datetime.now)

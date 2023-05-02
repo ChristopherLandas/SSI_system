@@ -75,5 +75,6 @@ def brighten_color(hexcode: str, i: int = 1):
 ''' example of inserting data
 usn = 'admin'
 pss = encrypt.pass_encrypt('admin', None)
-database.exec_nonquery([[f'INSERT INTO {db.ACC_CRED} VALUES (?, ?, ?)', (usn, pss["pass"], pss['salt'])]])
+database.exec_nonquery([[f'INSERT INTO {db.ACC_CRED} VALUES (?, ?, ?, ?)', (usn, pss["pass"], pss['salt'], None)],
+                        [f'INSERT INTO {db.ACC_INFO} VALUES (?, ?, ?)', ('admin', 'admin', 'admin')]])
 '''

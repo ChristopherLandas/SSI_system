@@ -1,5 +1,5 @@
 class db:
-    DB = 'ssi'
+    DB = 'ssi1'
     PORT = 3306
     HOST = '127.0.0.1'
     PASSWORD = 'test123'

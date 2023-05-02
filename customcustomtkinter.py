@@ -38,12 +38,12 @@ class customcustomtkinter:
                 self.after(50)
                 self.configure(fg_color = self._hover_color)
                 for cmd in self._command:
-                    if(callable(cmd)):
+                    if callable(cmd):
                         cmd()
         #click response of the button; includes the flash when clicked
 
         def update_button(self, is_hover: bool = True):
-            if(is_hover):
+            if is_hover:
                 self.bind('<Enter>', lambda _: self.configure(fg_color = self._hover_color))
                 self.bind('<Leave>', lambda _: self.configure(fg_color = self.og_color))
             else:
@@ -56,7 +56,7 @@ class customcustomtkinter:
             for i in child:
                 i.unbind('<Button-1>', None)
                 i.bind('<Button-1>', self.response)
-                if(self._hover):
+                if self._hover:
                     i.bind('<Enter>', lambda _: self.configure(fg_color = self._hover_color))
                     i.bind('<Leave>', lambda _: self.configure(fg_color = self.og_color))
                 else:
@@ -66,16 +66,16 @@ class customcustomtkinter:
 
         def configure(self, require_redraw=False, command: Optional[Callable[[], None]] = None, hover: Optional[bool] = None,
                       hover_color: Optional[Union[str, Tuple[str, str]]] = None, **kwargs):
-            if(command is not None):
+            if command is not None:
                 self._command = [] if isinstance(command, list) else [command]
                 self.unbind('<Button-1>', None)
                 self.bind('<Button-1>', self.response)
                 self.update_children()
-            if(hover_color is not None):
+            if hover_color is not None:
                 self._hover_color = hover_color
                 self.unbind('<Enter>', None)
                 self.bind('<Enter>', lambda _: self.configure(fg_color = self._hover_color))
-            if(hover is not None):
+            if hover is not None:
                 self._hover = hover
                 self.update_button(hover)
                 self.update_children()
@@ -258,21 +258,21 @@ class customcustomtkinterutil:
             #setup variables
 
             for i in range(len(buttons)):
-                if(isinstance(buttons[i], customcustomtkinter.ctkButtonFrame)):
+                if isinstance(buttons[i], customcustomtkinter.ctkButtonFrame):
                     buttons[i]._command.append(partial(self.click, i))
-                elif(isinstance(buttons[i], ctk.CTkButton)):
+                elif isinstance(buttons[i], ctk.CTkButton):
                     cmd = buttons[i]._command
                     buttons[i].configure(command = partial(self.click, i, cmd))
                 self._og_color.append(buttons[i]._fg_color)
             #set the designated command for buttonframe and ctkbutton
 
         def click(self, i: int, button_command: callable = None, e: any = None):
-            if(button_command is not None):
+            if button_command is not None:
                 button_command()
             #actual command of a button
 
-            if(self.active == self._buttons[i] and self._switch):
-                if(self._children is not None):
+            if self.active == self._buttons[i] and self._switch:
+                if self._children is not None:
                     self._children[i].deiconify()
                 self.active.configure(hover = True)
                 self.active.configure(fg_color = self._og_color[i])
@@ -280,14 +280,14 @@ class customcustomtkinterutil:
                 self.active = None
                 return
             #if the clicked button was the active button and the switch mode is on
-            elif(self.active is not None):
-                if(self._children is not None):
+            elif self.active is not None:
+                if self._children is not None:
                     self._children[self._buttons.index(self.active)].deiconify()
                 self.active.configure(fg_color = self._og_color[self._buttons.index(self.active)])
                 self.active.configure(hover = True)
                 self._state[0]()
             #if theres an existing active button
-            if(self._children is not None):
+            if self._children is not None:
                 self._children[i].place()
             self.active = self._buttons[i]
             self.active.configure(hover = False)
