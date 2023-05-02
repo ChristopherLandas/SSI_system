@@ -2,8 +2,8 @@ class db:
     DB = 'ssi'
     PORT = 3306
     HOST = '127.0.0.1'
-    PASSWORD = 'test123'
-    USERNAME = 'ROOT'
+    PASSWORD = 'hello123'
+    USERNAME = 'root'
 
     ACC_CRED = 'acc_cred'
     USERNAME = 'usn'

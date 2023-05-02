@@ -29,7 +29,8 @@ class database:
         try:
             mdb = mariadb.connect(user= db.USERNAME, password= db.PASSWORD, host= db.HOST, port= db.PORT, database= db.DB)
             return mdb
-        except mariadb.Error:
+        except mariadb.Error as e:
+            print(e)
             pass
         return None
 
