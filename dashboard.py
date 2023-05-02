@@ -349,7 +349,7 @@ class dashboard(ctk.CTkToplevel):
                                                           children=[self.notif_menu_bar, self.settings_menu_bar, self.acc_menu_bar])
 
         '''setting default events'''
-        load_main_frame('Inventory', 4)
+        load_main_frame('Dashboard', 0)
         #change_active_event(self.db_button, 0)
         self.protocol("WM_DELETE_WINDOW", log_out)
         self.mainloop()
