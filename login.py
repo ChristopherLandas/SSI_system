@@ -3,7 +3,7 @@ from tkinter import messagebox
 from tkextrafont import Font
 from PIL import Image
 from Theme import Color
-from dashboard import dashboard
+from dashboard import dashboard as _db
 from constants import db
 from util import *
 from os import walk
@@ -49,7 +49,7 @@ class loginUI(ctk.CTk):
                                         [f"UPDATE {db.ACC_CRED} set {db.acc_cred.ENTRY_OTP} = ? where {db.USERNAME} = ?",
                                         (data_key, self.user_entry.get())]])
                 self.withdraw()
-                dashboard(self, data_key, current_datetime)
+                _db(self, data_key, current_datetime)
 
         '''Import Icons and Images'''
         self.bg_img = ctk.CTkImage(light_image=Image.open("image/bg.png"),size=(1920,1080))

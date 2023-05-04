@@ -129,7 +129,6 @@ class customcustomtkinter:
                 ctk.CTkLabel(self, text='Wrong format\nCheck for errors').place(relx = .5, rely = .5, anchor = 'c')
                 return;
             #check if the format follows the guideline, if it doesn't it will only pop a label
-
             self._column_format  = column_format
             self.column_titles = [s.replace('/', '') for s in re.findall(r'\/\w+', self._column_format)]
             self.column_types = [str(s) for s in re.findall(r'\-(\w+|\#)', self._column_format)]
@@ -242,6 +241,14 @@ class customcustomtkinter:
 
                 frm.update_children()
                 frm.pack(fill = 'x', pady = (1,0))
+
+        def update_table(self, data: Union[tuple, list]):
+            for i in self.data_frames:
+                i.destroy()
+            self.data_frames = []
+            self._data = []
+            self.add_data(data)
+
 
 class customcustomtkinterutil:
     class button_manager:

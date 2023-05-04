@@ -15,13 +15,15 @@ from customcustomtkinter import customcustomtkinter as cctk
 from customcustomtkinter import customcustomtkinterutil as cctku
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+from constants import db
+from constants import action
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
 width = 0
 height = 0
-acc = ()
+acc_info = ()
+acc_cred = ()
 date_logged = None
 
 class dashboard(ctk.CTkToplevel):
@@ -31,27 +33,30 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         #makes the form full screen and removing the default tab bar
 
-        '''
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
             return
         else:
-            global acc, date_logged
+            global acc_info, date_logged
             date_logged = _date_logged;
-            acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
+            acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
+            acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
+            print(acc_cred)
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
         #for preventing security breach through python code; enable it to test it
-        '''
 
-        global acc, date_logged
+        '''
+        global acc_info, date_logged
         date_logged = _date_logged;
-        acc = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
+        acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        '''
         self._master = master
 
+        '''Fonts'''
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
@@ -79,9 +84,12 @@ class dashboard(ctk.CTkToplevel):
         self.user_setting_icon = ctk.CTkImage(light_image=Image.open("image/usersetting.png"),size=(24,27))
         self.histlog_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"),size=(22,25))
 
+        '''Global Variables'''
         global width, height
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
+
+        '''Main Information'''
         side_frame_w = round(width * 0.175)
         default_menubar_width = .15
         default_menubar_height = .3
@@ -316,9 +324,9 @@ class dashboard(ctk.CTkToplevel):
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
         self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
-        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc[0][1]).upper(), font=("Poppins Medium", 15))
+        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][1]).upper(), font=("Poppins Medium", 15))
         self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = (5,0))
-        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc[0][2]).upper(), font=("Poppins Medium", 12))
+        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][2]).upper(), font=("Poppins Medium", 12))
         self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.acc_btn.update_children()
@@ -508,7 +516,7 @@ class sales_frame(ctk.CTkFrame):
         self.grid_forget()
 
 class inventory_frame(ctk.CTkFrame):
-    global width, height
+    global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
@@ -560,8 +568,9 @@ class histlog_frame(ctk.CTkFrame):
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''pop ups'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '''inventory'''
+
 class restock(ctk.CTkFrame):
-    global width, height
+    global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master, width * .8, height *.8, corner_radius= 0, fg_color='#111111')
         self.columnconfigure(0, weight=1)
@@ -579,7 +588,6 @@ class restock(ctk.CTkFrame):
 
             if self.item_uid is None:
                 return
-            print(self.item_uid, database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, )))
             if(database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, ))is not None):
                 self.expiry_date_entry.configure(state = ctk.NORMAL)
             else:
@@ -590,7 +598,6 @@ class restock(ctk.CTkFrame):
         def stock():
             inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
                                                  (self.item_uid, self.expiry_date_entry.get() or '1000-01-01'))
-            #if the there's no uid
 
             if inventory_data: # if there was an already existing table; update the existing table
                 if inventory_data[0][2] is None:
@@ -599,6 +606,13 @@ class restock(ctk.CTkFrame):
                     database.exec_nonquery([[sql_commands.update_expiry_stock, (int(self.stock_entry.get()), self.item_uid, inventory_data[0][2])]])
             else:# if there's no exisiting table; create new instance of an item
                 database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.get(), self.expiry_date_entry.get() or None)]])
+
+            database.exec_nonquery([['INSERT INTO action_history VALUES (?, ?, ?)',
+                                     (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
+            messagebox.showinfo('Adding Succesfull')
+            master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
+            master.data_view.update_table(master.data1)
+            reset()
 
         ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
 
@@ -630,13 +644,29 @@ class restock(ctk.CTkFrame):
         self.leave_btn.grid(row = 8, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
 
 class add_item(ctk.CTkFrame):
-    global width, height
+    global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master, width * .8, height *.8, corner_radius= 0, fg_color='#111111')
         '''events'''
         def reset():
             master.add_item_popup = add_item(master)
             self.destroy()
+
+        def add():
+            if(self.item_name_entry.get() and self.manufacturer_entry.get() and self.category_entry.get() and self.price_entry.get() and
+               self.supplier_entry.get() and self.stock_entry.get()):
+                self.warning_lbl.configure(text = '', fg_color='transparent')
+                uid = str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(12)
+                database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.manufacturer_entry.get(), self.category_entry.get())],
+                                        [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), self.expiration_date_entry.get())],
+                                        [sql_commands.add_item_settings, (uid, float(self.price_entry.get()), .85, .5, int(self.stock_entry.get()))],
+                                        [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contanct_entry.get())]])
+                messagebox.showinfo('Adding Succesfull')
+                master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
+                master.data_view.update_table(master.data1)
+                reset()
+            else:
+                self.warning_lbl.configure(text = 'Enter Required Fields', fg_color='red')
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -701,9 +731,11 @@ class add_item(ctk.CTkFrame):
         self.action_frame = ctk.CTkFrame(self.frame, corner_radius= 12, fg_color='transparent')
         self.action_frame.grid(row = 1, column = 1, sticky = 'nsew', padx =(12,12), pady = (12,12))
 
-        self.add_btn = ctk.CTkButton(self.action_frame, 140, 28, text='Add', command=lambda: print('Recorded'))
+        self.warning_lbl = ctk.CTkLabel(self.action_frame, text='', fg_color='transparent')
+        self.warning_lbl.pack()
+        self.add_btn = ctk.CTkButton(self.action_frame, 140, 28, text='Add', command= add)
         self.add_btn.pack()
         self.cancel_btn = ctk.CTkButton(self.action_frame, 140, 28, text='Cancel', command= reset)
         self.cancel_btn.pack()
 
-dashboard(None, 'admin', datetime.datetime.now)
+#dashboard(None, 'admin', datetime.datetime.now)

@@ -22,3 +22,7 @@ class db:
         DATE_LOGGED = 'date_logged'
         TIME_IN = 'time_in'
         TIME_OUT = 'time_out'
+
+class action:
+    RESTOCKED_ITEM = f'RST/%s/%s/%s' #item stocked, stocked_change, success?
+    ADD_ITEM = f'ADD/%s' #UID of the item
