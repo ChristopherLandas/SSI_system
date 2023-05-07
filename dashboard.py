@@ -525,7 +525,8 @@ class inventory_frame(ctk.CTkFrame):
                                          command= lambda : self.restock_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.restock_btn.pack()
         self.add_item_btn = ctk.CTkButton(self, width * .03, height * .03, 12,
-                                         command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
+                                         #command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
+                                          )
         self.add_item_btn.pack()
 
         self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
@@ -534,7 +535,7 @@ class inventory_frame(ctk.CTkFrame):
         self.data_view.pack();
 
         self.restock_popup = restock(self)
-        self.add_item_popup = add_item(self)
+        #self.add_item_popup = add_item(self)
 
         self.grid_forget()
 
