@@ -565,3 +565,5 @@ class histlog_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget()
+
+dashboard(None, 'admin', datetime.datetime.now)
