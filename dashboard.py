@@ -530,7 +530,9 @@ class inventory_frame(ctk.CTkFrame):
 
         self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
         self.data_view = cctk.cctkTreeView(self, self.data1, width= width * .8, height= height * .8,
-                                           column_format=f'/No:{int(width*.05)}-#c/Name:x-tl/Stock:{int(width*.07)}-tl/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!50!30')
+                                           column_format=f'/No:{int(width*.05)}-#c/Name:x-tl/Stock:{int(width*.07)}-tl/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!50!30',
+                                           font_color='white',
+                                           conditional_colors= {5: {'Reorder':'yellow', 'Critical':'red','Normal1':'green'}})
         self.data_view.pack();
         self.restock_popup = Inventory_popup.restock(self, None, (width, height, acc_cred, acc_info))
         self.add_item_popup = Inventory_popup.add_item(self, None, (width, height, acc_cred, acc_info))
