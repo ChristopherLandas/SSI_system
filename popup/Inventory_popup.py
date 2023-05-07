@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from customcustomtkinter import customcustomtkinter as cctk
 import sql_commands
 from util import database
 from tkinter import messagebox
@@ -8,7 +9,6 @@ from constants import action
 def add_item(master, obj, info:tuple):
     class add_item(ctk.CTkFrame):
         def __init__(self, master, obj, info:tuple):
-            print(master)
             width = info[0]
             height = info[1]
             acc_cred = info[2]
@@ -159,9 +159,10 @@ def restock( master, obj, info:tuple):
             self.frame.grid(row = 1, column = 0, sticky = 'nsew', padx =12, pady = (0,12))
 
             ctk.CTkLabel(self.frame, text='Item:', anchor='w').grid(row = 0, column = 0, padx = 12, sticky = 'nsew')
-            self.item_name_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Item Name')
-            self.item_name_entry.bind('<Return>', validate_acc)
-            self.item_name_entry.bind('<FocusOut>', validate_acc)
+
+            item = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)]
+            self.item_name_entry = cctk.selection_comboBox(self.frame, width * .5, height * .05, hover = False, command= validate_acc,
+                                                           values= list(item))
             self.item_name_entry.grid(row = 1, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
 
             ctk.CTkLabel(self.frame, text='Expiration Date', anchor='w').grid(row = 2, column = 0, padx = 12, sticky = 'nsew')

@@ -5,6 +5,9 @@ from functools import partial
 from util import brighten_color
 import re
 from tkinter import messagebox;
+from customtkinter.windows.widgets.font import CTkFont
+from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
+
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -125,13 +128,14 @@ class customcustomtkinter:
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
 
-            if not re.fullmatch(r'(\/\w+:(x|\d+)-(\w+|\#))+\!\d+\!\d+', column_format):
+            print(column_format)
+            if not re.fullmatch(r'(\/\w+:(x|\d+)-(\w+|\#\w+))+\!\d+\!\d+', column_format):
                 ctk.CTkLabel(self, text='Wrong format\nCheck for errors').place(relx = .5, rely = .5, anchor = 'c')
                 return;
             #check if the format follows the guideline, if it doesn't it will only pop a label
             self._column_format  = column_format
             self.column_titles = [s.replace('/', '') for s in re.findall(r'\/\w+', self._column_format)]
-            self.column_types = [str(s) for s in re.findall(r'\-(\w+|\#)', self._column_format)]
+            self.column_types = [str(s) for s in re.findall(r'\-(\w+|\#\w+)', self._column_format)]
             total_fixed_width = sum([int(s) for s in re.findall(r'\:(x|\d+)', self._column_format) if str(s).isnumeric()])
             x_width = (self._current_width - (total_fixed_width + 14)) / len(re.findall(r'\:x', self._column_format))
             #set the measurements of the treeview according to the format given
@@ -218,10 +222,13 @@ class customcustomtkinter:
                 self._data.append(d[i])
                 if self.data_grid_btn_mng is not None:
                     self.data_grid_btn_mng._og_color.append(frm._fg_color)
-
+                print(self.column_types)
                 for j in range(len(self.column_widths)):
-                    if self.column_types[j] in ['t', '#']:
-                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j] in ['t'] else (i + 1), width = self.column_widths[j])
+                    if self.column_types[j][0] in ['t', '#']:
+                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] == 't' else (i + 1), width = self.column_widths[j], justify = ctk.RIGHT)
+                        temp._label.grid_forget()
+                        temp._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
+                        temp._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
                     else:
                         temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
@@ -235,7 +242,7 @@ class customcustomtkinter:
                             self.spinner = customcustomtkinter.cctkSpinnerCombo(frm,step_count=1, fg_color=("green", "blue"), button_color=("red", "yellow"),entry_fg_color=("red", "yellow"),
                                    button_hover_color=("yellow", "red"), entry_font=("Lucida", 20), entry_text_color=("white", "black"))
                             self.spinner.place(relx = .5, rely = .5, anchor = 'c')
-                    if self.column_types[j] == 't':
+                    if self.column_types[j][0] == 't':
                         tI += 1
                 # generates the content from the frame
 
@@ -249,6 +256,40 @@ class customcustomtkinter:
             self._data = []
             self.add_data(data)
 
+    class selection_comboBox(ctk.CTkComboBox):
+        def __init__(self, master: any, width: int = 140, height: int = 28, corner_radius: Optional[int] = None,
+                     border_width: Optional[int] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     button_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     dropdown_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     dropdown_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     dropdown_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     text_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     text_color_disabled: Optional[Union[str, Tuple[str, str]]] = None,
+                     font: Optional[Union[tuple, CTkFont]] = None, dropdown_font: Optional[Union[tuple, CTkFont]] = None,
+                     values: Optional[List[str]] = None, state: str = tk.NORMAL, hover: bool = True, variable: Union[tk.Variable,
+                     None] = None, command: Union[Callable[[str], None], None] = None, justify: str = "left", **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, button_color,
+                             button_hover_color, dropdown_fg_color, dropdown_hover_color, dropdown_text_color, text_color,
+                             text_color_disabled, font, dropdown_font, values, state, hover, variable, command, justify, **kwargs)
+            self._entry.delete(0, tk.END)
+            self._entry.configure(state= "readonly")
+            del self._dropdown_menu
+            self._dropdown_menu = DropdownMenu(master=self,
+                                           values=self._values,
+                                           command=self._dropdown_callback,
+                                           fg_color=dropdown_fg_color,
+                                           hover_color=dropdown_hover_color,
+                                           text_color=dropdown_text_color,
+                                           font=dropdown_font,
+                                           min_character_width= round(width * .275))
+        def _dropdown_callback(self, value: str):
+            self._entry.configure(state="normal")
+            self._entry.delete(0, tk.END)
+            self._entry.insert(0, value)
+            self._entry.configure(state="readonly")
+            return super()._dropdown_callback(value)
 
 class customcustomtkinterutil:
     class button_manager:

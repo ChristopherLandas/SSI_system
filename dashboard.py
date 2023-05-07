@@ -530,9 +530,8 @@ class inventory_frame(ctk.CTkFrame):
 
         self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
         self.data_view = cctk.cctkTreeView(self, self.data1, width= width * .8, height= height * .8,
-                                           column_format=f'/No:{int(width*.05)}-#/Name:x-t/Stock:{int(width*.07)}-t/Price:{int(width*.07)}-t/ExpirationDate:{int(width*.1)}-t/Status:{int(width*.08)}-t!50!30')
+                                           column_format=f'/No:{int(width*.05)}-#c/Name:x-tl/Stock:{int(width*.07)}-tl/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!50!30')
         self.data_view.pack();
-
         self.restock_popup = Inventory_popup.restock(self, None, (width, height, acc_cred, acc_info))
         self.add_item_popup = Inventory_popup.add_item(self, None, (width, height, acc_cred, acc_info))
 
@@ -564,6 +563,6 @@ class histlog_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
-        self.grid_forget()
+        self.grid_forget();
 
 dashboard(None, 'admin', datetime.datetime.now)
