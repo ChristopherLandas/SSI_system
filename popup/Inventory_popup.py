@@ -2,20 +2,21 @@ import customtkinter as ctk
 import sql_commands
 from util import database
 from tkinter import messagebox
+from constants import action
 
 
-def add_item(master, obj):
+def add_item(master, obj, info:tuple):
     class add_item(ctk.CTkFrame):
-        def __init__(self, master, obj):
-            width = master.width
-            height = master.height
-            acc_cred = master.acc_cred
-            acc_info = master.acc_info
+        def __init__(self, master, obj, info:tuple):
+            print(master)
+            width = info[0]
+            height = info[1]
+            acc_cred = info[2]
+            acc_info = info[3]
             super().__init__(master, width * .8, height *.8, corner_radius= 0, fg_color='#111111')
             '''events'''
             def reset():
-                master.add_item_popup = add_item(master)
-                self.destroy()
+                self.place_forget()
 
             def add():
                 if(self.item_name_entry.get() and self.manufacturer_entry.get() and self.category_entry.get() and self.price_entry.get() and
@@ -102,7 +103,82 @@ def add_item(master, obj):
             self.add_btn.pack()
             self.cancel_btn = ctk.CTkButton(self.action_frame, 140, 28, text='Cancel', command= reset)
             self.cancel_btn.pack()
+    return add_item(master, obj, info)
 
-def test():
-    class instance():
-        print('hello')
+def restock( master, obj, info:tuple):
+    class restock(ctk.CTkFrame):
+        def __init__(self, master, obj, info:tuple):
+            width = info[0]
+            height = info[1]
+            acc_cred = info[2]
+            acc_info = info[3]
+            super().__init__(master, width * .8, height *.8, corner_radius= 0, fg_color='#111111')
+            self.columnconfigure(0, weight=1)
+            self.rowconfigure(1, weight=1)
+            self.grid_propagate(0)
+
+            '''events'''
+            def reset():
+                self.place_forget()
+
+            def validate_acc(_):
+                self.item_uid = database.fetch_data("SELECT uid FROM item_general_info WHERE NAME = ?", (self.item_name_entry.get(),))
+                self.item_uid = self.item_uid[0][0] if self.item_uid else None
+
+                if self.item_uid is None:
+                    return
+                if(database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, ))is not None):
+                    self.expiry_date_entry.configure(state = ctk.NORMAL)
+                else:
+                    self.expiry_date_entry.configure(state = ctk.DISABLED)
+                self.stock_entry.configure(state = ctk.NORMAL)
+                self.action_btn.configure(state = ctk.NORMAL)
+
+            def stock():
+                inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
+                                                    (self.item_uid, self.expiry_date_entry.get() or '1000-01-01'))
+
+                if inventory_data: # if there was an already existing table; update the existing table
+                    if inventory_data[0][2] is None:
+                        database.exec_nonquery([[sql_commands.update_non_expiry_stock, (int(self.stock_entry.get()), self.item_uid)]])
+                    else:
+                        database.exec_nonquery([[sql_commands.update_expiry_stock, (int(self.stock_entry.get()), self.item_uid, inventory_data[0][2])]])
+                else:# if there's no exisiting table; create new instance of an item
+                    database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.get(), self.expiry_date_entry.get() or None)]])
+
+                database.exec_nonquery([['INSERT INTO action_history VALUES (?, ?, ?)',
+                                        (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
+                messagebox.showinfo('Adding Succesfull')
+                master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
+                master.data_view.update_table(master.data1)
+                reset()
+
+            ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
+
+            self.frame = ctk.CTkFrame(self, corner_radius= 12, fg_color='#333333')
+            self.frame.grid(row = 1, column = 0, sticky = 'nsew', padx =12, pady = (0,12))
+
+            ctk.CTkLabel(self.frame, text='Item:', anchor='w').grid(row = 0, column = 0, padx = 12, sticky = 'nsew')
+            self.item_name_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Item Name')
+            self.item_name_entry.bind('<Return>', validate_acc)
+            self.item_name_entry.bind('<FocusOut>', validate_acc)
+            self.item_name_entry.grid(row = 1, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+            ctk.CTkLabel(self.frame, text='Expiration Date', anchor='w').grid(row = 2, column = 0, padx = 12, sticky = 'nsew')
+            self.expiry_date_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Expiration Date', state = ctk.DISABLED,
+                                                )
+            self.expiry_date_entry.grid(row = 3, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+            ctk.CTkLabel(self.frame, text='Stock', anchor='w').grid(row = 4, column = 0, padx = 12, sticky = 'nsew')
+            self.stock_entry = ctk.CTkEntry(self.frame, width *.5, height * .05, placeholder_text='Stock', state = ctk.DISABLED)
+            self.stock_entry.grid(row = 5, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+            self.warning_text =  ctk.CTkLabel(self.frame, text='', anchor='w', text_color='red')
+            self.warning_text.grid(row = 6, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+            self.action_btn = ctk.CTkButton(self.frame, width * .04, height * .05, 12, text='Restock', command=stock, state=ctk.DISABLED)
+            self.action_btn.grid(row = 7, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+
+            self.leave_btn = ctk.CTkButton(self.frame, width * .04, height * .05, 12, text='Back', command = reset)
+            self.leave_btn.grid(row = 8, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+    return restock(master, obj, info)
