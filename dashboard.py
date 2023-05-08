@@ -498,19 +498,20 @@ class transaction_frame(ctk.CTkFrame):
     global width, height
     
     def __init__(self, master):
-        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Color[2])
     
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-        
+        self.right_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,12))
+
         self.grid_columnconfigure((1), weight=1)
         self.grid_rowconfigure((1,2), weight=1)
         
-        self.or_num_label = ctk.CTkLabel(self, fg_color=Color.White_Ghost, corner_radius=5, width=width*0.125, height = height*0.05,
+        self.or_num_label = ctk.CTkLabel(self, fg_color=Color.White_Color[3], corner_radius=5, width=width*0.125, height = height*0.05,
                                          text="OR#: 0001", font=("DM Sans Medium", 15))
         self.or_num_label.grid(row=0, column=0, padx=(width*0.005,0), pady=(height*0.01))
         
-        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.55, height=height*0.05,)
+        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], width=width*0.55, height=height*0.05,)
         self.client_name_frame.grid(row=0, column=1, columnspan=1)
         self.client_name_frame.pack_propagate(0)
         
@@ -521,10 +522,10 @@ class transaction_frame(ctk.CTkFrame):
         self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005,width*0.01), pady=(height*0.01))
         
         self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
-                                       fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=2, padx=(0, width*0.005),  pady=(height*0.01))
         
-        self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
+        self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Color[3])
         self.service_frame.grid(row=1, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(0,height*0.005))
         self.service_frame.grid_columnconfigure(0, weight=1)
         self.service_frame.grid_rowconfigure(0, weight=1)
@@ -532,14 +533,14 @@ class transaction_frame(ctk.CTkFrame):
         self.service_data = [(10001, "Grooming", 500, 1, 0, 500, " "),
                              (10001, "Grooming", 500, 1, 0, 500, " ")]
         self.service_treeview = cctk.cctkTreeView(self.service_frame, data=self.service_data, width=width*0.8, height=height*0.3, 
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tl/ItemName:x-tr/Price:{int(width*.07)}-tc/Quantity:{int(width*.1)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!30!30')
+                                                  column_format=f'/No:{int(width*.03)}-#c/ServiceCode:{int(width*0.08)}-tl/ServiceName:x-tr/Price:{int(width*.07)}-tc/Quantity:{int(width*.1)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!30!30')
         self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
         
         self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.service_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
         self.service_add_button = ctk.CTkButton(self.service_frame, text="Add Service", image=self.add_icon, command=lambda:print("Add Service"),
-                                                 font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
+                                                 font=("DM Sans Medium", 16), width=width*0.1, height=height*0.045)
         self.service_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
         self.service_total_frame = ctk.CTkFrame(self.service_frame, height=height*0.045, width=width*0.2, corner_radius=5)
         self.service_total_frame.grid(row=1, column=3, pady=(0,height*0.01), padx=(0, width*0.05))
@@ -549,7 +550,7 @@ class transaction_frame(ctk.CTkFrame):
         self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.service_total_value.pack(side="right", padx=(0, width*0.01))
         
-        self.item_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
+        self.item_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Color[3])
         self.item_frame.grid(row=2, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(height*0.005,height*0.01))
         self.item_frame.grid_columnconfigure(0, weight=1)
         self.item_frame.grid_rowconfigure(0, weight=1)
@@ -565,7 +566,7 @@ class transaction_frame(ctk.CTkFrame):
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.item_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
         self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda:print("Add item"),
-                                                 font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
+                                                 font=("DM Sans Medium", 16), width=width*0.1, height=height*0.045)
         self.item_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
         self.item_total_frame = ctk.CTkFrame(self.item_frame, height=height*0.045, width=width*0.2, corner_radius=5)
         self.item_total_frame.grid(row=1, column=3, pady=(0,height*0.01), padx=(0, width*0.05))
@@ -575,18 +576,19 @@ class transaction_frame(ctk.CTkFrame):
         self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.item_total_value.pack(side="right", padx=(0, width*0.01))
         
-        self.bottom_frame = ctk.CTkFrame(self,height=height*0.05, fg_color="#E0E0E0")
+        self.bottom_frame = ctk.CTkFrame(self,height=height*0.05, fg_color="transparent")
         self.bottom_frame.grid(row=3, column=0, columnspan=3, pady=(0,height*0.01), padx=(width*0.005),sticky="nsew")
         self.bottom_frame.pack_propagate(0)
         
-        self.clear_all_button = ctk.CTkButton(self.bottom_frame, text="Clear All", fg_color="#EB455F", hover_color="#A6001A", 
-                                              cursor="hand2", command=quit)
+        self.clear_all_button = ctk.CTkButton(self.bottom_frame, height=height*0.05, width=width*0.05,text="Clear All", fg_color=Color.Red_Color[2], hover_color=Color.Red_Color[3], 
+                                              cursor="hand2", font=("DM Sans Medium", 16))
         self.clear_all_button.pack(side="left")
         
-        self.proceed_button = ctk.CTkButton(self.bottom_frame, text="Proceed", cursor="hand2", hover_color="#2C74B3")
+        self.proceed_button = ctk.CTkButton(self.bottom_frame, height=height*0.05, width=width*0.08, text="Proceed", image=self.right_icon, hover_color="#2C74B3", compound="right",
+                                            font=("DM Sans Medium", 16))
         self.proceed_button.pack(side="right", padx=10)
         
-        self.draft_button = ctk.CTkButton(self.bottom_frame, text="Draft", cursor="hand2", hover_color="#2C74B3")
+        self.draft_button = ctk.CTkButton(self.bottom_frame, height=height*0.05, width=width*0.08, text="Draft", hover_color="#2C74B3", font=("DM Sans Medium", 16))
         self.draft_button.pack(side="right", padx=10)
         
         
