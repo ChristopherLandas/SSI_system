@@ -2,7 +2,7 @@ class Color:
     White_Lotion = "#FCFCFC"
     White_Milk = "#FFFDF6"
     White_Platinum = "#E5E5E5"
-    White_Ghost = "#F9F9F9"
+    White_Ghost = ("#F9F9F9", "#020202")
     White_Gray = "#EFEFEF"
     White_Chinese = "#E0E0E0"
     White_AntiFlash = "#F1F1F1"
