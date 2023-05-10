@@ -17,7 +17,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from constants import db
 from constants import action
-from popup import Inventory_popup
+from popup import Inventory_popup, transaction_popups
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -70,7 +70,7 @@ class dashboard(ctk.CTkToplevel):
         #for testing purposes, might delete after the development
 
         '''Import Images'''
-        self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo_1.png"),size=(37,35))
+        self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
         self.dashboard_icon = ctk.CTkImage(light_image=Image.open("image/dashboard.png"),size=(22,22))
         self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales.png"),size=(26,20))
         self.inventory_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"),size=(24,25))
@@ -495,46 +495,46 @@ class dashboard_frame(ctk.CTkFrame):
         self.log_history_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005) ,width * .01), pady=(height*0.017))
 
 class transaction_frame(ctk.CTkFrame):
-    global width, height
-    
+    global width, height, acc_cred, acc_info
+
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-    
+
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-        
+
         self.grid_columnconfigure((1), weight=1)
         self.grid_rowconfigure((1,2), weight=1)
-        
+
         self.or_num_label = ctk.CTkLabel(self, fg_color=Color.White_Ghost, corner_radius=5, width=width*0.125, height = height*0.05,
                                          text="OR#: 0001", font=("DM Sans Medium", 15))
         self.or_num_label.grid(row=0, column=0, padx=(width*0.005,0), pady=(height*0.01))
-        
+
         self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.55, height=height*0.05,)
         self.client_name_frame.grid(row=0, column=1, columnspan=1)
         self.client_name_frame.pack_propagate(0)
-        
+
         self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
         self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
-        
+
         self.client_name_entry = ctk.CTkEntry(self.client_name_frame, placeholder_text="Client's Name",font=("DM Sans Medium", 15), border_width=0, fg_color="white")
         self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005,width*0.01), pady=(height*0.01))
-        
+
         self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=2, padx=(0, width*0.005),  pady=(height*0.01))
-        
+
         self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
         self.service_frame.grid(row=1, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(0,height*0.005))
         self.service_frame.grid_columnconfigure(0, weight=1)
         self.service_frame.grid_rowconfigure(0, weight=1)
-        
+
         self.service_data = [(10001, "Grooming", 500, 1, 0, 500, " "),
                              (10001, "Grooming", 500, 1, 0, 500, " ")]
-        self.service_treeview = cctk.cctkTreeView(self.service_frame, data=self.service_data, width=width*0.8, height=height*0.3, 
+        self.service_treeview = cctk.cctkTreeView(self.service_frame, data=self.service_data, width=width*0.8, height=height*0.3,
                                                   column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tl/ItemName:x-tr/Price:{int(width*.07)}-tc/Quantity:{int(width*.1)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!30!30')
         self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
-        
+
         self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.service_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
@@ -548,23 +548,24 @@ class transaction_frame(ctk.CTkFrame):
         self.service_total_label.pack(side="left", padx=(width*0.01, 0))
         self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.service_total_value.pack(side="right", padx=(0, width*0.01))
-        
+
         self.item_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
         self.item_frame.grid(row=2, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(height*0.005,height*0.01))
         self.item_frame.grid_columnconfigure(0, weight=1)
         self.item_frame.grid_rowconfigure(0, weight=1)
-        
+
         self.item_data = [(10001, "Item NAme", 500, 1, 0, 500, " "),
                           (10001, "Item NAme", 500, 1, 0, 500, " ")]
-        self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.item_data, width=width*0.8, height=height*0.3, 
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tl/ItemName:x-tr/Price:{int(width*.07)}-tc/Quantity:{int(width*.1)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!30!30')
+        self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.item_data, width=width*0.8, height=height*0.3,
+                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ItemName:x-tl/Price:{int(width*.07)}-tr/Quantity:{int(width*.1)}-tc/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tr/Action:{int(width*.05)}-bD!30!30')
+        self.item_treeview.add_data((10001, "Item NAme", 1233, 1, 0, 500, " "))
         self.item_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
-       
-       
+
+
         self.item_clear_button = ctk.CTkButton(self.item_frame, text="", image=self.trash_icon, command=lambda:print("Clear All item"),
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.item_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda:print("Add item"),
+        self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda: self.show_list.place(relx = .5, rely= .5, anchor = 'c'),
                                                  font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
         self.item_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
         self.item_total_frame = ctk.CTkFrame(self.item_frame, height=height*0.045, width=width*0.2, corner_radius=5)
@@ -574,22 +575,22 @@ class transaction_frame(ctk.CTkFrame):
         self.item_total_label.pack(side="left", padx=(width*0.01, 0))
         self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.item_total_value.pack(side="right", padx=(0, width*0.01))
-        
+
         self.bottom_frame = ctk.CTkFrame(self,height=height*0.05, fg_color="#E0E0E0")
         self.bottom_frame.grid(row=3, column=0, columnspan=3, pady=(0,height*0.01), padx=(width*0.005),sticky="nsew")
         self.bottom_frame.pack_propagate(0)
-        
-        self.clear_all_button = ctk.CTkButton(self.bottom_frame, text="Clear All", fg_color="#EB455F", hover_color="#A6001A", 
+
+        self.clear_all_button = ctk.CTkButton(self.bottom_frame, text="Clear All", fg_color="#EB455F", hover_color="#A6001A",
                                               cursor="hand2", command=quit)
         self.clear_all_button.pack(side="left")
-        
+
         self.proceed_button = ctk.CTkButton(self.bottom_frame, text="Proceed", cursor="hand2", hover_color="#2C74B3")
         self.proceed_button.pack(side="right", padx=10)
-        
+
         self.draft_button = ctk.CTkButton(self.bottom_frame, text="Draft", cursor="hand2", hover_color="#2C74B3")
         self.draft_button.pack(side="right", padx=10)
-        
-        
+
+
         self.total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.2, fg_color="#F9F9F9")
         self.total_frame.pack(side="right", padx=10)
         self.total_frame.pack_propagate(0)
@@ -598,6 +599,8 @@ class transaction_frame(ctk.CTkFrame):
         self.final_total_label.pack(side="left", padx=(width*0.01, 0))
         self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.final_total_value.pack(side="right", padx=(0, width*0.01))
+
+        self.show_list: ctk.CTkFrame = transaction_popups.show_list(self, self.item_add_button, (width, height, acc_cred, acc_info))
 
 class services_frame(ctk.CTkFrame):
     global width, height
