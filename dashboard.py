@@ -620,23 +620,36 @@ class inventory_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
-
-        self.restock_btn = ctk.CTkButton(self, width * .03, height * .03, 12,
-                                         command= lambda : self.restock_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.restock_btn.pack()
-        self.add_item_btn = ctk.CTkButton(self, width * .03, height * .03, 12,
+        self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(15,15))
+        self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
+        
+        self.grid_columnconfigure((0,1), weight=1)
+        
+        self.add_item_btn = ctk.CTkButton(self,width=width*0.1, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.add_item_btn.pack()
+        self.add_item_btn.grid(row=0, column=1, sticky="e", padx=(0, width*0.01))
+        
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=2, padx=(0, width*0.01),  pady=(height*0.01), sticky="e")
+        
+        self.restock_btn = ctk.CTkButton(self, width=width*0.1, height = height*0.05, text="Restock", image=self.restock_icon, font=("DM Sans Medium", 14), 
+                                         command= lambda : self.restock_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.restock_btn.grid(row=2, column=2, pady=(height*0.01), sticky="e", padx=(0, width*0.01))
 
-        self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
-        self.data_view = cctk.cctkTreeView(self, self.data1, width= width * .8, height= height * .8,
-                                           column_format=f'/No:{int(width*.05)}-#c/Name:x-tl/Stock:{int(width*.07)}-tl/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!50!30',
+
+        self.data_frame = ctk.CTkFrame(self)
+        self.data_frame.grid(row=1, column=1, columnspan=2,  padx=(0, width*0.0025))
+        self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
+        self.data_view = cctk.cctkTreeView(self.data_frame, self.data1, width= width * .8, height= height * .75,
+                                           column_format=f'/No:{int(width*.05)}-#c/Name:x-tl/Stock:{int(width*.07)}-tl/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!30!30',
                                            font_color='white',
                                            conditional_colors= {5: {'Reorder':'yellow', 'Critical':'red','Normal1':'green'}})
-        self.data_view.pack();
+        self.data_view.pack()
         self.restock_popup = Inventory_popup.restock(self, None, (width, height, acc_cred, acc_info))
         self.add_item_popup = Inventory_popup.add_item(self, None, (width, height, acc_cred, acc_info))
-
+        
+        
         self.grid_forget()
 
 class patient_info_frame(ctk.CTkFrame):
