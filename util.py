@@ -73,6 +73,12 @@ def brighten_color(hexcode: str, i: int = 1):
     b = 00 if b * i < 0 else 255 if b * i > 255 else round(b * i)
     return "#%02x%02x%02x" % (r,g,b)
 
+def price_format_to_float(val: str) -> float:
+    return float(val.replace(',',''))
+
+def format_price(val: float) -> str:
+    return '{:,.2f}'.format(val)
+
 ''' example of inserting data
 usn = 'admin'
 pss = encrypt.pass_encrypt('admin', None)

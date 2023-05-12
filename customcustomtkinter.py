@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 from typing import *
+from util import *
 from functools import partial
 from util import brighten_color
 import re
@@ -17,7 +18,7 @@ class customcustomtkinter:
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None, command: Union[Callable[[],None], None] = None,
                      hover: bool = True, hover_color: Union[str, Tuple[str, str]] = "transparent",
-                     **kwargs):
+                     double_click_command: Union[Callable[[],None], None] = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color,
                              background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
             # sets the default properties of a frame
@@ -26,9 +27,11 @@ class customcustomtkinter:
             self._hover_color = hover_color
             self._command = [] if isinstance(command, list) else [command]
             self._hover = hover
+            self._doulbe_click_command = double_click_command
             #make a reference/encapsulation from extended arguments
 
             self.bind('<Button-1>', self.response)
+            self.bind('<Double-Button-1>', None if self._doulbe_click_command == None else self._doulbe_click_command)
             self.pack_propagate(0)
             self.grid_propagate(0)
             self.update_button(hover)
@@ -59,6 +62,8 @@ class customcustomtkinter:
             for i in child:
                 i.unbind('<Button-1>', None)
                 i.bind('<Button-1>', self.response)
+                i.unbind('<Double-Button-1>', None)
+                i.bind('<Double-Button-1>', None if self._doulbe_click_command == None else self._doulbe_click_command)
                 if self._hover:
                     i.bind('<Enter>', lambda _: self.configure(fg_color = self._hover_color))
                     i.bind('<Leave>', lambda _: self.configure(fg_color = self.og_color))
@@ -73,6 +78,8 @@ class customcustomtkinter:
                 self._command = [] if isinstance(command, list) else [command]
                 self.unbind('<Button-1>', None)
                 self.bind('<Button-1>', self.response)
+                self.unbind('<Double-Button-1>', None)
+                self.bind('<Double-Button-1>', None if self._doulbe_click_command == None else self._doulbe_click_command)
                 self.update_children()
             if hover_color is not None:
                 self._hover_color = hover_color
@@ -118,7 +125,7 @@ class customcustomtkinter:
 
     class cctkTreeView(ctk.CTkFrame):
 
-        def __init__(self, master: any, data: Union[tuple, list], width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
+        def __init__(self, master: any, data: Union [Union[tuple, list], None] = None, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                      fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
@@ -126,7 +133,9 @@ class customcustomtkinter:
                      header_color: Union[str, tuple] = '#006611', data_grid_color: Union[list, tuple] = ('#333333', '#444444'),
                      selected_color: Union [tuple, str] = brighten_color('#006611', 1.3), font_color: Union[str, tuple] = 'black',
                      conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 20),
-                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#0000ff', **kwargs):
+                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#0000ff',
+                     double_click_command: Union[Callable[[],None], None] = None,
+                     bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
 
@@ -155,6 +164,8 @@ class customcustomtkinter:
             self.row_font = row_font
             self._selected_color =selected_color
             self._row_hover_color = row_hover_color
+            self._double_click_command = double_click_command
+            self.bd_configs = bd_configs
             #encapsulate other arguments
 
             self.pack_propagate(0)
@@ -188,8 +199,8 @@ class customcustomtkinter:
             #additional button that will serve as go to top/down of a scroll bar
 
             '''initial generation here'''
-            self.add_data(data)
-            #self.add_data(data)
+            if(data is not None):
+                self.add_data(data)
             #generates data grid
 
             self.data_grid_btn_mng = customcustomtkinterutil.button_manager(self.data_frames, self._selected_color, True, None)
@@ -210,6 +221,8 @@ class customcustomtkinter:
                 if self.data_grid_btn_mng.active == dlt_btn.master.master:
                     self.data_grid_btn_mng.active = None
                 #active button was set to none if it was destroyed
+                if(self.bd_configs is not None):
+                    self.bd_deduction(dlt_btn)
 
                 dlt_btn.master.master.destroy()
                 for i in range(data_mngr_index, len(self.data_frames)):
@@ -223,16 +236,17 @@ class customcustomtkinter:
             d = [data] if isinstance(data, tuple) else data
             for i in range(len(d)):
                 tI = 0;
-                frm = customcustomtkinter.ctkButtonFrame(self.contents._parent_canvas, height=self._data_grid_heights, width=15,
+                frm = customcustomtkinter.ctkButtonFrame(self.contents, height=self._data_grid_heights, width=15,
                                                          fg_color=self._data_grid_color[0] if len(self.data_frames) % 2 == 0 else self._data_grid_color[1],
-                                                         corner_radius= 0, hover_color= self._row_hover_color)
+                                                         corner_radius= 0, hover_color= self._row_hover_color,
+                                                         double_click_command= self._double_click_command)
                 self.data_frames.append(frm)
                 self._data.append(d[i])
                 if self.data_grid_btn_mng is not None:
                     self.data_grid_btn_mng._og_color.append(frm._fg_color)
                 for j in range(len(self.column_widths)):
                     if self.column_types[j][0] in ['t', '#']:
-                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] == 't' else (i + 1), width = self.column_widths[j],
+                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] == 't' else (len(self._data)), width = self.column_widths[j],
                                             justify = ctk.RIGHT, font= self.row_font)
                         txt_clr = self._font_color if j not in self._conditional_colors else self._conditional_colors[j].get(temp._text, self._font_color)
                         temp.configure(text_color = txt_clr)
@@ -258,6 +272,7 @@ class customcustomtkinter:
 
                 frm.update_children()
                 frm.pack(fill = 'x', pady = (1,0))
+                self.contents.update()
 
         def update_table(self, data: Union[tuple, list]):
             for i in self.data_frames:
@@ -265,6 +280,26 @@ class customcustomtkinter:
             self.data_frames = []
             self._data = []
             self.add_data(data)
+
+        def bd_deduction(self, btn: ctk.CTkButton):
+            for tup in self.bd_configs:
+                item = int(btn.master.master.winfo_children()[tup[0]]._text)
+                print(item)
+                if isinstance(tup[1], list):
+                    for lbls in tup[1]:
+                        lbls.configure(text = format_price(float(price_format_to_float(lbls._text)) - item))
+                else:
+                    tup[1].configure(text = format_price(float(price_format_to_float(tup[1]._text)) - item))
+
+        def delete_all_data(self):
+            print(self.data_frames.__len__())
+            for frm in self.data_frames:
+                frm.destroy()
+            self.data_grid_btn_mng._buttons.clear()
+            self.data_grid_btn_mng._og_color.clear()
+            self._data.clear()
+
+
 
     class selection_comboBox(ctk.CTkComboBox):
         def __init__(self, master: any, width: int = 140, height: int = 28, corner_radius: Optional[int] = None,
@@ -352,3 +387,11 @@ class customcustomtkinterutil:
             self.active.configure(fg_color = self._hold_color)
             self._state[1]()
         #setup click variable
+
+        def deactivate_active(self):
+            if self._children is not None:
+                self._children[self._buttons.index(self.active)].deiconify()
+            self.active.configure(hover = True)
+            self.active.configure(fg_color = self._og_color[self._buttons.index(self.active)])
+            self._state[0]()
+            self.active = None
