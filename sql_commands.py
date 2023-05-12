@@ -27,6 +27,21 @@ get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
                           ORDER BY item_inventory_info.Expiry_Date"
 
+get_item_and_their_total_stock = 'SELECT item_general_info.name,\
+                                         CAST(SUM(item_inventory_info.Stock) as INT)\
+                                 FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                 GROUP BY item_general_info.UID'
+
+get_item_data_for_transaction = "SELECT item_general_info.UID,\
+                                         item_general_info.name,\
+                                         CAST(item_settings.Price AS INT)\
+                                 FROM item_general_info\
+                                 JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                 INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                 WHERE item_general_info.name = ?\
+                                 GROUP BY item_general_info.UID"
+
+
 add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?)'
 update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
@@ -37,3 +52,6 @@ add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 show_all_items = "SELECT NAME FROM item_general_info"
+
+generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
+record_transaction = "INSERT INTO transaction_record VALUES(?, ?)"
