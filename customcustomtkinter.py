@@ -1,3 +1,4 @@
+from typing import Optional, Tuple, Union
 import customtkinter as ctk
 import tkinter as tk
 from typing import *
@@ -8,7 +9,7 @@ import re
 from tkinter import messagebox;
 from customtkinter.windows.widgets.font import CTkFont
 from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
-
+from tkcalendar import Calendar
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -335,6 +336,32 @@ class customcustomtkinter:
             self._entry.insert(0, value)
             self._entry.configure(state="readonly")
             return super()._dropdown_callback(value)
+        
+    class tk_calendar(ctk.CTkToplevel):
+        def __init__(self, label, format, *args, fg_color: str | Tuple[str, str] | None = None, **kwargs):
+            super().__init__(*args, fg_color=fg_color, **kwargs)
+            
+            def set_date():
+                label.configure(text= ( format % (self.cal.selection_get())))
+                self.withdraw()
+            import datetime
+
+            position_X = (self.winfo_screenwidth()/2)
+            position_Y = (self.winfo_screenheight()/2)-(400/2)
+
+
+            self.title("Calendar")
+            self.geometry("%dx%d+%d+%d"%(400,400,position_X,position_Y))
+            self.resizable(0,0)
+
+            self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False,
+                                mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
+            self.cal.pack(fill="both", expand=True, padx=5, pady=5)
+
+            self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)
+            self.set_date.pack(pady=10)
+            
+            self.attributes('-topmost',1)
 
 class customcustomtkinterutil:
     class button_manager:
