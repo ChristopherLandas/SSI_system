@@ -337,11 +337,11 @@ class customcustomtkinter:
             self._entry.insert(0, value)
             self._entry.configure(state="readonly")
             return super()._dropdown_callback(value)
-        
+
     class tk_calendar(ctk.CTkToplevel):
-        def __init__(self, label, format, *args, fg_color: str | Tuple[str, str] | None = None, **kwargs):
+        def __init__(self, label, format, *args, fg_color: str or Tuple[str, str] or None = None, **kwargs):
             super().__init__(*args, fg_color=fg_color, **kwargs)
-            
+
             def set_date():
                 label.configure(text= ( format % (self.cal.selection_get())))
                 self.withdraw()
@@ -361,7 +361,7 @@ class customcustomtkinter:
 
             self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)
             self.set_date.pack(pady=10)
-            
+
             self.attributes('-topmost',1)
 
     class modified_combobox(ctk.CTkComboBox):
