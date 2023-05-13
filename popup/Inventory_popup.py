@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
 import sql_commands
+import tkcalendar
+from Theme import Color
 from util import database
 from tkinter import messagebox
 from constants import action
@@ -13,7 +15,8 @@ def add_item(master, obj, info:tuple):
             height = info[1]
             acc_cred = info[2]
             acc_info = info[3]
-            super().__init__(master, width * .8, height *.8, corner_radius= 0, fg_color='#111111')
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
+            #set to transparent to prevent clicking other buttons inside the inventory
             '''events'''
             def reset():
                 self.place_forget()
@@ -24,7 +27,7 @@ def add_item(master, obj, info:tuple):
                     self.warning_lbl.configure(text = '', fg_color='transparent')
                     uid = str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(12)
                     database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.manufacturer_entry.get(), self.category_entry.get())],
-                                            [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), self.expiration_date_entry.get())],
+                                            [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), self.expiration_date_entry.cget("text"))],
                                             [sql_commands.add_item_settings, (uid, float(self.price_entry.get()), .85, .5, int(self.stock_entry.get()))],
                                             [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contanct_entry.get())]])
                     messagebox.showinfo('Adding Succesfull')
@@ -34,18 +37,24 @@ def add_item(master, obj, info:tuple):
                 else:
                     self.warning_lbl.configure(text = 'Enter Required Fields', fg_color='red')
 
-            self.columnconfigure(0, weight=1)
-            self.rowconfigure(1, weight=1)
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
-            ctk.CTkLabel(self, text='Add Item', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
+            
+            self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], corner_radius=5)
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.02)
+            
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1,weight=1)
+            
+            ctk.CTkLabel(self.main_frame, text='ADD ITEM', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht,
+                         height=height*0.05).grid(row = 0, column = 0, padx=(width*0.01), pady=(height*0.007,0),sticky = 'w')
 
-            self.frame = ctk.CTkFrame(self, corner_radius= 12, fg_color='#333333')
+            self.frame = ctk.CTkFrame(self.main_frame, corner_radius= 12, fg_color='black')
             self.frame.grid(row = 1, column = 0, sticky = 'nsew', padx =12, pady = (0,12))
 
-            self.frame.rowconfigure(0, weight= 1)
-            self.frame.rowconfigure(1, weight= 1)
-            self.frame.columnconfigure(0, weight=1)
-            self.frame.columnconfigure(1, weight=1)
+            self.frame.rowconfigure((0,1), weight= 1)
+            self.frame.columnconfigure((0,1), weight=1)
 
             self.item_frame = ctk.CTkFrame(self.frame, corner_radius= 12, fg_color='#444444')
             self.item_frame.grid(row = 0, column = 0, sticky = 'nsew', padx =(12,0), pady = (12,0))
@@ -84,15 +93,18 @@ def add_item(master, obj, info:tuple):
             self.inventory_frame = ctk.CTkFrame(self.frame, corner_radius= 12, fg_color='#444444')
             self.inventory_frame.grid(row = 1, column = 0, sticky = 'nsew', padx =(12,0), pady = (12,12))
             self.inventory_frame.columnconfigure(0, weight=1)
-            ctk.CTkLabel(self.inventory_frame, text='Inventory', anchor='w', font=('Arial', 24)).grid(row = 0, column = 0, sticky = 'nsew', pady = (12,12), padx= (12,0))
+            ctk.CTkLabel(self.inventory_frame, text='Inventory', anchor='w', font=('Arial', 20)).grid(row = 0, column = 0, sticky = 'nsew', pady = (0,0), padx= (12,0))
 
-            ctk.CTkLabel(self.inventory_frame, text='Stock', anchor='w').grid(row = 1, column = 0, sticky = 'nsew', pady = (12, 0), padx = (12,0))
+            ctk.CTkLabel(self.inventory_frame, text='Stock', anchor='w').grid(row = 1, column = 0, sticky = 'nsew', pady =  (0), padx = (12,0))
             self.stock_entry = ctk.CTkEntry(self.inventory_frame, corner_radius= 12, placeholder_text='Required')
             self.stock_entry.grid(row = 2, column = 0, sticky = 'nsew', pady = (2,0), padx= (12,12))
 
-            ctk.CTkLabel(self.inventory_frame, text='Expiration Date', anchor='w').grid(row = 3, column = 0, sticky = 'nsew', pady = (12, 0), padx = (12,0))
-            self.expiration_date_entry = ctk.CTkEntry(self.inventory_frame, corner_radius= 12, placeholder_text='')
+            ctk.CTkLabel(self.inventory_frame, text='Expiration Date', anchor='w').grid(row = 3, column = 0, sticky = 'nsew', pady = (0), padx = (12,0))
+            self.expiration_date_entry = ctk.CTkLabel(self.inventory_frame, corner_radius= 12, text='Select Expiry Date',fg_color="white")
             self.expiration_date_entry.grid(row = 4, column = 0, sticky = 'nsew', pady = (2,0), padx= (12,12))
+            
+            self.show_calendar = ctk.CTkButton(self.inventory_frame, text="Set Expiry Date", command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s") )
+            self.show_calendar.grid(row=4, column=1)
 
             self.action_frame = ctk.CTkFrame(self.frame, corner_radius= 12, fg_color='transparent')
             self.action_frame.grid(row = 1, column = 1, sticky = 'nsew', padx =(12,12), pady = (12,12))
