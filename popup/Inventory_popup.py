@@ -146,8 +146,8 @@ def restock( master, obj, info:tuple):
                 else:# if there's no exisiting table; create new instance of an item
                     database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.get(), self.expiry_date_entry.get() or None)]])
 
-                database.exec_nonquery([['INSERT INTO action_history VALUES (?, ?, ?)',
-                                        (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
+              # database.exec_nonquery([['INSERT INTO action_history VALUES (?, ?, ?)',
+                   #                     (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
                 messagebox.showinfo('Adding Succesfull')
                 master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
                 master.data_view.update_table(master.data1)
