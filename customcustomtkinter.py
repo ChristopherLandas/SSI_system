@@ -246,6 +246,7 @@ class customcustomtkinter:
                 if self.data_grid_btn_mng is not None:
                     self.data_grid_btn_mng._og_color.append(frm._fg_color)
                 for j in range(len(self.column_widths)):
+                    #for label type column
                     if self.column_types[j][0] in ['t', '#']:
                         temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] == 't' else (len(self._data)), width = self.column_widths[j],
                                             justify = ctk.RIGHT, font= self.row_font)
@@ -255,6 +256,7 @@ class customcustomtkinter:
                         temp._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
                         temp._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
+                    #for special type column
                     else:
                         temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
@@ -264,9 +266,8 @@ class customcustomtkinter:
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
                         elif self.column_types[j] == 'id':
-                            self.spinner = customcustomtkinter.cctkSpinnerCombo(frm,step_count=1, fg_color=("green", "blue"), button_color=("red", "yellow"),entry_fg_color=("red", "yellow"),
-                                   button_hover_color=("yellow", "red"), entry_font=("Lucida", 20), entry_text_color=("white", "black"))
-                            self.spinner.place(relx = .5, rely = .5, anchor = 'c')
+                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent')
+                            spinner.place(relx = .5, rely = .5, anchor = 'c')
                     if self.column_types[j][0] == 't':
                         tI += 1
                 # generates the content from the frame
@@ -362,6 +363,173 @@ class customcustomtkinter:
             self.set_date.pack(pady=10)
             
             self.attributes('-topmost',1)
+
+    class tk_calendar(ctk.CTkToplevel):
+        def __init__(self, label, format, *args, fg_color: str or Tuple[str, str] or None = None, **kwargs):
+            super().__init__(*args, fg_color=fg_color, **kwargs)
+
+            def set_date():
+                label.configure(text= ( format % (self.cal.selection_get())))
+                self.withdraw()
+            import datetime
+
+            position_X = (self.winfo_screenwidth()/2)
+            position_Y = (self.winfo_screenheight()/2)-(400/2)
+
+
+            self.title("Calendar")
+            self.geometry("%dx%d+%d+%d"%(400,400,position_X,position_Y))
+            self.resizable(0,0)
+
+            self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False,
+                                mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
+            self.cal.pack(fill="both", expand=True, padx=5, pady=5)
+
+            self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)
+            self.set_date.pack(pady=10)
+
+            self.attributes('-topmost',1)
+
+    class modified_combobox(ctk.CTkComboBox):
+        def __init__(self, master: any, width: int = 140, height: int = 28, corner_radius: Optional[int] = None,
+                     border_width: Optional[int] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     button_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     dropdown_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     dropdown_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     dropdown_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     text_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     text_color_disabled: Optional[Union[str, Tuple[str, str]]] = None,
+                     font: Optional[Union[tuple, CTkFont]] = None, dropdown_font: Optional[Union[tuple, CTkFont]] = None,
+                     values: Optional[List[str]] = None, state: str = tk.NORMAL, hover: bool = True, variable: Union[tk.Variable,
+                     None] = None, command: Union[Callable[[str], None], None] = None, justify: str = "left", **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, button_color,
+                             button_hover_color, dropdown_fg_color, dropdown_hover_color, dropdown_text_color, text_color,
+                             text_color_disabled, font, dropdown_font, values, state, hover, variable, command, justify, **kwargs)
+            self._stringvar = ctk.StringVar()
+            self._og_values = values
+            self._is_entered = False
+            del self._dropdown_menu
+            self._dropdown_menu = ctk.CTkFrame()
+            '''self._dropdown_menu = DropdownMenu(master=self,
+                                           values=self._values,
+                                           command=self._dropdown_callback,
+                                           fg_color=dropdown_fg_color,
+                                           hover_color=dropdown_hover_color,
+                                           text_color=dropdown_text_color,
+                                           font=dropdown_font,
+                                           min_character_width= round(width * .275))'''
+
+
+            #encapsulation
+            self._stringvar.trace_add('write', self.on_text_change_callback)
+            self._entry.configure(textvariable=self._stringvar)
+            self._entry.delete(0, tk.END)
+            #self._entry.bind('<Key>', self.on_text_change_callback)
+            #defining defaults
+
+        def on_text_change_callback(self, _ = None, *__):
+            if len(self._entry.get()) >= 3:
+                modified_val = [s for s in self._values if s.startswith(self._stringvar.get())]
+                self._dropdown_menu.configure(values = modified_val)
+                self._open_dropdown_menu()
+                #print(self._stringvar.get()[-1])
+            else:
+                self._dropdown_menu.configure(values = self._values)
+
+        def _dropdown_callback(self, value: str):
+            self._entry.delete(0, tk.END)
+            self._entry.insert(0, value)
+            return super()._dropdown_callback(value)
+
+        def _clicked(self, event=None):
+            print(float(self.winfo_rootx()/self.winfo_screenwidth()))
+            ctk.CTkFrame(self.master, 120, 120, 0).place(relx = self.winfo_rootx()/self.winfo_screenwidth(),
+                                                         rely = (self.winfo_rooty() + self._apply_widget_scaling(self._current_height + 0))/self.winfo_screenheight() )
+
+    class cctkSpinnerCombo(ctk.CTkFrame):
+        def __init__(self, master: any, width: int = 100, height: int = 30, corner_radius: Optional[Union[int, str]] = None,
+                    border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
+                    fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                    background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
+                    overwrite_preferred_drawing_method: Union[str, None] = None,
+                    #custom arguments
+                    button_font: Optional[Tuple[str, int, str]] = ("Lucida", 20, "bold"), button_color: Optional[Union[str, Tuple[str, str]]] = ('#EB455F', '#2C74B3'),
+                    button_hover_color:  Optional[Union[str, Tuple[str, str]]] = None, button_font_color: Optional[Union[str, Tuple[str, str]]] = ("black", "white"),
+                    entry_font: Optional[Tuple[str, int, str]] = None, entry_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+                    entry_fg_color:Optional[Tuple[str, int, str]] = None,
+                    step_count: int = 1, val_range: Optional[Tuple[int, int]] = None, command:Callable = None,
+                    base_val:int = 0, initial_val: int = 0, **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
+
+            self.MAX_VAL = 2147483647
+            self.MIN_VAL = -2147483648
+            self._step_count = step_count
+            self._command  = command
+            self._fg_color = fg_color
+            self._btn_color = (button_color, button_color) if isinstance(button_color, str) else button_color
+            self._val_range = val_range or (self.MIN_VAL, self.MAX_VAL)
+            self.value = 0;
+            self._base_val = base_val
+
+            self.grid_columnconfigure((0,2), weight=0)
+            self.grid_columnconfigure(1, weight=1)
+
+            self.sub_button = ctk.CTkButton(self,text="-", command=partial(self.change_value, -1), text_color=button_font_color, bg_color='transparent',
+                                            font=button_font, height=height, width=width*.3, fg_color= self._btn_color[0], hover_color=button_hover_color)
+            self.sub_button.grid(row=0, column=0, padx=(width*0.05,0), pady=(height*0.1))
+
+            self.num_entry = ctk.CTkEntry(self, height=height, width=width*.7, border_width=0, font=entry_font, text_color=entry_text_color, fg_color=entry_fg_color,
+                                        justify="c")
+            self.num_entry.grid(row=0, column=1, padx=(width*0.05),pady=(height*0.15))
+
+            self.add_button = ctk.CTkButton(self, command=self.change_value, text_color=button_font_color, bg_color='transparent',
+                                            text="+", font=button_font,height=height, width=width*.3, fg_color= self._btn_color[1], hover_color=button_hover_color)
+            self.add_button.grid(row=0, column=2, padx=(0,width*0.05),pady=(height*0.1))
+
+            self.num_entry.insert(0,initial_val)
+
+        def change_value(self, mul: int = 1):
+            try:
+                val = int(self.num_entry.get()) + self._step_count * mul
+                val = self._val_range[0] if val < self._val_range[0] else self._val_range[1] if val > self._val_range[1] else val
+                self.value = val;
+                self.num_entry.delete(0, "end")
+                self.num_entry.insert(0, val)
+            except ValueError:
+                return
+            if self._command is not None:
+                self._command(mul)
+
+
+        def get(self) -> Union[int, None]:
+            try:
+                return int(self.num_entry.get())
+            except ValueError:
+                return None
+
+        def set(self, value: int):
+            self.num_entry.delete(0, "end")
+            self.num_entry.insert(0, str(value))
+
+        def configure(self, require_redraw=False, **kwargs):
+            if "value" in kwargs:
+                self.value = kwargs["value"]
+                self.num_entry.delete(0, "end")
+                self.num_entry.insert(0, kwargs["value"])
+                kwargs.pop("value")
+            if "base_val" in kwargs:
+                self._base_val = kwargs["base_val"]
+                kwargs.pop("base_val")
+            if "command" in kwargs:
+                self._command = kwargs["command"]
+                kwargs.pop("command")
+            if "val_range" in kwargs:
+                if isinstance(kwargs['val_range'], tuple):
+                    self._val_range = kwargs['val_range']
+                    kwargs.pop('val_range')
+            return super().configure(require_redraw, **kwargs)
 
 class customcustomtkinterutil:
     class button_manager:

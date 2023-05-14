@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
 import sql_commands
-from util import database
+from util import *
 from tkinter import messagebox
 from constants import action
 from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
@@ -38,22 +38,47 @@ def show_list(master, obj, info:tuple):
             self.place_forget()
 
         def get_item(self, _: any = None):
-            #print(self.item_table.data_grid_btn_mng.active.winfo_children()[0]._text)
-            #self.reset()
+            #if there's a selected item
             if self.item_table.data_grid_btn_mng.active is not None:
                 item_name =  self.item_table.data_grid_btn_mng.active.winfo_children()[0]._text
+                #getting the needed information for the item list
                 transaction_data = database.fetch_data(sql_commands.get_item_data_for_transaction, (item_name, ))[0]
+                #collects part of the data needed in the transaction
                 items_in_treeview = [s.winfo_children()[2]._text if self._treeview.data_frames != [] else None for s in self._treeview.data_frames]
-                if(item_name in items_in_treeview):
-                    quantity = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[4]._text
-                    price = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[6]._text
-                    self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[4].configure(text = int(quantity) + 1)
-                    self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[6].configure(text = float(price) + transaction_data[2])
+                #search the tree view if there's an already existing item
 
+                #if there's an already existing item
+                if(item_name in items_in_treeview):
+                    print(transaction_data)
+                    quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[4].winfo_children()[0]
+                    quantity_column.change_value()
+                    price_column: ctk.CTkLabel = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[6]
+                    print(float(price_column._text), transaction_data[2])
+                    price_column.configure(text = float(price_column._text) + transaction_data[2])
+                    #modify the record's quantity
                 else:
-                    self._treeview.add_data(transaction_data+(1, 0, transaction_data[2]))
+                    self._treeview.add_data(transaction_data+(0, transaction_data[2]))
+                    quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[-1].winfo_children()[4].winfo_children()[0]
+                    price_column: ctk.CTkLabel = self._treeview.data_frames[-1].winfo_children()[6]
+                    self.item_table.data_grid_btn_mng.active.winfo_children()[1]
+
+                    def spinner_command(mul: int = 1):
+                        master.change_total_value(-float(price_column._text))
+                        #before change
+
+                        price_change = quantity_column._base_val * quantity_column.value
+                        master.change_total_value(price_change)
+                        price_column.configure(text = price_change)
+                        #after change
+                        if quantity_column._base_val * quantity_column.value >= quantity_column._base_val * quantity_column._val_range[1]:
+                            messagebox.showinfo('NOTE!', 'Maximum stock reached')
+
+                    quantity_column.configure(command = spinner_command, base_val = transaction_data[2], value = 1, val_range = (1
+                    , 10))
+                    #add a new record
+
                 master.change_total_value(transaction_data[2])
                 self.item_table.data_grid_btn_mng.deactivate_active()
                 self.reset()
-                #print(transaction_data)
+                #reset the state of this popup
     return instance(master, obj, info)
