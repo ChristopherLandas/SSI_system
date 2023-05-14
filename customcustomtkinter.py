@@ -492,7 +492,7 @@ class customcustomtkinter:
 
         def change_value(self, mul: int = 1):
             try:
-                val = int(self.num_entry.get()) + self._step_count * mul
+                val = max(0, int(self.num_entry.get()) + self._step_count * mul)
                 val = self._val_range[0] if val < self._val_range[0] else self._val_range[1] if val > self._val_range[1] else val
                 self.value = val;
                 self.num_entry.delete(0, "end")
