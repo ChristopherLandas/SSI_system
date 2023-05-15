@@ -31,6 +31,7 @@ class dashboard(ctk.CTkToplevel):
     def __init__(self, master:ctk.CTk, entry_key: str, _date_logged: datetime):
         super().__init__()
         self.state("zoomed")
+        self.update()
         self.attributes("-fullscreen", True)
         '''
         #makes the form full screen and removing the default tab bar
@@ -622,7 +623,8 @@ class transaction_frame(ctk.CTkFrame):
 
         self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
     def change_total_value(self, value: float):
-            total_val = float(price_format_to_float(self.item_total_value._text)) + value
+            value = float(value)
+            #total_val = float(price_format_to_float(self.item_total_value._text)) + float(value)
             self.item_total_value.configure(text = format_price(float(price_format_to_float(self.item_total_value._text)) + value))
             self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) + value))
 
@@ -671,7 +673,7 @@ class inventory_frame(ctk.CTkFrame):
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=5, padx=(0, width*0.005),  pady=(height*0.01), sticky="e")
 
-        self.restock_btn = ctk.CTkButton(self, width=width*0.1, height = height*0.05, text="Restock", image=self.restock_icon, font=("DM Sans Medium", 14),
+        self.restock_btn = ctk.CTkButton(self, width=width*0.1, height = height*0.05, text="Record Stock", image=self.restock_icon, font=("DM Sans Medium", 14),
                                          command= lambda : self.restock_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.restock_btn.grid(row=2, column=5, pady=(height*0.01), sticky="e", padx=(0, width*0.005))
         self.grid_propagate(0)

@@ -17,8 +17,7 @@ class body(ctk.CTk):
         #self.option_menu = ctk.CTkOptionMenu(self, 140, 28, values=['natsuga','hajimata','kimi ni ochita'], state=ctk.ACTIVE)
         #self.option_menu.place(relx = .5, rely = .5, anchor ='c')
 
-        self.spinner = cctk.cctkSpinnerCombo(self, 100, 30, 12, fg_color='transparent', val_range=(0, 10))
-        self.spinner.v
+        self.spinner = cctk.cctkSpinnerCombo(self, 100, 30, 12, fg_color='transparent', val_range=(-10, 10))
         self.spinner.pack()
 
         self.mainloop()

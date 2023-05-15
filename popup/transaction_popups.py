@@ -49,20 +49,15 @@ def show_list(master, obj, info:tuple):
 
                 #if there's an already existing item
                 if(item_name in items_in_treeview):
-                    print(transaction_data)
                     quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[4].winfo_children()[0]
                     quantity_column.change_value()
-                    price_column: ctk.CTkLabel = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[6]
-                    print(float(price_column._text), transaction_data[2])
-                    price_column.configure(text = float(price_column._text) + transaction_data[2])
-                    #modify the record's quantity
+                    #change the value of the spinner combo; modifying the record's total price
                 else:
                     self._treeview.add_data(transaction_data+(0, transaction_data[2]))
                     quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[-1].winfo_children()[4].winfo_children()[0]
                     price_column: ctk.CTkLabel = self._treeview.data_frames[-1].winfo_children()[6]
-                    self.item_table.data_grid_btn_mng.active.winfo_children()[1]
 
-                    def spinner_command(mul: int = 1):
+                    def spinner_command(mul: int = 0):
                         master.change_total_value(-float(price_column._text))
                         #before change
 
@@ -71,13 +66,17 @@ def show_list(master, obj, info:tuple):
                         price_column.configure(text = price_change)
                         #after change
                         if quantity_column._base_val * quantity_column.value >= quantity_column._base_val * quantity_column._val_range[1]:
-                            messagebox.showinfo('NOTE!', 'Maximum stock reached')
+                            quantity_column.num_entry.configure(text_color = 'red')
+                            #messagebox.showinfo('NOTE!', 'Maximum stock reached')
+                        else:
+                            quantity_column.num_entry.configure(text_color = quantity_column._entry_text_color)
 
                     quantity_column.configure(command = spinner_command, base_val = transaction_data[2], value = 1, val_range = (1
-                    , 10))
+                    , int(self.item_table.data_grid_btn_mng.active.winfo_children()[1]._text)))
                     #add a new record
 
-                master.change_total_value(transaction_data[2])
+                    master.change_total_value(transaction_data[2])
+
                 self.item_table.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
