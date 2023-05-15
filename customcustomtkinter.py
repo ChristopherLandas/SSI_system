@@ -285,8 +285,7 @@ class customcustomtkinter:
 
         def bd_deduction(self, btn: ctk.CTkButton):
             for tup in self.bd_configs:
-                item = int(btn.master.master.winfo_children()[tup[0]]._text)
-                print(item)
+                item = float(btn.master.master.winfo_children()[tup[0]]._text)
                 if isinstance(tup[1], list):
                     for lbls in tup[1]:
                         lbls.configure(text = format_price(float(price_format_to_float(lbls._text)) - item))
@@ -431,7 +430,7 @@ class customcustomtkinter:
                     #custom arguments
                     button_font: Optional[Tuple[str, int, str]] = ("Lucida", 20, "bold"), button_color: Optional[Union[str, Tuple[str, str]]] = ('#EB455F', '#2C74B3'),
                     button_hover_color:  Optional[Union[str, Tuple[str, str]]] = None, button_font_color: Optional[Union[str, Tuple[str, str]]] = ("black", "white"),
-                    entry_font: Optional[Tuple[str, int, str]] = None, entry_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+                    entry_font: Optional[Tuple[str, int, str]] = None, entry_text_color: Union[str, Tuple[str, str]] = 'black',
                     entry_fg_color:Optional[Tuple[str, int, str]] = None,
                     step_count: int = 1, val_range: Optional[Tuple[int, int]] = None, command:Callable = None,
                     base_val:int = 0, initial_val: int = 0, **kwargs):
@@ -444,8 +443,10 @@ class customcustomtkinter:
             self._fg_color = fg_color
             self._btn_color = (button_color, button_color) if isinstance(button_color, str) else button_color
             self._val_range = val_range or (self.MIN_VAL, self.MAX_VAL)
+            self._val_range = (self._val_range[1], self._val_range[0]) if self._val_range[0] > self._val_range[1] else self._val_range
             self.value = 0;
             self._base_val = base_val
+            self._entry_text_color = entry_text_color
 
             self.grid_columnconfigure((0,2), weight=0)
             self.grid_columnconfigure(1, weight=1)
@@ -456,6 +457,8 @@ class customcustomtkinter:
 
             self.num_entry = ctk.CTkEntry(self, height=height, width=width*.7, border_width=0, font=entry_font, text_color=entry_text_color, fg_color=entry_fg_color,
                                         justify="c")
+            self.num_entry.bind('<Return>', self.return_entry_func)
+            self.num_entry.bind('<Button-1>', lambda _: self.num_entry.configure(state = 'normal'))
             self.num_entry.grid(row=0, column=1, padx=(width*0.05),pady=(height*0.15))
 
             self.add_button = ctk.CTkButton(self, command=self.change_value, text_color=button_font_color, bg_color='transparent',
@@ -465,8 +468,9 @@ class customcustomtkinter:
             self.num_entry.insert(0,initial_val)
 
         def change_value(self, mul: int = 1):
+            self.num_entry.configure(state = 'normal')
             try:
-                val = int(self.num_entry.get()) + self._step_count * mul
+                val = int(self.value) + self._step_count * mul
                 val = self._val_range[0] if val < self._val_range[0] else self._val_range[1] if val > self._val_range[1] else val
                 self.value = val;
                 self.num_entry.delete(0, "end")
@@ -504,6 +508,22 @@ class customcustomtkinter:
                     self._val_range = kwargs['val_range']
                     kwargs.pop('val_range')
             return super().configure(require_redraw, **kwargs)
+
+        def return_entry_func(self, _):
+            txt:str = self.num_entry.get()
+            if txt.replace('-', '').isnumeric():
+                val = self._val_range[0] if int(txt) < self._val_range[0] else self._val_range[1] if int(txt) > self._val_range[1] else int(txt)
+                self.value = val;
+                print(val)
+                self.num_entry.delete(0, "end")
+                self.num_entry.insert(0, self.value)
+                if self._command is not None:
+                    self._command(0)
+            else:
+                self.num_entry.delete(0, ctk.END)
+                self.num_entry.insert(0, self.value)
+            self.num_entry.configure(state = 'readonly')
+
 
 class customcustomtkinterutil:
     class button_manager:
