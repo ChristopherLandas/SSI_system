@@ -363,6 +363,32 @@ class customcustomtkinter:
 
             self.attributes('-topmost',1)
 
+    class tk_calendar(ctk.CTkToplevel):
+        def __init__(self, label, format, *args, fg_color: str or Tuple[str, str] or None = None, **kwargs):
+            super().__init__(*args, fg_color=fg_color, **kwargs)
+
+            def set_date():
+                label.configure(text= ( format % (self.cal.selection_get())))
+                self.withdraw()
+            import datetime
+
+            position_X = (self.winfo_screenwidth()/2)
+            position_Y = (self.winfo_screenheight()/2)-(400/2)
+
+
+            self.title("Calendar")
+            self.geometry("%dx%d+%d+%d"%(400,400,position_X,position_Y))
+            self.resizable(0,0)
+
+            self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False,
+                                mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
+            self.cal.pack(fill="both", expand=True, padx=5, pady=5)
+
+            self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)
+            self.set_date.pack(pady=10)
+
+            self.attributes('-topmost',1)
+
     class modified_combobox(ctk.CTkComboBox):
         def __init__(self, master: any, width: int = 140, height: int = 28, corner_radius: Optional[int] = None,
                      border_width: Optional[int] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
@@ -470,7 +496,6 @@ class customcustomtkinter:
         def change_value(self, mul: int = 1):
             self.num_entry.configure(state = 'normal')
             try:
-                val = int(self.value) + self._step_count * mul
                 val = self._val_range[0] if val < self._val_range[0] else self._val_range[1] if val > self._val_range[1] else val
                 self.value = val;
                 self.num_entry.delete(0, "end")
