@@ -293,7 +293,6 @@ class customcustomtkinter:
                     tup[1].configure(text = format_price(float(price_format_to_float(tup[1]._text)) - item))
 
         def delete_all_data(self):
-            print(self.data_frames.__len__())
             for frm in self.data_frames:
                 frm.destroy()
             self.data_grid_btn_mng._buttons.clear()
@@ -443,11 +442,12 @@ class customcustomtkinter:
             return super()._dropdown_callback(value)
 
         def _clicked(self, event=None):
-            print(float(self.winfo_rootx()/self.winfo_screenwidth()))
             ctk.CTkFrame(self.master, 120, 120, 0).place(relx = self.winfo_rootx()/self.winfo_screenwidth(),
                                                          rely = (self.winfo_rooty() + self._apply_widget_scaling(self._current_height + 0))/self.winfo_screenheight() )
 
     class cctkSpinnerCombo(ctk.CTkFrame):
+        MAX_VAL = 2147483647
+        MIN_VAL = -2147483648
         def __init__(self, master: any, width: int = 100, height: int = 30, corner_radius: Optional[Union[int, str]] = None,
                     border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
@@ -462,8 +462,7 @@ class customcustomtkinter:
                     base_val:int = 0, initial_val: int = 0, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
 
-            self.MAX_VAL = 2147483647
-            self.MIN_VAL = -2147483648
+            #global MIN_VAL, MAX_VAL
             self._step_count = step_count
             self._command  = command
             self._fg_color = fg_color
@@ -496,6 +495,7 @@ class customcustomtkinter:
         def change_value(self, mul: int = 1):
             self.num_entry.configure(state = 'normal')
             try:
+                val = self.value + (self._step_count * mul)
                 val = self._val_range[0] if val < self._val_range[0] else self._val_range[1] if val > self._val_range[1] else val
                 self.value = val;
                 self.num_entry.delete(0, "end")
@@ -539,7 +539,6 @@ class customcustomtkinter:
             if txt.replace('-', '').isnumeric():
                 val = self._val_range[0] if int(txt) < self._val_range[0] else self._val_range[1] if int(txt) > self._val_range[1] else int(txt)
                 self.value = val;
-                print(val)
                 self.num_entry.delete(0, "end")
                 self.num_entry.insert(0, self.value)
                 if self._command is not None:

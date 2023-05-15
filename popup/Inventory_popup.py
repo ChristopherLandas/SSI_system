@@ -16,9 +16,9 @@ def add_item(master, obj, info:tuple):
             acc_cred = info[2]
             acc_info = info[3]
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
-            
+
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
-            
+
             #set to transparent to prevent clicking other buttons inside the inventory
             '''events'''
             def reset():
@@ -43,17 +43,17 @@ def add_item(master, obj, info:tuple):
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
-            
+
             self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], corner_radius=0)
             self.main_frame.grid(row=0, column=0, sticky="ew", padx=width*0.01, pady=height*0.02)
-            
+
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure((2),weight=1)
-            
+
             self.top_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
             self.top_frame.pack_propagate(0)
-            
+
             ctk.CTkLabel(self.top_frame, text='ADD ITEM', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=reset).pack(side="right", padx=(0,width*0.01))
 
@@ -75,7 +75,7 @@ def add_item(master, obj, info:tuple):
             self.category_entry.grid(row = 6, column = 0,columnspan=2, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
 
             ctk.CTkLabel(self.item_frame, text='Price: ', font=("DM Sans Medium", 14), anchor="e").grid(row = 7, column = 0, sticky="nsew",pady = (height*0.005,0), padx = (width*0.0125,0))
-            self.price_entry = cctk.cctkSpinnerCombo(self.item_frame, step_count=5, entry_font=("DM Sans Medium",14))
+            self.price_entry = cctk.cctkSpinnerCombo(self.item_frame, step_count=5, entry_font=("DM Sans Medium",14), val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL))
             self.price_entry.grid(row = 7, column = 1, sticky = 'w', pady = (height*0.005, height*0.01), padx = (width*0.005,width*0.01))
 
             self.supplier_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.White_Color[2])
@@ -90,20 +90,20 @@ def add_item(master, obj, info:tuple):
             ctk.CTkLabel(self.supplier_frame, text='Contact', anchor='w', font=("DM Sans Medium",14)).grid(row = 3, column = 0, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
             self.contact_entry = ctk.CTkEntry(self.supplier_frame, corner_radius= 3, placeholder_text='', font=("DM Sans Medium",14))
             self.contact_entry.grid(row = 4, column = 0, sticky = 'nsew', pady = (0,height*0.025), padx = (width*0.01))
-    
+
             self.inventory_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.White_Color[2])
             self.inventory_frame.grid(row = 1, column = 1, sticky = 'nsew', padx =(0,width*0.01), pady = (height*0.015,0))
-            
+
             ctk.CTkLabel(self.inventory_frame, text='INVENTORY', anchor='w', font=('DM Sans Medium', 18)).grid(row = 0, column = 0,columnspan=2, sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
-            
+
             ctk.CTkLabel(self.inventory_frame, text='Stock: ',anchor="e", font=("DM Sans Medium", 14)).grid(row = 1, column = 0, sticky = 'w',padx = (width*0.01,0))
             self.stock_entry = cctk.cctkSpinnerCombo(self.inventory_frame, entry_font=("DM Sans Medium",14))
-            self.stock_entry.grid(row = 1, column = 1, sticky = 'w',padx=(0,width*0.01), columnspan=2) 
+            self.stock_entry.grid(row = 1, column = 1, sticky = 'w',padx=(0,width*0.01), columnspan=2)
 
             ctk.CTkLabel(self.inventory_frame, text='Expiration Date', anchor='w', font=("DM Sans Medium", 14)).grid(row = 3, column = 0, sticky = 'nsew', pady = (0), padx = (12,0))
             self.expiration_date_entry = ctk.CTkLabel(self.inventory_frame, corner_radius= 5, text='Set Expiry Date',fg_color="white", width=width*0.15,height=height*0.05, font=("DM Sans Medium", 14))
             self.expiration_date_entry.grid(row = 4, column = 0, sticky = 'nsew',columnspan=2, pady = (height*0.015), padx = (width*0.01))
-            
+
             self.show_calendar = ctk.CTkButton(self.inventory_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03,
                                                command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s"), corner_radius=3 )
             self.show_calendar.grid(row=4, column=2, padx = (0,width*0.01), sticky="w")
@@ -117,7 +117,7 @@ def add_item(master, obj, info:tuple):
             self.cancel_btn.pack(side="left", padx=(width*0.025,width*0.005))
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=3, font=("DM Sans Medium", 14), text='Add New Item', command= add)
             self.add_btn.pack(side="left", padx=(width*0.005, width*0.025))
-            
+
     return add_item(master, obj, info)
 
 def restock( master, obj, info:tuple):
