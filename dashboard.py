@@ -33,6 +33,7 @@ class dashboard(ctk.CTkToplevel):
         self.state("zoomed")
         self.update()
         self.attributes("-fullscreen", True)
+
         '''
         #makes the form full screen and removing the default tab bar
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
@@ -49,11 +50,12 @@ class dashboard(ctk.CTkToplevel):
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
         #for preventing security breach through python code; enable it to test it
-        '''
 
-        global acc_info, date_logged
+        '''
+        global acc_info, acc_cred, date_logged
         date_logged = _date_logged;
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
+        acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
         self._master = master
         '''Fonts'''
@@ -494,17 +496,10 @@ class dashboard_frame(ctk.CTkFrame):
 
 class transaction_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
-
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-
         '''events'''
-        def clear_all_item():
-           verification = messagebox.askyesno('Clear All', 'Are you sure you want to delete\nall trasaction record?')
-           if verification:
-               self.item_treeview.delete_all_data()
-               self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) - float(price_format_to_float(self.final_total_value._text))))
-               self.item_total_value.configure(text = '0.00')
+
 
         def clear_without_verification():
             self.item_treeview.delete_all_data()
@@ -512,14 +507,9 @@ class transaction_frame(ctk.CTkFrame):
             self.item_total_value.configure(text = '0.00')
 
         def proceed():
-            uid = database.fetch_data(sql_commands.generate_id_transaction, None)[0][0] + 1;
-            update_item = [(s.winfo_children()[1]._text, s.winfo_children()[4]._text) for s in self.item_treeview.data_frames]
-            for uit in update_item:
-                print(int(uit[1]), uit[0])
-                database.exec_nonquery([['UPDATE item_inventory_info SET Stock = Stock - ? where UID = ?', (int(uit[1]), uit[0])]])
-            database.exec_nonquery([[sql_commands.record_transaction, (str(uid), price_format_to_float(self.final_total_value._text))]])
-            clear_without_verification()
-            messagebox.showinfo('Success', 'Transaction Success')
+            self.show_transaction_proceed =transaction_popups.show_transaction_proceed(self, (width, height, self.item_treeview, acc_cred[0]),
+                                                                                       [self.item_treeview._data, price_format_to_float(self.item_total_value._text)])
+            self.show_transaction_proceed.place(relx = .5, rely =.5, anchor = 'c')
 
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
@@ -580,7 +570,7 @@ class transaction_frame(ctk.CTkFrame):
         self.item_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
 
-        self.item_clear_button = ctk.CTkButton(self.item_frame, text="", image=self.trash_icon, command= clear_all_item,
+        self.item_clear_button = ctk.CTkButton(self.item_frame, text="", image=self.trash_icon, command= self.clear_all_item,
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.item_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
         self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda: self.show_list.place(relx = .5, rely= .5, anchor = 'c'),
@@ -619,14 +609,23 @@ class transaction_frame(ctk.CTkFrame):
         self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.final_total_value.pack(side="right", padx=(0, width*0.01))
 
-        self.show_list: ctk.CTkFrame = transaction_popups.show_list(self, self.item_add_button, (width, height, self.item_treeview))
-
+        self.show_list: ctk.CTkFrame = transaction_popups.show_list(self, (width, height, self.item_treeview))
         self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
     def change_total_value(self, value: float):
             value = float(value)
             #total_val = float(price_format_to_float(self.item_total_value._text)) + float(value)
             self.item_total_value.configure(text = format_price(float(price_format_to_float(self.item_total_value._text)) + value))
             self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) + value))
+
+    def clear_all_item(self):
+           verification = messagebox.askyesno('Clear All', 'Are you sure you want to delete\nall trasaction record?')
+           if verification:
+                self.reset()
+
+    def reset(self):
+        self.item_treeview.delete_all_data()
+        self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) - float(price_format_to_float(self.final_total_value._text))))
+        self.item_total_value.configure(text = '0.00')
 
 
 class services_frame(ctk.CTkFrame):
@@ -648,6 +647,21 @@ class inventory_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
+        '''events'''
+        def update_tables(_ :any = None):
+            self.refresh_btn.configure(state = ctk.DISABLED)
+            self.data_view1.update_table(database.fetch_data(sql_commands.get_inventory_by_group, None))
+            self.data_view2.update_table(database.fetch_data(sql_commands.get_inventory_by_expiry, None))
+            self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+
+        def change_view(_: any = None):
+            if self.view_by_selection.get() == 'View by Item':
+                self.data_view1.pack(pady=(height*0.005,0))
+                self.data_view2.pack_forget()
+            else:
+                self.data_view2.pack(pady=(height*0.005,0))
+                self.data_view1.pack_forget()
+
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
         self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
 
@@ -664,8 +678,9 @@ class inventory_frame(ctk.CTkFrame):
         self.refresh_btn = ctk.CTkButton(self, text="", width=width*0.028, height=height*0.05)
         self.refresh_btn.grid(row=0, column=2, sticky="w")
 
-        self.view_by_selection = cctk.selection_comboBox(self, width=width*0.18, height = height*0.05, values=["View by Group", "View by Expiry"] )
-        self.view_by_selection.set("View by Group")
+        self.view_by_selection = ctk.CTkOptionMenu(self, width=width*0.18, height = height*0.05, values=["View by Item", "View by Expiry"],
+                                                   command=change_view )
+        self.view_by_selection.set("View by Item")
         self.view_by_selection.grid(row=0, column=4, padx=(0,width*0.005))
 
 
@@ -682,21 +697,30 @@ class inventory_frame(ctk.CTkFrame):
         self.data_frame.grid(row=1, column=0, columnspan=6,  padx=(width*0.005), sticky="nsew")
 
         self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
-        self.data_view = cctk.cctkTreeView(self.data_frame, self.data1, width= width * .8, height= height * .75,
-                                           column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!30!30',
-                                           font_color='white',
-                                           conditional_colors= {5: {'Reorder':'yellow', 'Critical':'red','Normal':'green'}})
-        self.data_view.pack(pady=(height*0.005,0))
-        self.refresh_btn.configure(lambda: self.data_view.update_table(database.fetch_data(sql_commands.get_inventory_by_group, None)))
+        self.data_view1 = cctk.cctkTreeView(self.data_frame, self.data1, width= width * .8, height= height * .75,
+                                           column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!30!30',
+                                           header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
+                                           conditional_colors= {5: {'Reorder':'yellow', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555'}})
+        self.data_view1.pack(pady=(height*0.005,0))
 
-        self.restock_popup = Inventory_popup.restock(self, None, (width, height, acc_cred, acc_info))
-        self.add_item_popup = Inventory_popup.add_item(self, None, (width, height, acc_cred, acc_info))
+        self.data2 = database.fetch_data(sql_commands.get_inventory_by_expiry, None)
+        self.data_view2 = cctk.cctkTreeView(self.data_frame, self.data2, width= width * .8, height= height * .75,
+                                           column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!30!30',
+                                           header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
+                                           conditional_colors= {5: {'Nearly Expire':'yellow', 'Expired':'red','Safe':'green'}})
+
+
+        #self.refresh_btn.configure(command = lambda: self.data_view.update_table(database.fetch_data(sql_commands.get_inventory_by_group, None)))
+        self.refresh_btn.configure(command = update_tables)
+
+        self.restock_popup = Inventory_popup.restock(self, (width, height, acc_cred, acc_info))
+        self.add_item_popup = Inventory_popup.add_item(self, (width, height, acc_cred, acc_info))
 
 
         self.grid_forget()
 
 class patient_info_frame(ctk.CTkFrame):
-    global width, height
+    global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='6').pack(anchor='w')

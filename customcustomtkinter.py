@@ -132,10 +132,10 @@ class customcustomtkinter:
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None, column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!50!50',
                      header_color: Union[str, tuple] = '#006611', data_grid_color: Union[list, tuple] = ('#333333', '#444444'),
-                     selected_color: Union [tuple, str] = brighten_color('#006611', 1.3), font_color: Union[str, tuple] = 'black',
+                     selected_color: Union [tuple, str] = brighten_color('#006611', 1.3),
                      conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 20),
-                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#0000ff',
-                     double_click_command: Union[Callable[[],None], None] = None,
+                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#0000ff', content_color: Optional[Union[str, Tuple[str, str]]] = 'black',
+                     double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = 'black',
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
@@ -148,7 +148,7 @@ class customcustomtkinter:
             self.column_titles = [s.replace('/', '') for s in re.findall(r'\/\w+', self._column_format)]
             self.column_types = [str(s) for s in re.findall(r'\-(\w+|\#\w+)', self._column_format)]
             total_fixed_width = sum([int(s) for s in re.findall(r'\:(x|\d+)', self._column_format) if str(s).isnumeric()])
-            x_width = (self._current_width - (total_fixed_width + 14)) / len(re.findall(r'\:x', self._column_format))
+            x_width = (self._current_width - (total_fixed_width + 14)) / len(re.findall(r'\:x', self._column_format))//1
             #set the measurements of the treeview according to the format given
 
             self.data_frames = []
@@ -159,7 +159,6 @@ class customcustomtkinter:
             self._data_grid_heights = int(re.findall(r'\!(\d+)', column_format)[1])
             self._header_color = header_color
             self._data_grid_color = (data_grid_color[0], data_grid_color[1]) if isinstance(data_grid_color, tuple) else((data_grid_color[0][0], data_grid_color[1][0]), (data_grid_color[0][1], data_grid_color[1][1]))
-            self._font_color = font_color;
             self._conditional_colors = conditional_colors
             self.navbar_font = navbar_font
             self.row_font = row_font
@@ -167,14 +166,15 @@ class customcustomtkinter:
             self._row_hover_color = row_hover_color
             self._double_click_command = double_click_command
             self.bd_configs = bd_configs
+            self._record_text_color = record_text_color
+            self._content_color = content_color
             #encapsulate other arguments
 
             self.pack_propagate(0)
             self.grid_propagate(0)
             self.grid_rowconfigure(1, weight=1)
-            #sdoijweiodhwfeio
-            #make the root frame fixed in sizesz
 
+            #make the root frame fixed in sizesz
             for i in range(len(self.column_titles)):
                 btn = None
                 if self.column_types[i] == 't' or self.column_types[i] == '#' or self.column_types[i] == 'q':
@@ -187,17 +187,18 @@ class customcustomtkinter:
                     btn = ctk.CTkLabel(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                        text=self.column_titles[i], font= self.navbar_font)
                 btn.grid(row = 0, column = i, sticky='we', padx = (1,0))
+                self.update()
             #generate the header bar
 
-            self.contents = ctk.CTkScrollableFrame(self, corner_radius=0, fg_color='#333333')
-            self.contents.grid(row = 1, column = 0, columnspan = len(self.column_titles) + 1, sticky = 'news')
-            #the data grid holder
-
-            self.scroll_bar_btn = customcustomtkinter.ctkButtonFrame(self, 14, self._header_heights, 0, fg_color='#006611',
+            self.scroll_bar_btn = customcustomtkinter.ctkButtonFrame(self, 14, self._header_heights, 0, fg_color=self._header_color,
                                                                      hover_color= brighten_color('#006611', 1.75),
                                                                      command = lambda: self.contents._parent_canvas.yview_moveto(0 if (self.contents._parent_canvas.yview()[1] > .5) else 1))
             self.scroll_bar_btn.grid(row = 0, column = len(self.column_titles), sticky='nsew')
             #additional button that will serve as go to top/down of a scroll bar
+
+            self.contents = ctk.CTkScrollableFrame(self, corner_radius=0, fg_color=self._content_color)
+            self.contents.grid(row = 1, column = 0, columnspan = len(self.column_titles) + 1, sticky = 'news')
+            #the data grid holder
 
             '''initial generation here'''
             if(data is not None):
@@ -249,8 +250,8 @@ class customcustomtkinter:
                     #for label type column
                     if self.column_types[j][0] in ['t', '#']:
                         temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] == 't' else (len(self._data)), width = self.column_widths[j],
-                                            justify = ctk.RIGHT, font= self.row_font)
-                        txt_clr = self._font_color if j not in self._conditional_colors else self._conditional_colors[j].get(temp._text, self._font_color)
+                                            justify = ctk.RIGHT, font= self.row_font, text_color = self._record_text_color)
+                        txt_clr = self._record_text_color if j not in self._conditional_colors else self._conditional_colors[j].get(temp._text, self._record_text_color)
                         temp.configure(text_color = txt_clr)
                         temp._label.grid_forget()
                         temp._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
@@ -282,6 +283,7 @@ class customcustomtkinter:
             self.data_frames = []
             self._data = []
             self.add_data(data)
+            self.data_grid_btn_mng = customcustomtkinterutil.button_manager(self.data_frames, self._selected_color, True, None)
 
         def bd_deduction(self, btn: ctk.CTkButton):
             for tup in self.bd_configs:
