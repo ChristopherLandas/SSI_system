@@ -65,6 +65,12 @@ class dashboard(ctk.CTkToplevel):
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
             Font(file='Font/DMSans-Regular.ttf')
+            
+            #Use DM Mono for numbers
+            Font(file="Font/DMMono-Light.ttf")
+            Font(file="Font/DMMono-Medium.ttf")
+            Font(file="Font/DMMono-Regular.ttf")
+            
         except _tkinter.TclError:
             pass
         #for testing purposes, might delete after the development

@@ -476,17 +476,17 @@ class customcustomtkinter:
             self.grid_columnconfigure((0,2), weight=0)
             self.grid_columnconfigure(1, weight=1)
 
-            self.sub_button = ctk.CTkButton(self,text="-", command=partial(self.change_value, -1), text_color=button_font_color, bg_color='transparent',
+            self.sub_button = ctk.CTkButton(self,text="-", command=partial(self.change_value, -1), text_color=button_font_color,
                                             font=button_font, height=height, width=width*.3, fg_color= self._btn_color[0], hover_color=button_hover_color)
             self.sub_button.grid(row=0, column=0, padx=(width*0.05,0), pady=(height*0.1))
 
-            self.num_entry = ctk.CTkEntry(self, height=height, width=width*.7, border_width=0, font=entry_font, text_color=entry_text_color, fg_color=entry_fg_color,
+            self.num_entry = ctk.CTkEntry(self, height=height, width=width*.7, border_width=0, font=entry_font, text_color=entry_text_color,
                                         justify="c")
             self.num_entry.bind('<Return>', self.return_entry_func)
             self.num_entry.bind('<Button-1>', lambda _: self.num_entry.configure(state = 'normal'))
             self.num_entry.grid(row=0, column=1, padx=(width*0.05),pady=(height*0.15))
 
-            self.add_button = ctk.CTkButton(self, command=self.change_value, text_color=button_font_color, bg_color='transparent',
+            self.add_button = ctk.CTkButton(self, command=self.change_value, text_color=button_font_color,
                                             text="+", font=button_font,height=height, width=width*.3, fg_color= self._btn_color[1], hover_color=button_hover_color)
             self.add_button.grid(row=0, column=2, padx=(0,width*0.05),pady=(height*0.1))
 
