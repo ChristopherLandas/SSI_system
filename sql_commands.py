@@ -2,7 +2,9 @@ get_inventory_by_group = f"SELECT item_general_info.name,\
                                   CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
                                   CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2)),\
                                   DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
-                                  case when SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Crit_factor\
+                                  case when SUM(item_inventory_info.Stock) < 1\
+                                      then 'Out Of Stock'\
+                                  when SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Crit_factor\
                                       then 'Critical'\
                                   when SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Reorder_factor\
                                       then 'Reorder'\
@@ -17,19 +19,29 @@ get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                                   item_inventory_info.Stock,\
                                   CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2)),\
                                   DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
-                                  case when item_inventory_info.Stock < item_settings.Safe_stock * item_settings.Crit_factor\
-                                      then 'Critical'\
-                                  when item_inventory_info.Stock < item_settings.Safe_stock * item_settings.Reorder_factor\
-                                      then 'Reorder'\
-                                      ELSE 'Normal' END AS stats\
+                                  case when item_inventory_info.Expiry_Date < CURRENT_DATE\
+                                      then 'Expired'\
+                                  when item_inventory_info.Expiry_Date < DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
+                                      then 'Nearly Expire'\
+                                  when item_inventory_info.Expiry_Date IS NULL\
+                                  	  then 'Does not expire'\
+                                      ELSE 'Safe' END AS stats\
                           FROM item_general_info\
                           JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                          ORDER BY item_inventory_info.Expiry_Date"
+                          WHERE item_inventory_info.stock > 0\
+                          ORDER BY case when item_inventory_info.Expiry_Date < CURRENT_DATE\
+                                      then 3\
+                                  when item_inventory_info.Expiry_Date < DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
+                                      then 2\
+                                  when item_inventory_info.Expiry_Date IS NULL\
+                                  	  then 0\
+                                      ELSE 1 END DESC"
 
 get_item_and_their_total_stock = 'SELECT item_general_info.name,\
                                          CAST(SUM(item_inventory_info.Stock) as INT)\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                 WHERE item_inventory_info.Stock != 0\
                                  GROUP BY item_general_info.UID'
 
 get_item_data_for_transaction = "SELECT item_general_info.UID,\
@@ -49,9 +61,12 @@ add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
-add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?)"
+add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 show_all_items = "SELECT NAME FROM item_general_info"
 
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
-record_transaction = "INSERT INTO transaction_record VALUES(?, ?)"
+record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?)"
+record_transaction_content = "INSERT INTO transaction_content VALUES(?, ?, ?, ?, ?, ?)"
+
+get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? ORDER BY Expiry_Date"

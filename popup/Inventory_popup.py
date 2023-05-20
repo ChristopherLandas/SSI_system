@@ -8,15 +8,16 @@ from tkinter import messagebox
 from constants import action
 from PIL import Image
 
-def add_item(master, obj, info:tuple):
+def add_item(master, info:tuple):
     class add_item(ctk.CTkFrame):
-        def __init__(self, master, obj, info:tuple):
+        def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
             acc_cred = info[2]
             acc_info = info[3]
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
 
+            '''default'''
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             #set to transparent to prevent clicking other buttons inside the inventory
             '''events'''
@@ -27,10 +28,10 @@ def add_item(master, obj, info:tuple):
                 if(self.item_name_entry.get() and self.manufacturer_entry.get() and self.category_entry.get() and self.price_entry.get() and
                 self.supplier_entry.get() and self.stock_entry.get()):
                     self.warning_lbl.configure(text = '', fg_color='transparent')
-                    uid = str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(12)
-                    database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.manufacturer_entry.get(), self.category_entry.get())],
-                                            [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), self.expiration_date_entry.cget("text"))],
-                                            [sql_commands.add_item_settings, (uid, float(self.price_entry.get()), .85, .5, int(self.stock_entry.get()))],
+                    uid = str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(5)
+                    database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.category_entry.get(), 0)],
+                                            [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), self.expiration_date_entry.cget("text") or None)],
+                                            [sql_commands.add_item_settings, (uid, float(self.price_entry.get()) / 1.1, .1, .85, .5, int(self.stock_entry.get()))],
                                             [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())]])
                     messagebox.showinfo('Adding Succesfull')
                     master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
@@ -150,12 +151,11 @@ def add_item(master, obj, info:tuple):
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=3, font=("DM Sans Medium", 14), text='Add New Item', command= add)
             self.add_btn.grid(row=1, column=1, sticky="w", padx=(0),pady=(0,height*0.025))
 
-            self.expiry_switch.toggle()
-    return add_item(master, obj, info)
+    return add_item(master, info)
 
-def restock( master, obj, info:tuple):
+def restock( master, info:tuple):
     class restock(ctk.CTkFrame):
-        def __init__(self, master, obj, info:tuple):
+        def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
             acc_cred = info[2]
@@ -199,7 +199,8 @@ def restock( master, obj, info:tuple):
                    #                     (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
                 messagebox.showinfo('Adding Succesfull')
                 master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
-                master.data_view.update_table(master.data1)
+                master.data_view1.update_table(master.data1)
+                master.data_view2.update_table(master.data2)
                 reset()
 
             #ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
@@ -225,6 +226,7 @@ def restock( master, obj, info:tuple):
             
             self.item_name_entry = cctk.selection_comboBox(self.item_frame, height * .05, hover = False, command= validate_acc,
                                                            values= list(item))
+
             self.item_name_entry.grid(row = 2, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
             
             self.restock_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
@@ -257,3 +259,4 @@ def restock( master, obj, info:tuple):
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
     return restock(master, obj, info)
+

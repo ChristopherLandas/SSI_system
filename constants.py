@@ -26,4 +26,4 @@ class db:
 
 class action:
     RESTOCKED_ITEM = f'RST/%s/%s/%s' #item stocked, stocked_change, success?
-    ADD_ITEM = f'ADD/%s' #UID of the item
+    ADD_ITEM = f'ADD/%s/%s' #UID of the item, success?
