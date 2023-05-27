@@ -59,6 +59,7 @@ class dashboard(ctk.CTkToplevel):
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
         self._master = master
         '''Fonts'''
+        '''
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
@@ -75,6 +76,7 @@ class dashboard(ctk.CTkToplevel):
 
         except _tkinter.TclError:
             pass
+        '''
         #for testing purposes, might delete after the development
 
         '''Import Images'''
@@ -596,7 +598,7 @@ class transaction_frame(ctk.CTkFrame):
         self.bottom_frame.pack_propagate(0)
 
         self.clear_all_button = ctk.CTkButton(self.bottom_frame, text="Clear All", fg_color="#EB455F", hover_color="#A6001A",
-                                              cursor="hand2", command=quit)
+                                              cursor="hand2")
         self.clear_all_button.pack(side="left")
 
         self.proceed_button = ctk.CTkButton(self.bottom_frame, text="Proceed", cursor="hand2", hover_color="#2C74B3", command= proceed)
