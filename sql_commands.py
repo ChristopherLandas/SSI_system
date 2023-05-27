@@ -12,6 +12,7 @@ get_inventory_by_group = f"SELECT item_general_info.name,\
                           FROM item_general_info\
                           JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                          WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                           GROUP BY item_general_info.name\
                           ORDER BY item_general_info.UID"
 
@@ -41,7 +42,7 @@ get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
 get_item_and_their_total_stock = 'SELECT item_general_info.name,\
                                          CAST(SUM(item_inventory_info.Stock) as INT)\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                 WHERE item_inventory_info.Stock != 0\
+                                 WHERE item_inventory_info.Stock != 0 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null)\
                                  GROUP BY item_general_info.UID'
 
 get_item_data_for_transaction = "SELECT item_general_info.UID,\
@@ -52,6 +53,13 @@ get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                  INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
                                  WHERE item_general_info.name = ?\
                                  GROUP BY item_general_info.UID"
+
+get_services_and_their_price = "SELECT * FROM service_info WHERE state = 1"
+get_services_data_for_transaction = "SELECT uid,\
+                                             service_name,\
+                                             CAST(price AS DECIMAL(10, 2))\
+                                     FROM service_info\
+                                     WHERE service_name = ?;"
 
 
 add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?)'
@@ -67,6 +75,9 @@ show_all_items = "SELECT NAME FROM item_general_info"
 
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?)"
-record_transaction_content = "INSERT INTO transaction_content VALUES(?, ?, ?, ?, ?, ?)"
+record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?)"
+record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?)"
 
-get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? ORDER BY Expiry_Date"
+get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = 'I00001' AND Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL ORDER BY Expiry_Date ASC"
+
+get_transaction_data = "SELECT * FROM transaction_record"
