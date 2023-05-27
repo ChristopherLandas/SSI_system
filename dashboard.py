@@ -67,12 +67,12 @@ class dashboard(ctk.CTkToplevel):
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
             Font(file='Font/DMSans-Regular.ttf')
-            
+
             #Use DM Mono for numbers
             Font(file="Font/DMMono-Light.ttf")
             Font(file="Font/DMMono-Medium.ttf")
             Font(file="Font/DMMono-Regular.ttf")
-            
+
         except _tkinter.TclError:
             pass
         #for testing purposes, might delete after the development
@@ -506,15 +506,15 @@ class transaction_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         '''events'''
 
-
         def clear_without_verification():
             self.item_treeview.delete_all_data()
             self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) - float(price_format_to_float(self.final_total_value._text))))
             self.item_total_value.configure(text = '0.00')
 
         def proceed():
-            self.show_transaction_proceed =transaction_popups.show_transaction_proceed(self, (width, height, self.item_treeview, acc_cred[0]),
-                                                                                       [self.item_treeview._data, price_format_to_float(self.item_total_value._text)])
+            self.show_transaction_proceed = transaction_popups.show_transaction_proceed(self, (width, height, self.item_treeview, acc_cred[0]),
+                                                                                        self.item_treeview._data, self.service_treeview._data,
+                                                                                        price_format_to_float(self.final_total_value._text))
             self.show_transaction_proceed.place(relx = .5, rely =.5, anchor = 'c')
 
 
@@ -548,14 +548,14 @@ class transaction_frame(ctk.CTkFrame):
         self.service_frame.grid_rowconfigure(0, weight=1)
 
         self.service_treeview = cctk.cctkTreeView(self.service_frame, width=width*0.8, height=height*0.3,
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tl/ItemName:x-tr/Price:{int(width*.07)}-ud/Quantity:{int(width*.1)}-id/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',
+                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Patient:x-#l/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',
                                                   double_click_command= lambda _: print('hello'))
         self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
         self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.service_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.service_add_button = ctk.CTkButton(self.service_frame, text="Add Service", image=self.add_icon, command=lambda:print("Add Service"),
+        self.service_add_button = ctk.CTkButton(self.service_frame, text="Add Service", image=self.add_icon, command= lambda: self.show_services_list.place(relx = .5, rely = .5, anchor = 'c'),
                                                  font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
         self.service_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
         self.service_total_frame = ctk.CTkFrame(self.service_frame, height=height*0.045, width=width*0.2, corner_radius=5)
@@ -579,7 +579,7 @@ class transaction_frame(ctk.CTkFrame):
         self.item_clear_button = ctk.CTkButton(self.item_frame, text="", image=self.trash_icon, command= self.clear_all_item,
                                                   fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
         self.item_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda: self.show_list.place(relx = .5, rely= .5, anchor = 'c'),
+        self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda: self.show_list_item.place(relx = .5, rely= .5, anchor = 'c'),
                                                  font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
         self.item_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
         self.item_total_frame = ctk.CTkFrame(self.item_frame, height=height*0.045, width=width*0.2, corner_radius=5)
@@ -615,12 +615,19 @@ class transaction_frame(ctk.CTkFrame):
         self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.final_total_value.pack(side="right", padx=(0, width*0.01))
 
-        self.show_list: ctk.CTkFrame = transaction_popups.show_list(self, (width, height, self.item_treeview))
+        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height, self.item_treeview))
+        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height, self.service_treeview))
         self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
-    def change_total_value(self, value: float):
+        self.service_treeview.bd_configs = [(6, [self.service_total_value, self.final_total_value])]
+
+    def change_total_value_item(self, value: float):
             value = float(value)
-            #total_val = float(price_format_to_float(self.item_total_value._text)) + float(value)
             self.item_total_value.configure(text = format_price(float(price_format_to_float(self.item_total_value._text)) + value))
+            self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) + value))
+
+    def change_total_value_service(self, value: float):
+            value = float(value)
+            self.service_total_value.configure(text = format_price(float(price_format_to_float(self.service_total_value._text)) + value))
             self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) + value))
 
     def clear_all_item(self):
@@ -646,6 +653,12 @@ class sales_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='4').pack(anchor='w')
+        self.main_data = database.fetch_data(sql_commands.get_transaction_data, None)
+        self.main_data = [(s[0], 'Alfredo', str(datetime.datetime.now().date()), format_price(float(s[2])), s[1]) for s in self.main_data]
+        self.data_view = cctk.cctkTreeView(self, self.main_data, width * .8, height * .8,
+                                           column_format='/No:75-#c/OR:75-tc/Client:x-tl/Date:175-tc/TotalPrice:125-tr/Cashier:125-tl/Actions:85-bD!50!30')
+        self.data_view.pack(pady = (15, 0))
+
         self.grid_forget()
 
 class inventory_frame(ctk.CTkFrame):
@@ -706,14 +719,14 @@ class inventory_frame(ctk.CTkFrame):
         self.data_view1 = cctk.cctkTreeView(self.data_frame, self.data1, width= width * .8, height= height * .75,
                                            column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                           conditional_colors= {5: {'Reorder':'yellow', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555'}})
+                                           conditional_colors= {5: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555'}})
         self.data_view1.pack(pady=(height*0.005,0))
 
         self.data2 = database.fetch_data(sql_commands.get_inventory_by_expiry, None)
         self.data_view2 = cctk.cctkTreeView(self.data_frame, self.data2, width= width * .8, height= height * .75,
                                            column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.08)}-tl!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                           conditional_colors= {5: {'Nearly Expire':'yellow', 'Expired':'red','Safe':'green'}})
+                                           conditional_colors= {5: {'Nearly Expire':'#ff7900', 'Expired':'red','Safe':'green'}})
 
 
         #self.refresh_btn.configure(command = lambda: self.data_view.update_table(database.fetch_data(sql_commands.get_inventory_by_group, None)))
@@ -721,9 +734,14 @@ class inventory_frame(ctk.CTkFrame):
 
         self.restock_popup = Inventory_popup.restock(self, (width, height, acc_cred, acc_info))
         self.add_item_popup = Inventory_popup.add_item(self, (width, height, acc_cred, acc_info))
-
-
         self.grid_forget()
+
+    def reset(self):
+        self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
+        self.data2 = database.fetch_data(sql_commands.get_inventory_by_expiry, None)
+        self.data_view1.update_table(self.data1)
+        self.data_view2s.update_table(self.data2)
+
 
 class patient_info_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
