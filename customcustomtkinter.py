@@ -424,7 +424,9 @@ class customcustomtkinter:
                 if int(txt) not in range(self._val_range[0], self._val_range[-1]):
                     self.num_entry.delete(0, ctk.END)
                     self.num_entry.insert(0, self._val_range[0] if int(txt) < self._val_range[0] else self._val_range[-1])
-                self.value = int(txt)
+                self.value = int(self.num_entry.get())
+                if self._command is not None:
+                    self._command(0)
             except IndexError:
                 pass
 
