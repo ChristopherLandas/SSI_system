@@ -514,6 +514,9 @@ class transaction_frame(ctk.CTkFrame):
             self.item_total_value.configure(text = '0.00')
 
         def proceed():
+            if price_format_to_float(self.final_total_value._text) == 0:
+                messagebox.showerror('Unable to Proceed', 'No Item Listed')
+                return
             self.show_transaction_proceed = transaction_popups.show_transaction_proceed(self, (width, height, self.item_treeview, acc_cred[0]),
                                                                                         self.item_treeview._data, self.service_treeview._data,
                                                                                         price_format_to_float(self.final_total_value._text))
@@ -742,7 +745,7 @@ class inventory_frame(ctk.CTkFrame):
         self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.data2 = database.fetch_data(sql_commands.get_inventory_by_expiry, None)
         self.data_view1.update_table(self.data1)
-        self.data_view2s.update_table(self.data2)
+        self.data_view2.update_table(self.data2)
 
 
 class patient_info_frame(ctk.CTkFrame):

@@ -53,14 +53,14 @@ def show_item_list(master, info:tuple):
                 #collects part of the data needed in the transaction
                 items_in_treeview = [s.winfo_children()[2]._text if self._treeview.data_frames != [] else None for s in self._treeview.data_frames]
                 #search the tree view if there's an already existing item
-                #print(transaction_data)
+
                 #if there's an already existing item
                 if(item_name in items_in_treeview):
                     quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[4].winfo_children()[0]
                     quantity_column.change_value()
                     #change the value of the spinner combo; modifying the record's total price
                 else:
-                    self._treeview.add_data(transaction_data+(1, transaction_data[2]))
+                    self._treeview.add_data(transaction_data+(0, transaction_data[2]))
                     quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[-1].winfo_children()[4].winfo_children()[0]
                     price_column: ctk.CTkLabel = self._treeview.data_frames[-1].winfo_children()[6]
 
@@ -125,7 +125,6 @@ def show_services_list(master, info:tuple):
         def place(self, **kwargs):
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price, None)
             self.data = [(s[1], s[3]) for s in raw_data]
-            #print(self.data)
             self.item_table.update_table(self.data)
             return super().place(**kwargs)
 
@@ -148,7 +147,7 @@ def show_services_list(master, info:tuple):
                 #    quantity_column.change_value()
                 #    #change the value of the spinner combo; modifying the record's total price
                 #else:
-                self._treeview.add_data(transaction_data+(1, transaction_data[2]))
+                self._treeview.add_data(transaction_data+(0, transaction_data[2]))
                 quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[-1].winfo_children()[3].winfo_children()[0]
                 price_column: ctk.CTkLabel = self._treeview.data_frames[-1].winfo_children()[6]
 
@@ -185,24 +184,25 @@ def show_services_list(master, info:tuple):
 def show_transaction_proceed(master, info:tuple, item_info: list, services_info, total_price: float) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, item_info: list, services_info, total_price: float):
-            width = info[0]
-            height = info[1]
+            width = info[0] * .99
+            height = info[1] * .99
             #basic inforamtion needed; measurement
 
             self.acc_cred = info[3]
-            #print(self.acc_cred)
             self._treeview = info[2]
             self._item_info = item_info
             self._services_info = services_info
             self._total_price = total_price
-
             #encapsulation
 
-            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="red")
+            super().__init__(master, width, height=height, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
 
             '''events'''
             def record_transaction():
+                if (float(self.payment_entry.get() or '0')) < self._total_price:
+                    messagebox.showinfo('Kulang', 'Ano to utang? Magbayad ka ng buo')
+                    return
                 record_id =  database.fetch_data(sql_commands.generate_id_transaction, (None))[0][0]
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0], self._total_price)]])
                 #record the transaction
@@ -217,7 +217,6 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
                 for item in modified_items_list:
                     stocks = database.fetch_data(sql_commands.get_specific_stock, (item[1], ))
-                    print(stocks)
                     if stocks[0][2] is None:
                         database.exec_nonquery([[sql_commands.update_non_expiry_stock, (-item[3], item[1])]])
                     else:
@@ -237,6 +236,12 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                                 break
                 #modify the stock
 
+                payment = float(self.payment_entry.get())
+                self.payment_entry.configure(text_color = 'red')
+                self.payment_entry.delete(0, ctk.END)
+                self.payment_entry.insert(0, format_price(round(self._total_price - payment, 2)))
+                #calculate and show the change
+
                 master.reset()
                 messagebox.showinfo('Sucess', 'Transaction Complete')
                 self._treeview.delete_all_data()
@@ -244,12 +249,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                 #reset into its default state
 
             #From here
-            self.boxframe = ctk.CTkFrame(self , width * .815, height=height*0.82, bg_color='black', fg_color='white')
-            self.boxframe.grid(row=1, column=1, padx=width*0.217, pady=height*0.22, sticky="nesw")
-            self.boxframe.grid_columnconfigure(0, weight=1)
-            self.boxframe.grid_rowconfigure(0, weight=1)
-
-            self.left_frame = ctk.CTkFrame(self.boxframe, bg_color='#c3c3c3')
+            """self.left_frame = ctk.CTkFrame(self, bg_color='#c3c3c3')
             self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
 
             self.services_lbl = ctk.CTkLabel(self.left_frame, text='Services:',font=("DM Sans Medium", 25))
@@ -258,21 +258,18 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.services_entry = ctk.CTkEntry(self.left_frame, placeholder_text='item1', height=height*0.65, width=width*0.2)
             self.services_entry.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
 
-            self.right_frame = ctk.CTkFrame(self.boxframe)
+            self.right_frame = ctk.CTkFrame(self)
             self.right_frame.grid(row=0, column=1, padx=20, pady=10, sticky="nsew")
 
             self.items_lbl = ctk.CTkLabel(self.right_frame, text='Items:',font=("DM Sans Medium", 25))
             self.items_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
 
-            #self.items_entry = ctk.CTkEntry(self.right_frame, placeholder_text='item1', height=height*0.65, width=width*0.2)
-            #self.items_entry.grid(row=1, column=0, padx=10, pady=10, sticky="ns")4
-            #self.item_data = [(s[1] + (f' x {s[3]}' if int(s[3]) > 1 else ''), format_price(float(s[4]))) for s in self._transaction_info[0]]
             self.item_data = [('item1', format_price(float(s[4]))) for s in self._item_info]
             self.item_list = cctk.cctkTreeView(self.right_frame, self.item_data, height=height*0.55, width=width*0.2,
                                                column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
             self.item_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
 
-            self.rightmost_frame = ctk.CTkFrame(self.boxframe, height=height*0.78, width=width*0.312, fg_color='white')
+            self.rightmost_frame = ctk.CTkFrame(self, height=height*0.78, width=width*0.312, fg_color='white')
             self.rightmost_frame.grid(row=0, column=2, padx=20, pady=10, sticky="ne")
 
             self.total_frame = ctk.CTkFrame(self.rightmost_frame)
@@ -295,9 +292,84 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.payment_method_cbox = ctk.CTkOptionMenu(self.payment_options_frame, values=["Cash", "Card", "Bank Statement"], height=height*0.05,width=width*0.285)
             self.payment_method_cbox.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="ew")
 
+            self.payment_frame = ctk.CTkFrame(self.rightmost_frame)
+            self.payment_frame.grid(row=3, column=0, padx=10, pady=(20, 10), sticky="new")
+
+            self.payment_lbl = ctk.CTkLabel(self.payment_frame, text='Payment:',font=("Poppins", 25))
+            self.payment_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
+
+            self.payment_entry = ctk.CTkEntry(self.payment_frame, height=height*0.12, width=width*0.31)
+            self.payment_entry.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="n")
+
+
             self.proceed_button = ctk.CTkButton(self.rightmost_frame, text='Proceed', command= record_transaction)
             self.proceed_button.grid(row=3, column=0, padx=10, pady=10, sticky="sew")
             self.cancel_button = ctk.CTkButton(self.rightmost_frame, text='Cancel', command= lambda: self.destroy())
-            self.cancel_button.grid(row=4, column=0, padx=10, pady=10, sticky="sew")
+            self.cancel_button.grid(row=4, column=0, padx=10, pady=10, sticky="sew")"""
 
+            self.left_frame = ctk.CTkFrame(self)
+            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
+
+            self.services_lbl = ctk.CTkLabel(self.left_frame, text='Services:',font=("Poppins", 45))
+            self.services_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+
+            '''self.services_entry = ctk.CTkEntry(self.left_frame,  height=height*0.78, width=width*0.2)
+            self.services_entry.grid(row=1, column=0, padx=10, pady=10, sticky="ns")'''
+            self.service_data = [('Service1', format_price(float(s[4]))) for s in self._services_info]
+            self.service_list = cctk.cctkTreeView(self.left_frame, self.service_data, height=height*0.75, width=width*0.2,
+                                               column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
+            self.service_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
+
+            self.right_frame = ctk.CTkFrame(self)
+            self.right_frame.grid(row=0, column=1, padx=20, pady=10, sticky="nsew")
+
+            self.items_lbl = ctk.CTkLabel(self.right_frame, text='Items:',font=("Poppins", 45))
+            self.items_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+
+            self.item_data = [('item1', format_price(float(s[4]))) for s in self._item_info]
+            self.item_list = cctk.cctkTreeView(self.right_frame, self.item_data, height=height*0.75, width=width*0.2,
+                                               column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
+            self.item_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
+
+            self.rightmost_frame = ctk.CTkFrame(self, height=height*0.78, width=width*0.312, fg_color='white')
+            self.rightmost_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nse")
+
+
+            self.total_frame = ctk.CTkFrame(self.rightmost_frame)
+            self.total_frame.grid(row=0, column=0, padx=10, pady=10, sticky="new", columnspan = 2)
+
+            self.total_lbl = ctk.CTkLabel(self.total_frame, text='Total:',font=("Poppins", 25))
+            self.total_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
+
+            self.total_val = ctk.CTkEntry(self.total_frame, height=height*0.12, width=width*0.31, font=('DM Sans Medium', 35))
+            self.total_val.insert(0, format_price(self._total_price))
+            self.total_val.configure(state = 'readonly')
+            self.total_val.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="n")
+
+            self.payment_options_frame = ctk.CTkFrame(self.rightmost_frame)
+            self.payment_options_frame.grid(row=1, column=0, padx=10, pady=(10, height*0.22), sticky="new", columnspan = 2)
+
+            self.payment_lbl = ctk.CTkLabel(self.payment_options_frame, text='Payment Method:', font=("Poppins", 25))
+            self.payment_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
+
+            self.payment_method_cbox = ctk.CTkOptionMenu(self.payment_options_frame, values=["Cash", "Card", "Bank Statement"], font=("Poppins", 25), height=height*0.08,width=width*0.31
+                                                         ,fg_color='white', button_color='#dddddd', text_color='black')
+            self.payment_method_cbox.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ew")
+
+            self.payment_frame = ctk.CTkFrame(self.rightmost_frame)
+            self.payment_frame.grid(row=3, column=0, padx=10, pady=(20, 10), sticky="new", columnspan = 2)
+
+            self.payment_lbl = ctk.CTkLabel(self.payment_frame, text='Payment:',font=("Poppins", 25))
+            self.payment_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
+
+            self.payment_entry = ctk.CTkEntry(self.payment_frame, height=height*0.12, width=width*0.31, font=('DM Sans Medium', 35))
+            self.payment_entry.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="n")
+
+            self.proceed_button = ctk.CTkButton(self.rightmost_frame, text='Proceed', command=record_transaction, width=135, font=("Poppins-Bold", 45))
+            self.proceed_button.grid(row=4, column=0, padx=(40, 50), pady =(10,10), sticky="ew")
+
+            self.cancel_button = ctk.CTkButton(self.rightmost_frame, text='Cancel', command= lambda: self.destroy(), width=135, font=("Poppins-Bold", 45))
+            self.cancel_button.grid(row=4, column=1, padx=(40, 50), pady =(10,10), sticky="ew")
+
+            self.payment_entry.focus_force()
     return instance(master, info, item_info, services_info, total_price)
