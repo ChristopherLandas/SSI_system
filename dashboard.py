@@ -647,8 +647,47 @@ class services_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='3').pack(anchor='w')
-        self.grid_forget()
+        #self.label = ctk.CTkLabel(self, text='3').pack(anchor='w')
+        
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
+        self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
+        self.inventory = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(25,22))
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        
+        self.grid_columnconfigure(4, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        
+        self.search_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], width=width*0.35, height = height*0.05,)
+        self.search_frame.grid(row=0, column=0,padx=(width*0.005))
+        self.search_frame.pack_propagate(0)
+
+        self.search_bar_frame = ctk.CTkFrame(self.search_frame, fg_color="light grey")
+        self.search_bar_frame.pack(fill="both", padx=width*0.005, pady=height*0.0075)        
+        
+        ctk.CTkLabel(self.search_bar_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+        self.search_entry = ctk.CTkEntry(self.search_bar_frame, placeholder_text="Search", border_width=0, fg_color="light grey")
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        
+        self.add_service = ctk.CTkButton(self,text="Add Service", width=width*0.1, height = height*0.05, image=self.plus)
+        self.add_service.grid(row=0, column=1)
+        
+        self.service_inventory = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.inventory)
+        self.service_inventory.grid(row=0, column=2,padx=(width*0.005,0))
+        
+        self.refresh = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh.grid(row=0, column=3,padx=(width*0.005))
+        
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=5, padx=(0, width*0.005),  pady=(height*0.01))
+        
+        self.service_data_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
+        self.service_data_frame.grid(row=1, column=0, columnspan=6, sticky="nsew", padx=(width*0.005), pady=(0,height*0.025))
+        
+        self.services_treeview = cctk.cctkTreeView(self.service_data_frame, width=width*0.8, height=height*0.8,
+                                               column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Price:{int(width*.07)}-tr/LastedEdited:{int(width*.1)}-tc/Actions:{int(width*.08)}-tl!30!30',
+                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
+        self.services_treeview.pack(padx=(width*0.005), pady=(height*0.015))
 
 class sales_frame(ctk.CTkFrame):
     global width, height
