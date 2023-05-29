@@ -1,25 +1,19 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import transaction_popups
-from decimal import Decimal
+import sql_commands
+import tkcalendar
+from Theme import Color
+from util import database
+from tkinter import messagebox
+from constants import action
+from PIL import Image
 
-class body(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-        self.state("zoomed")
-        self.update()
-        self.attributes("-fullscreen", True)
-        self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
-
-        customer_info(self, self.screen, (1, 'admin', '2012-01-01'), None).place(relx = .5 , rely = .5, anchor = 'c')
-        self.mainloop()
-
-def customer_info(master, info:tuple, sales_info: tuple, sales_content: list) -> ctk.CTkFrame:
+def show_sales_record_info(master, info:tuple, sales_info: tuple, sales_content: list) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, sales_info: tuple, sales_content: list):
             width = info[0]
             height = info[1]
-            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0)
+            super().__init__(master, width * .8, height=height*0.8, corner_radius= 0)
             self.pack_propagate(0)
             #basic inforamtion needed; measurement
 
@@ -33,5 +27,3 @@ def customer_info(master, info:tuple, sales_info: tuple, sales_content: list) ->
             #the actual frame, modification on the frame itself goes here
 
     return instance(master, info, sales_info, sales_content)
-
-body()

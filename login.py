@@ -33,13 +33,13 @@ class loginUI(ctk.CTk):
                 salt = database.fetch_data(f'SELECT {db.acc_cred.SALT} FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ?',
                                         (self.user_entry.get(), ))[0][0]
             except IndexError:
-                self.password_entry.delete(0, 999999999)
+                self.password_entry.delete(0, ctk.END)
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
                 return
             count = database.fetch_data(f'SELECT COUNT(*) FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ? AND {db.acc_cred.PASSWORD} = ?',
                                         (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
             if count[0][0] == 0:
-                self.password_entry.delete(0, 999999999)
+                self.password_entry.delete(0, ctk.END)
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
             else:
                 current_datetime = datetime.datetime.now();

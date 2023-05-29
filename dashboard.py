@@ -17,7 +17,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from constants import db
 from constants import action
-from popup import Inventory_popup, transaction_popups
+from popup import Inventory_popup, transaction_popups, Sales_popup
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -33,7 +33,7 @@ class dashboard(ctk.CTkToplevel):
         self.state("zoomed")
         self.update()
         self.attributes("-fullscreen", True)
-
+        '''
         #makes the form full screen and removing the default tab bar
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
@@ -56,7 +56,6 @@ class dashboard(ctk.CTkToplevel):
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
         self._master = master
-        '''
 
         '''Fonts'''
         '''
@@ -553,8 +552,7 @@ class transaction_frame(ctk.CTkFrame):
         self.service_frame.grid_rowconfigure(0, weight=1)
 
         self.service_treeview = cctk.cctkTreeView(self.service_frame, width=width*0.8, height=height*0.3,
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Patient:x-#l/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',
-                                                  double_click_command= lambda _: print('hello'))
+                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Patient:x-#l/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',)
         self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
         self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
@@ -711,6 +709,7 @@ class sales_frame(ctk.CTkFrame):
         self.main_data = [(s[0], 'Alfredo', str(datetime.datetime.now().date()), format_price(float(s[2])), s[1]) for s in self.main_data]
         self.data_view = cctk.cctkTreeView(self, self.main_data, width * .8, height * .8,
                                            column_format='/No:75-#c/OR:75-tc/Client:x-tl/Date:175-tc/TotalPrice:125-tr/Cashier:125-tl/Actions:85-bD!50!30')
+        self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
         self.data_view.pack(pady = (15, 0))
 
         self.grid_forget()
@@ -826,4 +825,4 @@ class histlog_frame(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget();
 
-#dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
