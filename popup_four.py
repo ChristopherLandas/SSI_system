@@ -1,39 +1,18 @@
+from typing import *
 import customtkinter as ctk
-from customcustomtkinter import customcustomtkinter as cctk
-from popup import transaction_popups
-from decimal import Decimal
+from tkcalendar import DateEntry
 
-class body(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-        self.state("zoomed")
-        self.update()
-        self.attributes("-fullscreen", True)
-        self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
-
-        self.val = 0
-        btn = ctk.CTkButton(self, text='click', command = lambda:print(self.val))
-        btn.pack()
-
-        self.bind('<Return>', lambda _: customer_info(self, self.screen, self.val).place(relx = .5, rely = .5, anchor = 'c'))
-
-        self.mainloop()
-
-def customer_info(master, info:tuple, val) -> ctk.CTkFrame:
-    class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, _val):
+def customer_info(master, obj, info:tuple) -> ctk.CTkFrame:
+    class add_item(ctk.CTkFrame):
+        def __init__(self, master, obj, info:tuple):
             width = info[0]
             height = info[1]
-            self._val = _val
             #basic inforamtion needed; measurement
 
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0)
             #the actual frame, modification on the frame itself goes here
 
-            '''events'''
-            def change_val():
-                self._val = 10
-                self.destroy()
+            '''code goes here'''
 
             #From here
             self.left_frame = ctk.CTkFrame(self, bg_color='#c3c3c3')
@@ -85,17 +64,26 @@ def customer_info(master, info:tuple, val) -> ctk.CTkFrame:
 
             self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
 
-            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=change_val, width=270, font=("Poppins-Bold", 45))
+            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=quit, width=270, font=("Poppins-Bold", 45))
 
             self.back_button.grid(row=0, column=1, padx=20, pady=(15, 15), sticky='s')
 
 
-            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=change_val, width=270, font=("Poppins-Bold", 45))
+            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=quit, width=270, font=("Poppins-Bold", 45))
             self.select_button.grid(row=0, column=2, padx=(0, 20), pady=(15, 15), sticky="se")
 
 
             #on out
 
-    return instance(master, info, val)
+    return add_item(master, obj, info)
+    #return the class as the frame
 
-body()
+x,y = 1920,1080
+ctk1 = ctk.CTk()
+ctk1.state("zoomed")
+ctk1.update()
+ctk1.attributes("-fullscreen", True)
+frame = customer_info(ctk1, None, (x * .8, y * .8))
+frame.place(relx = .5, rely = .5, anchor = 'c')
+ctk1.mainloop()
+#for running and testing

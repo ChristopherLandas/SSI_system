@@ -54,7 +54,7 @@ get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                  WHERE item_general_info.name = ?\
                                  GROUP BY item_general_info.UID"
 
-get_services_and_their_price = "SELECT * FROM service_info WHERE state = 1"
+get_services_and_their_price = "SELECT UID, service_name, Item_needed, price FROM service_info WHERE state = 1"
 get_services_data_for_transaction = "SELECT uid,\
                                              service_name,\
                                              CAST(price AS DECIMAL(10, 2))\

@@ -94,6 +94,7 @@ def show_item_list(master, info:tuple):
                 #reset the state of this popup
     return instance(master, info)
 
+
 def show_services_list(master, info:tuple):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple):
@@ -199,6 +200,11 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             #the actual frame, modification on the frame itself goes here
 
             '''events'''
+            def auto_pay(_: any = None):
+                self.payment_entry.delete(0, ctk.END)
+                self.payment_entry.insert(0, self._total_price)
+                record_transaction()
+
             def record_transaction():
                 if (float(self.payment_entry.get() or '0')) < self._total_price:
                     messagebox.showinfo('Kulang', 'Ano to utang? Magbayad ka ng buo')
@@ -372,4 +378,5 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.cancel_button.grid(row=4, column=1, padx=(40, 50), pady =(10,10), sticky="ew")
 
             self.payment_entry.focus_force()
+            self.payment_entry.bind('<Shift-Return>', auto_pay)
     return instance(master, info, item_info, services_info, total_price)

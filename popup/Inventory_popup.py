@@ -35,7 +35,7 @@ def add_item(master, info:tuple):
                     uid = 'I'+str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(5)
                     database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.category_entry.get(), 0 if self.expiry_switch_val.get() == 'disabled' else 1)],
                                             [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), self.expiration_date_entry.cget("text") if self.expiration_date_entry._text != 'Set Expiry Date' else None)],
-                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get()), .85, .5, int(self.stock_entry.get()))],
+                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .75, .5, int(self.stock_entry.get()))],
                                             [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())]])
                     messagebox.showinfo('Adding Succesfull')
                     master.reset()
@@ -278,5 +278,8 @@ def restock( master, info:tuple):
 
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
-    return restock(master, info)
 
+        def place(self, **kwargs):
+            self.item_name_entry.configure(values = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)])
+            return super().place(**kwargs)
+    return restock(master, info)
