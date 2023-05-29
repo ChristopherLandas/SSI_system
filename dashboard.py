@@ -34,7 +34,6 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
 
-        '''
         #makes the form full screen and removing the default tab bar
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
@@ -42,11 +41,10 @@ class dashboard(ctk.CTkToplevel):
             self.destroy()
             return
         else:
-            global acc_info, date_logged
+            global acc_info, date_logged, acc_cred
             date_logged = _date_logged;
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
-            print(acc_cred)
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
         #for preventing security breach through python code; enable it to test it
@@ -58,6 +56,8 @@ class dashboard(ctk.CTkToplevel):
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
         self._master = master
+        '''
+
         '''Fonts'''
         '''
         try:
@@ -367,7 +367,7 @@ class dashboard(ctk.CTkToplevel):
                                                           children=[self.notif_menu_bar, self.settings_menu_bar, self.acc_menu_bar])
 
         '''setting default events'''
-        load_main_frame('Dashboard', 4)
+        load_main_frame('Dashboard', 0)
         #change_active_event(self.db_button, 0)
         self.protocol("WM_DELETE_WINDOW", log_out)
         self.mainloop()
@@ -826,4 +826,4 @@ class histlog_frame(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget();
 
-dashboard(None, 'admin', datetime.datetime.now)
+#dashboard(None, 'admin', datetime.datetime.now)
