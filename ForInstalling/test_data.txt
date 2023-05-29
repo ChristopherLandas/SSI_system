@@ -25,11 +25,11 @@ INSERT INTO item_supplier_info VALUES ('I00003', 'medVet assc.', '+639042648221'
 INSERT INTO item_supplier_info VALUES ('I00004', 'medVet assc..', '+639042648221');
 INSERT INTO item_supplier_info VALUES ('I00005', 'Pfizer corp..', 'OrtSupp@Pfizer.com.ph');
 
-INSERT INTO service_info VALUES('S00001', 'Grooming', 'test', 500, 1);
-INSERT INTO service_info VALUES('S00002', '5-in-1 Vaccine', 'test', 1500, 1);
-INSERT INTO service_info VALUES('S00003', 'Papiloma Vaccine', 'test', 2500, 1);
-INSERT INTO service_info VALUES('S00004', 'Yeast Infection Treatment', 'test', 2100, 1);
-INSERT INTO service_info VALUES('S00005', 'Canine Castration Surgery', 'test', 1700, 1);
-INSERT INTO service_info VALUES('S00006', 'Confinement', 'test', 200, 1);
-INSERT INTO service_info VALUES('S00007', 'Euthanasion', 'test', 900, 1);
-INSERT INTO service_info VALUES('S00008', 'Feline Castration Srugery', 'test', 500, 1);
+INSERT INTO service_info VALUES('S00001', 'Grooming', 'test', 500, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00002', '5-in-1 Vaccine', 'test', 1500, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00003', 'Papiloma Vaccine', 'test', 2500, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00004', 'Yeast Infection Treatment', 'test', 2100, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00005', 'Canine Castration Surgery', 'test', 1700, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00006', 'Confinement', 'test', 200, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00007', 'Euthanasion', 'test', 900, 1, CURRENT_DATE);
+INSERT INTO service_info VALUES('S00008', 'Feline Castration Srugery', 'test', 500, 1, CURRENT_DATE);

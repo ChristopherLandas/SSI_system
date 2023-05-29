@@ -114,10 +114,10 @@ def show_services_list(master, info:tuple):
             ctk.CTkLabel(self.upper_frame, text='Add Service', font=('Arial', 24)).pack(side=ctk.LEFT, padx = (12, 0))
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
             self.lower_frame = ctk.CTkFrame(self, corner_radius=0, fg_color='#111111')
-            self.item_table = cctk.cctkTreeView(self.lower_frame, self.data, self.width * .75, self.height * .65,
+            self.service_table = cctk.cctkTreeView(self.lower_frame, self.data, self.width * .75, self.height * .65,
                                                 column_format='/Name:x-tl/Price:250-tl!50!30',
                                                 double_click_command= self.get_item)
-            self.item_table.pack(pady = (12, 0), fill='y')
+            self.service_table.pack(pady = (12, 0), fill='y')
             self.select_btn = ctk.CTkButton(self.lower_frame, 120, 30, text='select', command= self.get_item)
             self.select_btn.pack(pady = (0, 12))
             self.lower_frame.grid(row = 1, column = 0, sticky = 'nsew')
@@ -126,7 +126,7 @@ def show_services_list(master, info:tuple):
         def place(self, **kwargs):
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price, None)
             self.data = [(s[1], s[3]) for s in raw_data]
-            self.item_table.update_table(self.data)
+            self.service_table.update_table(self.data)
             return super().place(**kwargs)
 
         def reset(self):
@@ -134,8 +134,8 @@ def show_services_list(master, info:tuple):
 
         def get_item(self, _: any = None):
             #if there's a selected item
-            if self.item_table.data_grid_btn_mng.active is not None:
-                service_name =  self.item_table.data_grid_btn_mng.active.winfo_children()[0]._text
+            if self.service_table.data_grid_btn_mng.active is not None:
+                service_name =  self.service_table.data_grid_btn_mng.active.winfo_children()[0]._text
                 #getting the needed information for the item list
                 transaction_data = database.fetch_data(sql_commands.get_services_data_for_transaction, (service_name, ))[0]
                 #collects part of the data needed in the transaction
@@ -177,7 +177,7 @@ def show_services_list(master, info:tuple):
                     #add a new record
 
                 master.change_total_value_service(transaction_data[2])
-                self.item_table.data_grid_btn_mng.deactivate_active()
+                self.service_table.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
     return instance(master, info)
@@ -250,7 +250,8 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
                 master.reset()
                 messagebox.showinfo('Sucess', 'Transaction Complete')
-                self._treeview.delete_all_data()
+                self._treeview[0].delete_all_data()
+                self._treeview[1].delete_all_data()
                 self.destroy()
                 #reset into its default state
 

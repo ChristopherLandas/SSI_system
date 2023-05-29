@@ -1,3 +1,4 @@
+#SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.name,\
                                   CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
                                   CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2)),\
@@ -39,6 +40,7 @@ get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                                   	  then 0\
                                       ELSE 1 END DESC"
 
+#FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
 get_item_and_their_total_stock = 'SELECT item_general_info.name,\
                                          CAST(SUM(item_inventory_info.Stock) as INT)\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -62,22 +64,30 @@ get_services_data_for_transaction = "SELECT uid,\
                                      WHERE service_name = ?;"
 
 
+#RESTOCKING
 add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?)'
 update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
 add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
+show_all_items = "SELECT NAME FROM item_general_info"
 
+#ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
-show_all_items = "SELECT NAME FROM item_general_info"
 
+#RECORDING ANY TRANSACTION
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?)"
 record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?)"
 
-get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = 'I00001' AND Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL ORDER BY Expiry_Date ASC"
+#UPDATING STOCK AFTER TRANSACTION
+get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL ORDER BY Expiry_Date ASC"
 
+#FOR SALES
 get_transaction_data = "SELECT * FROM transaction_record"
+
+#FOR SERVICES
+get_service_data = "SELECT service_name, price, date_added FROM service_info"

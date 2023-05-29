@@ -517,7 +517,7 @@ class transaction_frame(ctk.CTkFrame):
             if price_format_to_float(self.final_total_value._text) == 0:
                 messagebox.showerror('Unable to Proceed', 'No Item Listed')
                 return
-            self.show_transaction_proceed = transaction_popups.show_transaction_proceed(self, (width, height, self.item_treeview, acc_cred[0]),
+            self.show_transaction_proceed = transaction_popups.show_transaction_proceed(self, (width, height, (self.item_treeview, self.service_treeview), acc_cred[0]),
                                                                                         self.item_treeview._data, self.service_treeview._data,
                                                                                         price_format_to_float(self.final_total_value._text))
             self.show_transaction_proceed.place(relx = .5, rely =.5, anchor = 'c')
@@ -600,9 +600,9 @@ class transaction_frame(ctk.CTkFrame):
         self.bottom_frame.grid(row=3, column=0, columnspan=3, pady=(0,height*0.01), padx=(width*0.005),sticky="nsew")
         self.bottom_frame.pack_propagate(0)
 
-        self.clear_all_button = ctk.CTkButton(self.bottom_frame, text="Clear All", fg_color="#EB455F", hover_color="#A6001A",
+        '''self.clear_all_button = ctk.CTkButton(self.bottom_frame, text="Clear All", fg_color="#EB455F", hover_color="#A6001A",
                                               cursor="hand2")
-        self.clear_all_button.pack(side="left")
+        self.clear_all_button.pack(side="left")'''
 
         self.proceed_button = ctk.CTkButton(self.bottom_frame, text="Proceed", cursor="hand2", hover_color="#2C74B3", command= proceed)
         self.proceed_button.pack(side="right", padx=10)
@@ -643,52 +643,62 @@ class transaction_frame(ctk.CTkFrame):
     def reset(self):
         self.item_treeview.delete_all_data()
         self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) - float(price_format_to_float(self.final_total_value._text))))
+        self.service_total_value.configure(text = '0.00')
         self.item_total_value.configure(text = '0.00')
-
 
 class services_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         #self.label = ctk.CTkLabel(self, text='3').pack(anchor='w')
-        
+
+        '''events'''
+        def update_tables(_ :any = None):
+            self.refresh_btn.configure(state = ctk.DISABLED)
+            self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
+            self.services_data_for_treeview = [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
+            self.services_treeview.update_table(self.services_data_for_treeview)
+            self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
         self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
         self.inventory = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(25,22))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
-        
+
         self.grid_columnconfigure(4, weight=1)
         self.grid_rowconfigure(1, weight=1)
-        
+
         self.search_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], width=width*0.35, height = height*0.05,)
         self.search_frame.grid(row=0, column=0,padx=(width*0.005))
         self.search_frame.pack_propagate(0)
 
         self.search_bar_frame = ctk.CTkFrame(self.search_frame, fg_color="light grey")
-        self.search_bar_frame.pack(fill="both", padx=width*0.005, pady=height*0.0075)        
-        
+        self.search_bar_frame.pack(fill="both", padx=width*0.005, pady=height*0.0075)
+
         ctk.CTkLabel(self.search_bar_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
         self.search_entry = ctk.CTkEntry(self.search_bar_frame, placeholder_text="Search", border_width=0, fg_color="light grey")
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        
+
         self.add_service = ctk.CTkButton(self,text="Add Service", width=width*0.1, height = height*0.05, image=self.plus)
         self.add_service.grid(row=0, column=1)
-        
+
         self.service_inventory = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.inventory)
         self.service_inventory.grid(row=0, column=2,padx=(width*0.005,0))
-        
-        self.refresh = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
-        self.refresh.grid(row=0, column=3,padx=(width*0.005))
-        
+
+        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=update_tables)
+        self.refresh_btn.grid(row=0, column=3,padx=(width*0.005))
+
         self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=5, padx=(0, width*0.005),  pady=(height*0.01))
-        
+
         self.service_data_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
         self.service_data_frame.grid(row=1, column=0, columnspan=6, sticky="nsew", padx=(width*0.005), pady=(0,height*0.025))
-        
-        self.services_treeview = cctk.cctkTreeView(self.service_data_frame, width=width*0.8, height=height*0.8,
-                                               column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Price:{int(width*.07)}-tr/LastedEdited:{int(width*.1)}-tc/Actions:{int(width*.08)}-tl!30!30',
+
+        self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
+        self.services_data_for_treeview = [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
+        self.services_treeview = cctk.cctkTreeView(self.service_data_frame, data = self.services_data_for_treeview, width=width*0.8, height=height*0.8,
+                                               column_format=f'/No:{int(width*.025)}-#r/Name:x-tl/Price:{int(width*.07)}-tr/LastedEdited:{int(width*.1)}-tc/Actions:{int(width*.08)}-bD!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
         self.services_treeview.pack(padx=(width*0.005), pady=(height*0.015))
 
@@ -709,6 +719,8 @@ class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
 
         '''events'''
         def update_tables(_ :any = None):
@@ -738,7 +750,7 @@ class inventory_frame(ctk.CTkFrame):
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.refresh_btn = ctk.CTkButton(self, text="", width=width*0.028, height=height*0.05)
+        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
         self.refresh_btn.grid(row=0, column=2, sticky="w")
 
         self.view_by_selection = ctk.CTkOptionMenu(self, width=width*0.18, height = height*0.05, values=["View by Item", "View by Expiry"],
@@ -785,7 +797,6 @@ class inventory_frame(ctk.CTkFrame):
         self.data2 = database.fetch_data(sql_commands.get_inventory_by_expiry, None)
         self.data_view1.update_table(self.data1)
         self.data_view2.update_table(self.data2)
-
 
 class patient_info_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
