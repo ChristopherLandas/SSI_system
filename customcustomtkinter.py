@@ -79,8 +79,6 @@ class customcustomtkinter:
                 self._command = [] if isinstance(command, list) else [command]
                 self.unbind('<Button-1>', None)
                 self.bind('<Button-1>', self.response)
-                self.unbind('<Double-Button-1>', None)
-                self.bind('<Double-Button-1>', None if self._doulbe_click_command == None else self._doulbe_click_command)
                 self.update_children()
             if hover_color is not None:
                 self._hover_color = hover_color
@@ -90,6 +88,12 @@ class customcustomtkinter:
                 self._hover = hover
                 self.update_button(hover)
                 self.update_children()
+            if 'double_click_command' in kwargs:
+                self.unbind('<Double-Button-1>', None)
+                self._doulbe_click_command = kwargs['double_click_command']
+                self.bind('<Double-Button-1>', kwargs['double_click_command'])
+                self.update_children()
+                kwargs.pop('double_click_command')
             return super().configure(require_redraw, **kwargs)
         #override configure function of frame, allowing to add those external arguments
     #button frame: a frame with a properties of a buttons
@@ -306,6 +310,14 @@ class customcustomtkinter:
             self.data_grid_btn_mng._buttons.clear()
             self.data_grid_btn_mng._og_color.clear()
             self._data.clear()
+
+        def configure(self, require_redraw=False, **kwargs):
+            if 'double_click_command' in kwargs:
+                for i in self.data_frames:
+                    self._double_click_command = kwargs['double_click_command']
+                    i.configure(double_click_command = kwargs['double_click_command'])
+                kwargs.pop('double_click_command')
+            return super().configure(require_redraw, **kwargs)
 
     class tk_calendar(ctk.CTkToplevel):
         def __init__(self, label, format, *args, fg_color: str or Tuple[str, str] or None = None, **kwargs):
