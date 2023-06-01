@@ -91,3 +91,20 @@ get_transaction_data = "SELECT * FROM transaction_record"
 
 #FOR SERVICES
 get_service_data = "SELECT service_name, price, date_added FROM service_info"
+
+#FOR LOG AUDIT
+get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT_DATE"
+
+#FOR INVENTORY STATE
+get_reorder_items = "SELECT  item_inventory_info.UID,\
+                             SUM(item_inventory_info.Stock)\
+                     FROM item_inventory_info JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                     WHERE item_inventory_info.Stock < item_settings.Safe_stock * item_settings.Reorder_factor AND\
+                           item_inventory_info.Stock > item_settings.Safe_stock * item_settings.Critical_factor\
+                     GROUP BY item_inventory_info.UID"
+
+get_reorder_items = "SELECT  item_inventory_info.UID,\
+                             SUM(item_inventory_info.Stock)\
+                     FROM item_inventory_info JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                     WHERE item_inventory_info.Stock < item_settings.Safe_stock * item_settings.Reorder_factor\
+                     GROUP BY item_inventory_info.UID"
