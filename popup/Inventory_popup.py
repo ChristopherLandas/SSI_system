@@ -237,7 +237,7 @@ def restock( master, info:tuple):
 
             self.item_frame =ctk.CTkFrame(self.main_frame, corner_radius=0)
             self.item_frame.pack(fill="x", expand=0, padx=width*0.008, pady=height*0.01)
-            self.item_frame.grid_columnconfigure(0, weight=1)
+            self.item_frame.grid_columnconfigure(1, weight=1)
 
             ctk.CTkLabel(self.item_frame, text='ITEM', anchor='w', font=('DM Sans Medium', 18), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
             ctk.CTkLabel(self.item_frame, text='Item Name', anchor='w').grid(row = 1, column = 0, padx = 12, sticky = 'nsew')
@@ -247,7 +247,15 @@ def restock( master, info:tuple):
             self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
                                                            values= list(item))
 
-            self.item_name_entry.grid(row = 2, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+            self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))
+            
+            ctk.CTkLabel(self.item_frame, text="Initial Price Change:").grid(row=3, column=0, sticky="w",pady = (height*0.01,0), padx= (width*0.01))
+            self.item_init_price_change =ctk.CTkEntry(self.item_frame)
+            self.item_init_price_change.grid(row=3, column=1, sticky="w")
+            
+            ctk.CTkLabel(self.item_frame, text="Narkup Change:").grid(row=4, column=0,sticky="w",pady = (height*0.01), padx= (width*0.01))
+            self.item_markup_change =ctk.CTkEntry(self.item_frame)
+            self.item_markup_change.grid(row=4, column=1,  sticky="w")
 
             self.restock_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
             self.restock_frame.pack(fill="both", expand=1, padx=width*0.008, pady=(0,height*0.01))
@@ -283,3 +291,53 @@ def restock( master, info:tuple):
             self.item_name_entry.configure(values = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)])
             return super().place(**kwargs)
     return restock(master, info)
+
+def show_status(master, info:tuple,):
+    class show_status(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, ):
+            width = info[0]
+            height = info[1]
+            acc_cred = info[2]
+            acc_info = info[3]
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+            
+            def reset():
+                self.place_forget()
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.5, height=height*0.85)
+            self.main_frame.grid(row=0, column=0, sticky="n", padx=width*0.01, pady=height*0.025)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(2,weight=1)
+            
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, sticky="nsew")
+            self.top_frame.pack_propagate(0)
+            
+            ctk.CTkLabel(self.top_frame, text="Inventory Status", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+            
+            self.status_frame = ctk.CTkFrame(self.main_frame, height=height*0.065, width=width*0.25)
+            self.status_frame.grid(row=1, column=0,sticky="w", padx=width*0.005, pady=height*0.01)
+            self.status_frame.pack_propagate(0)
+            
+            self.status_label = ctk.CTkLabel(self.status_frame, text="", font=("DM Sans Medium", 18))
+            self.status_label.pack(side="left", padx=width*0.015)
+            
+            self.status_count = ctk.CTkLabel(self.status_frame, text="#", font=("DM Sans Medium", 18))
+            self.status_count.pack(side="right", padx=width*0.015)
+            
+            self.db_inventory_frame = ctk.CTkFrame(self.main_frame)
+            self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
+            
+            self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.5, height=height*0.85,
+                                               column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:x-bD!30!30',
+                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
+            self.db_inventory_treeview.pack()
+            
+            
+    return show_status(master, info,)

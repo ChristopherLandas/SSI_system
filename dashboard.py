@@ -388,7 +388,6 @@ class dashboard_frame(ctk.CTkFrame):
             ax =pie_figure.add_subplot(111)
             ax.pie(data, autopct='%1.1f%%', startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Red_Tulip, Color.Light_Green],
                    textprops={'fontsize':18, 'color': Color.White_Ghost, 'family':'monospace', 'weight':'bold' },)
-            ax.legend(labels, loc=8, ncol=2,prop={'family':"monospace", "size": 13}, labelcolor=Color.Blue_Maastricht, frameon=0)
             pie_figure.subplots_adjust(top=1,left=0,right=1, bottom=0)
 
             canvas = FigureCanvasTkAgg(pie_figure, master)
@@ -415,13 +414,13 @@ class dashboard_frame(ctk.CTkFrame):
         self.income_summary_sub = ctk.CTkLabel(self.income_summary_frame,text=f"as of {date.today().strftime('%B %d, %Y')}", font=("DM Sans Medium", 14), text_color=Color.Grey_Davy)
         self.income_summary_sub.grid(row=1, column=0, sticky="ew")
 
-        self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
+        self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.Red_Tulip, corner_radius=5)
         self.items_sales_frame.grid(row=2, column=0, sticky="nsew", padx=(income_frame_width*0.03), pady=(income_frame_height*0.05, income_frame_height*.015),)
         self.items_sales_frame.pack_propagate(0)
         self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
         self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
 
-        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
+        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.Light_Green, corner_radius=5)
         self.services_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(income_frame_width*0.03),pady=( income_frame_height*.015))
         self.services_sales_frame.pack_propagate(0)
         self.services_sales_label = ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
@@ -451,19 +450,24 @@ class dashboard_frame(ctk.CTkFrame):
         self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
         self.inventory_stat_label.grid(row=0, column=1, sticky="w", padx=(inventory_frame_width*0.04,0),pady=(inventory_frame_height*0.04,inventory_frame_height*0.02))
 
+        def show_status_popup(button_title):
+            self.status_popup.status_label.configure(text=button_title)
+            self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
+            #print(button)
+        
         self.reorder_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
-        self.reorder_level_button.configure(command=lambda: print("Show Items need reordering"))
+        self.reorder_level_button.configure(command=lambda: show_status_popup(self.reorder_level_button.winfo_children()[0].cget("text")))
         self.reorder_level_button.grid(row=1, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
         self.reorder_label = ctk.CTkLabel(self.reorder_level_button, text="Reorder Items", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.reorder_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
-        self.reorder_light = ctk.CTkLabel(self.reorder_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color=Color.Orange_Dandelion)
+        self.reorder_light = ctk.CTkLabel(self.reorder_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color="yellow")
         self.reorder_light.pack(side="right", padx=(inventory_frame_width*0.025,inventory_frame_width*0.05))
         self.reorder_count = ctk.CTkLabel(self.reorder_level_button, text="8", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.reorder_count.pack(side="right")
         self.reorder_level_button.update_children()
 
         self.critical_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
-        self.critical_level_button.configure(command=lambda: print("Show Items critical level"))
+        self.critical_level_button.configure(command=lambda: show_status_popup(self.critical_level_button.winfo_children()[0].cget("text")))
         self.critical_level_button.grid(row=2, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
         self.critical_label = ctk.CTkLabel(self.critical_level_button, text="Critical Items", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.critical_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
@@ -474,7 +478,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.critical_level_button.update_children()
 
         self.nearly_expired_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
-        self.nearly_expired_level_button.configure(command=lambda: print("Show nearly expired items"))
+        self.nearly_expired_level_button.configure(command=lambda: show_status_popup(self.nearly_expired_level_button.winfo_children()[0].cget("text")))
         self.nearly_expired_level_button.grid(row=3, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0, inventory_frame_height*0.02))
         self.nearly_expired_label = ctk.CTkLabel(self.nearly_expired_level_button, text="Nearly Expired Items", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.nearly_expired_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
@@ -485,22 +489,49 @@ class dashboard_frame(ctk.CTkFrame):
         self.nearly_expired_level_button.update_children()
 
         self.expired_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum, corner_radius=5,cursor="hand2")
-        self.expired_level_button.configure(command=lambda: print("Show expired items"))
+        self.expired_level_button.configure(command=lambda: show_status_popup(self.expired_level_button.winfo_children()[0].cget("text")))
         self.expired_level_button.grid(row=4, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0, inventory_frame_height*0.05))
         self.expired_label = ctk.CTkLabel(self.expired_level_button, text="Expired Items", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.expired_label.pack(side="left", padx=(inventory_frame_width*0.04,0))
-        self.expired_light = ctk.CTkLabel(self.expired_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color=Color.Red_Pastel)
+        self.expired_light = ctk.CTkLabel(self.expired_level_button, text="", height=inventory_frame_height*0.04, width=inventory_frame_width*0.03, corner_radius=8, fg_color="black")
         self.expired_light.pack(side="right", padx=(inventory_frame_width*0.025,inventory_frame_width*0.05))
         self.expired_count = ctk.CTkLabel(self.expired_level_button, text="3", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
         self.expired_count.pack(side="right")
         self.expired_level_button.update_children()
 
+        '''Schedule Appointments'''
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.sched_client_frame.grid(row=2, column=0, columnspan=4, padx= (width*.01 ,width*(.005)), pady=(height*0.017))
-
+        self.sched_client_frame.grid_propagate(0)
+        self.sched_client_frame.grid_columnconfigure(1,weight=1)
+        self.sched_client_frame.grid_rowconfigure(1,weight=1)
+        
+        ctk.CTkLabel(self.sched_client_frame, text="Scheduled Clients Today", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
+        self.sched_data_frame = ctk.CTkFrame(self.sched_client_frame)
+        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
+        
+        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.38, height=height*0.45,
+                                               column_format=f'/No:{int(width*.025)}-#r/ClientName:x-tl/Service:x-tr/Number:{int(width*.125)}-bD!30!30',
+                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
+        self.sched_data_treeview.pack()
+        
         self.log_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.log_history_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005) ,width * .01), pady=(height*0.017))
-
+        self.log_history_frame.grid_propagate(0)
+        self.log_history_frame.grid_columnconfigure(1,weight=1)
+        self.log_history_frame.grid_rowconfigure(1,weight=1)
+        
+        ctk.CTkLabel(self.log_history_frame, text="Action Logs", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
+        self.sched_data_frame = ctk.CTkFrame(self.log_history_frame)
+        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
+        
+        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.38, height=height*0.45,
+                                               column_format=f'/No:{int(width*.025)}-#r/User:x-tl/Time:x-bD!30!30',
+                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
+        self.sched_data_treeview.pack()
+        
+        self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
+        self.grid_forget()
 class transaction_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
     def __init__(self, master):
