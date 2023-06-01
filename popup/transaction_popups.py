@@ -255,65 +255,6 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                 self.destroy()
                 #reset into its default state
 
-            #From here
-            """self.left_frame = ctk.CTkFrame(self, bg_color='#c3c3c3')
-            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
-
-            self.services_lbl = ctk.CTkLabel(self.left_frame, text='Services:',font=("DM Sans Medium", 25))
-            self.services_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
-
-            self.services_entry = ctk.CTkEntry(self.left_frame, placeholder_text='item1', height=height*0.65, width=width*0.2)
-            self.services_entry.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
-
-            self.right_frame = ctk.CTkFrame(self)
-            self.right_frame.grid(row=0, column=1, padx=20, pady=10, sticky="nsew")
-
-            self.items_lbl = ctk.CTkLabel(self.right_frame, text='Items:',font=("DM Sans Medium", 25))
-            self.items_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
-
-            self.item_data = [('item1', format_price(float(s[4]))) for s in self._item_info]
-            self.item_list = cctk.cctkTreeView(self.right_frame, self.item_data, height=height*0.55, width=width*0.2,
-                                               column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
-            self.item_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
-
-            self.rightmost_frame = ctk.CTkFrame(self, height=height*0.78, width=width*0.312, fg_color='white')
-            self.rightmost_frame.grid(row=0, column=2, padx=20, pady=10, sticky="ne")
-
-            self.total_frame = ctk.CTkFrame(self.rightmost_frame)
-            self.total_frame.grid(row=0, column=0, padx=10, pady=10, sticky="new")
-
-            self.total_lbl = ctk.CTkLabel(self.total_frame, text='Total:',font=("DM Sans Medium", 15))
-            self.total_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
-
-            self.total_val = ctk.CTkEntry(self.total_frame, height=height*0.12, width=width*0.285, font=('DM Sans Medium', 35))
-            self.total_val.insert(0, self._total_price)
-            self.total_val.configure(state = 'readonly')
-            self.total_val.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="n")
-
-            self.payment_options_frame = ctk.CTkFrame(self.rightmost_frame)
-            self.payment_options_frame.grid(row=1, column=0, padx=10, pady=(10, height*0.375), sticky="new")
-
-            self.payment_lbl = ctk.CTkLabel(self.payment_options_frame, text='Payment Method:',font=("DM Sans Medium", 15))
-            self.payment_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
-
-            self.payment_method_cbox = ctk.CTkOptionMenu(self.payment_options_frame, values=["Cash", "Card", "Bank Statement"], height=height*0.05,width=width*0.285)
-            self.payment_method_cbox.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="ew")
-
-            self.payment_frame = ctk.CTkFrame(self.rightmost_frame)
-            self.payment_frame.grid(row=3, column=0, padx=10, pady=(20, 10), sticky="new")
-
-            self.payment_lbl = ctk.CTkLabel(self.payment_frame, text='Payment:',font=("Poppins", 25))
-            self.payment_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
-
-            self.payment_entry = ctk.CTkEntry(self.payment_frame, height=height*0.12, width=width*0.31)
-            self.payment_entry.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="n")
-
-
-            self.proceed_button = ctk.CTkButton(self.rightmost_frame, text='Proceed', command= record_transaction)
-            self.proceed_button.grid(row=3, column=0, padx=10, pady=10, sticky="sew")
-            self.cancel_button = ctk.CTkButton(self.rightmost_frame, text='Cancel', command= lambda: self.destroy())
-            self.cancel_button.grid(row=4, column=0, padx=10, pady=10, sticky="sew")"""
-
             self.left_frame = ctk.CTkFrame(self)
             self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
 
@@ -381,3 +322,95 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.payment_entry.focus_force()
             self.payment_entry.bind('<Shift-Return>', auto_pay)
     return instance(master, info, item_info, services_info, total_price)
+
+def customer_info(master, info:tuple, parent= None) -> ctk.CTkFrame:
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, parent):
+            width = info[0]
+            height = info[1]
+            #basic inforamtion needed; measurement
+
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="red")
+            #the actual frame, modification on the frame itself goes here
+            self.value:tuple = (None, None, None, None)
+
+            def hide():
+                self.place_forget()
+                self.pack_forget()
+                self.grid_forget()
+
+            def discard():
+                if messagebox.askyesno('NOTE!', 'all changes will be discarded?'):
+                    self.pet_name.delete(0, ctk.END)
+                    self.animal_breed_entry.delete(0, ctk.END)
+                    self.scheduled_service_entry.delete(0, ctk.END)
+                    self.note_entry.delete(0, ctk.END)
+                    self.pet_name.insert(0, self.value[0] or '')
+                    self.animal_breed_entry.insert(0, self.value[1] or '')
+                    self.scheduled_service_entry.insert(0, self.value[2] or '')
+                    self.note_entry.insert(0, self.value[3] or '')
+                    hide()
+
+
+            def record():
+                self.value = (self.pet_name.get(), self.animal_breed_entry.get(), self.scheduled_service_entry.get(), self.note_entry.get())
+                if isinstance(parent, cctk.info_tab):
+                    parent.value = self.value
+                hide()
+
+
+            self.left_frame = ctk.CTkFrame(self, bg_color='#c3c3c3')
+            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
+
+            self.pet_info_lbl = ctk.CTkLabel(self.left_frame, text='Pet Info',font=("Poppins", 45))
+            self.pet_info_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+            #Name label
+            self.Name_lbl = ctk.CTkLabel(self.left_frame, text='Name:',font=("Poppins", 25))
+            self.Name_lbl.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
+            #Name entry
+            self.pet_name = ctk.CTkEntry(self.left_frame, placeholder_text='chao pan', height=height*0.09, width=width*0.795, font=("Poppins", 25))
+            self.pet_name.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ns")
+            #Breed and Animal Type label
+            self.animal_breed_lbl = ctk.CTkLabel(self.left_frame, text='Breed and Animal Type:',font=("Poppins", 25))
+            self.animal_breed_lbl.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="nw")
+            #Breed and Animal Type entry
+            self.animal_breed_entry = ctk.CTkEntry(self.left_frame, placeholder_text='dog', height=height*0.09, width=width*0.795, font=("Poppins", 25))
+            self.animal_breed_entry.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="ns")
+            #calendar and note frame
+            self.middle_frame = ctk.CTkFrame(self.left_frame, bg_color='#D9D9D9', fg_color='#D9D9D9')
+            self.middle_frame.grid(row=5, column=0, padx=10, pady=(20, 10), sticky="nsw")
+            #sched service frame
+            self.schedule_service_frame = ctk.CTkFrame(self.middle_frame, bg_color='#D9D9D9')
+            self.schedule_service_frame.grid(row=0, column=0, padx=10, pady=(20, 10), sticky="nsw")
+            #Scheduled service label
+            self.scheduled_service_lbl = ctk.CTkLabel(self.schedule_service_frame, text='Scheduled Service:',font=("Poppins", 25))
+            self.scheduled_service_lbl.grid(row=0, column=0, padx=(10, 0), pady=(0, 10), sticky="nw")
+            #Scheduled service entry
+            self.scheduled_service_entry = ctk.CTkEntry(self.schedule_service_frame, placeholder_text='date', height=height*0.09, width=width*0.285, font=("Poppins", 25))
+            self.scheduled_service_entry.grid(row=1, column=0, padx=(10, 0), pady=(0, 10), sticky="ns")
+            #note frame
+            self.note_frame = ctk.CTkFrame(self.middle_frame, bg_color='#D9D9D9')
+            self.note_frame.grid(row=0, column=1, padx=10, pady=(20, 10), sticky="nsw")
+            #note label
+            self.note_lbl = ctk.CTkLabel(self.note_frame, text='Note:',font=("Poppins", 25))
+            self.note_lbl.grid(row=0, column=1, padx=10, pady=(10, 0), sticky="nw")
+            #note entry
+            self.note_entry = ctk.CTkEntry(self.note_frame, placeholder_text='a dog', height=height*0.25, width=width*0.445, font=("Poppins", 25))
+            self.note_entry.grid(row=1, column=1, padx=10, pady=(0, 10), sticky="ns")
+
+
+            self.rightmost_frame = ctk.CTkFrame(self, height=height*0.78, width=width*0.312, fg_color='white')
+            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
+
+            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=height*0.78, width=width*0.312, fg_color='white')
+
+            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
+
+            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=discard, width=270, font=("Poppins-Bold", 45))
+
+            self.back_button.grid(row=0, column=1, padx=20, pady=(15, 15), sticky='s')
+
+            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=record, width=270, font=("Poppins-Bold", 45))
+            self.select_button.grid(row=0, column=2, padx=(0, 20), pady=(15, 15), sticky="se")
+            #on out
+    return instance(master, info, parent)
