@@ -454,7 +454,7 @@ class dashboard_frame(ctk.CTkFrame):
             self.status_popup.status_label.configure(text=button_title)
             self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
             #print(button)
-        
+
         self.reorder_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
         self.reorder_level_button.configure(command=lambda: show_status_popup(self.reorder_level_button.winfo_children()[0].cget("text")))
         self.reorder_level_button.grid(row=1, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
@@ -505,31 +505,32 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_client_frame.grid_propagate(0)
         self.sched_client_frame.grid_columnconfigure(1,weight=1)
         self.sched_client_frame.grid_rowconfigure(1,weight=1)
-        
+
         ctk.CTkLabel(self.sched_client_frame, text="Scheduled Clients Today", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
         self.sched_data_frame = ctk.CTkFrame(self.sched_client_frame)
         self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
-        
+
         self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.38, height=height*0.45,
-                                               column_format=f'/No:{int(width*.025)}-#r/ClientName:x-tl/Service:x-tr/Number:{int(width*.125)}-bD!30!30',
+                                               column_format=f'/No:{int(width*.03)}-#r/ClientName:x-tl/Service:x-tr/Number:{int(width*.125)}-bD!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
         self.sched_data_treeview.pack()
-        
+
         self.log_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.log_history_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005) ,width * .01), pady=(height*0.017))
         self.log_history_frame.grid_propagate(0)
         self.log_history_frame.grid_columnconfigure(1,weight=1)
         self.log_history_frame.grid_rowconfigure(1,weight=1)
-        
+
         ctk.CTkLabel(self.log_history_frame, text="Action Logs", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
-        self.sched_data_frame = ctk.CTkFrame(self.log_history_frame)
-        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
-        
-        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.38, height=height*0.45,
-                                               column_format=f'/No:{int(width*.025)}-#r/User:x-tl/Time:x-bD!30!30',
+        self.action_data_frame = ctk.CTkFrame(self.log_history_frame)
+        self.action_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
+
+        self.action_log_data = database.fetch_data(sql_commands.get_log_audit_for_today)
+        self.action_log_treeview = cctk.cctkTreeView(self.action_data_frame, width=width*0.38, height=height*0.45,
+                                               column_format=f'/No:{int(width*.03)}-#r/User:x-tl/Time:x-bD!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
-        self.sched_data_treeview.pack()
-        
+        self.action_log_treeview.pack()
+
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.grid_forget()
 class transaction_frame(ctk.CTkFrame):
