@@ -237,7 +237,7 @@ def restock( master, info:tuple):
 
             self.item_frame =ctk.CTkFrame(self.main_frame, corner_radius=0)
             self.item_frame.pack(fill="x", expand=0, padx=width*0.008, pady=height*0.01)
-            self.item_frame.grid_columnconfigure(0, weight=1)
+            self.item_frame.grid_columnconfigure(1, weight=1)
 
             ctk.CTkLabel(self.item_frame, text='ITEM', anchor='w', font=('DM Sans Medium', 18), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
             ctk.CTkLabel(self.item_frame, text='Item Name', anchor='w').grid(row = 1, column = 0, padx = 12, sticky = 'nsew')
@@ -247,7 +247,15 @@ def restock( master, info:tuple):
             self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
                                                            values= list(item))
 
-            self.item_name_entry.grid(row = 2, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
+            self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))
+            
+            ctk.CTkLabel(self.item_frame, text="Initial Price Change:").grid(row=3, column=0, sticky="w",pady = (height*0.01,0), padx= (width*0.01))
+            self.item_init_price_change =ctk.CTkEntry(self.item_frame)
+            self.item_init_price_change.grid(row=3, column=1, sticky="w")
+            
+            ctk.CTkLabel(self.item_frame, text="Narkup Change:").grid(row=4, column=0,sticky="w",pady = (height*0.01), padx= (width*0.01))
+            self.item_markup_change =ctk.CTkEntry(self.item_frame)
+            self.item_markup_change.grid(row=4, column=1,  sticky="w")
 
             self.restock_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
             self.restock_frame.pack(fill="both", expand=1, padx=width*0.008, pady=(0,height*0.01))
