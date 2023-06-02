@@ -337,6 +337,7 @@ class dashboard(ctk.CTkToplevel):
         self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = (5,0))
         self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][2]).upper(), font=("Poppins Medium", 12))
         self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
+        
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.acc_btn.update_children()
         self.update()
@@ -499,39 +500,45 @@ class dashboard_frame(ctk.CTkFrame):
         self.expired_count.pack(side="right")
         self.expired_level_button.update_children()
 
+       
+        self.sales_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
+        self.sales_history_frame.grid(row=2, column=0, columnspan=4, padx= (width * .01, width*(.005)), pady=(height*0.017))
+        self.sales_history_frame.grid_propagate(0)
+        self.sales_history_frame.grid_columnconfigure(1,weight=1)
+        self.sales_history_frame.grid_rowconfigure(1,weight=1)
+        
+        ctk.CTkLabel(self.sales_history_frame, text=f"Sales History", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=(width*0.02,0), pady=(height*0.025, height*0.005))
+        ctk.CTkLabel(self.sales_history_frame, text=f"as of {date.today().strftime('%B %Y')}", text_color="grey", font=("DM Sans Medium",14)).grid(row=0, column=1, sticky="sw", padx=(width*0.005,0), pady=(0,height*0.005))
+        self.sales_data_frame = ctk.CTkFrame(self.sales_history_frame, fg_color="transparent")
+        self.sales_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",pady=(0))
+        
+        self.sales_data_treeview = cctk.cctkTreeView(self.sales_data_frame, width=width*0.365, height=height*0.45, 
+                                               column_format=f'/No:{int(width*.03)}-#c/Day:x-tl/Total:x-tl/Action:{int(width*0.05)}-tc!30!30',
+                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
+        self.sales_data_treeview.pack()
+        
+        self.current_total = ctk.CTkLabel(self.sales_history_frame, text="Total:   0,000.00", fg_color=Color.White_Chinese, corner_radius=5,height=height*0.05, width=width*0.1, font=("DM Sans Medium", 14))
+        self.current_total.grid(row=2, column=1, sticky="e", padx=width*0.015, pady=(height*0.005,height*0.015))
+        
         '''Schedule Appointments'''
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
-        self.sched_client_frame.grid(row=2, column=0, columnspan=4, padx= (width*.01 ,width*(.005)), pady=(height*0.017))
+        self.sched_client_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005),width*.01), pady=(height*0.017), sticky="nsew")
         self.sched_client_frame.grid_propagate(0)
         self.sched_client_frame.grid_columnconfigure(1,weight=1)
         self.sched_client_frame.grid_rowconfigure(1,weight=1)
         
         ctk.CTkLabel(self.sched_client_frame, text="Scheduled Clients Today", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
-        self.sched_data_frame = ctk.CTkFrame(self.sched_client_frame)
-        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
+        self.sched_data_frame = ctk.CTkFrame(self.sched_client_frame, fg_color="transparent")
+        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",pady=(0, height*0.025))
         
-        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.38, height=height*0.45,
-                                               column_format=f'/No:{int(width*.025)}-#r/ClientName:x-tl/Service:x-tr/Number:{int(width*.125)}-bD!30!30',
-                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
-        self.sched_data_treeview.pack()
-        
-        self.log_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
-        self.log_history_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005) ,width * .01), pady=(height*0.017))
-        self.log_history_frame.grid_propagate(0)
-        self.log_history_frame.grid_columnconfigure(1,weight=1)
-        self.log_history_frame.grid_rowconfigure(1,weight=1)
-        
-        ctk.CTkLabel(self.log_history_frame, text="Action Logs", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
-        self.sched_data_frame = ctk.CTkFrame(self.log_history_frame)
-        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
-        
-        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.38, height=height*0.45,
-                                               column_format=f'/No:{int(width*.025)}-#r/User:x-tl/Time:x-bD!30!30',
+        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.365, height=height*0.45,
+                                               column_format=f'/No:{int(width*.03)}-#c/ClientName:x-tl/Service:x-#l/Contact:x-tl!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
         self.sched_data_treeview.pack()
         
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.grid_forget()
+        
 class transaction_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
     def __init__(self, master):
@@ -583,7 +590,7 @@ class transaction_frame(ctk.CTkFrame):
         self.service_frame.grid_rowconfigure(0, weight=1)
 
         self.service_treeview = cctk.cctkTreeView(self.service_frame, width=width*0.8, height=height*0.3,
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Patient:x-#l/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',)
+                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Patient:x-#l/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!30!30',)
         self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
         self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
@@ -597,7 +604,7 @@ class transaction_frame(ctk.CTkFrame):
         self.service_total_frame.pack_propagate(0)
         self.service_total_label = ctk.CTkLabel(self.service_total_frame, text="Service Total:", font=("DM Sans Medium", 14))
         self.service_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
+        self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000.00", font=("DM Sans Medium", 14))
         self.service_total_value.pack(side="right", padx=(0, width*0.01))
 
         self.item_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
@@ -605,8 +612,8 @@ class transaction_frame(ctk.CTkFrame):
         self.item_frame.grid_columnconfigure(0, weight=1)
         self.item_frame.grid_rowconfigure(0, weight=1)
 
-        self.item_treeview = cctk.cctkTreeView(self.item_frame, width=width*0.8, height=height*0.3,
-                                               column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ItemName:x-tl/Price:{int(width*.07)}-tr/Quantity:{int(width*.1)}-id/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tr/Action:{int(width*.05)}-bD!50!40')
+        self.item_treeview = cctk.cctkTreeView(self.item_frame, width=width*0.8, height=height*0.3, row_hover_color="light grey",
+                                               column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ItemName:x-tl/Price:{int(width*.07)}-tr/Quantity:{int(width*.15)}-id/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tr/Action:{int(width*.05)}-bD!30!30')
         self.item_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
 
@@ -621,7 +628,7 @@ class transaction_frame(ctk.CTkFrame):
         self.item_total_frame.pack_propagate(0)
         self.item_total_label = ctk.CTkLabel(self.item_total_frame, text="Item Total:", font=("DM Sans Medium", 14))
         self.item_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
+        self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("DM Sans Medium", 14))
         self.item_total_value.pack(side="right", padx=(0, width*0.01))
 
 

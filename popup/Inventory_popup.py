@@ -321,21 +321,21 @@ def show_status(master, info:tuple,):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
-            self.status_frame = ctk.CTkFrame(self.main_frame, height=height*0.065, width=width*0.25)
+            self.status_frame = ctk.CTkFrame(self.main_frame, height=height*0.055, width=width*0.25)
             self.status_frame.grid(row=1, column=0,sticky="w", padx=width*0.005, pady=height*0.01)
             self.status_frame.pack_propagate(0)
             
-            self.status_label = ctk.CTkLabel(self.status_frame, text="", font=("DM Sans Medium", 18))
+            self.status_label = ctk.CTkLabel(self.status_frame, text="", font=("DM Sans Medium", 14))
             self.status_label.pack(side="left", padx=width*0.015)
             
-            self.status_count = ctk.CTkLabel(self.status_frame, text="#", font=("DM Sans Medium", 18))
+            self.status_count = ctk.CTkLabel(self.status_frame, text="#", font=("DM Sans Medium", 14))
             self.status_count.pack(side="right", padx=width*0.015)
             
-            self.db_inventory_frame = ctk.CTkFrame(self.main_frame)
-            self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
+            self.db_inventory_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Ghost)
+            self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", pady=(0,height*0.025))
             
-            self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.5, height=height*0.85,
-                                               column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:x-bD!30!30',
+            self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.485, height=height*0.8,
+                                               column_format=f'/No:{int(width*.025)}-#r/ItemCode:{int(width*0.1)}-tc/ItemName:x-tl/Quantity:{int(width*0.08)}-tl/Action:{int(width*0.05)}-tc!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
             self.db_inventory_treeview.pack()
             
