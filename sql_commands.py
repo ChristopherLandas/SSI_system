@@ -84,7 +84,7 @@ record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?
 record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?)"
 
 #UPDATING STOCK AFTER TRANSACTION
-get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL ORDER BY Expiry_Date ASC"
+get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
 
 #FOR SALES
 get_transaction_data = "SELECT * FROM transaction_record"
