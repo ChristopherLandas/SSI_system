@@ -137,7 +137,7 @@ class customcustomtkinter:
                      header_color: Union[str, tuple] = '#006611', data_grid_color: Union[list, tuple] = ('#333333', '#444444'),
                      selected_color: Union [tuple, str] = brighten_color('#006611', 1.3),
                      conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 20),
-                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#0000ff', content_color: Optional[Union[str, Tuple[str, str]]] = 'black',
+                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'black',
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = 'black',
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
@@ -267,6 +267,12 @@ class customcustomtkinter:
                         temp._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
                         temp._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
+                    #for info tab column
+                    elif self.column_types[j] == 'iT':
+                        temp:customcustomtkinter.info_tab = customcustomtkinter.info_tab(frm, width= self.column_widths[j], corner_radius= 0,
+                                                                                         border_width=0, fg_color='transparent')
+                        temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
+                        #modified_data = list(self._data[-1]).insert(j, temp.val)
                     #for special type column
                     else:
                         temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
@@ -279,6 +285,7 @@ class customcustomtkinter:
                         elif self.column_types[j] == 'id':
                             spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent')
                             spinner.place(relx = .5, rely = .5, anchor = 'c')
+
                     if self.column_types[j][0] == 't':
                         tI += 1
                 # generates the content from the frame
@@ -500,6 +507,7 @@ class customcustomtkinter:
                              background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
             self._tab = tab
             self._button_text  = button_text
+            self.value = None
             self.button = ctk.CTkButton(self, width * .8, height * .8, 12, text = self._button_text)
             self.button.place(relx = .5, rely = .5, anchor = 'c')
 
