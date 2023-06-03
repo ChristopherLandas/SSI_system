@@ -33,7 +33,7 @@ class dashboard(ctk.CTkToplevel):
         self.state("zoomed")
         self.update()
         self.attributes("-fullscreen", True)
-        '''
+        self._master = master
         #makes the form full screen and removing the default tab bar
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
@@ -55,7 +55,7 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        self._master = master
+        '''
 
         '''Fonts'''
         '''
@@ -450,8 +450,10 @@ class dashboard_frame(ctk.CTkFrame):
         self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
         self.inventory_stat_label.grid(row=0, column=1, sticky="w", padx=(inventory_frame_width*0.04,0),pady=(inventory_frame_height*0.04,inventory_frame_height*0.02))
 
-        def show_status_popup(button_title):
+        def show_status_popup(button_title: str):
             self.status_popup.status_label.configure(text=button_title)
+            if 'reorder' in button_title.lower():
+                self.status_popup.db_inventory_treeview.update_table(database.fetch_data(sql_commands.get_reorder_items))
             self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
             #print(button)
 
@@ -526,8 +528,8 @@ class dashboard_frame(ctk.CTkFrame):
         self.action_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
 
         self.action_log_data = database.fetch_data(sql_commands.get_log_audit_for_today)
-        self.action_log_treeview = cctk.cctkTreeView(self.action_data_frame, width=width*0.38, height=height*0.45,
-                                               column_format=f'/No:{int(width*.03)}-#r/User:x-tl/Time:x-bD!30!30',
+        self.action_log_treeview = cctk.cctkTreeView(self.action_data_frame, width=width*0.38, height=height*0.45, data = self.action_log_data,
+                                               column_format=f'/No:{int(width*.03)}-#r/User:x-tl/Time:x-tc!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
         self.action_log_treeview.pack()
 
@@ -584,7 +586,7 @@ class transaction_frame(ctk.CTkFrame):
         self.service_frame.grid_rowconfigure(0, weight=1)
 
         self.service_treeview = cctk.cctkTreeView(self.service_frame, width=width*0.8, height=height*0.3,
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Patient:x-#l/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',)
+                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Pet:x-iT/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',)
         self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
         self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
@@ -857,4 +859,4 @@ class histlog_frame(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget();
 
-dashboard(None, 'admin', datetime.datetime.now)
+#dashboard(None, 'admin', datetime.datetime.now)
