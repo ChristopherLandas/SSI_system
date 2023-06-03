@@ -163,6 +163,10 @@ class loginUI(ctk.CTk):
             self.show_pass_btn.configure(image=self.hide_icon)
             self.__is_PasswordVisible = True
 
+    def wm_deiconify(self) -> None:
+        self.password_entry.delete(0, ctk.END)
+        return super().wm_deiconify()
+
 if __name__ == '__main__':
     app = loginUI()
     app.mainloop()
