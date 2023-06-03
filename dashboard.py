@@ -337,6 +337,7 @@ class dashboard(ctk.CTkToplevel):
         self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = (5,0))
         self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][2]).upper(), font=("Poppins Medium", 12))
         self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
+        
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.acc_btn.update_children()
         self.update()
@@ -456,7 +457,7 @@ class dashboard_frame(ctk.CTkFrame):
                 self.status_popup.db_inventory_treeview.update_table(database.fetch_data(sql_commands.get_reorder_items))
             self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
             #print(button)
-
+            
         self.reorder_level_button  = cctk.ctkButtonFrame(self.inventory_stat_frame, height=inventory_frame_height*0.04, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
         self.reorder_level_button.configure(command=lambda: show_status_popup(self.reorder_level_button.winfo_children()[0].cget("text")))
         self.reorder_level_button.grid(row=1, column=1, sticky="nsew", padx=(inventory_frame_width*0.025 ),pady=(0,inventory_frame_height*0.02))
@@ -535,6 +536,7 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.grid_forget()
+        
 class transaction_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
     def __init__(self, master):
@@ -600,7 +602,7 @@ class transaction_frame(ctk.CTkFrame):
         self.service_total_frame.pack_propagate(0)
         self.service_total_label = ctk.CTkLabel(self.service_total_frame, text="Service Total:", font=("DM Sans Medium", 14))
         self.service_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
+        self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000.00", font=("DM Sans Medium", 14))
         self.service_total_value.pack(side="right", padx=(0, width*0.01))
 
         self.item_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
@@ -608,8 +610,8 @@ class transaction_frame(ctk.CTkFrame):
         self.item_frame.grid_columnconfigure(0, weight=1)
         self.item_frame.grid_rowconfigure(0, weight=1)
 
-        self.item_treeview = cctk.cctkTreeView(self.item_frame, width=width*0.8, height=height*0.3,
-                                               column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ItemName:x-tl/Price:{int(width*.07)}-tr/Quantity:{int(width*.1)}-id/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tr/Action:{int(width*.05)}-bD!50!40')
+        self.item_treeview = cctk.cctkTreeView(self.item_frame, width=width*0.8, height=height*0.3, row_hover_color="light grey",
+                                               column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ItemName:x-tl/Price:{int(width*.07)}-tr/Quantity:{int(width*.15)}-id/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tr/Action:{int(width*.05)}-bD!30!30')
         self.item_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
 
 
@@ -624,7 +626,7 @@ class transaction_frame(ctk.CTkFrame):
         self.item_total_frame.pack_propagate(0)
         self.item_total_label = ctk.CTkLabel(self.item_total_frame, text="Item Total:", font=("DM Sans Medium", 14))
         self.item_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
+        self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("DM Sans Medium", 14))
         self.item_total_value.pack(side="right", padx=(0, width*0.01))
 
 

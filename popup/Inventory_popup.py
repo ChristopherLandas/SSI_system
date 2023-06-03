@@ -313,6 +313,7 @@ def show_status(master, info:tuple,):
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(2,weight=1)
 
+
             self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
             self.top_frame.grid(row=0, column=0, sticky="nsew")
             self.top_frame.pack_propagate(0)
@@ -338,6 +339,5 @@ def show_status(master, info:tuple,):
                                                column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tc/Quantity:x-tl!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
             self.db_inventory_treeview.pack()
-
 
     return show_status(master, info,)
