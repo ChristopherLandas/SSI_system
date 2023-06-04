@@ -180,7 +180,7 @@ class customcustomtkinter:
             #make the root frame fixed in sizesz
             for i in range(len(self.column_titles)):
                 btn = None
-                if self.column_types[i] == 't' or self.column_types[i] == '#' or self.column_types[i] == 'q':
+                if self.column_types[i] in ['tc', 'tr', 'tl', '#c', '#r', '#l', 't', '#']:
                     btn = customcustomtkinter.ctkButtonFrame(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                                              hover_color= brighten_color(self._header_color, 1.75))
                     title = ctk.CTkLabel(btn, text=self.column_titles[i], font=self.navbar_font)
@@ -356,6 +356,7 @@ class customcustomtkinter:
 
             self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False, date_pattern="mm-dd-yyyy",
                                 mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
+
             self.cal.pack(fill="both", expand=True, padx=5, pady=5)
 
             self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)

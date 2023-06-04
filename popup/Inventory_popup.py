@@ -179,8 +179,6 @@ def restock( master, info:tuple):
         def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
-            acc_cred = info[2]
-            acc_info = info[3]
             super().__init__(master,  width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -215,15 +213,11 @@ def restock( master, info:tuple):
                 else:# if there's no exisiting table; create new instance of an item
                     database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.value, self.expiry_date_entry._text or None)]])
 
-              # database.exec_nonquery([['INSERT INTO action_history VALUES (?, ?, ?)',
-                   #                     (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
                 messagebox.showinfo('Process Succesfull','Item successfully added')
                 master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
                 master.data_view1.update_table(master.data1)
                 master.data_view2.update_table(master.data2)
                 reset()
-
-            #ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.35, height=height*0.8)
             self.main_frame.grid(row=0, column=0, sticky="n", padx=width*0.01, pady=height*0.025)
