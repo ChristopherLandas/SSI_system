@@ -332,13 +332,13 @@ class dashboard(ctk.CTkToplevel):
                                            hover_color= Color.White_Gray,cursor="hand2")
 
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
-        self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
+        """ self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
         self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
         self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][1]).upper(), font=("Poppins Medium", 15))
         self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = (5,0))
         self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][2]).upper(), font=("Poppins Medium", 12))
         self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
-
+         """
         self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
         self.acc_btn.update_children()
         self.update()
@@ -579,7 +579,7 @@ class transaction_frame(ctk.CTkFrame):
         self.client_name_entry = ctk.CTkEntry(self.client_name_frame, placeholder_text="Client's Name",font=("DM Sans Medium", 15), border_width=0, fg_color="white")
         self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005,width*0.01), pady=(height*0.01))
 
-        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y : %X'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=2, padx=(0, width*0.005),  pady=(height*0.01))
 
@@ -845,8 +845,129 @@ class reports_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='7').pack(anchor='w')
+        #self.label = ctk.CTkLabel(self, text='7').pack(anchor='w')
+        self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
+        
+        self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
+        self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+
+        self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
+        self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))       
+        self.base_frame.grid_propagate(0)
+        self.base_frame.grid_columnconfigure(0, weight=1)
+        self.base_frame.grid_rowconfigure(1, weight=1)
+        
+        self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
+        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
+
+        self.report_frames=[self.sales_report_frame, self.inventory_report_frame]
+        self.active_report = None
+        
         self.grid_forget()
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        
+        selected_color = Color.Blue_Yale
+        
+        def load_main_frame(cur_frame: int):
+            if self.active_report is not None:
+                self.active_report.grid_forget()
+            self.active_report = self.report_frames[cur_frame]
+            self.active_report.grid(row =1, column =0, sticky = 'nsew',padx=width*0.005, pady=height*0.005)
+            
+        def report_menu_callback(report_type):
+           
+            if "Daily" in report_type:
+                self.date_selected_label.grid(row=0, column=1, padx=(0, width*0.005))
+                self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
+                self.month_option.grid_forget()
+                self.year_option.grid_forget()
+                self.year_option.grid_forget()
+            elif "Monthly" in report_type:
+                self.date_selected_label.grid_forget()
+                self.show_calendar.grid_forget()
+                self.month_option.grid(row=0, column=1)
+                self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
+            elif "Yearly" in report_type:
+                self.date_selected_label.grid_forget()
+                self.show_calendar.grid_forget()
+                self.month_option.grid_forget()
+                self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
+        
+        def set_date():
+            cctk.tk_calendar(self.date_selected_label,"%s", date_format="word")
+
+        operational_year = []
+        starting_year = 2014
+        for i in range((int(date.today().strftime('%Y'))+1)-starting_year):
+           operational_year.append(str(starting_year+i))
+            
+        
+        
+        self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
+        self.top_frame.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.01, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
+        
+        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=3, sticky="n")
+
+        self.sales_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125, 
+                                                       fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1)
+        self.sales_report_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.sales_report_button.configure(command=partial(load_main_frame, 0))
+        self.sales_report_icon = ctk.CTkLabel(self.sales_report_button, text="",image=self.sales_icon)
+        self.sales_report_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.sales_report_label = ctk.CTkLabel(self.sales_report_button, text="SALES REPORT", text_color="white",)
+        self.sales_report_label.pack(side="left")
+        self.sales_report_button.grid()
+        self.sales_report_button.update_children()
+                
+        self.inventory_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155, 
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1)
+        self.inventory_report_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.inventory_report_button.configure(command=partial(load_main_frame, 1))
+        self.inventory_report_icon = ctk.CTkLabel(self.inventory_report_button, text="",image=self.inventory_icon)
+        self.inventory_report_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.inventory_report_label = ctk.CTkLabel(self.inventory_report_button, text="INVENTORY REPORT", text_color="white")
+        self.inventory_report_label.pack(side="left")
+        self.inventory_report_button.grid()
+        self.inventory_report_button.update_children()
+    
+        self.button_manager = cctku.button_manager([self.sales_report_button, self.inventory_report_button], selected_color, False, 0)
+        self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
+                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"))
+        self.button_manager.click(self.button_manager._default_active, None)
+        
+        self.report_option_var = ctk.StringVar(value="Daily Report")
+        
+        self.sales_report_top = ctk.CTkFrame(self.sales_report_frame)
+        self.sales_report_top.grid(row=0, column=0, sticky="n", )
+        
+        self.report_type_menu = ctk.CTkOptionMenu(self.sales_report_top, values=["Daily Report", "Monthly Report", "Yearly Report"], variable=self.report_option_var,anchor="center",
+                                                  command=partial(report_menu_callback))
+        self.report_type_menu.grid(row=0, column=0, padx=(width*0.005), pady=height*0.005)
+        
+        self.date_selected_label = ctk.CTkLabel(self.sales_report_top, text=f"{date.today().strftime('%B %d, %Y')}", fg_color=Color.White_Color[3], corner_radius=5,
+                                                width=width*0.1)
+        self.date_selected_label.grid(row=0, column=1, padx=(0, width*0.005))
+        
+        self.show_calendar = ctk.CTkButton(self.sales_report_top, text="", image=self.calendar_icon, width=width*0.025,
+                                           command=set_date)
+        self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
+        
+        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values=["January", "Febuary", "March","April",
+                                                                             "May", "June", "July", "August","September",
+                                                                             "October", "November", "December"], anchor="center", width=width*0.1 )
+        self.month_option.set(f"{date.today().strftime('%B')}")
+        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center")
+        self.year_option.set(f"{date.today().strftime('%Y')}")
+        
+            
+        
+        load_main_frame(0)
 
 class user_setting_frame(ctk.CTkFrame):
     global width, height
@@ -854,7 +975,6 @@ class user_setting_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='8').pack(anchor='w')
         self.grid_forget()
-
 class histlog_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):

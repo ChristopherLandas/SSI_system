@@ -8,7 +8,7 @@ class Color:
     White_AntiFlash = "#F1F1F1"
     White_SilverSand = "#C5C5C5"
 
-    White_Color = ("#FCFCFC","#FFFDF6","#E5E5E5","#F9F9F9","#EFEFEF","#E0E0E0","#F1F1F1","#C5C5C5",)
+    White_Color = ("#FCFCFC","#FFFDF6","#E5E5E5","#F9F9F9","#EFEFEF","#E0E0E0","#F1F1F1","#C5C5C5","#B9B9B9")
     
     Blue_Oxford = "#0A2647"
     Blue_Maastricht = "#06283D"
