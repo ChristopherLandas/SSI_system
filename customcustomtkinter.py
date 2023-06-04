@@ -344,7 +344,7 @@ class customcustomtkinter:
             self.resizable(0,0)
 
             self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False,
-                                mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
+                                mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0", )
             self.cal.pack(fill="both", expand=True, padx=5, pady=5)
 
             self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)

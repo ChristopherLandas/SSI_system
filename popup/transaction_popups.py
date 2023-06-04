@@ -15,39 +15,56 @@ def show_item_list(master, info:tuple):
             self.width = info[0]
             self.height = info[1]
             self._treeview: cctk.cctkTreeView = info[2]
-            super().__init__(master, self.width * .8, self.height *.8, corner_radius= 0)
+            #basic inforamtion needed; measurement
 
-            self.columnconfigure(0, weight=1)
-            self.rowconfigure(1, weight=1)
-            self.grid_propagate(0)
+            super().__init__(master, self.width, self.height, corner_radius= 0, fg_color="transparent", bg_color='transparent')
+            #the actual frame, modification on the frame itself goes here
 
-            self.upper_frame = ctk.CTkFrame(self, height= self.height * .075, corner_radius= 0, fg_color='#222222')
-            self.upper_frame.pack_propagate(0)
-            self.upper_frame.grid(row = 0, column = 0, sticky = 'we')
-            ctk.CTkLabel(self.upper_frame, text='Add Item', font=('Arial', 24)).pack(side=ctk.LEFT, padx = (12, 0))
+            self.boxframe = ctk.CTkFrame(master , width = self.width * .92, height=self.height*0.835, bg_color='black', fg_color='white')
+            #self.boxframe.pack(anchor='center', pady = (71 , 0))
+
+            self.boxframe.pack_propagate(0)
+
+            self.left_frame = ctk.CTkFrame(self.boxframe, bg_color='#c3c3c3')
+            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
+
+            self.item_lbl = ctk.CTkLabel(self.left_frame, text='Items:',font=("Poppins", 45))
+            self.item_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.lower_frame = ctk.CTkFrame(self, corner_radius=0, fg_color='#111111')
-            self.item_table = cctk.cctkTreeView(self.lower_frame, self.data, self.width * .75, self.height * .65,
-                                                column_format='/name:x-tl/quantity:250-tl!50!30',
+            self.item_treeview = cctk.cctkTreeView(self.left_frame, self.data, self.width * .75, self.height * .65,
+                                                column_format=f'/Service:x-tl/Price:{round(self.width * .15)}-tl/Stocks:{round(self.width * .15)}-tl!35!30',
                                                 double_click_command= self.get_item)
-            self.item_table.pack(pady = (12, 0), fill='y')
-            self.select_btn = ctk.CTkButton(self.lower_frame, 120, 30, text='select', command= self.get_item)
-            self.select_btn.pack(pady = (0, 12))
-            self.lower_frame.grid(row = 1, column = 0, sticky = 'nsew')
-            #self.back_btn = ctk.CTkButton(self, width*.03, height * .4, text='back', command= reset).pack(pady = (12, 0))
+            self.item_treeview.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
+
+            self.rightmost_frame = ctk.CTkFrame(self.boxframe, height=self.height*0.78, width =self.width*0.312, fg_color='white')
+            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
+
+            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=self.height*0.78, width =self.width*0.312, fg_color='white')
+            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
+
+            self.back_button = ctk.CTkButton(self.x_fr, text='Back', width =270, font=("Poppins-Bold", 45), command= self.reset)
+
+            self.back_button.grid(row=0, column=1, padx=20, sticky='s')
+
+
+            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=self.get_item, width =270, font=("Poppins-Bold", 45))
+            self.select_button.grid(row=0, column=2, padx=(0, 20), sticky="se")
 
         def place(self, **kwargs):
+            self.boxframe.place(relx = .5, rely = .5, anchor = 'c')
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_table.update_table(self.data)
+            self.item_treeview.update_table(self.data)
             return super().place(**kwargs)
 
         def reset(self):
+            self.boxframe.place_forget()
             self.place_forget()
 
         def get_item(self, _: any = None):
             #if there's a selected item
-            if self.item_table.data_grid_btn_mng.active is not None:
-                item_name =  self.item_table.data_grid_btn_mng.active.winfo_children()[0]._text
+            if self.item_treeview.data_grid_btn_mng.active is not None:
+                item_name =  self.item_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
                 #getting the needed information for the item list
                 transaction_data = database.fetch_data(sql_commands.get_item_data_for_transaction, (item_name, ))[0]
                 #collects part of the data needed in the transaction
@@ -85,11 +102,11 @@ def show_item_list(master, info:tuple):
                             quantity_column.num_entry.configure(text_color = quantity_column._entry_text_color)
 
                     quantity_column.configure(command = spinner_command, base_val = transaction_data[2], value = 1, val_range = (1
-                    , int(self.item_table.data_grid_btn_mng.active.winfo_children()[1]._text)))
+                    , int(self.item_treeview.data_grid_btn_mng.active.winfo_children()[1]._text)))
                     #add a new record
                     master.change_total_value_item(transaction_data[2])
 
-                self.item_table.data_grid_btn_mng.deactivate_active()
+                self.item_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
     return instance(master, info)
@@ -104,38 +121,51 @@ def show_services_list(master, info:tuple):
             self._treeview: cctk.cctkTreeView = info[2]
             super().__init__(master, self.width * .8, self.height *.8, corner_radius= 0)
 
-            self.columnconfigure(0, weight=1)
-            self.rowconfigure(1, weight=1)
-            self.grid_propagate(0)
+            self.boxframe = ctk.CTkFrame(master , width = self.width * .92, height=self.height*0.835, bg_color='black', fg_color='white')
 
-            self.upper_frame = ctk.CTkFrame(self, height= self.height * .075, corner_radius= 0, fg_color='#222222')
-            self.upper_frame.pack_propagate(0)
-            self.upper_frame.grid(row = 0, column = 0, sticky = 'we')
-            ctk.CTkLabel(self.upper_frame, text='Add Service', font=('Arial', 24)).pack(side=ctk.LEFT, padx = (12, 0))
-            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.lower_frame = ctk.CTkFrame(self, corner_radius=0, fg_color='#111111')
-            self.service_table = cctk.cctkTreeView(self.lower_frame, self.data, self.width * .75, self.height * .65,
-                                                column_format='/Name:x-tl/Price:250-tl!50!30',
-                                                double_click_command= self.get_item)
-            self.service_table.pack(pady = (12, 0), fill='y')
-            self.select_btn = ctk.CTkButton(self.lower_frame, 120, 30, text='select', command= self.get_item)
-            self.select_btn.pack(pady = (0, 12))
-            self.lower_frame.grid(row = 1, column = 0, sticky = 'nsew')
-            #self.back_btn = ctk.CTkButton(self, width*.03, height * .4, text='back', command= reset).pack(pady = (12, 0))
+            self.boxframe.pack_propagate(0)
+
+            self.left_frame = ctk.CTkFrame(self.boxframe, bg_color='#c3c3c3')
+            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
+
+            self.services_lbl = ctk.CTkLabel(self.left_frame, text='Services:',font=("Poppins", 45))
+            self.services_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+
+            self.data = database.fetch_data(sql_commands.get_services_and_their_price)
+            self.service_treeview = cctk.cctkTreeView(self.left_frame, height=self.height*0.65, width =self.width*0.785,
+                                                       column_format='/Services:x-tl/Price:x-tr!35!30',
+                                                       double_click_command= self.get_service)
+            self.service_treeview.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
+
+            self.rightmost_frame = ctk.CTkFrame(self.boxframe, height=self.height*0.78, width =self.width*0.312, fg_color='white')
+            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
+
+            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=self.height*0.78, width =self.width*0.312, fg_color='white')
+            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
+
+            self.back_button = ctk.CTkButton(self.x_fr, text='Back', width =270, font=("Poppins-Bold", 45), command=self.reset)
+
+            self.back_button.grid(row=0, column=1, padx=20, sticky='s')
+
+
+            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=self.get_service, width =270, font=("Poppins-Bold", 45))
+            self.select_button.grid(row=0, column=2, padx=(0, 20), sticky="se")
 
         def place(self, **kwargs):
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price, None)
+            self.boxframe.place(relx = .5, rely = .5, anchor = 'c')
             self.data = [(s[1], s[3]) for s in raw_data]
-            self.service_table.update_table(self.data)
+            self.service_treeview.update_table(self.data)
             return super().place(**kwargs)
 
         def reset(self):
+            self.boxframe.place_forget()
             self.place_forget()
 
-        def get_item(self, _: any = None):
+        def get_service(self, _: any = None):
             #if there's a selected item
-            if self.service_table.data_grid_btn_mng.active is not None:
-                service_name =  self.service_table.data_grid_btn_mng.active.winfo_children()[0]._text
+            if self.service_treeview.data_grid_btn_mng.active is not None:
+                service_name =  self.service_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
                 #getting the needed information for the item list
                 transaction_data = database.fetch_data(sql_commands.get_services_data_for_transaction, (service_name, ))[0]
                 self._treeview.add_data(transaction_data+(0, transaction_data[2]))
@@ -145,7 +175,7 @@ def show_services_list(master, info:tuple):
                 info_tab._tab.place(relx = .5, rely = .5, anchor = 'c')
 
                 master.change_total_value_service(transaction_data[2])
-                self.service_table.data_grid_btn_mng.deactivate_active()
+                self.service_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
     return instance(master, info)
@@ -192,7 +222,6 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
                 for item in modified_items_list:
                     stocks = database.fetch_data(sql_commands.get_specific_stock, (item[1], ))
-                    print(item)
                     if stocks[0][2] is None:
                         database.exec_nonquery([[sql_commands.update_non_expiry_stock, (-item[3], item[1])]])
                     else:
