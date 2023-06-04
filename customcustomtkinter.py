@@ -180,7 +180,7 @@ class customcustomtkinter:
             #make the root frame fixed in sizesz
             for i in range(len(self.column_titles)):
                 btn = None
-                if self.column_types[i] == 't' or self.column_types[i] == '#' or self.column_types[i] == 'q':
+                if self.column_types[i] in ['tc', 'tr', 'tl', '#c', '#r', '#l', 't', '#']:
                     btn = customcustomtkinter.ctkButtonFrame(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                                              hover_color= brighten_color(self._header_color, 1.75))
                     title = ctk.CTkLabel(btn, text=self.column_titles[i], font=self.navbar_font)
