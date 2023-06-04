@@ -79,6 +79,27 @@ def price_format_to_float(val: str) -> float:
 def format_price(val: float) -> str:
     return '{:,.2f}'.format(val)
 
+def date_to_words(date):
+    months = [
+        "", "January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"
+    ]
+    month, day, year = date.split('-')
+
+    if day.startswith('0'):
+        day = day[1]
+    day = int(day)
+    if day > 31 or day < 1:
+        return "Invalid day"
+
+    month = int(month)
+    if month > 12 or month < 1:
+        return "Invalid month"
+    month = months[month]
+
+    # Combining day, month, and year
+    return "{} {}, {}".format(month, day, year)
+
 ''' example of inserting data
 usn = 'admin'
 pss = encrypt.pass_encrypt('admin', None)

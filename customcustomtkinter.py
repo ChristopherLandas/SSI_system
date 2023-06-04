@@ -320,14 +320,25 @@ class customcustomtkinter:
             return super().configure(require_redraw, **kwargs)
 
     class tk_calendar(ctk.CTkToplevel):
-        def __init__(self, label, format, *args, fg_color: str or Tuple[str, str] or None = None, **kwargs):
+        def __init__(self, label,format, *args, fg_color: str or Tuple[str, str] or None = None, date_format: str ="numerical", **kwargs):
             super().__init__(*args, fg_color=fg_color, **kwargs)
-
-            def set_date():
-                label.configure(text= ( format % (self.cal.selection_get())))
-                self.withdraw()
             import datetime
-
+            import util
+            
+            def set_date():
+                date_text = None
+                if "numerical" in date_format:
+                    #label.configure(text= ( format % (self.cal.get_date())))
+                    date_text = str(self.cal.get_date())
+                elif "word" in date_format:
+                    #label.configure(text= f"{util.date_to_words(str(self.cal.get_date()))}")
+                    date_text = str(util.date_to_words(str(self.cal.get_date())))
+                else:
+                    date_text = "Invalid Format"
+                
+                label.configure(text=date_text)
+                self.withdraw()
+            
             position_X = (self.winfo_screenwidth()/2)
             position_Y = (self.winfo_screenheight()/2)-(400/2)
 
@@ -336,7 +347,7 @@ class customcustomtkinter:
             self.geometry("%dx%d+%d+%d"%(400,400,position_X,position_Y))
             self.resizable(0,0)
 
-            self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False,
+            self.cal = Calendar(self, year=2000, month=1, day=1, showweeknumbers=False, date_pattern="mm-dd-yyyy",
                                 mindate=datetime.datetime.now(), normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
             self.cal.pack(fill="both", expand=True, padx=5, pady=5)
 
@@ -344,6 +355,7 @@ class customcustomtkinter:
             self.set_date.pack(pady=10)
 
             self.attributes('-topmost',1)
+        
 
     class cctkSpinnerCombo(ctk.CTkFrame):
         MAX_VAL = 2147483647
