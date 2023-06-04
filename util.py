@@ -34,7 +34,7 @@ class database:
             pass
         return None
 
-    def fetch_data(cmd, tup):
+    def fetch_data(cmd, tup:tuple = None):
         db_con = database.fetch_db_profile()
         try:
             db_cur = db_con.cursor()
