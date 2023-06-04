@@ -7,6 +7,7 @@ from util import database
 from tkinter import messagebox
 from constants import action
 from PIL import Image
+import datetime
 
 def add_item(master, info:tuple):
     class add_item(ctk.CTkFrame):
@@ -155,7 +156,7 @@ def add_item(master, info:tuple):
             self.expiration_date_entry.grid(row = 5, column = 0, sticky = 'nsew',columnspan=2, pady = (0,height*0.015), padx = (width*0.01,width*0.005 ))
 
             self.show_calendar = ctk.CTkButton(self.inventory_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
-                                               command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s"), corner_radius=3, state="disabled" )
+                                               command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()), corner_radius=3, state="disabled",  )
             self.show_calendar.grid(row=5, column=2, padx = (0,width*0.01), pady = (0,height*0.015), sticky="e")
 
             '''Action Frame'''
@@ -179,11 +180,15 @@ def restock( master, info:tuple):
         def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
+            acc_cred = info[2]
+            acc_info = info[3]
             super().__init__(master,  width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
 
+            
+            
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             '''events'''
             def reset():
@@ -213,11 +218,15 @@ def restock( master, info:tuple):
                 else:# if there's no exisiting table; create new instance of an item
                     database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.value, self.expiry_date_entry._text or None)]])
 
+              # database.exec_nonquery([['INSERT INTO action_history VALUES (?, ?, ?)',
+                   #                     (acc_cred[0], action.RESTOCKED_ITEM % (self.item_uid, self.stock_entry.get(), True))]])
                 messagebox.showinfo('Process Succesfull','Item successfully added')
                 master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
                 master.data_view1.update_table(master.data1)
                 master.data_view2.update_table(master.data2)
                 reset()
+
+            #ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.35, height=height*0.8)
             self.main_frame.grid(row=0, column=0, sticky="n", padx=width*0.01, pady=height*0.025)
@@ -261,7 +270,7 @@ def restock( master, info:tuple):
             self.expiry_date_entry.grid(row = 2, column = 0, columnspan=3,sticky = 'nsew', padx = 12, pady = (0, 12))
 
             self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
-                                               command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s"), corner_radius=3)
+                                               command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
             self.show_calendar.grid(row=2, column=3, padx = (0,width*0.01), pady = (0,height*0.015), sticky="w")
 
             ctk.CTkLabel(self.restock_frame, text='Stock', anchor='w').grid(row = 3, column = 0, padx = 12, sticky = 'nsew')
