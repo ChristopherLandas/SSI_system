@@ -6,6 +6,7 @@ from Theme import Color
 from util import database
 from tkinter import messagebox
 from constants import action
+import datetime
 from PIL import Image
 
 def add_item(master, info:tuple):
@@ -202,8 +203,10 @@ def restock( master, info:tuple):
                 self.action_btn.configure(state = ctk.NORMAL)
 
             def stock():
+                modified_dt: str = str(datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d'))
+                print(modified_dt)
                 inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
-                                                    (self.item_uid, self.expiry_date_entry._text or '1000-01-01'))
+                                                    (self.item_uid, modified_dt or '1000-01-01'))
 
                 if inventory_data: # if there was an already existing table; update the existing table
                     if inventory_data[0][2] is None:
@@ -211,7 +214,7 @@ def restock( master, info:tuple):
                     else:
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (int(self.stock_entry.value), self.item_uid, inventory_data[0][2])]])
                 else:# if there's no exisiting table; create new instance of an item
-                    database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.value, self.expiry_date_entry._text or None)]])
+                    database.exec_nonquery([[sql_commands.add_new_instance, (self.item_uid, self.stock_entry.value, modified_dt or None)]])
 
                 messagebox.showinfo('Process Succesfull','Item successfully added')
                 master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
@@ -335,3 +338,6 @@ def show_status(master, info:tuple,):
             self.db_inventory_treeview.pack()
 
     return show_status(master, info,)
+#nearly expire = 738588
+#
+# 738580
