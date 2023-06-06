@@ -188,8 +188,6 @@ def restock( master, info:tuple):
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
 
-
-
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             '''events'''
             def reset():

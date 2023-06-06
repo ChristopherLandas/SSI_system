@@ -35,10 +35,9 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
         self._master = master
-
-        '''
         #makes the form full screen and removing the default tab bar
-        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -50,8 +49,7 @@ class dashboard(ctk.CTkToplevel):
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
-        #for preventing security breach through python code; enable it to test it
-        '''
+        #for preventing security breach through python code; enable it to test it """
 
         global acc_info, acc_cred, date_logged
         date_logged = _date_logged;
@@ -518,8 +516,8 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.grid_forget()
-    def grid(self, **kwargs):
 
+    def grid(self, **kwargs):
         return super().grid(**kwargs)
 
 class transaction_frame(ctk.CTkFrame):
@@ -845,6 +843,8 @@ class reports_frame(ctk.CTkFrame):
         self.base_frame.grid_propagate(0)
         self.base_frame.grid_columnconfigure(0, weight=1)
         self.base_frame.grid_rowconfigure(1, weight=1)
+        
+
 
 
 
@@ -860,6 +860,7 @@ class reports_frame(ctk.CTkFrame):
 
         selected_color = Color.Blue_Yale
         '''Test DATA'''
+
         data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
 
@@ -936,6 +937,7 @@ class reports_frame(ctk.CTkFrame):
 
         def show_hbar(master, data, info=[], label=[]):
 
+
             height = info[1]
             width =info[0]
             fg_color = info[2]
@@ -987,6 +989,7 @@ class reports_frame(ctk.CTkFrame):
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=3, sticky="n")
 
+
         self.sales_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
                                                        fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
@@ -998,6 +1001,9 @@ class reports_frame(ctk.CTkFrame):
         self.sales_report_label.pack(side="left")
         self.sales_report_button.grid()
         self.sales_report_button.update_children()
+                
+        self.inventory_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155, 
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.inventory_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
