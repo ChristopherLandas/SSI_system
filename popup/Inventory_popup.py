@@ -188,8 +188,6 @@ def restock( master, info:tuple):
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
 
-            
-            
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             '''events'''
             def reset():
@@ -303,8 +301,6 @@ def show_status(master, info:tuple,):
         def __init__(self, master, info:tuple, ):
             width = info[0]
             height = info[1]
-            acc_cred = info[2]
-            acc_info = info[3]
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -342,11 +338,10 @@ def show_status(master, info:tuple,):
             self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
             self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.5, height=height*0.85,
-                                               column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tc/Quantity:x-tl!30!30',
+                                               column_format=f'/No:{int(width*.025)}-#c/ItemName:x-tl/Quantity:x-tl!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
             self.db_inventory_treeview.pack()
+        def update_treeview(self, data):
+            self.db_inventory_treeview.update_table(data)
 
     return show_status(master, info,)
-#nearly expire = 738588
-#
-# 738580
