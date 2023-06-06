@@ -191,15 +191,14 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             #basic inforamtion needed; measurement
             self._customer_info = customer_info
             self._pets_raw_info = pets_raw_info
-            self.pets_info = [s.value for s in self._pets_raw_info]
+            if(self._pets_raw_info is not None):
+                self.pets_info = [s.value for s in self._pets_raw_info]
             self.acc_cred = info[3]
             self._treeview = info[2]
             self._item_info = item_info
             self._services_info = services_info
             self._total_price = total_price
             #encapsulation
-
-            print(self.pets_info)
 
             super().__init__(master, width, height=height, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
@@ -215,14 +214,14 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                     messagebox.showinfo('Kulang', 'Ano to utang? Magbayad ka ng buo')
                     return
                 record_id =  database.fetch_data(sql_commands.generate_id_transaction, (None))[0][0]
-                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0], self._total_price)]])
+                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0], self._customer_info, self._total_price)]])
                 #record the transaction
 
                 modified_items_list = [(record_id, s[0], s[1], s[3], float(s[2]), 0) for s in self._item_info]
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in modified_items_list])
                 #record the items from eithin the transaction
 
-                modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.now().date()), float(s[2]), 0, 'ongoing') for s in self._services_info]
+                modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.now().date()), float(s[2]), 0, 0) for s in self._services_info]
                 database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in modified_services_list])
                 #record the services from eithin the transaction
 

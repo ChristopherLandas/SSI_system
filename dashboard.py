@@ -35,8 +35,10 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
         self._master = master
+
+        '''
         #makes the form full screen and removing the default tab bar
-        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -48,18 +50,16 @@ class dashboard(ctk.CTkToplevel):
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
-        #for preventing security breach through python code; enable it to test it """
-
+        #for preventing security breach through python code; enable it to test it
         '''
+
         global acc_info, acc_cred, date_logged
         date_logged = _date_logged;
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        '''
 
         '''Fonts'''
-        '''
         try:
             Font(file="Font/Poppins-Medium.ttf")
             Font(file="Font/Poppins-Regular.ttf")
@@ -76,9 +76,8 @@ class dashboard(ctk.CTkToplevel):
 
         except _tkinter.TclError:
             pass
-        '''
-        #for testing purposes, might delete after the development
 
+        #for testing purposes, might delete after the development
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
         self.dashboard_icon = ctk.CTkImage(light_image=Image.open("image/dashboard.png"),size=(22,22))
@@ -380,17 +379,19 @@ class dashboard_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Chinese)
-        self.data =[1457.75,4011.25]
+        self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
+                    float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
 
-        def show_pie(master, data):
+
+        def show_pie(master, data: list):
             labels = ["Items", "Service"]
 
 
-            data = data
+            data = data if data[0] + data[1] > 0 else [1, 0]
             pie_figure= Figure(figsize=(income_frame_width*0.006,income_frame_height*0.013), dpi=100)
             pie_figure.set_facecolor(Color.White_Ghost)
             ax =pie_figure.add_subplot(111)
-            ax.pie(data, autopct='%1.1f%%', startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Red_Tulip, Color.Light_Green],
+            ax.pie(data, autopct='%1.1f%%', startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Red_Tulip],
                    textprops={'fontsize':18, 'color': Color.White_Ghost, 'family':'monospace', 'weight':'bold' },)
             pie_figure.subplots_adjust(top=1,left=0,right=1, bottom=0)
 
@@ -418,23 +419,23 @@ class dashboard_frame(ctk.CTkFrame):
         self.income_summary_sub = ctk.CTkLabel(self.income_summary_frame,text=f"as of {date.today().strftime('%B %d, %Y')}", font=("DM Sans Medium", 14), text_color=Color.Grey_Davy)
         self.income_summary_sub.grid(row=1, column=0, sticky="ew")
 
-        self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.Red_Tulip, corner_radius=5)
+        self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.Light_Green, corner_radius=5)
         self.items_sales_frame.grid(row=2, column=0, sticky="nsew", padx=(income_frame_width*0.03), pady=(income_frame_height*0.05, income_frame_height*.015),)
         self.items_sales_frame.pack_propagate(0)
         self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
-        self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
+        self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text=f"₱{format_price(self.data[0])}", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
 
-        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.Light_Green, corner_radius=5)
+        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.Red_Tulip, corner_radius=5)
         self.services_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(income_frame_width*0.03),pady=( income_frame_height*.015))
         self.services_sales_frame.pack_propagate(0)
         self.services_sales_label = ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
-        self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
+        self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, text=f"₱{format_price(self.data[1])}", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
 
         self.total_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
         self.total_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(income_frame_width*0.03),pady=(income_frame_height*.015,0))
         self.total_sales_frame.pack_propagate(0)
         self.total_sales_label = ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(income_frame_width*.025,0))
-        self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text="₱000,000.00", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
+        self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text=f"₱{format_price(self.data[1] + self.data[0])}", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,income_frame_width*.025))
         #Watermelon Pie
         show_pie(self.income_summary_frame, self.data)
 
@@ -455,11 +456,11 @@ class dashboard_frame(ctk.CTkFrame):
         self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
         self.inventory_stat_label.grid(row=0, column=1, sticky="w", padx=(inventory_frame_width*0.04,0),pady=(inventory_frame_height*0.04,inventory_frame_height*0.02))
 
-        def show_status_popup(txt: str, data: list):
-            print(data)
-            self.status_popup.status_label.configure(text=txt)
+        def show_status_popup(name: str, data):
+            print(name)
+            self.status_popup.status_label.configure(text = name)
+            self.status_popup.update_treeview(data)
             self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
-            #print(button)
 
         self.inventory_content_frame = ctk.CTkScrollableFrame(self.inventory_stat_frame, height=inventory_frame_height*0.16)
         self.inventory_content_frame.grid_propagate()
@@ -473,14 +474,15 @@ class dashboard_frame(ctk.CTkFrame):
                      ('Near Expire', '#ff7900', database.fetch_data(sql_commands.get_near_expire_state) or None),
                      ('Expire', '#dd0000', database.fetch_data(sql_commands.get_expired_state) or None)]
         stat_data = [s for s in stat_data if s[-1] is not None]
+        stat_tabs_info: dict = {s[0]: s[-1] for s in stat_data}
 
         for i in range(len(stat_data)):
-            self.stat_tabs.append(dashboard_popup.status_bar(self.inventory_content_frame, (inventory_frame_width, inventory_frame_height),
-                                                                                            stat_data[i][0], stat_data[i][1],
-                                                                                            len(stat_data[i][-1])))
-            #self.stat_tabs[-1].configure(command=lambda: show_status_popup((self.stat_tabs[-1].winfo_children()[0].cget("text"), stat_data[self.stat_tabs.index(self.stat_tabs[-1])])))
-            self.stat_tabs[-1].configure(command= lambda: show_status_popup())
+            temp = dashboard_popup.status_bar(self.inventory_content_frame, (inventory_frame_width, income_frame_height),
+                                                                             stat_data[i][0], stat_data[i][1],
+                                                                             len(stat_data[i][-1]), show_status_popup, stat_tabs_info)
+            self.stat_tabs.append(copy.copy(temp))
             self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(inventory_frame_width*0.001 ),pady=(0,inventory_frame_height*0.02))
+            del temp
 
         '''Schedule Appointments'''
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
@@ -516,7 +518,10 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.grid_forget()
-        
+    def grid(self, **kwargs):
+
+        return super().grid(**kwargs)
+
 class transaction_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
     def __init__(self, master):
@@ -530,9 +535,8 @@ class transaction_frame(ctk.CTkFrame):
             self.item_total_value.configure(text = '0.00')
 
         def proceed():
-            print(len(self.service_treeview._data) > 0, not self.client_name_entry.get())
-            if len(self.service_treeview._data) > 0 and not self.client_name_entry.get():
-                messagebox.showerror('Unable to Proceed', 'Customer\'s Name must be filled\nwhen availing services')
+            if not self.client_name_entry.get():
+                messagebox.showerror('Unable to Proceed', 'Customer\'s Name must be filled')
                 return
             if price_format_to_float(self.final_total_value._text) == 0:
                 messagebox.showerror('Unable to Proceed', 'No Item Listed')
@@ -540,7 +544,7 @@ class transaction_frame(ctk.CTkFrame):
             self.show_transaction_proceed = transaction_popups.show_transaction_proceed(self, (width, height, (self.item_treeview, self.service_treeview), acc_cred[0]),
                                                                                         self.item_treeview._data, self.service_treeview._data,
                                                                                         price_format_to_float(self.final_total_value._text),
-                                                                                        self.client_name_entry.get(), self.customer_infos)
+                                                                                        self.client_name_entry.get(), self.customer_infos or None)
             self.show_transaction_proceed.place(relx = .5, rely =.5, anchor = 'c')
 
 
@@ -728,7 +732,7 @@ class sales_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='4').pack(anchor='w')
         self.main_data = database.fetch_data(sql_commands.get_transaction_data, None)
-        self.main_data = [(s[0], 'Alfredo', str(datetime.datetime.now().date()), format_price(float(s[2])), s[1]) for s in self.main_data]
+        self.main_data = [(s[0], s[2], str(datetime.datetime.now().date()), format_price(float(s[3])), s[1]) for s in self.main_data]
         self.data_view = cctk.cctkTreeView(self, self.main_data, width * .8, height * .8,
                                            column_format='/No:75-#c/OR:75-tc/Client:x-tl/Date:175-tc/TotalPrice:125-tr/Cashier:125-tl/Actions:85-bD!50!30')
         self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
@@ -841,7 +845,7 @@ class reports_frame(ctk.CTkFrame):
         self.base_frame.grid_propagate(0)
         self.base_frame.grid_columnconfigure(0, weight=1)
         self.base_frame.grid_rowconfigure(1, weight=1)
-        
+
 
 
         self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
@@ -856,15 +860,17 @@ class reports_frame(ctk.CTkFrame):
 
         selected_color = Color.Blue_Yale
         '''Test DATA'''
-        data=[1000,500]
-        label=["Items", "Services"] 
-        
+        data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
+               float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
+
+        label=["Items", "Services"]
+
         monthly_data=[4427, 4573, 765, 777, 1513, 528, 4132, 4975, 4826, 4998, 568, 3184, 4586, 3587, 59, 966, 3644, 1298, 823, 2134, 1786, 3505, 4735, 3221, 4746, 4394, 3719, 2040, 574, 21, 627]
-        monthly_label=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31'] 
-        
+        monthly_label=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
+
         yearly_data=[63186, 42850, 42820, 55140, 58043, 99675, 86688, 81409, 5547, 3301, 2170, 44858]
         yearly_label=["January", "Febuary", "March","April","May", "June", "July", "August","September","October", "November", "December"]
-        
+
         def load_main_frame(cur_frame: int):
             if self.active_report is not None:
                 self.active_report.grid_forget()
@@ -885,7 +891,7 @@ class reports_frame(ctk.CTkFrame):
                 self.daily_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.date_selected_label.grid(row=0, column=1, padx=(0, width*0.005))
                 self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
-                
+
             elif "Monthly" in report_type:
                 self.date_selected_label.grid_forget()
                 self.show_calendar.grid_forget()
@@ -911,11 +917,11 @@ class reports_frame(ctk.CTkFrame):
             cctk.tk_calendar(self.date_selected_label,"%s", date_format="word")
 
         def show_pie(master, data, info=[], label=[]):
-            
+
             height = info[1]
             width =info[0]
             fg_color = info[2]
-            
+
             label = label
             data = data
             pie_figure= Figure(figsize=(width, height), dpi=100)
@@ -929,59 +935,59 @@ class reports_frame(ctk.CTkFrame):
             canvas.get_tk_widget().pack()
 
         def show_hbar(master, data, info=[], label=[]):
-            
+
             height = info[1]
             width =info[0]
             fg_color = info[2]
-            
+
             label = label
             data = data
-            
+
             bar_figure= Figure(figsize=(width, height), dpi=100)
             bar_figure.set_facecolor(fg_color)
             ax =bar_figure.add_subplot(111)
             ax.barh(label, data, align='center',  color=[Color.Light_Green,Color.Red_Tulip])
             #ax.set_xlabel("Income")
-            
+
             canvas = FigureCanvasTkAgg(bar_figure, master)
             canvas.draw()
             canvas.get_tk_widget().pack()
-            
+
         def show_bar(master, data, info=[], label=[]):
-            
+
             height = info[1]
             width =info[0]
             fg_color = info[2]
-            
+
             label = label
             data = data
-            
+
             bar_figure= Figure(figsize=(width, height), dpi=100)
             bar_figure.set_facecolor(fg_color)
             ax =bar_figure.add_subplot(111)
             ax.bar(label, data, align='center',  color=[Color.Light_Green,Color.Red_Tulip])
             #ax.set_xlabel("Income")
-            
+
             canvas = FigureCanvasTkAgg(bar_figure, master)
             canvas.draw()
             canvas.get_tk_widget().pack()
-            
+
         operational_year = []
         starting_year = 2014
         for i in range((int(date.today().strftime('%Y'))+1)-starting_year):
            operational_year.append(str(starting_year+i))
-        
+
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
         self.top_frame.grid_columnconfigure(2, weight=1)
-        
+
         ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
 
         self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=3, sticky="n")
 
-        self.sales_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125, 
+        self.sales_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
                                                        fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.sales_report_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
@@ -992,8 +998,8 @@ class reports_frame(ctk.CTkFrame):
         self.sales_report_label.pack(side="left")
         self.sales_report_button.grid()
         self.sales_report_button.update_children()
-                
-        self.inventory_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155, 
+
+        self.inventory_report_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.inventory_report_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
@@ -1014,7 +1020,7 @@ class reports_frame(ctk.CTkFrame):
 
         self.sales_report_top = ctk.CTkFrame(self.sales_report_frame)
         self.sales_report_top.grid(row=0, column=0, sticky="n", pady=(height*0.0025,0))
-        
+
         self.report_type_menu = ctk.CTkOptionMenu(self.sales_report_top, values=["Daily Report", "Monthly Report", "Yearly Report"], variable=self.report_option_var,anchor="center",
                                                   command=partial(report_menu_callback))
         self.report_type_menu.grid(row=0, column=0, padx=(width*0.005), pady=height*0.005)
@@ -1033,55 +1039,55 @@ class reports_frame(ctk.CTkFrame):
         self.month_option.set(f"{date.today().strftime('%B')}")
         self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center")
         self.year_option.set(f"{date.today().strftime('%Y')}")
-        
+
         self.daily_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.daily_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
         #self.daily_graph.grid_columnconfigure((2), weight=1)
         self.daily_graph.grid_columnconfigure((3), weight=2)
         self.daily_graph.grid_rowconfigure((0), weight=1)
-        
+
         self.sales_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color="#DBDBDB")
         self.sales_daily_graph.grid(row=0, column= 0,columnspan=3, sticky="nsew",  padx=(width*0.005,0), pady=(height*0.01))
-        
-        self.items_total = ctk.CTkLabel(self.daily_graph,  text="Item:        0,000.00", corner_radius=5, fg_color="white")
+
+        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(data[0])}", corner_radius=5, fg_color="white")
         self.items_total.grid(row=1, column=0,padx=(width*0.005,0), pady=(0,height*0.007))
-        self.service_total = ctk.CTkLabel(self.daily_graph,text="Services     0,000.00", corner_radius=5, fg_color="white")
+        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(data[1])}", corner_radius=5, fg_color="white")
         self.service_total.grid(row=1, column=1, padx=(width*0.005), pady=(0,height*0.007))
-        self.income_total = ctk.CTkLabel(self.daily_graph,text="Total    0,000.00", corner_radius=5, fg_color="white")
+        self.income_total = ctk.CTkLabel(self.daily_graph,text=f"Total    {format_price(data[0] + data[1])}", corner_radius=5, fg_color="white")
         self.income_total.grid(row=1, column=2, sticky="nsew", pady=(0,height*0.007))
-         
+
         self.bars_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color="#DBDBDB", height=height*0.35)
         self.bars_daily_graph.grid(row=0, column= 3, sticky="nsew", padx=(width*0.005), pady=(height*0.01,0))
         self.bars_daily_graph.pack_propagate(0)
 
-        show_pie(self.sales_daily_graph, data=data, info=[width*0.004,height*0.005,"#DBDBDB"], label=label)
+        show_pie(self.sales_daily_graph, data=data if data[0] + data[1] > 0 else [1,0], info=[width*0.004,height*0.005,"#DBDBDB"], label=label)
         show_hbar(self.bars_daily_graph, data=data, info=[width*0.05,height*0.005,"#DBDBDB"], label=label)
-       
+
         self.data_frame = ctk.CTkFrame(self.sales_report_frame, height=height*0.35)
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=height*0.0075)
-        
+
         self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35, header_color=Color.Blue_Yale, content_color="transparent",
                                            column_format='/No:75-#c/OR:75-tc/Client:x-tl/Service:175-tc/Item:175-tr/Total:125-tl/Actions:85-tc!30!30')
         self.daily_data_view.pack(pady=height*0.01, padx=width*0.005)
-        
+
         self.monthly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
-        
+
         self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35, header_color=Color.Blue_Yale, content_color="transparent",
                                            column_format='/No:75-#c/Date:x-tc/Service:175-tc/Item:175-tr/Total:125-tl/Actions:85-tc!30!30')
         self.monthly_data_view.pack(pady=height*0.01, padx=width*0.005)
-        
+
         show_bar(self.monthly_graph, data=monthly_data, info=[width*0.01,height*0.005,"#DBDBDB"], label=monthly_label)
-        
+
         self.yearly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
-        
+
         self.yearly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35, header_color=Color.Blue_Yale, content_color="transparent",
                                            column_format='/No:75-#c/Month:x-tc/Service:x-tc/Item:175-tr/Total:x-tl/Actions:85-tc!30!30')
         self.yearly_data_view.pack(pady=height*0.01, padx=width*0.005)
-        
+
         show_bar(self.yearly_graph, data=yearly_data, info=[width*0.01,height*0.005,"#DBDBDB"], label=yearly_label)
-        
+
         report_menu_callback("Daily")
         load_main_frame(0)
 
