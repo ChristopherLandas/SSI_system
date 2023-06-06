@@ -81,7 +81,7 @@ add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 
 #RECORDING ANY TRANSACTION
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
-record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?)"
+record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, CURRENT_DATE)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?)"
 record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
 
@@ -145,3 +145,12 @@ get_expired_state = "SELECT item_general_info.name,\
                              'Expiry' AS _type\
                      FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                      HAVING exp;"
+
+#FOR DAILY SALES
+get_services_daily_sales = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
+                            FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                            WHERE transaction_record.transaction_date = CURRENT_DATE;"
+
+get_items_daily_sales = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
+                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                         WHERE transaction_record.transaction_date = CURRENT_DATE;"
