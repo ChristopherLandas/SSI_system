@@ -347,6 +347,3 @@ def show_status(master, info:tuple,):
             self.db_inventory_treeview.update_table(data)
 
     return show_status(master, info,)
-#nearly expire = 738588
-#
-# 738580
