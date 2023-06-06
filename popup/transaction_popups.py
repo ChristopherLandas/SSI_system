@@ -112,9 +112,10 @@ def show_item_list(master, info:tuple):
     return instance(master, info)
 
 
-def show_services_list(master, info:tuple):
+def show_services_list(master, info:tuple, data_reciever: list):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, data_reciever: list):
+            self._data_reciever = data_reciever
             self._master = master
             self.width = info[0]
             self.height = info[1]
@@ -172,27 +173,33 @@ def show_services_list(master, info:tuple):
                 info_tab:cctk.info_tab = self._treeview.data_frames[-1].winfo_children()[3]
                 info_tab._tab = customer_info(self._treeview.master.master, (info[0] * .8, info[1] * .8), info_tab)
                 info_tab.button.configure(command = lambda: info_tab._tab.place(relx = .5, rely = .5, anchor = 'c'))
+                self._data_reciever.append(info_tab)
                 info_tab._tab.place(relx = .5, rely = .5, anchor = 'c')
+
 
                 master.change_total_value_service(transaction_data[2])
                 self.service_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
-    return instance(master, info)
+    return instance(master, info, data_reciever)
 
-def show_transaction_proceed(master, info:tuple, item_info: list, services_info, total_price: float) -> ctk.CTkFrame:
+def show_transaction_proceed(master, info:tuple, item_info: list, services_info, total_price: float, customer_info: str, pets_info: List) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, item_info: list, services_info, total_price: float):
+        def __init__(self, master, info:tuple, item_info: list, services_info, total_price: float, customer_info: str, pets_raw_info: List):
             width = info[0] * .99
             height = info[1] * .99
             #basic inforamtion needed; measurement
-
+            self._customer_info = customer_info
+            self._pets_raw_info = pets_raw_info
+            self.pets_info = [s.value for s in self._pets_raw_info]
             self.acc_cred = info[3]
             self._treeview = info[2]
             self._item_info = item_info
             self._services_info = services_info
             self._total_price = total_price
             #encapsulation
+
+            print(self.pets_info)
 
             super().__init__(master, width, height=height, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
@@ -215,7 +222,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in modified_items_list])
                 #record the items from eithin the transaction
 
-                modified_services_list = [(record_id, s[0], s[1], 'fredo', str(datetime.datetime.now().date()), float(s[2]), 0) for s in self._services_info]
+                modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.now().date()), float(s[2]), 0, 'ongoing') for s in self._services_info]
                 database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in modified_services_list])
                 #record the services from eithin the transaction
 
@@ -320,7 +327,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
             self.payment_entry.focus_force()
             self.payment_entry.bind('<Shift-Return>', auto_pay)
-    return instance(master, info, item_info, services_info, total_price)
+    return instance(master, info, item_info, services_info, total_price, customer_info, pets_info)
 
 def customer_info(master, info:tuple, parent= None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):

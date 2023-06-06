@@ -139,7 +139,7 @@ class customcustomtkinter:
                      conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 20),
                      row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'black',
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = 'black',
-                     bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, **kwargs):
+                     bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
 
@@ -147,6 +147,7 @@ class customcustomtkinter:
                 ctk.CTkLabel(self, text='Wrong format\nCheck for errors').place(relx = .5, rely = .5, anchor = 'c')
                 return;
             #check if the format follows the guideline, if it doesn't it will only pop a label
+            self._bd_pop_list: list = bd_pop_list
             self._column_format  = column_format
             self.column_titles = [s.replace('/', '') for s in re.findall(r'\/\w+', self._column_format)]
             self.column_types = [str(s) for s in re.findall(r'\-(\w+|\#\w+)', self._column_format)]
@@ -219,6 +220,8 @@ class customcustomtkinter:
             confirmation = messagebox.askyesno('Warning', 'Are you sure you want to delete the data')
             if confirmation:
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
+                if self._bd_pop_list is not None or len(self._bd_pop_list) > 0:
+                    self._bd_pop_list.pop(data_mngr_index)
                 self.data_grid_btn_mng._buttons.pop(data_mngr_index)
                 self.data_grid_btn_mng._og_color.pop(data_mngr_index)
                 #remove the row from the button manager
@@ -332,7 +335,7 @@ class customcustomtkinter:
             super().__init__(*args, fg_color=fg_color, **kwargs)
             import datetime
             import util
-            
+
             def set_date():
                 date_text = None
                 if "numerical" in date_format:
@@ -343,10 +346,10 @@ class customcustomtkinter:
                     date_text = str(util.date_to_words(str(self.cal.get_date())))
                 else:
                     date_text = "Invalid Format"
-                
+
                 label.configure(text=date_text)
                 self.withdraw()
-            
+
             position_X = (self.winfo_screenwidth()/2)
             position_Y = (self.winfo_screenheight()/2)-(400/2)
 
@@ -365,7 +368,7 @@ class customcustomtkinter:
             self.set_date.pack(pady=10)
 
             self.attributes('-topmost',1)
-        
+
 
     class cctkSpinnerCombo(ctk.CTkFrame):
         MAX_VAL = 2147483647

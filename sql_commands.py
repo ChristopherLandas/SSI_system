@@ -83,7 +83,7 @@ add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?)"
-record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?)"
+record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
@@ -98,15 +98,50 @@ get_service_data = "SELECT service_name, price, date_added FROM service_info"
 get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT_DATE"
 
 #FOR INVENTORY STATE
-get_reorder_items = "SELECT  item_inventory_info.UID,\
-                             SUM(item_inventory_info.Stock)\
-                     FROM item_inventory_info JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
-                     WHERE item_inventory_info.Stock < item_settings.Safe_stock * item_settings.Reorder_factor AND\
-                           item_inventory_info.Stock > item_settings.Safe_stock * item_settings.Critical_factor\
-                     GROUP BY item_inventory_info.UID"
+get_reorder_state= "SELECT item_general_info.name,\
+                            case when sum(item_inventory_info.stock) <= item_settings.Reorder_factor * item_settings.Safe_stock\
+                                    AND sum(item_inventory_info.stock) > item_settings.Crit_factor * item_settings.Safe_stock\
+                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock,\
+                            'Stock' AS _type\
+                    FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                        INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                    GROUP BY item_inventory_info.uid\
+                    HAVING stock;"
 
-get_reorder_items = "SELECT  item_inventory_info.UID,\
-                             SUM(item_inventory_info.Stock)\
-                     FROM item_inventory_info JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
-                     WHERE item_inventory_info.Stock < item_settings.Safe_stock * item_settings.Reorder_factor\
-                     GROUP BY item_inventory_info.UID"
+get_critical_state = "SELECT item_general_info.name,\
+                            case when sum(item_inventory_info.stock) <= item_settings.Crit_factor * item_settings.Safe_stock\
+                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock,\
+                            'Stock' AS _type\
+                    FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                        INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                    GROUP BY item_inventory_info.uid\
+                    HAVING stock;"
+
+get_out_of_stock_state = "SELECT item_general_info.name,\
+                                 case when sum(item_inventory_info.stock) = 0\
+                                           then sum(item_inventory_info.stock) ELSE -1 END AS stock,\
+                                 'Stock' AS _type\
+                          FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                              INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                          GROUP BY item_inventory_info.uid\
+                          HAVING stock >= 0;"
+
+get_near_expire_state = "SELECT item_general_info.name,\
+                                 item_inventory_info.Stock,\
+                                 case when item_inventory_info.Expiry_Date <= DATE_ADD(CURRENT_DATE, INTERVAL 15 DAY)\
+                                             AND item_inventory_info.Expiry_Date > CURRENT_DATE\
+                                             AND item_inventory_info.Expiry_Date IS NOT NULL \
+                                             then item_inventory_info.Expiry_Date ELSE 0 END AS EXP,\
+                                 'Expiry' AS _type\
+                         FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                         HAVING exp;"
+
+
+get_expired_state = "SELECT item_general_info.name,\
+                             item_inventory_info.Stock,\
+                             case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
+                                         AND item_inventory_info.Expiry_Date IS NOT NULL \
+                                         then item_inventory_info.Expiry_Date ELSE NULL END AS EXP,\
+                             'Expiry' AS _type\
+                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                     HAVING exp;"
