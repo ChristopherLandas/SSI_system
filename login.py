@@ -7,6 +7,7 @@ from dashboard import dashboard as _db
 from constants import db
 from util import *
 from os import walk
+import sql_commands
 import datetime
 
 
@@ -16,6 +17,7 @@ class loginUI(ctk.CTk):
 
     def __init__(self):
         super().__init__()
+        self.attempt = 0
 
         '''Import Font
         Font(file="Font/Poppins-Medium.ttf")
@@ -23,16 +25,27 @@ class loginUI(ctk.CTk):
         '''
 
         '''load all fonts'''
-        for i in next(walk('font'))[2]:
-            Font(file= f'Font/{i}')
+        '''for i in next(walk('font'))[2]:
+            Font(file= f'Font/{i}')'''
 
 
         '''functions and processes'''
+        def report_exceed_attempt():
+            _usn = database.fetch_data(sql_commands.get_usn, (self.user_entry.get(),))
+            _usn = None if len(_usn) == 0 else _usn[0][0]
+            database.exec_nonquery([[sql_commands.record_login_report, (_usn, self.user_entry.get())]])
+            messagebox.showwarning('Login Error', 'Login Attempts Exceeds 3 times\nIt will be reported to the owner')
+            self.destroy()
+
         def login(_):
             try:
                 salt = database.fetch_data(f'SELECT {db.acc_cred.SALT} FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ?',
                                         (self.user_entry.get(), ))[0][0]
             except IndexError:
+                self.attempt += 1
+                if self.attempt == 3:
+                    report_exceed_attempt()
+                    return
                 self.password_entry.delete(0, ctk.END)
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
                 return
@@ -40,6 +53,10 @@ class loginUI(ctk.CTk):
                                         (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
             if count[0][0] == 0:
                 self.password_entry.delete(0, ctk.END)
+                self.attempt += 1
+                if self.attempt == 3:
+                    report_exceed_attempt()
+                    return
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
             else:
                 current_datetime = datetime.datetime.now();
@@ -58,6 +75,7 @@ class loginUI(ctk.CTk):
         self.pass_icon = ctk.CTkImage(light_image=Image.open("image/pass_icon.png"),size=(30,30))
         self.show_icon = ctk.CTkImage(light_image=Image.open("image/view.png"),size=(28,28))
         self.hide_icon = ctk.CTkImage(light_image=Image.open("image/hide.png"),size=(28,28))
+
 
         '''Setting values of the root window'''
         title_name = "J.Z. Angeles Veterinary Clinic"
