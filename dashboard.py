@@ -110,6 +110,14 @@ class dashboard(ctk.CTkToplevel):
         self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
         self.active_main_frame = None
 
+        '''setting the user level access'''
+        user_level_access = database.fetch_data(sql_commands.get_level_acessess, (acc_info[0][2], ))[0]
+        if(not user_level_access[1]):
+            temp:inventory_frame = self.main_frames[4]
+            temp.add_item_btn.destroy()
+            del temp
+        del user_level_access
+
         '''events'''
         def load_main_frame(title: str, cur_frame: int):
             self.title_label.configure(text= title.upper())
