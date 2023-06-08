@@ -33,6 +33,7 @@ def show_item_list(master, info:tuple):
 
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
             self.item_treeview = cctk.cctkTreeView(self.left_frame, self.data, self.width * .75, self.height * .65,
+                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
                                                 column_format=f'/Service:x-tl/Price:{round(self.width * .15)}-tl/Stocks:{round(self.width * .15)}-tl!35!30',
                                                 double_click_command= self.get_item)
             self.item_treeview.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
@@ -134,6 +135,7 @@ def show_services_list(master, info:tuple, data_reciever: list):
 
             self.data = database.fetch_data(sql_commands.get_services_and_their_price)
             self.service_treeview = cctk.cctkTreeView(self.left_frame, height=self.height*0.65, width =self.width*0.785,
+                                                      header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
                                                        column_format='/Services:x-tl/Price:x-tr!35!30',
                                                        double_click_command= self.get_service)
             self.service_treeview.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
@@ -211,7 +213,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
             def record_transaction():
                 if (float(self.payment_entry.get() or '0')) < self._total_price:
-                    messagebox.showinfo('Kulang', 'Ano to utang? Magbayad ka ng buo')
+                    messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
                 record_id =  database.fetch_data(sql_commands.generate_id_transaction, (None))[0][0]
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0], self._customer_info, self._total_price)]])
@@ -221,7 +223,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in modified_items_list])
                 #record the items from eithin the transaction
 
-                modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.now().date()), float(s[2]), 0, 0) for s in self._services_info]
+                modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.strptime(self.pets_info[0][2], '%m-%d-%Y').strftime('%Y-%m-%d')), float(s[2]), 0, 0) for s in self._services_info]
                 database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in modified_services_list])
                 #record the services from eithin the transaction
 
@@ -268,9 +270,10 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
             '''self.services_entry = ctk.CTkEntry(self.left_frame,  height=height*0.78, width=width*0.2)
             self.services_entry.grid(row=1, column=0, padx=10, pady=10, sticky="ns")'''
-            self.service_data = [('Service1', format_price(float(s[4]))) for s in self._services_info]
+            self.service_data = [(f'{s[1]}', format_price(float(s[4]))) for s in self._services_info]
             self.service_list = cctk.cctkTreeView(self.left_frame, self.service_data, height=height*0.75, width=width*0.2,
-                                               column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
+                                                  header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
+                                                  column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
             self.service_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
 
             self.right_frame = ctk.CTkFrame(self)
@@ -278,9 +281,10 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
             self.items_lbl = ctk.CTkLabel(self.right_frame, text='Items:',font=("Poppins", 45))
             self.items_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
-
-            self.item_data = [('item1', format_price(float(s[4]))) for s in self._item_info]
+            print(self._item_info)
+            self.item_data = [(f'{s[1]} * {s[3]}', format_price(float(s[4]))) for s in self._item_info]
             self.item_list = cctk.cctkTreeView(self.right_frame, self.item_data, height=height*0.75, width=width*0.2,
+                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
                                                column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
             self.item_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
 
