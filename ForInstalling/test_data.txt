@@ -33,4 +33,3 @@ INSERT INTO service_info VALUES('S00005', 'Canine Castration Surgery', 'test', 1
 INSERT INTO service_info VALUES('S00006', 'Confinement', 'test', 200, 1, CURRENT_DATE);
 INSERT INTO service_info VALUES('S00007', 'Euthanasion', 'test', 900, 1, CURRENT_DATE);
 INSERT INTO service_info VALUES('S00008', 'Feline Castration Srugery', 'test', 500, 1, CURRENT_DATE);
-

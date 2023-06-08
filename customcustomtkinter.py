@@ -133,12 +133,15 @@ class customcustomtkinter:
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                      fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
-                     overwrite_preferred_drawing_method: Union[str, None] = None, column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!50!50',
+                     overwrite_preferred_drawing_method: Union[str, None] = None, 
+                     
+                     column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!50!50',
                      header_color: Union[str, tuple] = '#006611', data_grid_color: Union[list, tuple] = ('#333333', '#444444'),
                      selected_color: Union [tuple, str] = brighten_color('#006611', 1.3),
                      conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 20),
                      row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'black',
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = 'black',
+                     nav_text_color: Optional[Union[str, Tuple[str, str]]] = "black",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
@@ -172,6 +175,7 @@ class customcustomtkinter:
             self.bd_configs = bd_configs
             self._record_text_color = record_text_color
             self._content_color = content_color
+            self._nav_text_color = nav_text_color
             #encapsulate other arguments
 
             self.pack_propagate(0)
@@ -184,12 +188,12 @@ class customcustomtkinter:
                 if self.column_types[i] == 't' or self.column_types[i] == '#' or self.column_types[i] == 'q':
                     btn = customcustomtkinter.ctkButtonFrame(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                                              hover_color= brighten_color(self._header_color, 1.75))
-                    title = ctk.CTkLabel(btn, text=self.column_titles[i], font=self.navbar_font)
+                    title = ctk.CTkLabel(btn, text=self.column_titles[i], font=self.navbar_font, text_color=self._nav_text_color)
                     title.place(relx = .5, rely = .5, anchor = 'c',)
                     btn.update_children()
                 else:
                     btn = ctk.CTkLabel(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
-                                       text=self.column_titles[i], font= self.navbar_font)
+                                       text=self.column_titles[i], font= self.navbar_font, text_color=self._nav_text_color)
                 btn.grid(row = 0, column = i, sticky='we', padx = (1,0))
                 self.update()
             #generate the header bar
@@ -341,6 +345,8 @@ class customcustomtkinter:
                 if "numerical" in date_format:
                     #label.configure(text= ( format % (self.cal.get_date())))
                     date_text = str(self.cal.get_date())
+                elif "raw" in date_format:
+                    date_text = self.cal.selection_get()
                 elif "word" in date_format:
                     #label.configure(text= f"{util.date_to_words(str(self.cal.get_date()))}")
                     date_text = str(util.date_to_words(str(self.cal.get_date())))

@@ -100,9 +100,9 @@ def date_to_words(date):
     # Combining day, month, and year
     return "{} {}, {}".format(month, day, year)
 
-'''example of inserting data
-usn = 'assisstant'
-pss = encrypt.pass_encrypt('assisstant', None)
+''' example of inserting data
+usn = 'admin'
+pss = encrypt.pass_encrypt('admin', None)
 database.exec_nonquery([[f'INSERT INTO {db.ACC_CRED} VALUES (?, ?, ?, ?)', (usn, pss["pass"], pss['salt'], None)],
-                        [f'INSERT INTO {db.ACC_INFO} VALUES (?, ?, ?)', ('assisstant', 'Assisstant', 'Assisstant')]])
+                        [f'INSERT INTO {db.ACC_INFO} VALUES (?, ?, ?)', ('admin', 'admin', 'admin')]])
 '''

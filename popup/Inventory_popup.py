@@ -9,6 +9,7 @@ from constants import action
 import datetime
 from PIL import Image
 import datetime
+import functools
 
 def add_item(master, info:tuple):
     class add_item(ctk.CTkFrame):
@@ -158,7 +159,7 @@ def add_item(master, info:tuple):
             self.expiration_date_entry.grid(row = 5, column = 0, sticky = 'nsew',columnspan=2, pady = (0,height*0.015), padx = (width*0.01,width*0.005 ))
 
             self.show_calendar = ctk.CTkButton(self.inventory_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
-                                               command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()), corner_radius=3, state="disabled",  )
+                                               command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s", date_format="raw", min_date=datetime.datetime.now()), corner_radius=3, state="disabled",  )
             self.show_calendar.grid(row=5, column=2, padx = (0,width*0.01), pady = (0,height*0.015), sticky="e")
 
             '''Action Frame'''
@@ -346,3 +347,118 @@ def show_status(master, info:tuple,):
             self.db_inventory_treeview.update_table(data)
 
     return show_status(master, info,)
+
+def supplier_list(master, info:tuple,):
+    class supplier_list(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, ):
+            
+            
+            from functools import partial
+            
+            width = info[0]
+            height = info[1]
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+            self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
+            self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
+            self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
+            self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
+            self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+            self.trash_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
+            self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
+
+            def reset():
+                self.place_forget()
+                
+            def show_supplier_popup():
+                self.create_supplier.place(relx=0.5, rely=0.5, anchor="center")
+                
+                
+            def hide_supplier_popup():
+                self.create_supplier.place_forget()
+                self.supplier_name.delete(0, "end")
+                self.supplier_contact.delete(0, "end")
+                
+            def update_tables(_ :any = None):
+                self.refresh_btn.configure(state = ctk.DISABLED)
+                self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+                
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.75, height=height*0.85)
+            self.main_frame.grid(row=0, column=0, sticky="n", padx=width*0.01, pady=height*0.025)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(3, weight=1)
+            self.main_frame.grid_rowconfigure(2,weight=1)
+
+            self.create_supplier = ctk.CTkFrame(self,height=height*0.35, width=width*0.35,fg_color=Color.White_Color[3],)
+            self.create_supplier.grid_columnconfigure(1, weight=1)
+            self.create_supplier.grid_rowconfigure((1,2), weight=1)
+            self.create_supplier.grid_rowconfigure((3), weight=2)
+            self.create_supplier.grid_propagate(0)
+            self.create_supplier.pack_propagate(0)
+            
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text="Supplier List", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+            
+            self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+            self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
+            
+            self.search_frame.pack_propagate(0)
+            ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+            self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+            
+            self.add_item_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Supplier",image=self.add_icon, font=("DM Sans Medium", 14),
+                                           command=show_supplier_popup)
+            self.add_item_btn.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+
+            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
+                                              command=update_tables)
+            self.refresh_btn.grid(row=1, column=2, sticky="w")
+            
+            self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
+            self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
+            
+            #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .735, height= height * .725, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/SupplierName:x-tl/Contact:{int(width*.25)}-tc/Action:{int(width*.075)}-tc!30!30',
+                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
+                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
+            self.data_view1.pack()
+            
+            self.pop_top_frame = ctk.CTkFrame(self.create_supplier, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.pop_top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
+            self.pop_top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.pop_top_frame, text="Create Supplier", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
+            self.pop_close_btn= ctk.CTkButton(self.pop_top_frame, text="X", height=height*0.04, width=width*0.025, command=hide_supplier_popup)
+            self.pop_close_btn.pack(side="right", padx=width*0.005)
+            
+            ctk.CTkLabel(self.create_supplier, text="Supplier Name: ", font=("Arial",16)).grid(row=1, column=0, padx=width*0.005, pady=height*0.005)
+            self.supplier_name = ctk.CTkEntry(self.create_supplier, placeholder_text="Supplier Name", font=("Arial",14),height=height*0.05)
+            self.supplier_name.grid(row=1,column=1, sticky="ew",padx=width*0.005, pady=height*0.005)             
+            
+            ctk.CTkLabel(self.create_supplier, text="Supplier Contact: ", font=("Arial",16)).grid(row=2, column=0,padx=width*0.005, pady=height*0.005)
+            self.supplier_contact = ctk.CTkEntry(self.create_supplier, placeholder_text="Supplier Contact", font=("Arial",14), height=height*0.05)
+            self.supplier_contact.grid(row=2,column=1, sticky="ew",padx=width*0.005, pady=height*0.005) 
+            
+            self.bottom_frame= ctk.CTkFrame(self.create_supplier, fg_color="transparent")
+            self.bottom_frame.grid(row=3, column=0, columnspan=2)
+            
+            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text="Cancel", command=hide_supplier_popup)
+            self.cancel_btn.pack(side="left",padx=(0,width*0.005))
+            
+            self.proceed_btn = ctk.CTkButton(self.bottom_frame, text="Proceed")
+            self.proceed_btn.pack(side="left",padx=(0,width*0.005))
+    return supplier_list(master, info)
+
+
