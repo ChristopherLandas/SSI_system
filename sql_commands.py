@@ -154,3 +154,13 @@ get_services_daily_sales = "SELECT CAST(SUM(services_transaction_content.price) 
 get_items_daily_sales = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
                          FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
                          WHERE transaction_record.transaction_date = CURRENT_DATE;"
+
+#OR
+get_or = 'SELECT COUNT(*) FROM transaction_record'
+
+#LOGIN REPORT
+record_login_report = "INSERT INTO login_report VALUES(?, ?, CURRENT_TIMESTAMP)"
+get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
+
+#USER LEVEL ACCESS
+get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
