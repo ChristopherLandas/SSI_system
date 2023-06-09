@@ -32,6 +32,7 @@ def popup_name_here(master, obj, info:tuple) -> ctk.CTkFrame:
                 database.exec_nonquery([['INSERT INTO acc_cred VALUES(?, ?, ?, NULL)', (self.usn_entry.get(), password['pass'], password['salt'])],
                                         ['INSERT INTO acc_info VALUES(?, ?, ?)', (self.usn_entry.get(), self.name_entry.get(), self.job_pos.get())]])
                 messagebox.showinfo('SUCCESS', f'Acc {self.usn_entry.get()}\nhas been successfully registered')
+                reset()
 
 
             self.usn_entry = ctk.CTkEntry(self, width=140, placeholder_text="usn")
