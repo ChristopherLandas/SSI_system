@@ -10,7 +10,7 @@ from typing import *
 
 
 class encrypt:
-    def pass_encrypt(pss, slt):
+    def pass_encrypt(pss, slt = None):
         salt = base64.urlsafe_b64encode(uuid.uuid4().bytes) if slt == None else str(slt).encode('utf-8')
         encryptor = hashlib.sha256()
         encryptor.update(str(pss).encode('utf-8') + salt)
@@ -50,6 +50,7 @@ class database:
             db_cur = db_con.cursor()
             for i in range(len(cmds)):
                 try:
+                    print(cmds[i])
                     db_cur.execute(cmds[i][0], cmds[i][1])
                     db_con.commit()
                 except mariadb.IntegrityError:
