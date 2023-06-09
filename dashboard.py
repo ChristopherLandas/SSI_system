@@ -28,6 +28,7 @@ height = 0
 acc_info = ()
 acc_cred = ()
 date_logged = None
+mainframes = []
 
 class dashboard(ctk.CTkToplevel):
     def __init__(self, master:ctk.CTk, entry_key: str, _date_logged: datetime):
@@ -52,7 +53,7 @@ class dashboard(ctk.CTkToplevel):
             del datakey
         #for preventing security breach through python code; enable it to test it """
 
-        global acc_info, acc_cred, date_logged
+        global acc_info, acc_cred, date_logged, mainframes
         date_logged = _date_logged;
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
@@ -109,6 +110,7 @@ class dashboard(ctk.CTkToplevel):
 
         self.active_win = None
         self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
+        mainframes = self.main_frames
         self.active_main_frame = None
 
         '''setting the user level access'''
@@ -522,6 +524,9 @@ class dashboard_frame(ctk.CTkFrame):
         canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 6)
 
     def generate_stat_tabs(self):
+        for i in self.stat_tabs:
+            i.destroy()
+        self.stat_tabs.clear()
         stat_data = [('Reorder', '#cccc00', database.fetch_data(sql_commands.get_reorder_state) or None),
                      ('Critical', '#ff0000', database.fetch_data(sql_commands.get_critical_state) or None),
                      ('Out-Of-Stock', '#222222', database.fetch_data(sql_commands.get_out_of_stock_state) or None),
@@ -542,7 +547,7 @@ class dashboard_frame(ctk.CTkFrame):
         return super().grid(**kwargs)
 
 class transaction_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info
+    global width, height, acc_cred, acc_info, mainframes
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.customer_infos = []
@@ -681,6 +686,8 @@ class transaction_frame(ctk.CTkFrame):
                 self.reset()
 
     def reset(self):
+        temp: dashboard_frame = mainframes[0]
+        temp.show_pie()
         self.item_treeview.delete_all_data()
         self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) - float(price_format_to_float(self.final_total_value._text))))
         self.service_total_value.configure(text = '0.00')
@@ -757,7 +764,7 @@ class sales_frame(ctk.CTkFrame):
         self.grid_forget()
 
 class inventory_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info
+    global width, height, acc_cred, acc_info, mainframes
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
@@ -954,7 +961,7 @@ class inventory_frame(ctk.CTkFrame):
         self.sort_status_option.grid(row=0, column=5, padx=(width*0.005), sticky="e")
 
         self.restock_btn = ctk.CTkButton(self.inventory_sub_frame, width=width*0.1, height = height*0.05, text="Stock Order", image=self.restock_icon, font=("DM Sans Medium", 14),
-                                         command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, relx = .5, rely = .5, anchor = 'c'))
+                                         command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, update_cmds=[mainframes[0].generate_stat_tabs, ], relx = .5, rely = .5, anchor = 'c'))
         self.restock_btn.grid(row=3, column=5, pady=(height*0.01), sticky="e", padx=(0, width*0.005))
         self.tree_view_frame = ctk.CTkFrame(self.inventory_sub_frame, fg_color="transparent")
         self.tree_view_frame.grid(row=1, column=0,columnspan=6, sticky="nsew",padx=(width*0.005))
