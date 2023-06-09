@@ -1,7 +1,7 @@
 #SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.name,\
                                   CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
-                                  CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2)),\
+                                  CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                   DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
                                   case when SUM(item_inventory_info.Stock) < 1\
                                       then 'Out Of Stock'\
@@ -17,11 +17,50 @@ get_inventory_by_group = f"SELECT item_general_info.name,\
                           GROUP BY item_general_info.name\
                           ORDER BY item_general_info.UID"
 
+get_normal_inventory = "SELECT item_general_info.name,\
+                            CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                            CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                            DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                            case when SUM(item_inventory_info.Stock) > item_settings.Safe_stock * item_settings.Reorder_factor then 'Normal' ELSE null END AS status\
+                        FROM item_general_info\
+                        JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                        INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                        WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                        GROUP BY item_general_info.name\
+                        HAVING STATUS = 'Normal'\
+                        ORDER BY item_general_info.UID"
+
+get_reorder_inventory = "SELECT item_general_info.name,\
+                            CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                            CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                            DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                            case when SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Reorder_factor AND SUM(item_inventory_info.Stock) > item_settings.Safe_stock * item_settings.Crit_factor then 'Reorder' ELSE null END AS status\
+                        FROM item_general_info\
+                        JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                        INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                        WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                        GROUP BY item_general_info.name\
+                        HAVING STATUS = 'Reorder'\
+                        ORDER BY item_general_info.UID"
+
+get_critical_inventory = "SELECT item_general_info.name,\
+                                CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                case when SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Crit_factor then 'Critical' ELSE null END AS status\
+                          FROM item_general_info\
+                          JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                          INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                          WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                          GROUP BY item_general_info.name\
+                          HAVING STATUS = 'Critical'\
+                          ORDER BY item_general_info.UID"
+
 get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                                   item_inventory_info.Stock,\
-                                  CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2)),\
+                                  CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                   DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
-                                  case when item_inventory_info.Expiry_Date < CURRENT_DATE\
+                                  case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
                                       then 'Expired'\
                                   when item_inventory_info.Expiry_Date < DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
                                       then 'Nearly Expire'\
@@ -32,13 +71,61 @@ get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                           JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
                           WHERE item_inventory_info.stock > 0\
-                          ORDER BY case when item_inventory_info.Expiry_Date < CURRENT_DATE\
+                          ORDER BY case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
                                       then 3\
                                   when item_inventory_info.Expiry_Date < DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
                                       then 2\
                                   when item_inventory_info.Expiry_Date IS NULL\
                                   	  then 0\
                                       ELSE 1 END DESC"
+
+get_expired_inventory = "SELECT DISTINCT item_general_info.name,\
+                            item_inventory_info.Stock,\
+                            CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                            DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                            case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
+                                then 'Expired' ELSE null END AS stat\
+                         FROM item_general_info\
+                         JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                         INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                         WHERE item_inventory_info.stock > 0\
+                         HAVING stat = 'Expired'"
+
+get_near_expire_inventory = "SELECT DISTINCT item_general_info.name,\
+                                     item_inventory_info.Stock,\
+                                     CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                     DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                     case when item_inventory_info.Expiry_Date > CURRENT_DATE AND item_inventory_info.Expiry_Date < DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
+                                         then 'Nearly Expire' ELSE null END AS stat\
+                             FROM item_general_info\
+                             JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                             INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                             WHERE item_inventory_info.stock > 0\
+                             HAVING stat = 'Nearly Expire'"
+
+get_safe_expire_inventory = "SELECT DISTINCT item_general_info.name,\
+                                     item_inventory_info.Stock,\
+                                     CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                     DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                     case when item_inventory_info.Expiry_Date > DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
+                                         then 'Safe' ELSE null END AS stat\
+                             FROM item_general_info\
+                             JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                             INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                             WHERE item_inventory_info.stock > 0\
+                             HAVING stat = 'Safe'"
+
+get_non_expiry_inventory = "SELECT DISTINCT item_general_info.name,\
+                                    item_inventory_info.Stock,\
+                                    CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                    DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                    case when item_inventory_info.Expiry_Date IS null\
+                                        then 'N/A' ELSE null END AS stat\
+                            FROM item_general_info\
+                            JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                            INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                            WHERE item_inventory_info.stock > 0\
+                            HAVING stat = 'N/A'"
 
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
 get_item_and_their_total_stock = "SELECT item_general_info.name,\
