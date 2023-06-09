@@ -98,10 +98,6 @@ def add_item(master, info:tuple):
             self.item_name_entry = ctk.CTkEntry(self.item_frame, corner_radius=3, placeholder_text='Required', font=("DM Sans Medium",14))
             self.item_name_entry.grid(row = 2, column = 0,columnspan=6, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
 
-            #ctk.CTkLabel(self.item_frame, text='Manufacturer', anchor='w', font=("DM Sans Medium", 14)).grid(row = 3, column = 0, columnspan=2, sticky = 'nsew', pady = (height*0.005,0), padx = (width*0.01))
-            #self.manufacturer_entry = ctk.CTkEntry(self.item_frame, corner_radius=3, placeholder_text='Required', font=("DM Sans Medium",14))
-            #self.manufacturer_entry.grid(row = 4, column = 0,columnspan=6, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
-
             ctk.CTkLabel(self.item_frame, text='Category', anchor='w', font=("DM Sans Medium", 14)).grid(row = 5, column = 0,columnspan=2, sticky = 'nsew',  pady = (height*0.025,0), padx = (width*0.01))
             self.category_entry = ctk.CTkComboBox(self.item_frame, corner_radius=3, values=["Vaccine", "Medicine", "Accessories", "Leash", "Shampoo"], font=("DM Sans Medium",14))
             self.category_entry.grid(row = 6, column = 0,columnspan=6, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
@@ -345,7 +341,7 @@ def show_status(master, info:tuple,):
             self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
             self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.5, height=height*0.85,
-                                               column_format=f'/No:{int(width*.025)}-#c/ItemName:x-tl/Quantity:x-tl!30!30',
+                                               column_format=f'/No:{int(width*.025)}-#c/ItemName:x-tl/Quantity:{int(width*0.075)}-tr/Action:{int(width*0.05)}-tc!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
             self.db_inventory_treeview.pack()
         def update_treeview(self, data):
@@ -519,6 +515,8 @@ def disposal_history(master, info:tuple,):
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
 
+            from datetime import date
+            
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
             self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
@@ -546,11 +544,13 @@ def disposal_history(master, info:tuple,):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
+            ctk.CTkLabel(self.main_frame, text=f"{date.today().strftime('%B %d, %Y')}", font=("Arial", 14), corner_radius=5,
+                         fg_color=Color.White_Color[7], width=width*0.085, height=height*0.085).grid(row=1, column=0, sticky="e", padx=width*0.005, pady=(height*0.01))
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
             
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .8, height= height * .775, corner_radius=0,
-                                             column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Stock:{int(width*0.05)}-tr/Status:x-tl/ExpiryDate:{int(width*.15)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
+                                             column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*0.07)}-tr/ExpiryDate:{int(width*.15)}-tl/DateDisposed:{int(width*.15)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
                                             header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                             row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
             self.data_view1.pack()
