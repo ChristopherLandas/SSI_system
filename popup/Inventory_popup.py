@@ -9,7 +9,7 @@ from constants import action
 import datetime
 from PIL import Image
 import datetime
-import functools
+from functools import partial
 
 def add_item(master, info:tuple):
     class add_item(ctk.CTkFrame):
@@ -29,7 +29,6 @@ def add_item(master, info:tuple):
                 self.place_forget()
 
             def add():
-                print(((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get()), self.expiry_switch_val.get() == 'disabled'))
                 if(self.item_name_entry.get() and self.unit_price_entry.get() and self.markup_price_entry.get()
                    and self.category_entry.get() and self.supplier_entry.get() and self.stock_entry.get() and
                    ((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get())
@@ -208,13 +207,13 @@ def restock( master, info:tuple):
                 self.action_btn.configure(state = ctk.NORMAL)
 
             def stock():
-                modified_dt: str = str(datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d'))
-                print(modified_dt)
+                modified_dt: str = None if self.expiry_date_entry._text == "Set Expiry Date" else str(datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d'))
                 inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
                                                     (self.item_uid, modified_dt or '1000-01-01'))
 
                 if inventory_data: # if there was an already existing table; update the existing table
                     if inventory_data[0][2] is None:
+                        print(int(self.stock_entry.value), self.item_uid)
                         database.exec_nonquery([[sql_commands.update_non_expiry_stock, (int(self.stock_entry.value), self.item_uid)]])
                     else:
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (int(self.stock_entry.value), self.item_uid, inventory_data[0][2])]])
@@ -226,7 +225,6 @@ def restock( master, info:tuple):
                 messagebox.showinfo('Process Succesfull','Item successfully added')
                 master.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None);
                 master.data_view1.update_table(master.data1)
-                master.data_view2.update_table(master.data2)
                 reset()
 
             #ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
@@ -251,7 +249,7 @@ def restock( master, info:tuple):
             item = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)]
 
             self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
-                                                           values= list(item))
+                                                           values= list(item),)
 
             self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))
 
@@ -293,7 +291,14 @@ def restock( master, info:tuple):
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
 
-        def place(self, **kwargs):
+        def place(self, default_data: str, **kwargs):
+            if default_data:
+                self.item_name_entry._current_value = default_data.winfo_children()[1]._text
+                self.item_name_entry._text_label.configure(text = default_data.winfo_children()[1]._text)
+                self.item_name_entry._command(None)
+            else:
+                self.item_name_entry._current_value = self.item_name_entry._values[0]
+                self.item_name_entry._text_label.configure(text = self.item_name_entry._values[0])
             self.item_name_entry.configure(values = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)])
             return super().place(**kwargs)
     return restock(master, info)
@@ -351,7 +356,6 @@ def show_status(master, info:tuple,):
 def supplier_list(master, info:tuple,):
     class supplier_list(ctk.CTkFrame):
         def __init__(self, master, info:tuple, ):
-            
             width = info[0]
             height = info[1]
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
@@ -375,7 +379,6 @@ def supplier_list(master, info:tuple,):
             def show_supplier_popup():
                 self.create_supplier.place(relx=0.5, rely=0.5, anchor="center")
                 
-                
             def hide_supplier_popup():
                 self.create_supplier.place_forget()
                 self.supplier_name.delete(0, "end")
@@ -397,7 +400,7 @@ def supplier_list(master, info:tuple,):
             self.create_supplier.grid_rowconfigure((3), weight=2)
             self.create_supplier.grid_propagate(0)
             self.create_supplier.pack_propagate(0)
-            
+
             self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
             self.top_frame.pack_propagate(0)
@@ -405,15 +408,15 @@ def supplier_list(master, info:tuple,):
             ctk.CTkLabel(self.top_frame, text="Supplier List", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
-            
+
             self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
             self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
-            
+
             self.search_frame.pack_propagate(0)
             ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-            
+
             self.add_item_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Supplier",image=self.add_icon, font=("DM Sans Medium", 14),
                                            command=show_supplier_popup)
             self.add_item_btn.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
@@ -424,14 +427,14 @@ def supplier_list(master, info:tuple,):
             
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
-            
+
             #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .735, height= height * .725, corner_radius=0,
                                             column_format=f'/No:{int(width*.025)}-#r/SupplierName:x-tl/Contact:{int(width*.25)}-tc/Action:{int(width*.075)}-tc!30!30',
                                             header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                             row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
             self.data_view1.pack()
-            
+
             self.pop_top_frame = ctk.CTkFrame(self.create_supplier, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
             self.pop_top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
             self.pop_top_frame.pack_propagate(0)

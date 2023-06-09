@@ -156,7 +156,7 @@ get_items_daily_sales = "SELECT CAST(SUM(item_transaction_content.price * item_t
                          WHERE transaction_record.transaction_date = CURRENT_DATE;"
 
 #OR
-get_or = 'SELECT COUNT(*) FROM transaction_record'
+get_or = 'SELECT COUNT(*)+1 FROM transaction_record'
 
 #LOGIN REPORT
 record_login_report = "INSERT INTO login_report VALUES(?, ?, CURRENT_TIMESTAMP)"
