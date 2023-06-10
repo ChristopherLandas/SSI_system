@@ -18,3 +18,4 @@ CREATE TABLE transaction_record (transaction_uid VARCHAR(8) NOT NULL, Attendant_
 CREATE TABLE item_transaction_content (transaction_uid VARCHAR(8) NOT NULL, Item_uid VARCHAR(6) NOT NULL, item_name VARCHAR(64) NOT NULL, quantity INT(11) NOT NULL, price FLOAT NOT NULL, deduction FLOAT NOT NULL) COLLATE= LATIN1_GENERAL_CI;
 CREATE TABLE services_transaction_content(transaction_uid VARCHAR(8) NOT NULL, service_uid VARCHAR(6) NOT NULL, service_name VARCHAR(64) NOT NULL, patient_name VARCHAR(128) NOT NULL, scheduled_date DATE NOT NULL, price FLOAT NOT NULL, deduction FLOAT NOT NULL, status INT(11) NOT NULL)COLLATE='latin1_general_ci';
 
+CREATE TABLE recieving_item(NAME VARCHAR(64) NOT NULL, stock INT(11) NOT NULL, supp_name VARCHAR(64) NOT NULL, recieving_data DATE NOT NULL, reciever VARCHAR(128) NOT NULL COLLATE LATIN1_GENERAL_CS, state INT (1) NOT NULL)COLLATE = latin1_general_ci
