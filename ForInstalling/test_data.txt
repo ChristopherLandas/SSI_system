@@ -1,6 +1,9 @@
 INSERT INTO acc_cred VALUES ('admin', '0c149295209d5f543cf1ba14956c5c135a78b9b311ad551715899e02c27dc99d', 'rCRF4amTSEOYQjqvWYuI7A==', NULL);
 INSERT INTO acc_cred VALUES ('assisstant', '5362ca593f063f2581f756e9827bdd02da670bad2b176108380d7bc971ee5148', 'ljEGlbKwSZe3ECK-0b2K8g==', NULL);
 
+INSERT INTO user_level_access VALUES ('Owner', 1);
+INSERT INTO user_level_access VALUES ('Assisstant', 0);
+
 INSERT INTO acc_info VALUES('admin', 'Owner', 'Owner');
 INSERT INTO acc_info VALUES('assisstant', 'Assisstant', 'Assisstant');
 
