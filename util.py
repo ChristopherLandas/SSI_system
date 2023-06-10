@@ -50,7 +50,6 @@ class database:
             db_cur = db_con.cursor()
             for i in range(len(cmds)):
                 try:
-                    print(cmds[i])
                     db_cur.execute(cmds[i][0], cmds[i][1])
                     db_con.commit()
                 except mariadb.IntegrityError:
