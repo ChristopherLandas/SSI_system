@@ -179,7 +179,6 @@ def restock( master, info:tuple):
             width = info[0]
             height = info[1]
             acc_cred = info[2]
-            acc_info = info[3]
             super().__init__(master,  width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -274,7 +273,7 @@ def restock( master, info:tuple):
             self.show_calendar.grid(row=2, column=3, padx = (0,width*0.01), pady = (0,height*0.015), sticky="w")
 
             ctk.CTkLabel(self.restock_frame, text='Stock', anchor='w').grid(row = 3, column = 0, padx = 12, sticky = 'nsew')
-            self.stock_entry = cctk.cctkSpinnerCombo(self.restock_frame, entry_font=("DM Mono Medium",14), val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL), state=ctk.DISABLED)
+            self.stock_entry = cctk.cctkSpinnerCombo(self.restock_frame, entry_font=("DM Mono Medium",14), val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), state=ctk.DISABLED)
             self.stock_entry.grid(row = 3, column = 1, columnspan=2, sticky = 'w',padx=(0,width*0.01))
 
             self.action_frame = ctk.CTkFrame(self.main_frame, height=height*0.15,corner_radius=0)
@@ -290,7 +289,7 @@ def restock( master, info:tuple):
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
 
-        def place(self, default_data: str, update_cmds: list, **kwargs):
+        def place(self, default_data: str, update_cmds: list = None, **kwargs):
             self.update_cmds = update_cmds
             if default_data:
                 self.item_name_entry._current_value = default_data.winfo_children()[1]._text
