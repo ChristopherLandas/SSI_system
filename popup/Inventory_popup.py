@@ -70,11 +70,23 @@ def add_item(master, info:tuple):
                 if (not self.markup_price_entry.get()) and self.unit_price_entry.get() and self.selling_price_entry.get():
                     self.markup_price_entry.insert(0, round(float(self.unit_price_entry.get()) / (float(self.selling_price_entry.get()) / 100), 2))
 
-
+            def category_expiry_callback(category):
+                if ("Vaccine" in category or "Medicine" in category):
+                    self.expiry_switch.select()     
+                else:
+                    self.expiry_switch.deselect()
+                expiry_switch_event()
+                    
+                print(category)
+                pass
+                
+            
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
 
+            self.item_category = ["Vaccine","Medicine","Accessories"]
+            
             self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], corner_radius=0)
             self.main_frame.grid(row=0, column=0, sticky="new", padx=width*0.01, pady=height*0.02)
 
@@ -99,8 +111,10 @@ def add_item(master, info:tuple):
             self.item_name_entry.grid(row = 2, column = 0,columnspan=6, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
 
             ctk.CTkLabel(self.item_frame, text='Category', anchor='w', font=("DM Sans Medium", 14)).grid(row = 5, column = 0,columnspan=2, sticky = 'nsew',  pady = (height*0.025,0), padx = (width*0.01))
-            self.category_entry = ctk.CTkComboBox(self.item_frame, corner_radius=3, values=["Vaccine", "Medicine", "Accessories", "Leash", "Shampoo"], font=("DM Sans Medium",14))
+            self.category_entry = ctk.CTkComboBox(self.item_frame, corner_radius=3, values=self.item_category, font=("DM Sans Medium",14),command=partial(category_expiry_callback))
             self.category_entry.grid(row = 6, column = 0,columnspan=6, sticky = 'nsew', pady = (0,height*0.005), padx = (width*0.01))
+
+            self.category_entry.set(self.item_category[2])
 
             ctk.CTkLabel(self.item_frame, text='Unit Price: ', font=("DM Sans Medium", 14), anchor="e").grid(row = 7, column = 0, sticky="w",pady = (height*0.025,0), padx = (width*0.0125,0))
             self.unit_price_entry = ctk.CTkEntry(self.item_frame, width=width*0.3, textvariable= ctk.StringVar())
@@ -171,6 +185,7 @@ def add_item(master, info:tuple):
             self.cancel_btn = ctk.CTkButton(self.action_frame, width=width*0.05, height=height*0.05,corner_radius=3, font=("DM Sans Medium", 14), text='Cancel', command= reset)
             self.cancel_btn.pack(pady = (height*0.025, height*0.01))
 
+            category_expiry_callback(self.item_category[2])
     return add_item(master, info)
 
 def restock( master, info:tuple):
