@@ -1045,7 +1045,6 @@ class inventory_frame(ctk.CTkFrame):
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=[],width= width * .805, height= height * .725, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*.08)}-tr/SupplierName:x-tr/Action:{int(width*.075)}-tc!30!30',
-                                           column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*.08)}-tr/SupplierName:x-tr/Action:{int(width*.075)}-tc!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
         self.rs_data_view1.pack()
