@@ -703,7 +703,7 @@ class services_frame(ctk.CTkFrame):
         def update_tables(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
-            self.services_data_for_treeview = [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
+            self.services_data_for_treeview = [] if self.services_raw_data is None else [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
             self.services_treeview.update_table(self.services_data_for_treeview)
             self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
 
