@@ -841,13 +841,16 @@ class inventory_frame(ctk.CTkFrame):
             self.active_report = self.report_frames[cur_frame]
             self.active_report.pack(fill="both", expand=1)
 
+        def refresh(_ :any = None):
+            self.sort_type_option.set('View by Levels')
+            sort_status_callback('View by Levels')
+
         def update_tables(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.refresh_btn.after(1000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             self.data_view1.pack_forget()
-            self.data_view1.update_table(self.list_show)
+            self.data_view1.update_table(database.fetch_data(sql_commands.get_inventory_by_group))
             self.data_view1.pack()
-
 
         def sort_status_callback(option):
             if "Levels" in option:
@@ -894,8 +897,6 @@ class inventory_frame(ctk.CTkFrame):
                 self.search_entry.configure(state = 'readonly')
                 sort_status_configuration_callback()
             else:
-                for s in self.data_view1._data:
-                    print(s[0], self.search_entry.get(), self.search_entry.get().lower() in s[0].lower())
                 self.list_show = [s for s in self.data_view1._data if self.search_entry.get().lower() in s[0].lower()]
             update_tables()
 
@@ -1002,7 +1003,7 @@ class inventory_frame(ctk.CTkFrame):
                                            conditional_colors= {5: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'}})
         self.data_view1.pack()
 
-        self.refresh_btn.configure(command = update_tables)
+        self.refresh_btn.configure(command = refresh)
 
         self.sort_type_option.set("View by Levels")
 
@@ -1045,9 +1046,10 @@ class inventory_frame(ctk.CTkFrame):
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*.08)}-tr/SupplierName:x-tr/Action:{int(width*.075)}-bD!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width * .07)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/SupplierName:x-tr/Action:{int(width*.075)}-bD!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-                                           row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
+                                           row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
+        self.rs_data_view1.configure(double_click_command = lambda _: self.restock_popup.stock(self.rs_data_view1))
         self.rs_data_view1.pack()
         '''RESTOCK FRAME: END'''
 

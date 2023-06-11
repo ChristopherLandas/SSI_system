@@ -162,6 +162,7 @@ update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHER
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
 add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 show_all_items = "SELECT NAME FROM item_general_info"
+show_reveiving_hist = "SELECT NAME, stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state != 1"
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?)"
@@ -256,9 +257,11 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 
 #RECIEVING ITEMS
-record_recieving_item = "INSERT INTO recieving_item (NAME, stock, supp_name, exp_date, reciever, state, date_recieved) VALUES (?, ?, ?, ? ,?, ?, ?)"
-get_recieving_items = "SELECT NAME, stock, supp_name from recieving_item"
+record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ? ,?, ?, ?)"
+get_recieving_items = "SELECT id, NAME, stock, supp_name from recieving_item where state = 1"
 get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
+get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
+update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
