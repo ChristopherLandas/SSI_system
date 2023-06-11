@@ -1,3 +1,6 @@
+#GENERAL
+get_uid = "SELECT UID FROM item_general_info where name = ?"
+
 #SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.name,\
                                   CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
@@ -251,3 +254,19 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 
 #USER LEVEL ACCESS
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
+
+#RECIEVING ITEMS
+record_recieving_item = "INSERT INTO recieving_item (NAME, stock, supp_name, exp_date, reciever, state, date_recieved) VALUES (?, ?, ?, ? ,?, ?, ?)"
+get_recieving_items = "SELECT NAME, stock, supp_name from recieving_item"
+get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
+
+#DISPOSAL
+get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
+                              item_inventory_info.Stock\
+                          FROM item_general_info\
+                          JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                          INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                          WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE"
+record_disposal_process = "INSERT INTO disposal_history (item_name, quan, date_of_disposal, disposed_by) VALUES (?, ?, CURRENT_TIMESTAMP, ?);"
+delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
+get_disposal_hist = "SELECT item_name, quan, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"

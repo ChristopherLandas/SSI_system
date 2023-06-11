@@ -10,6 +10,7 @@ import datetime
 from PIL import Image
 import datetime
 from functools import partial
+from typing import *
 
 def add_item(master, info:tuple):
     class add_item(ctk.CTkFrame):
@@ -72,20 +73,20 @@ def add_item(master, info:tuple):
 
             def category_expiry_callback(category):
                 if ("Vaccine" in category or "Medicine" in category):
-                    self.expiry_switch.select()     
+                    self.expiry_switch.select()
                 else:
                     self.expiry_switch.deselect()
                 expiry_switch_event()
-                    
+
                 print(category)
                 pass
-                
-            
+
+
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             self.item_category = ["Vaccine","Medicine","Accessories"]
-            
+
             self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], corner_radius=0)
             self.main_frame.grid(row=0, column=0, sticky="new", padx=width*0.01, pady=height*0.02)
 
@@ -187,9 +188,9 @@ def add_item(master, info:tuple):
             category_expiry_callback(self.item_category[2])
     return add_item(master, info)
 
-def restock( master, info:tuple):
+def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
     class restock(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             width = info[0]
             height = info[1]
             acc_cred = info[2]
@@ -215,10 +216,21 @@ def restock( master, info:tuple):
                 self.stock_entry.configure(state = ctk.NORMAL)
                 self.action_btn.configure(state = ctk.NORMAL)
 
-            def stock():
+            def recieve_stock():
+                uid = database.fetch_data(sql_commands.get_uid, (self.item_name_entry.get(), ))[0][0]
+                supplier = database.fetch_data(sql_commands.get_supplier, (uid, ))[0][0]
+                expiry = None if 'Set'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
+                data = (self.item_name_entry.get(), self.stock_entry.get(), supplier, expiry, None, 1, None)
+                database.exec_nonquery([[sql_commands.record_recieving_item, data]])
+                if data_view :
+                    data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))
+
+            def add_stock(_inventory_data = None):
                 modified_dt: str = None if self.expiry_date_entry._text == "Set Expiry Date" else str(datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d'))
-                inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
-                                                    (self.item_uid, modified_dt or '1000-01-01'))
+                #inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
+                #                                    (self.item_uid, modified_dt or '1000-01-01'))
+                '''TBA'''
+                inventory_data = _inventory_data
 
                 if inventory_data: # if there was an already existing table; update the existing table
                     if inventory_data[0][2] is None:
@@ -300,7 +312,7 @@ def restock( master, info:tuple):
             self.leave_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Back', command = reset)
             self.leave_btn.grid(row = 1, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
 
-            self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=stock, state=ctk.DISABLED)
+            self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=recieve_stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
 
         def place(self, default_data: str, update_cmds: list = None, **kwargs):
@@ -314,7 +326,7 @@ def restock( master, info:tuple):
                 self.item_name_entry._text_label.configure(text = self.item_name_entry._values[0])
             self.item_name_entry.configure(values = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)])
             return super().place(**kwargs)
-    return restock(master, info)
+    return restock(master, info, data_view)
 
 def show_status(master, info:tuple,):
     class show_status(ctk.CTkFrame):
@@ -532,7 +544,7 @@ def disposal_history(master, info:tuple,):
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             from datetime import date
-            
+
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
             self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
@@ -565,10 +577,15 @@ def disposal_history(master, info:tuple,):
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
-            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .8, height= height * .775, corner_radius=0,
-                                             column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*0.07)}-tr/ExpiryDate:{int(width*.15)}-tl/DateDisposed:{int(width*.15)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
+            data = database.fetch_data(sql_commands.get_disposal_hist)
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=data,width= width * .8, height= height * .775, corner_radius=0,
+                                             column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*0.07)}-tr/DateDisposed:{int(width*.2)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
                                             header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                             row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
             self.data_view1.pack()
+
+        def place(self, **kwargs):
+            self.data_view1.update_table(database.fetch_data(sql_commands.get_disposal_hist))
+            return super().place(**kwargs)
 
     return disposal_history(master, info)

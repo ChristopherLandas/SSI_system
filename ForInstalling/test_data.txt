@@ -7,11 +7,15 @@ INSERT INTO user_level_access VALUES ('Assisstant', 0);
 INSERT INTO acc_info VALUES('admin', 'Owner', 'Owner');
 INSERT INTO acc_info VALUES('assisstant', 'Assisstant', 'Assisstant');
 
-INSERT INTO item_general_info VALUES ('I00001', 'MayPaw Heavy Duty Rope Dog Leash', 'Leash', 0);
-INSERT INTO item_general_info VALUES ('I00002', 'Taglory Rope Dog Leash', 'Leash', 0);
-INSERT INTO item_general_info VALUES ('I00003', 'Fresh Step Clumping Cat Litter', 'Litter Sand', 0);
-INSERT INTO item_general_info VALUES ('I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 'Litter Sand', 0);
-INSERT INTO item_general_info VALUES ('I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 'Dog Supplement', 1);
+INSERT INTO categories VALUES('Medicine', 1);
+INSERT INTO categories VALUES('Accessories', 0);
+INSERT INTO categories VALUES('Food', 1);
+
+INSERT INTO item_general_info VALUES ('I00001', 'MayPaw Heavy Duty Rope Dog Leash', 'Accessories');
+INSERT INTO item_general_info VALUES ('I00002', 'Taglory Rope Dog Leash', 'Accessories');
+INSERT INTO item_general_info VALUES ('I00003', 'Fresh Step Clumping Cat Litter', 'Accessories');
+INSERT INTO item_general_info VALUES ('I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 'Accessories');
+INSERT INTO item_general_info VALUES ('I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 'Medicine');
 
 INSERT INTO item_inventory_info VALUES ('I00001', 37, NULL);
 INSERT INTO item_inventory_info VALUES ('I00002', 43, NULL);
