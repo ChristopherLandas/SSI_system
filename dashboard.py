@@ -874,8 +874,6 @@ class sales_frame(ctk.CTkFrame):
         #self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
         self.data_view.pack(pady=(width*0.005))
 
-
-
 class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, mainframes
     def __init__(self, master):
@@ -1673,7 +1671,9 @@ class user_setting_frame(ctk.CTkFrame):
         staff_names = []
         staff_names2 = [['Andrew Tate', 'Owner', 1, 1, 1, 1, 1, 1, 1, 1, 1], ['MLD', 'Assistant', 1, 0, 0, 0, 0, 1, 1, 0, 0], ['Sneako', 'Assistant', 0, 1, 1, 1, 1, 0, 0, 0, 0], ['Fresh And Fit', 'Admin', 1, 1, 1, 1, 1, 1, 1, 1, 1]]
         #roles list
-        roles_list = ['Owner', 'Admin', 'Assistant']
+        roles_list = database.fetch_data('SELECT title FROM user_level_access')
+        roles_list = [s[0] for s in roles_list]
+        print(roles_list)
 
         #functions
         #disable all checkboxes
@@ -1867,8 +1867,10 @@ class user_setting_frame(ctk.CTkFrame):
         def my_show():
             if(c_v1.get()==1):
                 self.password_entry.configure(show='')
+                self.reenter_password_entry.configure(show = '')
             else:
                 self.password_entry.configure(show='*')
+                self.reenter_password_entry.configure(show = '*')
         #subject for removal
         def open_pin_toplvl():
             pin_top = tk.Toplevel()
@@ -1903,11 +1905,11 @@ class user_setting_frame(ctk.CTkFrame):
             self.reenter_password_entry.delete(0, tk.END)
             self.first_name_entry.delete(0, tk.END)
             self.last_name_entry.delete(0, tk.END)
-            self.address_entry.delete(0, tk.END)
-            self.contact_no_entry.delete(0, tk.END)
+            #self.address_entry.delete(0, tk.END)
+            #self.contact_no_entry.delete(0, tk.END)
         #checks if all entry has value and if password are the same
         def check_entry():
-            if len(self.username_entry.get()) == 0 or len(self.password_entry.get()) == 0 or len(self.address_entry.get()) == 0 or len(self.contact_no_entry.get()) == 0 or len(self.first_name_entry.get()) == 0 or len(self.last_name_entry.get()) == 0:
+            if len(self.username_entry.get()) == 0 or len(self.password_entry.get()) == 0 or len(self.first_name_entry.get()) == 0 or len(self.last_name_entry.get()) == 0:
                     messagebox.showerror("Error", "Enter all fields", icon='error')
             else:
                 if self.password_entry.get() == self.reenter_password_entry.get():
@@ -1919,22 +1921,20 @@ class user_setting_frame(ctk.CTkFrame):
 
         #ship the values
         def add_new_acc():
+            if database.fetch_data('SELECT * FROM acc_cred where usn = ?',( self.username_entry.get(), )):
+                    messagebox.showinfo('Can\'t Create record', 'Username already exist')
+                    return
             fullname = f'{self.first_name_entry.get()} {self.last_name_entry.get()}'
-            pos = self.position_cbox.get()
+            password = encrypt.pass_encrypt(self.password_entry.get())
+            database.exec_nonquery([['INSERT INTO acc_cred VALUES(?, ?, ?, NULL)', (self.username_entry.get(), password['pass'], password['salt'])],
+                                    ['INSERT INTO acc_info VALUES(?, ?, ?)', (self.username_entry.get(), fullname, self.position_cbox.get())]])
+            clear_acc_creation_fields()
 
-            single_acc_data = [fullname, pos]
-            if(pos=='Assistant'):
-                single_acc_data = [fullname, pos, 0, 1, 1, 1, 1, 1, 0, 1, 0]
-            else:
-                single_acc_data = [fullname, pos, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-            staff_names2.append(single_acc_data)
-
-        #create new acc
         def create_new_acc():
             add_new_acc()
-            clear_acc_creation_fields()
-            get_staff_name()
-            refresh_staff_names()
+            #clear_acc_creation_fields()
+            #get_staff_name()
+            #refresh_staff_names()
         '''ACCOUNT CREATION: START'''
         #user info label
         self.user_info_title_lbl = ctk.CTkLabel(self.box_frame, text='Create New Account',font=("Poppins", 35), text_color="#06283D")
@@ -1953,23 +1953,27 @@ class user_setting_frame(ctk.CTkFrame):
         #password label
         self.password_lbl = ctk.CTkLabel(self.account_details_frame, text='Password:',font=("Poppins", 25, "bold"), text_color="#06283D")
         self.password_lbl.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
         #password entry
         self.password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=password_svar, height=height*0.08, width=width*0.25,font=("Poppins", 25), show='*')
         self.password_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
-        #show password checkbutton
-        c1 = ctk.CTkSwitch(self.account_details_frame,text='Show Password',variable=c_v1,onvalue=1,offvalue=0,command=my_show)
-        c1.grid(row=2,column=1)
+
         #Re-enter Password label
         self.reenter_password_lbl = ctk.CTkLabel(self.account_details_frame, text='Re-enter Password:',font=("Poppins", 25, "bold"), text_color="#06283D")
-        self.reenter_password_lbl.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        self.reenter_password_lbl.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
         #Re-enter Password entry
         self.reenter_password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=repass_svar, height=height*0.08, width=width*0.25,font=("Poppins", 25), show='*')
-        self.reenter_password_entry.grid(row=3, column=1, padx=10, pady=10, sticky="nsw")
+        self.reenter_password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="nsw")
+
+        c1 = ctk.CTkSwitch(self.account_details_frame,text='Show Password',variable=c_v1,onvalue=1,offvalue=0,command=my_show)
+        c1.grid(row=3,column=1)
+
         #position label
         self.position_title_lbl = ctk.CTkLabel(self.account_details_frame, text='Position:',font=("Poppins", 25, "bold"), text_color="#06283D")
         self.position_title_lbl.grid(row=4, column=0, padx=10, pady=10, sticky="w")
         #position cbox
-        self.position_cbox = ctk.CTkComboBox(self.account_details_frame, values=roles_list, font=("Poppins", 25), height=height*0.08,width=width*0.25, dropdown_font=('Poppins', 25), button_color='#3B8ED0', button_hover_color='#2C74B3')
+        self.position_cbox = ctk.CTkOptionMenu(self.account_details_frame, values=roles_list, font=("Poppins", 25), height=height*0.08,width=width*0.25, dropdown_font=('Poppins', 25), button_color='#3B8ED0', button_hover_color='#2C74B3')
         self.position_cbox.grid(row=4, column=1, padx=10, pady=(0, 10), sticky="ew")
 
         #personal info frame
@@ -1989,17 +1993,17 @@ class user_setting_frame(ctk.CTkFrame):
         self.last_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="Doe", height=height*0.08, width=width*0.25,font=("Poppins", 25))
         self.last_name_entry.grid(row=1, column=1, padx=10, pady=10, sticky="nsw")
         #contact no label
-        self.contact_no_lbl = ctk.CTkLabel(self.personal_info_frame, text='Contact No.:',font=("Poppins", 25, "bold"), text_color="#06283D")
-        self.contact_no_lbl.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        #self.contact_no_lbl = ctk.CTkLabel(self.personal_info_frame, text='Contact No.:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        #self.contact_no_lbl.grid(row=2, column=0, padx=10, pady=10, sticky="w")
         #contact no entry
-        self.contact_no_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="0922 123 1234", height=height*0.08, width=width*0.25,font=("Poppins", 25))
-        self.contact_no_entry.grid(row=2, column=1, padx=10, pady=10, sticky="nsw")
+        #self.contact_no_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="0922 123 1234", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        #self.contact_no_entry.grid(row=2, column=1, padx=10, pady=10, sticky="nsw")
         #address label
-        self.address_lbl = ctk.CTkLabel(self.personal_info_frame, text='Address:',font=("Poppins", 25, "bold"), text_color="#06283D")
-        self.address_lbl.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        #self.address_lbl = ctk.CTkLabel(self.personal_info_frame, text='Address:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        #self.address_lbl.grid(row=3, column=0, padx=10, pady=10, sticky="w")
         #address entry
-        self.address_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="123 Otentukumpo St.", height=height*0.08, width=width*0.25,font=("Poppins", 25))
-        self.address_entry.grid(row=3, column=1, padx=10, pady=10, sticky="nsw")
+        #self.address_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="123 Otentukumpo St.", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        #self.address_entry.grid(row=3, column=1, padx=10, pady=10, sticky="nsw")
         #frame for bottom windows
         self.bottom_frame= ctk.CTkFrame(self.box_frame, fg_color='white')
         self.bottom_frame.grid(row=10, column=0, padx=10, pady=10, sticky="s", columnspan=4)
@@ -2020,5 +2024,4 @@ class histlog_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         self.label = ctk.CTkLabel(self, text='9').pack(anchor='w')
         self.grid_forget();
-
 dashboard(None, 'admin', datetime.datetime.now)
