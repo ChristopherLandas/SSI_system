@@ -287,7 +287,7 @@ class customcustomtkinter:
                         temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
                         if self.column_types[j] == 'bD':
-                            dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color='red' ,text='')
+                            dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color=Color.Red_Tulip ,text='-')
                             dlt_btn.configure(command = partial(self.bd_func, dlt_btn))
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
