@@ -621,7 +621,6 @@ class transaction_frame(ctk.CTkFrame):
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent", )
         self.top_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
         
-        
         self.client_name_frame = ctk.CTkFrame(self.top_frame, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05,)
         self.client_name_frame.pack(side="left",padx=(width*0.005))
         self.client_name_frame.pack_propagate(0)
@@ -632,10 +631,12 @@ class transaction_frame(ctk.CTkFrame):
         self.client_name_entry = ctk.CTkEntry(self.client_name_frame, placeholder_text="Client's Name",font=("DM Sans Medium", 15), border_width=0, fg_color="white")
         self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
 
-        self.add_service = ctk.CTkButton(self.top_frame, image=self.service_icon, text="Add Service", height=height*0.05, width=width*0.1,font=("Arial", 14))
+        self.add_service = ctk.CTkButton(self.top_frame, image=self.service_icon, text="Add Service", height=height*0.05, width=width*0.1,font=("Arial", 14),
+                                         command=lambda:self.show_services_list.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_service.pack(side="left")
 
-        self.add_item = ctk.CTkButton(self.top_frame, image=self.item_icon, text="Add item",height=height*0.05, width=width*0.1, font=("Arial", 14))
+        self.add_item = ctk.CTkButton(self.top_frame, image=self.item_icon, text="Add item",height=height*0.05, width=width*0.1, font=("Arial", 14),
+                                      command=lambda:self.show_list_item.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item.pack(side="left",padx=(width*0.005))
         
         self.sched_service = ctk.CTkButton(self.top_frame, image=self.cal_icon, text="Scheduled Service",height=height*0.05, width=width*0.1, font=("Arial", 14))
@@ -746,12 +747,12 @@ class transaction_frame(ctk.CTkFrame):
         self.final_total_label = ctk.CTkLabel(self.total_frame, text="Total:", font=("DM Sans Medium", 14))
         self.final_total_label.pack(side="left", padx=(width*0.01, 0))
         self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
-        self.final_total_value.pack(side="right", padx=(0, width*0.01))
+        self.final_total_value.pack(side="right", padx=(0, width*0.01))"""
 
-        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height, self.item_treeview))
-        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height, self.service_treeview), self.customer_infos)
-        self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
-        self.service_treeview.bd_configs = [(6, [self.service_total_value, self.final_total_value])] """
+        #self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
+        #self.service_treeview.bd_configs = [(6, [self.service_total_value, self.final_total_value])] 
+        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height))
+        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.customer_infos)
 
     def change_total_value_item(self, value: float):
             value = float(value)
