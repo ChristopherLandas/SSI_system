@@ -781,15 +781,39 @@ class sales_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='4').pack(anchor='w')
+        
+        self.grid_columnconfigure(2,weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_forget()
+        
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+        
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=3, sticky="nsew", padx=width*0.005,pady=height*0.01)
+        
+        self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color="white")
+        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack_propagate(0)
+        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="light grey")
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+
+        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1)
+        
+        self.treeview_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
+        self.treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+        
         self.main_data = database.fetch_data(sql_commands.get_transaction_data, None)
         self.main_data = [(s[0], s[2], str(datetime.datetime.now().date()), format_price(float(s[3])), s[1]) for s in self.main_data]
-        self.data_view = cctk.cctkTreeView(self, self.main_data, width * .8, height * .8,
-                                           column_format='/No:75-#c/OR:75-tc/Client:x-tl/Date:175-tc/TotalPrice:125-tr/Cashier:125-tl/Actions:85-bD!50!30')
-        self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
-        self.data_view.pack(pady = (15, 0))
-
-        self.grid_forget()
+        self.data_view = cctk.cctkTreeView(self.treeview_frame, width=width * .8, height=height * .8,
+                                           column_format=f'/No:{int(width*0.025)}-#r/OR:{int(width*0.075)}-tc/Client:x-tl/Date:{int(width*0.15)}-tc/Total:{int(width*0.085)}-tr/Cashier:{int(width*.175)}-tl!30!30')
+        #self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
+        self.data_view.pack(pady=(width*0.005))
+        
+        
 
 class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, mainframes
@@ -940,7 +964,7 @@ class inventory_frame(ctk.CTkFrame):
         self.stock_in_button.grid()
         self.stock_in_button.update_children()
 
-        self.stock_disposal_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
+        self.stock_disposal_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.stock_disposal_button.grid(row=0, column=2, sticky="sw", padx=(0,width*0.0025), pady=0)
@@ -1101,12 +1125,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
         self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
-        self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
-        self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
-        self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
-        self.disposal_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
         self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
-        self.history_icon = ctk.CTkImage(light_image= Image.open("image/histlogs.png"), size=(22,25))
         self.trash_icon = ctk.CTkImage(light_image= Image.open("image/trash.png"), size=(22,25))
         self.gen_icon = ctk.CTkImage(light_image=Image.open("image/patient_icon.png"),size=(18,20))
         
@@ -1157,6 +1176,9 @@ class reports_frame(ctk.CTkFrame):
 
         self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
         self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+
 
         self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
         self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
@@ -1165,12 +1187,13 @@ class reports_frame(ctk.CTkFrame):
         self.base_frame.grid_rowconfigure(1, weight=1)
 
         self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
-        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
+        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
 
         self.sales_report_frame.grid_columnconfigure(1, weight=1)
         self.sales_report_frame.grid_rowconfigure(2, weight=1)
         
         self.inventory_report_frame.grid_columnconfigure(1, weight=1)
+        self.inventory_report_frame.grid_rowconfigure(1, weight=1)
 
         self.report_frames=[self.sales_report_frame, self.inventory_report_frame]
         self.active_report = None
@@ -1366,6 +1389,9 @@ class reports_frame(ctk.CTkFrame):
         self.show_calendar = ctk.CTkButton(self.sales_report_top, text="", image=self.calendar_icon, width=width*0.025,
                                            command=set_date)
         self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
+        
+        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
 
         self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values=["April","May", "June"], anchor="center", width=width*0.1 )
         self.month_option.set(f"{date.today().strftime('%B')}")
@@ -1397,14 +1423,14 @@ class reports_frame(ctk.CTkFrame):
         self.data_frame = ctk.CTkFrame(self.sales_report_frame, height=height*0.35)
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=height*0.0075)
 
-        self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35, header_color=Color.Blue_Yale, content_color="transparent",
-                                           column_format='/No:75-#c/OR:75-tc/Client:x-tl/Service:175-tc/Item:175-tr/Total:125-tl/Actions:85-tc!30!30')
+        self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35,
+                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.075)}-tc/Client:x-tl/Service:{int(width*0.2)}-tc/Item:{int(width*0.2)}-tr/Total:{int(width*0.1)}-tl!30!30')
         self.daily_data_view.pack(pady=height*0.01, padx=width*0.005)
 
         self.monthly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
-        self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5, header_color=Color.Blue_Yale, content_color="transparent",
+        self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5,
                                            column_format=f"/No:{int(width*.025)}-#c/Date:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.monthly_data_view.pack()
 
@@ -1413,14 +1439,31 @@ class reports_frame(ctk.CTkFrame):
         self.yearly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
-        self.yearly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5, header_color=Color.Blue_Yale, content_color="transparent",
+        self.yearly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5,
                                            column_format=f"/No:{int(width*.025)}-#c/Month:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.yearly_data_view.pack()
 
         show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,"#DBDBDB"], label=yearly_label)
-
-
         report_menu_callback("Daily")
+
+        '''INVENTORY REPORT'''
+        self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
+        self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.0025), pady=(height*0.005,0))
+        self.search_frame.pack_propagate(0)
+        
+        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("Arial", 14), text_color="black", fg_color=Color.White_Color[3])
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        
+        self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005,0))
+        
+        self.rep_treeview_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="transparent")
+        self.rep_treeview_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
+        
+        self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
+                                           column_format=f"/No:{int(width*.025)}-#c/ItemName:x-tl/InitialStock:{int(width*.2)}-tr/CurrentStock:{int(width*.2)}-tr!30!30")
+        self.inventory_rep_treeview.pack()
         load_main_frame(0)
 
 class user_setting_frame(ctk.CTkFrame):
