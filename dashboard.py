@@ -602,29 +602,85 @@ class transaction_frame(ctk.CTkFrame):
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
+        self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
+        self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
+        self.cal_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(20,20))
+        self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
 
         self.grid_columnconfigure((1), weight=1)
-        self.grid_rowconfigure((1,2), weight=1)
+        self.grid_rowconfigure((2), weight=1)
 
         self.or_num_label = ctk.CTkLabel(self, fg_color=Color.White_Ghost, corner_radius=5, width=width*0.125, height = height*0.05,
                                          text="OR#: 0001", font=("DM Sans Medium", 15))
-        self.or_num_label.grid(row=0, column=0, padx=(width*0.005,0), pady=(height*0.01))
+        self.or_num_label.grid(row=0, column=0, padx=(width*0.005,0), pady=(height*0.01), sticky="w")
 
-        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.55, height=height*0.05,)
-        self.client_name_frame.grid(row=0, column=1, columnspan=1)
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=2, padx=(width*0.005),  pady=(height*0.01))
+
+        self.top_frame = ctk.CTkFrame(self, fg_color="transparent", )
+        self.top_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
+
+        self.client_name_frame = ctk.CTkFrame(self.top_frame, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05,)
+        self.client_name_frame.pack(side="left",padx=(width*0.005))
         self.client_name_frame.pack_propagate(0)
 
         self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
         self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
 
         self.client_name_entry = ctk.CTkEntry(self.client_name_frame, placeholder_text="Client's Name",font=("DM Sans Medium", 15), border_width=0, fg_color="white")
-        self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005,width*0.01), pady=(height*0.01))
+        self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
 
-        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
-                                       fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=2, padx=(0, width*0.005),  pady=(height*0.01))
+        self.add_service = ctk.CTkButton(self.top_frame, image=self.service_icon, text="Add Service", height=height*0.05, width=width*0.1,font=("Arial", 14),
+                                         command=lambda:self.show_services_list.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_service.pack(side="left")
 
-        self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
+        self.add_item = ctk.CTkButton(self.top_frame, image=self.item_icon, text="Add item",height=height*0.05, width=width*0.1, font=("Arial", 14),
+                                      command=lambda:self.show_list_item.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_item.pack(side="left",padx=(width*0.005))
+
+        self.sched_service = ctk.CTkButton(self.top_frame, image=self.cal_icon, text="Scheduled Service",height=height*0.05, width=width*0.1, font=("Arial", 14))
+        self.sched_service.pack(side="right", padx=(0,width*0.005))
+
+        self.transact_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
+        self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="new", padx=(width*0.005), pady=(height*0.01))
+
+        self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.6,
+                                                   column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-tc/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-tl!30!30')
+        self.transact_treeview.pack(pady=(height*0.01,0))
+
+        self.bottom_frame = ctk.CTkFrame(self.transact_frame, fg_color="transparent", height=height*0.05)
+        self.bottom_frame.pack(pady=(height*0.01), fill="x", padx=(width*0.005))
+        #self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+
+        self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        self.price_total_frame.pack(side="right")
+        self.price_total_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.price_total_frame, text="Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+        self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text="0,000.00", font=("Arial", 14))
+        self.price_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+        self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        self.item_total_frame.pack(side="right", padx=(0,width*0.0075))
+        self.item_total_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+        self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("Arial", 14))
+        self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+        self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        self.services_total_frame.pack(side="right", padx=(0,width*0.0075))
+        self.services_total_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+        self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="0,000.00", font=("Arial", 14))
+        self.services_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right")
+        self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025))
+
+        """ self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
         self.service_frame.grid(row=1, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(0,height*0.005))
         self.service_frame.grid_columnconfigure(0, weight=1)
         self.service_frame.grid_rowconfigure(0, weight=1)
@@ -691,12 +747,12 @@ class transaction_frame(ctk.CTkFrame):
         self.final_total_label = ctk.CTkLabel(self.total_frame, text="Total:", font=("DM Sans Medium", 14))
         self.final_total_label.pack(side="left", padx=(width*0.01, 0))
         self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
-        self.final_total_value.pack(side="right", padx=(0, width*0.01))
+        self.final_total_value.pack(side="right", padx=(0, width*0.01))"""
 
-        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height, self.item_treeview))
-        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height, self.service_treeview), self.customer_infos)
-        self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
-        self.service_treeview.bd_configs = [(6, [self.service_total_value, self.final_total_value])]
+        #self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
+        #self.service_treeview.bd_configs = [(6, [self.service_total_value, self.final_total_value])]
+        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height))
+        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.customer_infos)
 
     def change_total_value_item(self, value: float):
             value = float(value)
@@ -747,12 +803,12 @@ class services_frame(ctk.CTkFrame):
         self.search_frame.grid(row=0, column=0,padx=(width*0.005))
         self.search_frame.pack_propagate(0)
 
-        self.search_bar_frame = ctk.CTkFrame(self.search_frame, fg_color="light grey")
-        self.search_bar_frame.pack(fill="both", padx=width*0.005, pady=height*0.0075)
-
-        ctk.CTkLabel(self.search_bar_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
-        self.search_entry = ctk.CTkEntry(self.search_bar_frame, placeholder_text="Search", border_width=0, fg_color="light grey")
+        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="light grey")
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="light grey", hover_color="grey",
+                                        width=width*0.005)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
         self.add_service = ctk.CTkButton(self,text="Add Service", width=width*0.1, height = height*0.05, image=self.plus)
         self.add_service.grid(row=0, column=1)
@@ -781,15 +837,44 @@ class sales_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='4').pack(anchor='w')
+
+        self.grid_columnconfigure(2,weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_forget()
+
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=3, sticky="nsew", padx=width*0.005,pady=height*0.01)
+
+        self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color="white")
+        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="light grey")
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="light grey", hover_color="grey",
+                                        width=width*0.005)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+
+
+        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1)
+
+        self.treeview_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
+        self.treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+
         self.main_data = database.fetch_data(sql_commands.get_transaction_data, None)
         self.main_data = [(s[0], s[2], str(datetime.datetime.now().date()), format_price(float(s[3])), s[1]) for s in self.main_data]
-        self.data_view = cctk.cctkTreeView(self, self.main_data, width * .8, height * .8,
-                                           column_format='/No:75-#c/OR:75-tc/Client:x-tl/Date:175-tc/TotalPrice:125-tr/Cashier:125-tl/Actions:85-bD!50!30')
-        self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
-        self.data_view.pack(pady = (15, 0))
+        self.data_view = cctk.cctkTreeView(self.treeview_frame, width=width * .8, height=height * .8,
+                                           column_format=f'/No:{int(width*0.025)}-#r/OR:{int(width*0.075)}-tc/Client:x-tl/Date:{int(width*0.15)}-tc/Total:{int(width*0.085)}-tr/Cashier:{int(width*.175)}-tl!30!30')
+        #self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
+        self.data_view.pack(pady=(width*0.005))
 
-        self.grid_forget()
+
 
 class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, mainframes
@@ -941,7 +1026,7 @@ class inventory_frame(ctk.CTkFrame):
         self.stock_in_button.grid()
         self.stock_in_button.update_children()
 
-        self.stock_disposal_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
+        self.stock_disposal_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.stock_disposal_button.grid(row=0, column=2, sticky="sw", padx=(0,width*0.0025), pady=0)
@@ -964,7 +1049,7 @@ class inventory_frame(ctk.CTkFrame):
         self.inventory_sub_frame.grid_rowconfigure(1, weight=1)
         self.inventory_sub_frame.grid_columnconfigure(3, weight=1)
 
-        self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05)
+        """ self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05)
         self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
 
         self.search_frame.pack_propagate(0)
@@ -972,7 +1057,21 @@ class inventory_frame(ctk.CTkFrame):
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
         self.search_entry.bind('<Return>', search)
         self.search_entry.bind('<Button-1>', lambda _: self.search_entry.configure(state = ctk.NORMAL))
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
+
+        self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05, fg_color="light grey")
+        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
+        self.search_entry.bind('<Return>', search)
+        self.search_entry.bind('<Button-1>', lambda _: self.search_entry.configure(state = ctk.NORMAL))
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="grey",
+                                        width=width*0.005, command=search)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
@@ -1016,13 +1115,24 @@ class inventory_frame(ctk.CTkFrame):
 
         self.restock_frame.grid_columnconfigure(3, weight=1)
 
-        self.rs_search_frame = ctk.CTkFrame(self.restock_frame,width=width*0.3, height = height*0.05)
+        """ self.rs_search_frame = ctk.CTkFrame(self.restock_frame,width=width*0.3, height = height*0.05)
         self.rs_search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
 
         self.rs_search_frame.pack_propagate(0)
         ctk.CTkLabel(self.rs_search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
         self.rs_search_entry = ctk.CTkEntry(self.rs_search_frame, placeholder_text="Search", border_width=0, fg_color="white")
+        self.rs_search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
+
+        self.rs_search_frame = ctk.CTkFrame(self.restock_frame, fg_color="light grey", width=width*0.35, height = height*0.05,)
+        self.rs_search_frame.grid(row=0, column=0,padx=(width*0.005))
+        self.rs_search_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.rs_search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+        self.rs_search_entry = ctk.CTkEntry(self.rs_search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
         self.rs_search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.rs_search_btn = ctk.CTkButton(self.rs_search_frame, text="", image=self.search, fg_color="white", hover_color="grey",
+                                        width=width*0.005)
+        self.rs_search_btn.pack(side="left", padx=(0, width*0.0025))
 
         self.rs_add_item_btn = ctk.CTkButton(self.restock_frame,width=width*0.1, height = height*0.05, text="Add Order",image=self.add_icon, font=("DM Sans Medium", 14),
                                            command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, relx = .5, rely = .5, anchor = 'c'))
@@ -1112,12 +1222,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
         self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
-        self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
-        self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
-        self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
-        self.disposal_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
         self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
-        self.history_icon = ctk.CTkImage(light_image= Image.open("image/histlogs.png"), size=(22,25))
         self.trash_icon = ctk.CTkImage(light_image= Image.open("image/trash.png"), size=(22,25))
         self.gen_icon = ctk.CTkImage(light_image=Image.open("image/patient_icon.png"),size=(18,20))
 
@@ -1125,13 +1230,24 @@ class patient_info_frame(ctk.CTkFrame):
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=4, sticky="n", padx=(width*0.005), pady=(height*0.01))
 
-        self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color=Color.White_Color[3])
+        self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color="white")
+        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="light grey")
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="light grey", hover_color="grey",
+                                        width=width*0.005)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+
+        """ self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color=Color.White_Color[3])
         self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("Arial", 14), text_color="black", fg_color=Color.White_Platinum)
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
 
         self.add_record_btn = ctk.CTkButton(self, width=width*0.08, height = height*0.05, text="Add Record",image=self.add_icon, font=("DM Sans Medium", 14),
                                             command=lambda:self.new_record.place(relx = .5, rely = .5, anchor = 'c'))
@@ -1168,6 +1284,9 @@ class reports_frame(ctk.CTkFrame):
 
         self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
         self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+
 
         self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
         self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
@@ -1176,12 +1295,13 @@ class reports_frame(ctk.CTkFrame):
         self.base_frame.grid_rowconfigure(1, weight=1)
 
         self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
-        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
+        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
 
         self.sales_report_frame.grid_columnconfigure(1, weight=1)
         self.sales_report_frame.grid_rowconfigure(2, weight=1)
 
         self.inventory_report_frame.grid_columnconfigure(1, weight=1)
+        self.inventory_report_frame.grid_rowconfigure(1, weight=1)
 
         self.report_frames=[self.sales_report_frame, self.inventory_report_frame]
         self.active_report = None
@@ -1378,6 +1498,9 @@ class reports_frame(ctk.CTkFrame):
                                            command=set_date)
         self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
 
+        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
+
         self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values=["April","May", "June"], anchor="center", width=width*0.1 )
         self.month_option.set(f"{date.today().strftime('%B')}")
         self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center")
@@ -1408,14 +1531,14 @@ class reports_frame(ctk.CTkFrame):
         self.data_frame = ctk.CTkFrame(self.sales_report_frame, height=height*0.35)
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=height*0.0075)
 
-        self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35, header_color=Color.Blue_Yale, content_color="transparent",
-                                           column_format='/No:75-#c/OR:75-tc/Client:x-tl/Service:175-tc/Item:175-tr/Total:125-tl/Actions:85-tc!30!30')
+        self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35,
+                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.075)}-tc/Client:x-tl/Service:{int(width*0.2)}-tc/Item:{int(width*0.2)}-tr/Total:{int(width*0.1)}-tl!30!30')
         self.daily_data_view.pack(pady=height*0.01, padx=width*0.005)
 
         self.monthly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
-        self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5, header_color=Color.Blue_Yale, content_color="transparent",
+        self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5,
                                            column_format=f"/No:{int(width*.025)}-#c/Date:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.monthly_data_view.pack()
 
@@ -1424,22 +1547,472 @@ class reports_frame(ctk.CTkFrame):
         self.yearly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
         self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
-        self.yearly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5, header_color=Color.Blue_Yale, content_color="transparent",
+        self.yearly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5,
                                            column_format=f"/No:{int(width*.025)}-#c/Month:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.yearly_data_view.pack()
 
         show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,"#DBDBDB"], label=yearly_label)
-
-
         report_menu_callback("Daily")
+
+        '''INVENTORY REPORT'''
+        self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
+        self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.0025), pady=(height*0.005,0))
+        self.search_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("Arial", 14), text_color="black", fg_color=Color.White_Color[3])
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+
+        self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005,0))
+
+        self.rep_treeview_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="transparent")
+        self.rep_treeview_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
+
+        self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
+                                           column_format=f"/No:{int(width*.025)}-#c/ItemName:x-tl/InitialStock:{int(width*.2)}-tr/CurrentStock:{int(width*.2)}-tr!30!30")
+        self.inventory_rep_treeview.pack()
         load_main_frame(0)
 
 class user_setting_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        self.label = ctk.CTkLabel(self, text='8').pack(anchor='w')
+        #self.label = ctk.CTkLabel(self, text='8').pack(anchor='w')
+        #self.grid_forget()
+        #self.label = ctk.CTkLabel(self, text='7').pack(anchor='w')
+        self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
+        #call roles icon
+        self.roles_icon = ctk.CTkImage(light_image=Image.open("image/patient.png"), size=(16,16))
+        #call account creation tab icon
+        self.account_creation_icon = ctk.CTkImage(light_image = Image.open("image/person_icon.png"), size=(24,25))
+
+        self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
+        self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
+        self.base_frame.grid_propagate(0)
+        self.base_frame.grid_columnconfigure(0, weight=1)
+        self.base_frame.grid_rowconfigure(1, weight=1)
+
+        #frame for roles tab
+        self.roles_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
+        #frame for account creation tab
+        self.account_creation_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
+
+        self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
+        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
+
+        self.sales_report_frame.grid_columnconfigure(1, weight=1)
+        self.sales_report_frame.grid_rowconfigure(2, weight=1)
+
+        self.inventory_report_frame.grid_columnconfigure(1, weight=1)
+
+        self.report_frames=[self.sales_report_frame, self.inventory_report_frame]
+        self.active_report = None
+
         self.grid_forget()
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+
+        selected_color = Color.Blue_Yale
+
+        def load_main_frame(cur_frame: int):
+            if self.active_report is not None:
+                self.active_report.grid_forget()
+            self.active_report = self.report_frames[cur_frame]
+            self.active_report.grid(row =1, column =0, sticky = 'nsew',padx=width*0.005, pady=height*0.005)
+
+        self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
+        self.top_frame.grid_columnconfigure(2, weight=1)
+        #date on top right
+        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
+
+        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=3, sticky="n")
+
+        #first tab on top frame
+        self.roles_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
+                                                       fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+
+        self.roles_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.roles_button.configure(command=partial(load_main_frame, 0))
+        self.roles_tab_icon = ctk.CTkLabel(self.roles_button, text="",image=self.roles_icon)
+        self.roles_tab_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.sales_report_label = ctk.CTkLabel(self.roles_button, text="ROLES", text_color="white",font=('Poppins', 15))
+        self.sales_report_label.pack(side="left")
+        self.roles_button.grid()
+        self.roles_button.update_children()
+        #second tab on top frame
+        self.account_creation_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+
+        self.account_creation_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+
+        self.account_creation_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.account_creation_button.configure(command=partial(load_main_frame, 1))
+        self.account_creation_tab_icon = ctk.CTkLabel(self.account_creation_button, text="",image=self.account_creation_icon)
+        self.account_creation_tab_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.inventory_report_label = ctk.CTkLabel(self.account_creation_button, text="ACCOUNT CREATION", text_color="white",font=('Poppins', 15))
+        self.inventory_report_label.pack(side="left")
+        self.account_creation_button.grid()
+        self.account_creation_button.update_children()
+
+        self.button_manager = cctku.button_manager([self.roles_button, self.account_creation_button], selected_color, False, 0)
+        self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
+                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
+        self.button_manager.click(self.button_manager._default_active, None)
+
+        self.report_option_var = ctk.StringVar(value="Daily Report")
+        #data for accounts
+        #StringVars
+        self.staff_name_svar = ctk.StringVar(value='Choose staff here...')
+
+        #staff name list
+        staff_names = []
+        staff_names2 = [['Andrew Tate', 'Owner', 1, 1, 1, 1, 1, 1, 1, 1, 1], ['MLD', 'Assistant', 1, 0, 0, 0, 0, 1, 1, 0, 0], ['Sneako', 'Assistant', 0, 1, 1, 1, 1, 0, 0, 0, 0], ['Fresh And Fit', 'Admin', 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+        #roles list
+        roles_list = ['Owner', 'Admin', 'Assistant']
+
+        #functions
+        #disable all checkboxes
+        def disable_privilege_checkboxes():
+            self.dashboard_chk_box.configure(state='disabled')
+            self.transaction_chk_box.configure(state='disabled')
+            self.service_chk_box.configure(state='disabled')
+            self.sales_chk_box.configure(state='disabled')
+            self.inventory_chk_box.configure(state='disabled')
+            self.pet_info_chk_box.configure(state='disabled')
+            self.reports_chk_box.configure(state='disabled')
+            self.users_chk_box.configure(state='disabled')
+            self.action_log_chk_box.configure(state='disabled')
+            self.role_cbox.configure(state='disabled')
+            self.update_acc_btn.configure(state='disabled')
+            self.clear_fields_btn.configure(state='disabled')
+            self.edit_acc_btn.configure(state='disabled')
+            self.role_cbox.set('')
+            self.staff_name_cbox.set('Choose staff here...')
+            clear_all_role_fields()
+        #enable all checkboxes
+        def enable_privilege_checkboxes():
+            self.dashboard_chk_box.configure(state='normal')
+            self.transaction_chk_box.configure(state='normal')
+            self.service_chk_box.configure(state='normal')
+            self.sales_chk_box.configure(state='normal')
+            self.inventory_chk_box.configure(state='normal')
+            self.pet_info_chk_box.configure(state='normal')
+            self.reports_chk_box.configure(state='normal')
+            self.users_chk_box.configure(state='normal')
+            self.action_log_chk_box.configure(state='normal')
+            self.role_cbox.configure(state='normal')
+            self.update_acc_btn.configure(state='normal')
+            self.clear_fields_btn.configure(state='normal')
+            self.edit_acc_btn.configure(state='normal')
+        #get all names in list
+        def get_staff_name():
+            for i in range(0, len(staff_names2)):
+                if(not staff_names2[i][0] in staff_names):
+                    staff_names.append(staff_names2[i][0])
+        #check acc stat
+        def check_acc(choice):
+            enable_privilege_checkboxes()
+            for l in checkbox_privilege_list:
+                l.deselect()
+            for i in range(0, len(staff_names2)):
+                if(staff_names2[i][0] == choice):
+                    self.role_cbox.set(staff_names2[i][1])
+                    for j in range(2, len(staff_names2[i])):
+                        if(staff_names2[i][j]):
+                            checkbox_privilege_list[j-2].select()
+        #cbox event
+        def refresh_staff_names():
+            #name combo box
+            self.staff_name_cbox.grid_forget()
+            self.staff_name_cbox = ctk.CTkComboBox(self.roles_inner_frame, values=staff_names, state='readonly', variable=self.staff_name_svar, font=('Poppins', (height*0.030)), dropdown_text_color='white', dropdown_fg_color='#3B8ED0', dropdown_font=('Poppins', (height*0.028)), width=(width*0.3), button_color='#3B8ED0', button_hover_color='#2C74B3', command=check_acc)
+            self.staff_name_cbox.grid(row=0, column=1, sticky='ew', padx=((width*0.005)), pady=height*0.005)
+
+        #clear all role fields
+        def clear_all_role_fields():
+            for i in checkbox_privilege_list:
+                i.deselect()
+        #update account
+        def update_staff_account():
+            for i in range(0, len(staff_names2)):
+                if (self.staff_name_cbox.get()==staff_names2[i][0]):
+                    staff_names2[i] = [staff_names2[i][0],
+                                        self.role_cbox.get(),
+                                        self.dashboard_chk_box.get(),
+                                        self.transaction_chk_box.get(),
+                                        self.service_chk_box.get(),
+                                        self.sales_chk_box.get(),
+                                        self.inventory_chk_box.get(),
+                                        self.pet_info_chk_box.get(),
+                                        self.reports_chk_box.get(),
+                                        self.users_chk_box.get(),
+                                        self.action_log_chk_box.get()]
+            disable_privilege_checkboxes()
+
+        #pre watched
+        get_staff_name()
+
+        #frame for roles tab
+        self.roles_inner_frame = ctk.CTkFrame(self.sales_report_frame)
+        self.roles_inner_frame.pack(fill=tk.BOTH, expand=True)
+        self.roles_inner_frame.grid_rowconfigure(4, weight=1)
+
+        #name label
+        ctk.CTkLabel(self.roles_inner_frame, text="Name:", font=('Poppins', (height*0.032), 'bold'), text_color='#06283D').grid(row=0, column=0, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #name combo box
+        self.staff_name_cbox = ctk.CTkComboBox(self.roles_inner_frame, values=staff_names, state='readonly', variable=self.staff_name_svar, font=('Poppins', (height*0.030)), dropdown_text_color='white', dropdown_fg_color='#3B8ED0', dropdown_font=('Poppins', (height*0.028)), width=(width*0.3), button_color='#3B8ED0', button_hover_color='#2C74B3', command=check_acc)
+        self.staff_name_cbox.grid(row=0, column=1, sticky='ew', padx=((width*0.005)), pady=height*0.005)
+        #roles label
+        ctk.CTkLabel(self.roles_inner_frame, text="Roles:", font=('Poppins', (height*0.032), 'bold'), text_color='#06283D').grid(row=1, column=0, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #roles combo box
+        self.role_cbox = ctk.CTkComboBox(self.roles_inner_frame, values=roles_list, state='readonly', font=('Poppins', (height*0.030)), dropdown_font=('Poppins', (height*0.028)), width=(width*0.3), button_color='#3B8ED0', button_hover_color='#2C74B3')
+        self.role_cbox.grid(row=1, column=1, sticky="we", pady = (height*0.005), padx = (width*0.005))
+        #edit account button
+        self.edit_acc_btn = ctk.CTkButton(self.roles_inner_frame, text='EDIT ACCOUNT', command=exit, font=('Poppins', (height*0.022)))
+        self.edit_acc_btn.grid(row=2, column=1, sticky='we', pady = (height*0.005), padx = (width*0.005))
+
+        #privileges frame
+        self.privileges_frame = ctk.CTkFrame(self.roles_inner_frame)
+        self.privileges_frame.grid(row=3, column=0, sticky='nesw', columnspan=3)
+        #privileges lbl
+        ctk.CTkLabel(self.privileges_frame, text='Privileges:', font=('Poppins', (height*0.032), 'bold'), text_color='#06283D').grid(row=0, column=0, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #dashboard privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Dashboard', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=1, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #dashboard privilege checkbox
+        self.dashboard_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.dashboard_chk_box.grid(row=1, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #transactions privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Transactions', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=2, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #transactions privilege checkbox
+        self.transaction_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.transaction_chk_box.grid(row=2, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #service privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Services', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=3, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #service privilege checkbox
+        self.service_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.service_chk_box.grid(row=3, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #sales privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Sales', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=4, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #sales privilege checkbox
+        self.sales_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.sales_chk_box.grid(row=4, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #inventory privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Inventory', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=5, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #inventory privilege checkbox
+        self.inventory_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.inventory_chk_box.grid(row=5, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #pet info privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Pet Info', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=6, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #pet info privilege checkbox
+        self.pet_info_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.pet_info_chk_box.grid(row=6, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #report privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Report', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=7, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #report privilege checkbox
+        self.reports_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.reports_chk_box.grid(row=7, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #users privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Users', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=8, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #users privilege checkbox
+        self.users_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.users_chk_box.grid(row=8, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+        #action log privilege title
+        ctk.CTkLabel(self.privileges_frame, text='Action Log', font=('Poppins', (height*0.022)), text_color='#06283D').grid(row=9, column=0, sticky='w', pady = (height*0.005), padx = ((width*0.08), (width*0.01)))
+        #action log privilege checkbox
+        self.action_log_chk_box = ctk.CTkCheckBox(self.privileges_frame, text='', font=('Poppins', (height*0.022)), text_color='#06283D')
+        self.action_log_chk_box.grid(row=9, column=1, sticky='w', pady = (height*0.005), padx = (width*0.01))
+
+        #frame for buttons
+        self.buttons_frame = ctk.CTkFrame(self.roles_inner_frame)
+        self.buttons_frame.grid(row=4, column=0, sticky='nesw', columnspan=3)
+        #to center children
+        self.buttons_frame.grid_rowconfigure(0, weight=1)
+        self.buttons_frame.grid_columnconfigure(0, weight=1)
+        self.buttons_frame.grid_columnconfigure(1, weight=1)
+
+        #update account button
+        self.update_acc_btn = ctk.CTkButton(self.buttons_frame, text='UPDATE', command=update_staff_account, font=('Poppins', (height*0.022)))
+        self.update_acc_btn.grid(row=0, column=0, pady = (height*0.005), padx = (width*0.005), sticky='e')
+        #clear role fields button
+        self.clear_fields_btn = ctk.CTkButton(self.buttons_frame, text='CLEAR', command=disable_privilege_checkboxes, font=('Poppins', (height*0.022)))
+        self.clear_fields_btn.grid(row=0, column=1, pady = (height*0.005), padx = (width*0.005), sticky='w')
+        #list of all checkboxes
+        checkbox_privilege_list = [self.dashboard_chk_box,
+                            self.transaction_chk_box,
+                            self.service_chk_box,
+                            self.sales_chk_box,
+                            self.inventory_chk_box,
+                            self.pet_info_chk_box,
+                            self.reports_chk_box,
+                            self.users_chk_box,
+                            self.action_log_chk_box]
+        #default
+        #disable everything
+        disable_privilege_checkboxes()
+
+        #account creation tab
+        #account creation frame
+        self.box_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="white")
+        self.box_frame.pack(fill=tk.BOTH, expand=True)
+
+        #String Values
+        password_svar = tk.StringVar()
+        repass_svar = tk.StringVar()
+        c_v1=tk.IntVar(value=0)
+        #show password function
+        def my_show():
+            if(c_v1.get()==1):
+                self.password_entry.configure(show='')
+            else:
+                self.password_entry.configure(show='*')
+        #subject for removal
+        def open_pin_toplvl():
+            pin_top = tk.Toplevel()
+            pin_top_offsetx, pin_top_offsety = self.winfo_x() + self.winfo_width(), self.winfo_y()
+            padx = 0 # the padding you need.
+            pady = 0
+            pin_top.geometry(f"+{pin_top_offsetx + padx}+{pin_top_offsety + pady}")
+            pin_top.title('Enter PIN to continue')
+
+            def check_pin():
+                if pin_entry.get() == "1234":
+                    add_new_acc()
+                    clear_acc_creation_fields()
+                    get_staff_name()
+                    self.staff_name_cbox.set(staff_names)
+                    quit()
+                else:
+                    messagebox.showerror("Error", "Wrong Pin", icon='error')
+            enter_pin_lbl = ctk.CTkLabel(pin_top, text="Enter PIN:",font=("Poppins", 25))
+            enter_pin_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="ns")
+            pin_entry = ctk.CTkEntry(pin_top, placeholder_text='****', height=height*0.065, width=width*0.12,font=("Poppins", 25), show="*")
+            pin_entry.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
+            confirm_btn = ctk.CTkButton(pin_top, text='CONFIRM', command=check_pin,font=("Poppins", 25))
+            confirm_btn.grid(row=1, column=0, padx=10, pady=10, sticky="sew")
+            cancel2_btn = ctk.CTkButton(pin_top, text='CANCEL', command=lambda: [pin_top.destroy()] ,font=("Poppins", 25))
+            cancel2_btn.grid(row=1, column=1, padx=10, pady=10, sticky="sew")
+            #end of removal
+        #clears all account creation fields
+        def clear_acc_creation_fields():
+            self.username_entry.delete(0, tk.END)
+            self.password_entry.delete(0, tk.END)
+            self.reenter_password_entry.delete(0, tk.END)
+            self.first_name_entry.delete(0, tk.END)
+            self.last_name_entry.delete(0, tk.END)
+            self.address_entry.delete(0, tk.END)
+            self.contact_no_entry.delete(0, tk.END)
+        #checks if all entry has value and if password are the same
+        def check_entry():
+            if len(self.username_entry.get()) == 0 or len(self.password_entry.get()) == 0 or len(self.address_entry.get()) == 0 or len(self.contact_no_entry.get()) == 0 or len(self.first_name_entry.get()) == 0 or len(self.last_name_entry.get()) == 0:
+                    messagebox.showerror("Error", "Enter all fields", icon='error')
+            else:
+                if self.password_entry.get() == self.reenter_password_entry.get():
+                    create_new_acc()
+                    messagebox.showinfo("Account Created", "Account Created Successfully!")
+                    #open_pin_toplvl()
+                else:
+                    messagebox.showerror("Error", "Passwords do not match", icon='error')
+
+        #ship the values
+        def add_new_acc():
+            fullname = f'{self.first_name_entry.get()} {self.last_name_entry.get()}'
+            pos = self.position_cbox.get()
+
+            single_acc_data = [fullname, pos]
+            if(pos=='Assistant'):
+                single_acc_data = [fullname, pos, 0, 1, 1, 1, 1, 1, 0, 1, 0]
+            else:
+                single_acc_data = [fullname, pos, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            staff_names2.append(single_acc_data)
+
+        #create new acc
+        def create_new_acc():
+            add_new_acc()
+            clear_acc_creation_fields()
+            get_staff_name()
+            refresh_staff_names()
+        '''ACCOUNT CREATION: START'''
+        #user info label
+        self.user_info_title_lbl = ctk.CTkLabel(self.box_frame, text='Create New Account',font=("Poppins", 35), text_color="#06283D")
+        self.user_info_title_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw", columnspan=2)
+
+        #account details frame
+        self.account_details_frame = ctk.CTkFrame(self.box_frame)
+        self.account_details_frame.grid(row=1, column=0, sticky='nesw', padx = (0, width*0.024))
+
+        #username label
+        self.username_lbl = ctk.CTkLabel(self.account_details_frame, text='Username:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.username_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        #username entry
+        self.username_entry = ctk.CTkEntry(self.account_details_frame, placeholder_text='assistant1', height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.username_entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        #password label
+        self.password_lbl = ctk.CTkLabel(self.account_details_frame, text='Password:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.password_lbl.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        #password entry
+        self.password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=password_svar, height=height*0.08, width=width*0.25,font=("Poppins", 25), show='*')
+        self.password_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        #show password checkbutton
+        c1 = ctk.CTkSwitch(self.account_details_frame,text='Show Password',variable=c_v1,onvalue=1,offvalue=0,command=my_show)
+        c1.grid(row=2,column=1)
+        #Re-enter Password label
+        self.reenter_password_lbl = ctk.CTkLabel(self.account_details_frame, text='Re-enter Password:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.reenter_password_lbl.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        #Re-enter Password entry
+        self.reenter_password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=repass_svar, height=height*0.08, width=width*0.25,font=("Poppins", 25), show='*')
+        self.reenter_password_entry.grid(row=3, column=1, padx=10, pady=10, sticky="nsw")
+        #position label
+        self.position_title_lbl = ctk.CTkLabel(self.account_details_frame, text='Position:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.position_title_lbl.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+        #position cbox
+        self.position_cbox = ctk.CTkComboBox(self.account_details_frame, values=roles_list, font=("Poppins", 25), height=height*0.08,width=width*0.25, dropdown_font=('Poppins', 25), button_color='#3B8ED0', button_hover_color='#2C74B3')
+        self.position_cbox.grid(row=4, column=1, padx=10, pady=(0, 10), sticky="ew")
+
+        #personal info frame
+        self.personal_info_frame = ctk.CTkFrame(self.box_frame)
+        self.personal_info_frame.grid(row=1, column=1, sticky='nesw')
+
+        #first name label
+        self.first_name_lbl = ctk.CTkLabel(self.personal_info_frame, text='First Name:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.first_name_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        #first name entry
+        self.first_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="John", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.first_name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="nsw")
+        #last name name label
+        self.last_name_lbl = ctk.CTkLabel(self.personal_info_frame, text='Last Name:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.last_name_lbl.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        #last name entry
+        self.last_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="Doe", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.last_name_entry.grid(row=1, column=1, padx=10, pady=10, sticky="nsw")
+        #contact no label
+        self.contact_no_lbl = ctk.CTkLabel(self.personal_info_frame, text='Contact No.:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.contact_no_lbl.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        #contact no entry
+        self.contact_no_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="0922 123 1234", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.contact_no_entry.grid(row=2, column=1, padx=10, pady=10, sticky="nsw")
+        #address label
+        self.address_lbl = ctk.CTkLabel(self.personal_info_frame, text='Address:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.address_lbl.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        #address entry
+        self.address_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="123 Otentukumpo St.", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.address_entry.grid(row=3, column=1, padx=10, pady=10, sticky="nsw")
+        #frame for bottom windows
+        self.bottom_frame= ctk.CTkFrame(self.box_frame, fg_color='white')
+        self.bottom_frame.grid(row=10, column=0, padx=10, pady=10, sticky="s", columnspan=4)
+        #create button
+        self.update_btn = ctk.CTkButton(self.bottom_frame, text='CREATE', command=check_entry,font=("Poppins", 25), fg_color='#2678F3', text_color='white')
+        self.update_btn.grid(row=0, column=0, padx=10, pady=10, sticky="sew")
+        #clear account creation fields button
+        self.update_btn = ctk.CTkButton(self.bottom_frame, text='CLEAR', command=clear_acc_creation_fields, font=("Poppins", 25), fg_color='white', text_color='#2678F3', border_color="#2678F3", border_width=2.5)
+        self.update_btn.grid(row=0, column=1, padx=10, pady=10, sticky="sew")
+        '''ACCOUNT CREATION: START'''
+
+
+        load_main_frame(0)
 
 class histlog_frame(ctk.CTkFrame):
     global width, height

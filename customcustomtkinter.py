@@ -10,6 +10,7 @@ from tkinter import messagebox;
 from customtkinter.windows.widgets.font import CTkFont
 from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
 from tkcalendar import Calendar
+import Theme
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -135,14 +136,15 @@ class customcustomtkinter:
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None, 
                      
-                     column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!50!50',
-                     header_color: Union[str, tuple] = '#006611', data_grid_color: Union[list, tuple] = ('#333333', '#444444'),
-                     selected_color: Union [tuple, str] = brighten_color('#006611', 1.3),
-                     conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 20),
-                     row_font: tuple = ('Arial', 12), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'black',
-                     double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = 'black',
-                     nav_text_color: Optional[Union[str, Tuple[str, str]]] = "black",
+                     column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!30!30',
+                     header_color: Union[str, tuple] = Color.Blue_Cobalt, data_grid_color: Union[list, tuple] = (Color.White_Ghost, Color.Grey_Bright_2),
+                     selected_color: Union [tuple, str] = Color.Blue_Steel,
+                     conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 16),
+                     row_font: tuple = ('Arial', 14), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'transparent',
+                     double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = Color.Blue_Maastricht,
+                     nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None, **kwargs):
+            
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
 
@@ -285,7 +287,7 @@ class customcustomtkinter:
                         temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
                         if self.column_types[j] == 'bD':
-                            dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color='red' ,text='')
+                            dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color=Color.Red_Tulip ,text='-')
                             dlt_btn.configure(command = partial(self.bd_func, dlt_btn))
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
