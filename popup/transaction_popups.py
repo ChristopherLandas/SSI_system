@@ -47,25 +47,10 @@ def show_item_list(master, info:tuple):
             self.search_btn.pack(side="left", padx=(0, width*0.005))
             
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.service_treeview = cctk.cctkTreeView(self.content_frame,data=self.data, height=height*0.65, width=width*0.505, 
+            self.item_treeview = cctk.cctkTreeView(self.content_frame,data=self.data, height=height*0.65, width=width*0.505, 
                                                       column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:{int(width*.1)}-tr!30!30")
-            self.service_treeview.grid(row=1, column=0, padx=(width*0.005), pady=(height*0.01), sticky="nsew")
-            
-            
-            """ self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview = cctk.cctkTreeView(self.left_frame, self.data, self.width * .75, self.height * .65,
-                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                                column_format=f'/Service:x-tl/Price:{round(self.width * .15)}-tl/Stocks:{round(self.width * .15)}-tl!35!30',
-                                                double_click_command= self.get_item)
-            self.item_treeview.grid(row=1, column=0, padx=10, pady=10, sticky="ns") """
+            self.item_treeview.grid(row=1, column=0, padx=(width*0.005), pady=(height*0.01), sticky="nsew")
 
-            """   self.rightmost_frame = ctk.CTkFrame(self.boxframe, height=self.height*0.78, width =self.width*0.312, fg_color='white')
-            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
-
-            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=self.height*0.78, width =self.width*0.312, fg_color='white')
-            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
-            """ 
-            
             self.bottom_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent", width=width*0.25)
             self.bottom_frame.grid(row=2, column=0 )
             self.bottom_frame.grid_propagate(0)
@@ -73,11 +58,8 @@ def show_item_list(master, info:tuple):
             self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("Arial", 14), command=self.reset)
             self.back_button.grid(row=0, column=0, sticky="w")
 
-            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14))
+            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14),command=self.get_item)
             self.select_button.grid(row=0, column=1, sticky="e") 
-            
-            """ self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=self.get_item, width =270, font=("Poppins-Bold", 45))
-            self.select_button.grid(row=0, column=2, padx=(0, 20), sticky="se") """
 
         def place(self, **kwargs):
             self.main_frame.pack()
@@ -89,7 +71,7 @@ def show_item_list(master, info:tuple):
             self.main_frame.place_forget()
             self.place_forget()
 
-        """ def get_item(self, _: any = None):
+        def get_item(self, _: any = None):
             #if there's a selected item
             if self.item_treeview.data_grid_btn_mng.active is not None:
                 item_name =  self.item_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
@@ -184,19 +166,6 @@ def show_services_list(master, info:tuple, data_reciever: list):
                                                       column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
             self.service_treeview.grid(row=1, column=0, padx=(width*0.005), pady=(height*0.01), sticky="nsew")
             
-            """
-            self.service_treeview = cctk.cctkTreeView(self.left_frame, height=self.height*0.65, width =self.width*0.785,
-                                                      header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                                       column_format='/Services:x-tl/Price:x-tr!35!30',)
-                                   
-            
-           
-            self.rightmost_frame = ctk.CTkFrame(self.boxframe, height=self.height*0.78, width =self.width*0.312, fg_color='white')
-            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
-
-            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=self.height*0.78, width =self.width*0.312, fg_color='white')
-            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
-            """
             self.bottom_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent", width=width*0.25)
             self.bottom_frame.grid(row=2, column=0 )
             self.bottom_frame.grid_propagate(0)
@@ -238,13 +207,15 @@ def show_services_list(master, info:tuple, data_reciever: list):
                 #reset the state of this popup
     return instance(master, info, data_reciever)
 
-def show_transaction_proceed(master, info:tuple, item_info: list, services_info, total_price: float, customer_info: str, pets_info: List) -> ctk.CTkFrame:
+def show_transaction_proceed(master, info:tuple, ) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, item_info: list, services_info, total_price: float, customer_info: str, pets_raw_info: List):
-            width = info[0] * .99
-            height = info[1] * .99
+        def __init__(self, master, info:tuple, ):
+            width = info[0]
+            height = info[1]
+            #item_info: list, services_info, total_price: float, customer_info: str, pets_info: List
+            #item_info: list, services_info, total_price: float, customer_info: str, pets_raw_info: List
             #basic inforamtion needed; measurement
-            self._customer_info = customer_info
+            """ self._customer_info = customer_info
             self._pets_raw_info = pets_raw_info
             if(self._pets_raw_info is not None):
                 self.pets_info = [s.value for s in self._pets_raw_info]
@@ -252,20 +223,21 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self._treeview = info[2]
             self._item_info = item_info
             self._services_info = services_info
-            self._total_price = total_price
+            self._total_price = total_price """
             #encapsulation
 
-            super().__init__(master, width, height=height, corner_radius= 0, fg_color='white')
+            super().__init__(master, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
 
             '''events'''
             def auto_pay(_: any = None):
                 self.payment_entry.delete(0, ctk.END)
-                self.payment_entry.insert(0, self._total_price)
+                #self.payment_entry.insert(0, self._total_price)
                 record_transaction()
 
             def record_transaction():
-                if (float(self.payment_entry.get() or '0')) < self._total_price:
+                pass
+                """ if (float(self.payment_entry.get() or '0')) < self._total_price:
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
                 record_id =  database.fetch_data(sql_commands.generate_id_transaction, (None))[0][0]
@@ -278,7 +250,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
 
                 modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.strptime(self.pets_info[0][2], '%m-%d-%Y').strftime('%Y-%m-%d')), float(s[2]), 0, 0) for s in self._services_info]
                 database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in modified_services_list])
-                #record the services from eithin the transaction
+                #record the services from eithin the transaction 
 
 
                 for item in modified_items_list:
@@ -313,38 +285,113 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
                 self._treeview[0].delete_all_data()
                 self._treeview[1].delete_all_data()
                 self.destroy()
-                #reset into its default state
+                #reset into its default state """
 
-            self.left_frame = ctk.CTkFrame(self)
-            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
+            self.main_frame = ctk.CTkFrame(self, width=width*0.8, height=height*0.85, corner_radius=0)
+            self.main_frame.pack()
+            self.main_frame.grid_columnconfigure((0), weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
+            
+            self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            self.services_lbl = ctk.CTkLabel(self.left_frame, text='Services:',font=("Poppins", 45))
-            self.services_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+            ctk.CTkLabel(self.top_frame, text='Payment', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
+            self.content_frame.grid(row=1,column=0, padx=width*0.005, pady=height*0.01, sticky="nsew")
+            self.content_frame.grid_columnconfigure(0, weight=1)
+            self.content_frame.grid_propagate(0)
 
-            '''self.services_entry = ctk.CTkEntry(self.left_frame,  height=height*0.78, width=width*0.2)
-            self.services_entry.grid(row=1, column=0, padx=10, pady=10, sticky="ns")'''
-            self.service_data = [(f'{s[1]}', format_price(float(s[4]))) for s in self._services_info]
-            self.service_list = cctk.cctkTreeView(self.left_frame, self.service_data, height=height*0.75, width=width*0.2,
-                                                  header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                                  column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
-            self.service_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
+            self.service_frame = ctk.CTkFrame(self.content_frame, corner_radius=0, fg_color="transparent")
+            self.service_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+            self.service_frame.grid_columnconfigure(0, weight=1)
 
-            self.right_frame = ctk.CTkFrame(self)
-            self.right_frame.grid(row=0, column=1, padx=20, pady=10, sticky="nsew")
+            ctk.CTkLabel(self.service_frame, text='Services Availed:',font=("Arial", 14), fg_color="transparent").grid(row=0, column=0, padx=width*0.005, pady=(0,height*0.005), sticky="w") 
+            
+            #self.service_data = [(f'{s[1]}', format_price(float(s[4]))) for s in self._services_info]
+            self.service_list = cctk.cctkTreeView(self.service_frame, data=None, height=height*0.245, width=width*0.545,
+                                                  column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Quantity:{int(width*0.1)}-tr/Price:{int(width * .05)}-tr!30!30')
+            self.service_list.grid(row=1, column=0)
 
-            self.items_lbl = ctk.CTkLabel(self.right_frame, text='Items:',font=("Poppins", 45))
-            self.items_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
-            print(self._item_info)
-            self.item_data = [(f'{s[1]} * {s[3]}', format_price(float(s[4]))) for s in self._item_info]
-            self.item_list = cctk.cctkTreeView(self.right_frame, self.item_data, height=height*0.75, width=width*0.2,
-                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                               column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Price:{int(width * .05)}-tr!50!30')
-            self.item_list.grid(row=1, column=0, padx=10, pady=10, sticky="ns")
+            self.service_total_frame = ctk.CTkFrame(self.service_frame, width=width*0.15, height=height*0.05, fg_color="light grey")
+            self.service_total_frame.pack_propagate(0)
+            self.service_total_frame.grid(row=2,column=0, sticky="e", pady=(5,0))
+            
+            ctk.CTkLabel(self.service_total_frame, text="Services Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.service_total_amount = ctk.CTkLabel(self.service_total_frame, text="0,000.00", font=("Arial", 14))
+            self.service_total_amount.pack(side="right",  padx=(0,width*0.0075))
+            
+            self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0, fg_color="transparent")
+            self.item_frame.grid(row=2, column=0, padx=10, pady=(0,10), sticky="nsew")
+            self.item_frame.grid_columnconfigure(0, weight=1)
+            
+            ctk.CTkLabel(self.item_frame, text='Items Availed:',font=("Arial", 14), fg_color="transparent").grid(row=0, column=0, padx=width*0.005, pady=(0,height*0.005), sticky="w") 
+            
+            #self.item_data = [(f'{s[1]} * {s[3]}', format_price(float(s[4]))) for s in self._item_info]
+            self.item_list = cctk.cctkTreeView(self.item_frame, data=None, height=height*0.245, width=width*0.545,
+                                               column_format=f'/No:{int(width * .03)}-#c/Name:x-tl/Quantity:{int(width*0.1)}-tr/Price:{int(width * .05)}-tr!30!30')
+            self.item_list.grid(row=1, column=0)
 
-            self.rightmost_frame = ctk.CTkFrame(self, height=height*0.78, width=width*0.312, fg_color='white')
-            self.rightmost_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nse")
+            self.item_total_frame = ctk.CTkFrame(self.item_frame, width=width*0.15, height=height*0.05, fg_color="light grey")
+            self.item_total_frame.pack_propagate(0)
+            self.item_total_frame.grid(row=2,column=0, sticky="e", pady=(5,0))
+            
+            ctk.CTkLabel(self.item_total_frame, text="Items Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("Arial", 14))
+            self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
+            
+            ctk.CTkButton(self.content_frame, text="Cancel", command=self.reset).grid(row=3, column=0, padx=10, pady=(0,10), sticky="w")
+            
+            self.payment_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.White_Color[3],width=width*0.225)
+            self.payment_frame.grid(row=1,column=1, padx=(0,width*0.005), pady=height*0.01, stick="nsew")
+            self.payment_frame.pack_propagate(0)
+            
+            self.payment_service_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
+            self.payment_service_frame.pack_propagate(0)
+            self.payment_service_frame.pack(fill="x", pady=(height*0.005))
+            
+            ctk.CTkLabel(self.payment_service_frame, text="Service:", font=("Arial", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.payment_service_amount = ctk.CTkLabel(self.payment_service_frame, text="0,000.00", font=("Arial", 16))
+            self.payment_service_amount.pack(side="right",  padx=(0,width*0.0075))
+            
+            self.payment_item_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
+            self.payment_item_frame.pack_propagate(0)
+            self.payment_item_frame.pack(fill="x", pady=(height*0.005))
+            
+            ctk.CTkLabel(self.payment_item_frame, text="Items:", font=("Arial", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.payment_item_amount = ctk.CTkLabel(self.payment_item_frame, text="0,000.00", font=("Arial", 16))
+            self.payment_item_amount.pack(side="right",  padx=(0,width*0.0075))
+            
+            self.total_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
+            self.total_frame.pack_propagate(0)
+            self.total_frame.pack(fill="x", pady=(height*0.005))
+            
+            ctk.CTkLabel(self.total_frame, text="Total:", font=("Arial", 20)).pack(side="left", padx=(width*0.0075,0))
+            self.total_amount = ctk.CTkLabel(self.total_frame, text="0,000.00", font=("Arial", 20), width=width*0.15, fg_color="light grey", corner_radius=5,
+                                             anchor="e")
+            self.total_amount.pack(side="right",  padx=(0,width*0.0075))
 
+            self.payment_entry_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, fg_color="transparent")
+            self.payment_entry_frame.pack_propagate(0)
+            self.payment_entry_frame.pack(fill="x", pady=(height*0.005))
+            
+            ctk.CTkLabel(self.payment_entry_frame, text="Enter Payment:", font=("Arial", 20)).pack(padx=(width*0.0075,0), anchor="w")
+            self.payment_entry_amount = ctk.CTkEntry(self.payment_entry_frame, placeholder_text="Payment here...", font=("Arial", 20),height=height*0.05, justify="right")
+            self.payment_entry_amount.pack(fill="x", padx=(width*0.0075))
 
+            self.change_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
+            self.change_frame.pack_propagate(0)
+            self.change_frame.pack(fill="x", pady=(height*0.005))
+            
+            ctk.CTkLabel(self.change_frame, text="Change:", font=("Arial", 20)).pack(side="left", padx=(width*0.0075,0))
+            self.change_amount = ctk.CTkLabel(self.change_frame, text="0,000.00", font=("Arial", 20), width=width*0.15, fg_color="light grey", corner_radius=5, anchor="e")
+            self.change_amount.pack(side="right",  padx=(0,width*0.0075))
+            
+            self.proceed_button = ctk.CTkButton(self.payment_frame, text='Proceed', font=("Aria", 20), height=height*0.085)
+            self.proceed_button.pack(fill="x",side="bottom", pady=height*0.025, padx=(width*0.025))
+            """
             self.total_frame = ctk.CTkFrame(self.rightmost_frame)
             self.total_frame.grid(row=0, column=0, padx=10, pady=10, sticky="new", columnspan = 2)
 
@@ -352,7 +399,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.total_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
 
             self.total_val = ctk.CTkEntry(self.total_frame, height=height*0.12, width=width*0.31, font=('DM Sans Medium', 35))
-            self.total_val.insert(0, format_price(self._total_price))
+            #self.total_val.insert(0, format_price(self._total_price))
             self.total_val.configure(state = 'readonly')
             self.total_val.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="n")
 
@@ -362,7 +409,7 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.payment_lbl = ctk.CTkLabel(self.payment_options_frame, text='Payment Method:', font=("Poppins", 25))
             self.payment_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
 
-            self.payment_method_cbox = ctk.CTkOptionMenu(self.payment_options_frame, values=["Cash", "Card", "Bank Statement"], font=("Poppins", 25), height=height*0.08,width=width*0.31
+            self.payment_method_cbox = ctk.CTkOptionMenu(self.payment_options_frame, values=["Cash"], font=("Poppins", 25), height=height*0.08,width=width*0.31
                                                          ,fg_color='white', button_color='#dddddd', text_color='black')
             self.payment_method_cbox.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ew")
 
@@ -378,12 +425,16 @@ def show_transaction_proceed(master, info:tuple, item_info: list, services_info,
             self.proceed_button = ctk.CTkButton(self.rightmost_frame, text='Proceed', command=record_transaction, width=135, font=("Poppins-Bold", 45))
             self.proceed_button.grid(row=4, column=0, padx=(40, 50), pady =(10,10), sticky="ew")
 
-            self.cancel_button = ctk.CTkButton(self.rightmost_frame, text='Cancel', command= lambda: self.destroy(), width=135, font=("Poppins-Bold", 45))
+            self.cancel_button = ctk.CTkButton(self.rightmost_frame, text='Cancel', command=self.reset, width=135, font=("Poppins-Bold", 45))
             self.cancel_button.grid(row=4, column=1, padx=(40, 50), pady =(10,10), sticky="ew")
 
-            self.payment_entry.focus_force()
-            self.payment_entry.bind('<Shift-Return>', auto_pay)
-    return instance(master, info, item_info, services_info, total_price, customer_info, pets_info)
+            self.payment_entry.focus_force() """
+            #self.payment_entry.bind('<Shift-Return>', auto_pay)
+            # item_info, services_info, total_price, customer_info, pets_info
+            
+        def reset(self):
+            self.place_forget()
+    return instance(master, info,)
 
 def customer_info(master, info:tuple, parent= None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
