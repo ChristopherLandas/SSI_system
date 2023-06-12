@@ -253,14 +253,14 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
 
             #ctk.CTkLabel(self, text='restock', anchor='w').grid(row = 0, column = 0, sticky = 'nsew', pady = (0, 12))
 
-            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.35, height=height*0.8)
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.45, height=height*0.8)
             self.main_frame.grid(row=0, column=0, sticky="n", padx=width*0.01, pady=height*0.025)
             self.main_frame.pack_propagate(0)
 
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.pack(fill="both", expand=0)
 
-            ctk.CTkLabel(self.top_frame, text='RESTOCK', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            """ ctk.CTkLabel(self.top_frame, text='RESTOCK', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
             self.item_frame =ctk.CTkFrame(self.main_frame, corner_radius=0)
@@ -313,8 +313,86 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.leave_btn.grid(row = 1, column = 0, sticky = 'nsew', padx = 12, pady = (0, 12))
 
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=recieve_stock, state=ctk.DISABLED)
-            self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
+            self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12)) """
 
+            #top bar
+            ctk.CTkLabel(self.top_frame, text='RESTOCK', anchor='w', corner_radius=0, font=("Arial", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            #change here go reset
+            self.item_frame =ctk.CTkFrame(self.main_frame, corner_radius=0)
+            self.item_frame.pack(fill="x", expand=0, padx=width*0.008, pady=height*0.01)
+            self.item_frame.grid_columnconfigure(1, weight=1)
+            #item title
+            ctk.CTkLabel(self.item_frame, text='ITEM', anchor='w', font=('Arial', height*0.03), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
+            #item name title
+            ctk.CTkLabel(self.item_frame, text='Item Name', anchor='w', font=('Arial', height*0.024)).grid(row = 1, column = 0, padx= (width*0.02), pady=(0, height*0.005), sticky = 'nsew')
+
+            item = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)]
+
+            self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
+                                                           values= list(item),)
+            self.item_name_entry.configure(font=('Arial', height*0.024), dropdown_font=('Arial', height*0.02))
+            self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx= (width*0.02), pady = (0, height*0.01))
+
+            #category entry
+            ctk.CTkLabel(self.item_frame, text="Category:", font=('Arial', height*0.024)).grid(row=3, column=0, sticky="w",pady = (height*0.01), padx= (width*0.02))
+            self.category_entry =ctk.CTkEntry(self.item_frame, state="disabled", font=('Arial', height*0.024), width=width*0.12)
+            self.category_entry.grid(row=3, column=1, sticky="w", pady = (height*0.01))
+
+            #supplier combobox
+            ctk.CTkLabel(self.item_frame, text="Supplier:", font=('Arial', height*0.024)).grid(row=4, column=0, sticky="w",pady = (height*0.01), padx= (width*0.02))
+            self.supplier_combo_box =ctk.CTkComboBox(self.item_frame, values=["ABD", "J&J", "Pfizer"], state='readonly', font=('Arial', height*0.024), width=width*0.12, dropdown_font=('Arial', height*0.02))
+            self.supplier_combo_box.grid(row=4, column=1, sticky="w", pady = (height*0.01,0))
+
+            #initial price change
+            ctk.CTkLabel(self.item_frame, text="Initial Price Change:", font=('Arial', height*0.024)).grid(row=5, column=0, sticky="w",pady = (height*0.01), padx= (width*0.02))
+            self.item_init_price_change =ctk.CTkEntry(self.item_frame, font=('Arial', height*0.024), width=width*0.12, justify='right', state='disabled')
+            self.item_init_price_change.grid(row=5, column=1, sticky="w", pady = (height*0.01,0))
+
+            #markup change
+            ctk.CTkLabel(self.item_frame, text="Markup Change:", font=('Arial', height*0.024)).grid(row=6, column=0,sticky="w",pady = (height*0.01), padx= (width*0.02))
+            self.item_markup_change =ctk.CTkEntry(self.item_frame, font=('Arial', height*0.024), width=width*0.12, justify='right')
+            self.item_markup_change.grid(row=6, column=1,  sticky="w", pady = (height*0.01,0))
+
+            #eend of a
+
+            self.restock_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
+            self.restock_frame.pack(fill="both", expand=1, padx=width*0.008, pady=(0,height*0.01))
+            self.restock_frame.grid_columnconfigure((1,2), weight=1)
+            #inventory title
+            ctk.CTkLabel(self.restock_frame, text='INVENTORY', anchor='w', font=('Arial', height*0.03), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
+
+            #initial stock
+            ctk.CTkLabel(self.restock_frame, text="Initial Stock:", font=('Arial', height*0.024)).grid(row=1, column=0,sticky="w",pady = (height*0.01), padx= (width*0.02))
+            self.initial_stock_entry =ctk.CTkEntry(self.restock_frame, state='disabled', width=width*0.06, justify='right', font=('Arial', height*0.024))
+            self.initial_stock_entry.grid(row=1, column=1,  sticky="w")
+            #Restock 
+            ctk.CTkLabel(self.restock_frame, text='Restock Amount:', anchor='w', font=('Arial', height*0.024)).grid(row = 2, column = 0, padx= (width*0.02))
+            self.stock_entry = cctk.cctkSpinnerCombo(self.restock_frame, val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL), state=ctk.NORMAL, width=width*0.04)
+            self.stock_entry.grid(row = 2, column = 1, columnspan=2, sticky = 'w',padx=(0,width*0.01))
+
+            #expiration set
+            ctk.CTkLabel(self.restock_frame, text='Expiration Date:', anchor='w', font=('Arial', height*0.024)).grid(row = 3, column = 0, columnspan=4, padx = (width*0.02), sticky = 'nsew',pady = (height*0.01))
+            self.expiry_date_entry = ctk.CTkLabel(self.restock_frame, height * .05, fg_color="white", text="Set Expiry Date", text_color="grey", corner_radius=3, font=('Arial', height*0.024))
+            self.expiry_date_entry.grid(row = 4, column = 0, columnspan=3,sticky = 'nsew', padx = ((width*0.02),(width*0.008)), pady = (0, 12))
+
+            self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
+                                               command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
+            self.show_calendar.grid(row=4, column=3, padx = (0,width*0.01), pady = (0,height*0.015), sticky="w")
+            #end of expiration setter
+            #bottom buttons frame
+            self.action_frame = ctk.CTkFrame(self.main_frame, height=height*0.15,corner_radius=0, fg_color='transparent')
+            self.action_frame.pack(padx=width*0.008, pady=(0,height*0.01))
+            #removed
+            '''self.warning_text =  ctk.CTkLabel(self.action_frame, text='TEST', text_color='red')
+            self.warning_text.grid(row = 0, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))'''
+            #end removed
+            self.leave_btn = ctk.CTkButton(self.action_frame, width * .15, height * .05, corner_radius=3, text='BACK', command = reset, font=('Arial', 14))
+            self.leave_btn.pack(side="left", padx=(width*0.025))
+
+            self.action_btn = ctk.CTkButton(self.action_frame, width * .15, height * .05, corner_radius=3, text='RESTOCK', state=ctk.DISABLED, font=('Arial', 14))
+            self.action_btn.pack(side="right",  padx=(width*0.025))
+            
         def place(self, default_data: str, update_cmds: list = None, **kwargs):
             self.update_cmds = update_cmds
             if default_data:
