@@ -134,7 +134,8 @@ class customcustomtkinter:
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                      fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
-                     overwrite_preferred_drawing_method: Union[str, None] = None,
+                     overwrite_preferred_drawing_method: Union[str, None] = None, 
+                     
 
                      column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!30!30',
                      header_color: Union[str, tuple] = Color.Blue_Cobalt, data_grid_color: Union[list, tuple] = (Color.White_Ghost, Color.Grey_Bright_2),
