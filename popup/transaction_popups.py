@@ -237,7 +237,7 @@ def show_transaction_proceed(master, info:tuple, ) -> ctk.CTkFrame:
 
             def record_transaction():
                 pass
-                """ if (float(self.payment_entry.get() or '0')) < self._total_price:
+                if (float(self.payment_entry.get() or '0')) < self._total_price:
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
                 record_id =  database.fetch_data(sql_commands.generate_id_transaction, (None))[0][0]
@@ -378,8 +378,8 @@ def show_transaction_proceed(master, info:tuple, ) -> ctk.CTkFrame:
             self.payment_entry_frame.pack(fill="x", pady=(height*0.005))
             
             ctk.CTkLabel(self.payment_entry_frame, text="Enter Payment:", font=("Arial", 20)).pack(padx=(width*0.0075,0), anchor="w")
-            self.payment_entry_amount = ctk.CTkEntry(self.payment_entry_frame, placeholder_text="Payment here...", font=("Arial", 20),height=height*0.05, justify="right")
-            self.payment_entry_amount.pack(fill="x", padx=(width*0.0075))
+            self.payment_entry = ctk.CTkEntry(self.payment_entry_frame, placeholder_text="Payment here...", font=("Arial", 20),height=height*0.05, justify="right")
+            self.payment_entry.pack(fill="x", padx=(width*0.0075))
 
             self.change_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
             self.change_frame.pack_propagate(0)
@@ -395,7 +395,7 @@ def show_transaction_proceed(master, info:tuple, ) -> ctk.CTkFrame:
             self.total_frame = ctk.CTkFrame(self.rightmost_frame)
             self.total_frame.grid(row=0, column=0, padx=10, pady=10, sticky="new", columnspan = 2)
 
-            self.total_lbl = ctk.CTkLabel(self.total_frame, text='Total:',font=("Poppins", 25))
+            self.total_lbl = ctk.CTkLabel(self.total_frame, text='Total:',font=("Arial", 25))
             self.total_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
 
             self.total_val = ctk.CTkEntry(self.total_frame, height=height*0.12, width=width*0.31, font=('DM Sans Medium', 35))
@@ -427,13 +427,12 @@ def show_transaction_proceed(master, info:tuple, ) -> ctk.CTkFrame:
 
             self.cancel_button = ctk.CTkButton(self.rightmost_frame, text='Cancel', command=self.reset, width=135, font=("Poppins-Bold", 45))
             self.cancel_button.grid(row=4, column=1, padx=(40, 50), pady =(10,10), sticky="ew")
-
-            self.payment_entry.focus_force() """
-            #self.payment_entry.bind('<Shift-Return>', auto_pay)
-            # item_info, services_info, total_price, customer_info, pets_info
-            
+            """
+            self.payment_entry.focus_force() 
+            self.payment_entry.bind('<Shift-Return>', auto_pay)
         def reset(self):
             self.place_forget()
+            #item_info, services_info, total_price, customer_info, pets_info
     return instance(master, info,)
 
 def customer_info(master, info:tuple, parent= None) -> ctk.CTkFrame:
@@ -442,16 +441,17 @@ def customer_info(master, info:tuple, parent= None) -> ctk.CTkFrame:
             width = info[0]
             height = info[1]
             #basic inforamtion needed; measurement
-
-            super().__init__(master, width * 0.95, height=height*0.95, corner_radius= 0, fg_color="transparent")
+        
+            super().__init__(master, corner_radius= 0, fg_color="transparent")
             #the actual frame, modification on the frame itself goes here
             self.value:tuple = (None, None, None, None)
             #self.grid_propagate(0)
 
+            self.cal_icon= ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(15,15))
+            self.sched_switch_var = ctk.StringVar(value="off")
+                   
             def hide():
                 self.place_forget()
-                self.pack_forget()
-                self.grid_forget()
 
             def discard():
                 if (self.pet_name.get() != self.value[0] or self.animal_breed_entry.get() != self.value[1] or
@@ -474,62 +474,126 @@ def customer_info(master, info:tuple, parent= None) -> ctk.CTkFrame:
                     parent.value = self.value
                 hide()
 
+            def sched_swtich_event():
+                if self.sched_switch_var.get() == "on":
+                    self.show_calendar.configure(state="normal")
+                    self.show_calendar.configure(fg_color=Color.Blue_Yale)
+                else:
+                    self.show_calendar.configure(state="disabled")
+                    self.show_calendar.configure(fg_color="light grey")
+                    
+            self.main_frame = ctk.CTkFrame(self, width=width*0.5, height=height*0.65, corner_radius=0)
+            self.main_frame.pack()
+            self.main_frame.grid_columnconfigure((0), weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
+            
+            self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            self.left_frame = ctk.CTkFrame(self, bg_color='#c3c3c3')
-            self.left_frame.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
-
-            self.pet_info_lbl = ctk.CTkLabel(self.left_frame, text='Pet Info',font=("Poppins", 45))
-            self.pet_info_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+            ctk.CTkLabel(self.top_frame, text='Pet Info', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=hide).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
+            self.content_frame.grid(row=1,column=0, padx=width*0.005, pady=height*0.01, sticky="nsew")
+            self.content_frame.grid_columnconfigure(0, weight=1)
+            self.content_frame.grid_propagate(0)
+            
+            self.client_name_label = ctk.CTkLabel(self.content_frame, text="Client's Pet Information",font=("Arial",18))
+            self.client_name_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
             #Name label
-            self.Name_lbl = ctk.CTkLabel(self.left_frame, text='Name:',font=("Poppins", 25))
-            self.Name_lbl.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
-            #Name entry
-            self.pet_name = ctk.CTkEntry(self.left_frame, placeholder_text='chao pan', height=height*0.09, width=width*0.795, font=("Poppins", 25))
+            ctk.CTkLabel(self.content_frame, text='Name:',font=("Arial", 14)).grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
+            
+            self.pet_values = ["DOG","CAT","CATDOG"]
+            self.pet_name = ctk.CTkComboBox(self.content_frame, width=width*0.45, font=("Arial", 14), values=self.pet_values)
             self.pet_name.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ns")
-            #Breed and Animal Type label
-            self.animal_breed_lbl = ctk.CTkLabel(self.left_frame, text='Breed and Animal Type:',font=("Poppins", 25))
+            
+            self.animal_breed_lbl = ctk.CTkLabel(self.content_frame, text='Breed and Animal Type:',font=("Arial", 14))
             self.animal_breed_lbl.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="nw")
             #Breed and Animal Type entry
-            self.animal_breed_entry = ctk.CTkEntry(self.left_frame, placeholder_text='dog', height=height*0.09, width=width*0.795, font=("Poppins", 25))
+            self.animal_breed_entry = ctk.CTkEntry(self.content_frame, width=width*0.45, font=("Arial", 14))
             self.animal_breed_entry.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="ns")
-            #calendar and note frame
-            self.middle_frame = ctk.CTkFrame(self.left_frame, bg_color='#D9D9D9', fg_color='#D9D9D9')
-            self.middle_frame.grid(row=5, column=0, padx=10, pady=(20, 10), sticky="nsw")
-            #sched service frame
-            self.schedule_service_frame = ctk.CTkFrame(self.middle_frame, bg_color='#D9D9D9')
-            self.schedule_service_frame.grid(row=0, column=0, padx=10, pady=(20, 10), sticky="nsw")
+            
+            self.schedule_service_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+            self.schedule_service_frame.grid(row=5,  column=0, padx=10, pady=(10), sticky="ew")
             #Scheduled service label
-            self.scheduled_service_lbl = ctk.CTkLabel(self.schedule_service_frame, text='Scheduled Service:',font=("Poppins", 25))
-            self.scheduled_service_lbl.grid(row=0, column=0, padx=(10, 0), pady=(0, 10), sticky="nw")
+            self.sched_switch = ctk.CTkSwitch(self.schedule_service_frame, text="Schedule Client?", command=sched_swtich_event, variable=self.sched_switch_var, 
+                                              onvalue="on", offvalue="off")
+            self.sched_switch.grid(row=0, column=0, padx=(10, 0), pady=(0, 10), sticky="nw")
+            
+            self.scheduled_service_lbl = ctk.CTkLabel(self.schedule_service_frame, text="Set Schedule",font=("Arial", 14))
+            self.scheduled_service_lbl.grid(row=1, column=0, padx=(10, 0), sticky="nw")
             #Scheduled service label
-            self.scheduled_service_val = ctk.CTkLabel(self.schedule_service_frame, height=height*0.09, width=width*0.285, font=("Poppins", 25), fg_color='white')
-            self.scheduled_service_val.grid(row=1, column=0, padx=(10, 0), pady=(0, 10), sticky="nsew")
-            self.show_calendar = ctk.CTkButton(self.schedule_service_frame, text="",height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
+            self.scheduled_service_val = ctk.CTkLabel(self.schedule_service_frame, width=width*0.25, height=height*0.05,font=("Arial", 14), fg_color='light grey', text="Set Date", text_color="grey")
+            self.scheduled_service_val.grid(row=2, column=0, padx=(10, 0), pady=(0, 10), sticky="nsew")
+            self.show_calendar = ctk.CTkButton(self.schedule_service_frame, text="",height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,image=self.cal_icon,
                                                command=lambda: cctk.tk_calendar(self.scheduled_service_val, "%s"), corner_radius=3)
-            self.show_calendar.grid(row=1, column=1, padx = (0,width*0.01), pady = (0,height*0.015), sticky="e")
-            #note frame
-            self.note_frame = ctk.CTkFrame(self.middle_frame, bg_color='#D9D9D9')
-            self.note_frame.grid(row=0, column=1, padx=10, pady=(20, 10), sticky="nsw")
-            #note label
-            self.note_lbl = ctk.CTkLabel(self.note_frame, text='Note:',font=("Poppins", 25))
-            self.note_lbl.grid(row=0, column=1, padx=10, pady=(10, 0), sticky="nw")
-            #note entry
-            self.note_entry = ctk.CTkEntry(self.note_frame, placeholder_text='a dog', height=height*0.25, width=width*0.445, font=("Poppins", 25))
-            self.note_entry.grid(row=1, column=1, padx=10, pady=(0, 10), sticky="ns")
+            self.show_calendar.grid(row=2, column=1, padx = (width*0.005,0), pady = (0,height*0.015), sticky="e")
+            
+            self.x_fr = ctk.CTkFrame(self.content_frame, height=height*0.78, width=width*0.312, fg_color="transparent")
 
+            self.x_fr.grid(row=6, column=0, padx=10, pady=10, sticky="s")
 
-            self.rightmost_frame = ctk.CTkFrame(self, height=height*0.78, width=width*0.312, fg_color='white')
-            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
-
-            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=height*0.78, width=width*0.312, fg_color='white')
-
-            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
-
-            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=discard, width=270, font=("Poppins-Bold", 45))
-
+            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=discard, font=("Arial", 20))
             self.back_button.grid(row=0, column=1, padx=20, pady=(15, 15), sticky='s')
 
-            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=record, width=270, font=("Poppins-Bold", 45))
-            self.select_button.grid(row=0, column=2, padx=(0, 20), pady=(15, 15), sticky="se")
+            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=record, font=("Arial", 20))
+            self.select_button.grid(row=0, column=2, padx=(0, 20), pady=(15, 15), sticky="se") 
+            
+            sched_swtich_event()
             #on out
+    return instance(master, info, parent)
+
+def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, parent):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, corner_radius= 0, fg_color="transparent")
+            
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            
+            def hide():
+                self.place_forget()
+                
+            self.main_frame = ctk.CTkFrame(self, width=width*0.75, height=height*0.75, corner_radius=0)
+            self.main_frame.pack()
+            self.main_frame.grid_columnconfigure((0), weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
+            
+            self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+            ctk.CTkLabel(self.top_frame, text='Scheduled Services', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=hide).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
+            self.content_frame.grid(row=1,column=0, padx=width*0.005, pady=height*0.01, sticky="nsew")
+            self.content_frame.grid_columnconfigure(2, weight=1)
+            self.content_frame.grid_rowconfigure(1, weight=1)
+            self.content_frame.grid_propagate(0)
+            
+            self.search_frame = ctk.CTkFrame(self.content_frame, fg_color="light grey", width=width*0.35, height = height*0.05,)
+            self.search_frame.grid(row=0, column=0,padx=(width*0.005),pady=(height*0.01), sticky="w")
+            self.search_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+            self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+            self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="grey",
+                                            width=width*0.005)
+            self.search_btn.pack(side="left", padx=(0, width*0.0025))
+            
+            self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+            self.refresh_btn.grid(row=0, column=2,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
+            
+            self.sched_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+            self.sched_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
+            
+            self.sched_treeview = cctk.cctkTreeView(self.sched_frame, data =[], width=width*0.725, height=height*0.7,
+                                               column_format=f'/No:{int(width*.025)}-#r/OR:{int(width*0.05)}-tc/ClientName:x-tl/Service:{int(width*.15)}-tr/Schedule:{int(width*.1)}-tc/Action:{int(width*.08)}-bD!30!30',)
+            self.sched_treeview.pack()
+            
     return instance(master, info, parent)

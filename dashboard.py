@@ -639,7 +639,8 @@ class transaction_frame(ctk.CTkFrame):
                                       command=lambda:self.show_list_item.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item.pack(side="left",padx=(width*0.005))
         
-        self.sched_service = ctk.CTkButton(self.top_frame, image=self.cal_icon, text="Scheduled Service",height=height*0.05, width=width*0.1, font=("Arial", 14))
+        self.sched_service = ctk.CTkButton(self.top_frame, image=self.cal_icon, text="Scheduled Service",height=height*0.05, width=width*0.1, font=("Arial", 14),
+                                           command=lambda:self.show_sched_service.place(relx=0.5, rely=0.5, anchor="c"))
         self.sched_service.pack(side="right", padx=(0,width*0.005))
 
         self.transact_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
@@ -652,6 +653,10 @@ class transaction_frame(ctk.CTkFrame):
         self.bottom_frame = ctk.CTkFrame(self.transact_frame, fg_color="transparent", height=height*0.05)
         self.bottom_frame.pack(pady=(height*0.01), fill="x", padx=(width*0.005))
         #self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+        """Testing ONLY REMOVE AFTER"""
+        self.test = ctk.CTkButton(self.bottom_frame, text="TEST",  height=height*0.05, width=width*0.05, 
+                                  command=lambda: self.show_customer_info.place(relx=0.5, rely=0.5, anchor="c"))
+        self.test.pack(side="left")
         
         self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
         self.price_total_frame.pack(side="right")
@@ -759,6 +764,8 @@ class transaction_frame(ctk.CTkFrame):
         self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height))
         self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.customer_infos)
         self.show_proceed_transact: ctk.CTkFrame = transaction_popups.show_transaction_proceed(self, (width, height))
+        self.show_customer_info:ctk.CTkFrame = transaction_popups.customer_info(self, (width, height))
+        self.show_sched_service:ctk.CTkFrame = transaction_popups.scheduled_services(self,(width, height))
 
     def change_total_value_item(self, value: float):
             value = float(value)
