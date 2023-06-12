@@ -646,7 +646,7 @@ class transaction_frame(ctk.CTkFrame):
         self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="new", padx=(width*0.005), pady=(height*0.01))
 
         self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.6,
-                                                   column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-tc/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-tl!30!30')
+                                                   column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30')
         self.transact_treeview.pack(pady=(height*0.01,0))
 
         self.bottom_frame = ctk.CTkFrame(self.transact_frame, fg_color="transparent", height=height*0.05)
@@ -749,20 +749,20 @@ class transaction_frame(ctk.CTkFrame):
         self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
         self.final_total_value.pack(side="right", padx=(0, width*0.01))"""
 
-        #self.item_treeview.bd_configs = [(6, [self.item_total_value, self.final_total_value])]
-        #self.service_treeview.bd_configs = [(6, [self.service_total_value, self.final_total_value])]
-        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height))
-        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.customer_infos)
+        self.transact_treeview.bd_configs = [(4, [self.item_total_amount, self.price_total_amount])]
+        self.transact_treeview.bd_configs = [(4, [self.services_total_amount, self.price_total_amount])]
+        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height), self.transact_treeview, self.change_total_value_item)
+        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.transact_treeview, self.change_total_value_service)
 
     def change_total_value_item(self, value: float):
             value = float(value)
-            self.item_total_value.configure(text = format_price(float(price_format_to_float(self.item_total_value._text)) + value))
-            self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) + value))
+            self.item_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.item_total_amount._text[1:])) + value))
+            self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
 
     def change_total_value_service(self, value: float):
             value = float(value)
-            self.service_total_value.configure(text = format_price(float(price_format_to_float(self.service_total_value._text)) + value))
-            self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) + value))
+            self.services_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.services_total_amount._text[1:])) + value))
+            self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
 
     def clear_all_item(self):
            verification = messagebox.askyesno('Clear All', 'Are you sure you want to delete\nall trasaction record?')
@@ -932,7 +932,7 @@ class inventory_frame(ctk.CTkFrame):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.refresh_btn.after(1000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             self.data_view1.pack_forget()
-            self.data_view1.update_table(database.fetch_data(sql_commands.get_inventory_by_group))
+            self.data_view1.update_table(self.list_show)
             self.data_view1.pack()
 
         def sort_status_callback(option):
@@ -951,8 +951,6 @@ class inventory_frame(ctk.CTkFrame):
                 #self.sort_type_var=["Safe","Nearly Expire", "Expired"]
 
         def sort_status_configuration_callback(_: any = None):
-            self.search_entry._entry_focus_out()
-            self.search_entry.configure(state = 'readonly')
             self.search_entry.delete(0, ctk.END)
             if "Levels" in self.sort_type_option.get():
                 if "All" in self.sort_status_option.get():
@@ -975,13 +973,12 @@ class inventory_frame(ctk.CTkFrame):
             update_tables()
 
         def search(_: any = None):
-            if not self.search_entry.get():
-                self.search_entry._entry_focus_out()
-                self.search_entry.configure(state = 'readonly')
-                sort_status_configuration_callback()
+            if self.search_entry.get():
+                temp = [s for s in self.list_show if self.search_entry.get().lower() in s[0].lower()]
+                self.data_view1.update_table(temp)
+                del temp
             else:
-                self.list_show = [s for s in self.data_view1._data if self.search_entry.get().lower() in s[0].lower()]
-            update_tables()
+                update_tables()
 
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
@@ -1047,17 +1044,20 @@ class inventory_frame(ctk.CTkFrame):
         self.inventory_sub_frame.grid_rowconfigure(1, weight=1)
         self.inventory_sub_frame.grid_columnconfigure(3, weight=1)
 
-        """ self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05)
+        self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05)
         self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
-
         self.search_frame.pack_propagate(0)
+
         ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
         self.search_entry.bind('<Return>', search)
         self.search_entry.bind('<Button-1>', lambda _: self.search_entry.configure(state = ctk.NORMAL))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="grey",
+                                        width=width*0.005, command=search)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
-        self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05, fg_color="light grey")
+        '''self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05, fg_color="light grey")
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
@@ -1069,7 +1069,7 @@ class inventory_frame(ctk.CTkFrame):
         self.search_entry.bind('<Button-1>', lambda _: self.search_entry.configure(state = ctk.NORMAL))
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="grey",
                                         width=width*0.005, command=search)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))'''
 
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))

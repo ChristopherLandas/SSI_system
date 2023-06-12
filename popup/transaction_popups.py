@@ -9,14 +9,42 @@ from decimal import Decimal
 import datetime
 from PIL import Image
 
-def show_item_list(master, info:tuple):
+def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
             self._master = master
             width = info[0]
             height = info[1]
             #self._treeview: cctk.cctkTreeView = info[2]
             super().__init__(master, corner_radius= 0)
+
+            '''event'''
+            def proceed(_: any = None):
+                if self.item_treeview.data_grid_btn_mng.active:
+                    data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
+                    add_data = (data[0], data[2], data[2])
+                    if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                        spinner.change_value()
+                    else: #if there's none
+                        root_treeview.add_data(add_data)
+                        data_frames = root_treeview.data_frames[-1]
+                        spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
+
+                        spinner.configure(val_range = (1, data[1]))
+                        change_val_func(price_format_to_float(data[2][1:]))
+                        #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
+
+                        def spinner_command(_: any = None):
+                            temp_frame = spinner.master.master
+                            change_val_func(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+                            price = price_format_to_float(temp_frame.winfo_children()[2]._text[1:])
+                            temp_frame.winfo_children()[4].configure(text = '₱' + format_price(price * spinner.value))
+                            change_val_func(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+
+                        spinner.configure(command = spinner_command)
+
+                    self.place_forget()
 
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
 
@@ -47,24 +75,10 @@ def show_item_list(master, info:tuple):
             self.search_btn.pack(side="left", padx=(0, width*0.005))
 
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.service_treeview = cctk.cctkTreeView(self.content_frame,data=self.data, height=height*0.65, width=width*0.505,
-                                                      column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:{int(width*.1)}-tr!30!30")
-            self.service_treeview.grid(row=1, column=0, padx=(width*0.005), pady=(height*0.01), sticky="nsew")
-
-
-            """ self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview = cctk.cctkTreeView(self.left_frame, self.data, self.width * .75, self.height * .65,
-                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color='black',
-                                                column_format=f'/Service:x-tl/Price:{round(self.width * .15)}-tl/Stocks:{round(self.width * .15)}-tl!35!30',
-                                                double_click_command= self.get_item)
-            self.item_treeview.grid(row=1, column=0, padx=10, pady=10, sticky="ns") """
-
-            """   self.rightmost_frame = ctk.CTkFrame(self.boxframe, height=self.height*0.78, width =self.width*0.312, fg_color='white')
-            self.rightmost_frame.grid(row=2, column=0, padx=10, pady=10, sticky="es")
-
-            self.x_fr = ctk.CTkFrame(self.rightmost_frame, height=self.height*0.78, width =self.width*0.312, fg_color='white')
-            self.x_fr.grid(row=2, column=0, padx=10, pady=10, sticky="s")
-            """
+            self.item_treeview = cctk.cctkTreeView(self.content_frame,data=self.data, height=height*0.65, width=width*0.505,
+                                                      column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:{int(width*.1)}-tr!30!30",
+                                                      double_click_command= proceed)
+            self.item_treeview.grid(row=1, column=0, padx=(width*0.005), pady=(height*0.01), sticky="nsew")
 
             self.bottom_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent", width=width*0.25)
             self.bottom_frame.grid(row=2, column=0 )
@@ -73,7 +87,7 @@ def show_item_list(master, info:tuple):
             self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("Arial", 14), command=self.reset)
             self.back_button.grid(row=0, column=0, sticky="w")
 
-            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14))
+            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14), command= proceed)
             self.select_button.grid(row=0, column=1, sticky="e")
 
             """ self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=self.get_item, width =270, font=("Poppins-Bold", 45))
@@ -92,65 +106,45 @@ def show_item_list(master, info:tuple):
         def get_item(self, _: any = None):
             pass
 
-        """ def get_item(self, _: any = None):
-            #if there's a selected item
-            if self.item_treeview.data_grid_btn_mng.active is not None:
-                item_name =  self.item_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
-                #getting the needed information for the item list
-                transaction_data = database.fetch_data(sql_commands.get_item_data_for_transaction, (item_name, ))[0]
-                #collects part of the data needed in the transaction
-                items_in_treeview = [s.winfo_children()[2]._text if self._treeview.data_frames != [] else None for s in self._treeview.data_frames]
-                #search the tree view if there's an already existing item
+    return instance(master, info, root_treeview, change_val_func)
 
-                #if there's an already existing item
-                if(item_name in items_in_treeview):
-                    quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[items_in_treeview.index(item_name)].winfo_children()[4].winfo_children()[0]
-                    quantity_column.change_value()
-                    #change the value of the spinner combo; modifying the record's total price
-                else:
-                    self._treeview.add_data(transaction_data+(1, transaction_data[2]))
-                    quantity_column: cctk.cctkSpinnerCombo = self._treeview.data_frames[-1].winfo_children()[4].winfo_children()[0]
-                    price_column: ctk.CTkLabel = self._treeview.data_frames[-1].winfo_children()[6]
-
-                    def spinner_command(mul: int = 0):
-                        master.change_total_value_item(-float(price_column._text))
-                        #before change
-
-                        price_change = quantity_column._base_val * quantity_column.value
-                        master.change_total_value_item(price_change)
-                        price_column.configure(text = price_change)
-                        #after change
-                        postdata = list(self._treeview._data[self._treeview.data_frames.index(quantity_column.master.master)])
-                        postdata[3] = quantity_column.value
-                        postdata[4] = Decimal(price_change)
-                        self._treeview._data[self._treeview.data_frames.index(quantity_column.master.master)] = tuple(postdata)
-                        #update the treeview's data
-
-                        if quantity_column._base_val * quantity_column.value >= quantity_column._base_val * quantity_column._val_range[1]:
-                            quantity_column.num_entry.configure(text_color = 'red')
-                            #messagebox.showinfo('NOTE!', 'Maximum stock reached')
-                        else:
-                            quantity_column.num_entry.configure(text_color = quantity_column._entry_text_color)
-
-                    quantity_column.configure(command = spinner_command, base_val = transaction_data[2], value = 1, val_range = (1
-                    , int(self.item_treeview.data_grid_btn_mng.active.winfo_children()[1]._text)))
-                    #add a new record
-                    master.change_total_value_item(transaction_data[2])
-
-                self.item_treeview.data_grid_btn_mng.deactivate_active()
-                self.reset()
-                #reset the state of this popup """
-    return instance(master, info)
-
-def show_services_list(master, info:tuple, data_reciever: list):
+def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, data_reciever: list):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
             #self._data_reciever = data_reciever
             self._master = master
             width = info[0]
             height = info[1]
             #self._treeview: cctk.cctkTreeView = info[2]
             super().__init__(master, corner_radius= 0)
+
+            '''event'''
+            def proceed(_: any = None):
+                if self.service_treeview.data_grid_btn_mng.active:
+                    data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
+                    add_data = (data[0], data[1], data[1])
+                    if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                        spinner.change_value()
+                    else: #if there's none
+                        root_treeview.add_data(add_data)
+                        data_frames = root_treeview.data_frames[-1]
+                        spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
+
+                        spinner.configure(val_range = (1, cctk.cctkSpinnerCombo.MAX_VAL))
+                        change_val_func(price_format_to_float(data[1][1:]))
+                        #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
+
+                        def spinner_command(_: any = None):
+                            temp_frame = spinner.master.master
+                            change_val_func(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+                            price = price_format_to_float(temp_frame.winfo_children()[2]._text[1:])
+                            temp_frame.winfo_children()[4].configure(text = '₱' + format_price(price * spinner.value))
+                            change_val_func(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+
+                        spinner.configure(command = spinner_command)
+
+                    self.place_forget()
 
             #ctk.CTkLabel(self, text="HElp").pack()
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
@@ -183,7 +177,8 @@ def show_services_list(master, info:tuple, data_reciever: list):
 
             #self.data = database.fetch_data(sql_commands.get_services_and_their_price)
             self.service_treeview = cctk.cctkTreeView(self.content_frame, height=height*0.65, width=width*0.425,
-                                                      column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
+                                                      column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30",
+                                                      double_click_command= proceed)
             self.service_treeview.grid(row=1, column=0, padx=(width*0.005), pady=(height*0.01), sticky="nsew")
 
             """
@@ -206,7 +201,7 @@ def show_services_list(master, info:tuple, data_reciever: list):
             self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("Arial", 14), command=self.reset)
             self.back_button.grid(row=0, column=0, sticky="w")
 
-            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14))
+            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14), command= proceed)
             self.select_button.grid(row=0, column=1, sticky="e")
 
         def reset(self):
@@ -238,7 +233,7 @@ def show_services_list(master, info:tuple, data_reciever: list):
                 self.service_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
-    return instance(master, info, data_reciever)
+    return instance(master, info, root_treeview, change_val_func)
 
 def show_transaction_proceed(master, info:tuple, item_info: list, services_info, total_price: float, customer_info: str, pets_info: List) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):

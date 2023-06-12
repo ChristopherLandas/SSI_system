@@ -133,7 +133,7 @@ get_non_expiry_inventory = "SELECT DISTINCT item_general_info.name,\
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
 get_item_and_their_total_stock = "SELECT item_general_info.name,\
                                          CAST(SUM(item_inventory_info.Stock) as INT),\
-                                         CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2))\
+                                         CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)), 2))\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                                  INNER	JOIN item_settings ON item_general_info.UID = item_settings.UID\
                                  WHERE item_inventory_info.Stock != 0 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null)\
@@ -148,7 +148,7 @@ get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                  WHERE item_general_info.name = ?\
                                  GROUP BY item_general_info.UID"
 
-get_services_and_their_price = "SELECT UID, service_name, Item_needed, price FROM service_info WHERE state = 1"
+get_services_and_their_price = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info WHERE state = 1"
 get_services_data_for_transaction = "SELECT uid,\
                                              service_name,\
                                              CAST(price AS DECIMAL(10, 2))\
