@@ -133,7 +133,7 @@ get_non_expiry_inventory = "SELECT DISTINCT item_general_info.name,\
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
 get_item_and_their_total_stock = "SELECT item_general_info.name,\
                                          CAST(SUM(item_inventory_info.Stock) as INT),\
-                                         CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2))\
+                                         CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)), 2))\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                                  INNER	JOIN item_settings ON item_general_info.UID = item_settings.UID\
                                  WHERE item_inventory_info.Stock != 0 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null)\
@@ -148,7 +148,7 @@ get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                  WHERE item_general_info.name = ?\
                                  GROUP BY item_general_info.UID"
 
-get_services_and_their_price = "SELECT UID, service_name, Item_needed, price FROM service_info WHERE state = 1"
+get_services_and_their_price = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info WHERE state = 1"
 get_services_data_for_transaction = "SELECT uid,\
                                              service_name,\
                                              CAST(price AS DECIMAL(10, 2))\
@@ -162,6 +162,7 @@ update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHER
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
 add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 show_all_items = "SELECT NAME FROM item_general_info"
+show_reveiving_hist = "SELECT NAME, stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state != 1"
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?)"
@@ -256,9 +257,11 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 
 #RECIEVING ITEMS
-record_recieving_item = "INSERT INTO recieving_item (NAME, stock, supp_name, exp_date, reciever, state, date_recieved) VALUES (?, ?, ?, ? ,?, ?, ?)"
-get_recieving_items = "SELECT NAME, stock, supp_name from recieving_item"
+record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ? ,?, ?, ?)"
+get_recieving_items = "SELECT id, NAME, stock, supp_name from recieving_item where state = 1"
 get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
+get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
+update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
@@ -270,3 +273,5 @@ get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
 record_disposal_process = "INSERT INTO disposal_history (item_name, quan, date_of_disposal, disposed_by) VALUES (?, ?, CURRENT_TIMESTAMP, ?);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, quan, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
+
+#ACCOUNT CREATION

@@ -7,6 +7,7 @@ from constants import db
 from functools import partial
 from Theme import *
 from typing import *
+from random import randint
 
 
 class encrypt:
@@ -99,6 +100,16 @@ def date_to_words(date):
 
     # Combining day, month, and year
     return "{} {}, {}".format(month, day, year)
+
+def generateId(initial: Optional[str] = None, length: Union[int, None] = 12) -> str:
+    num = randint(0, 16 if length <= 1 else 16**(length - len(initial or '')))
+    hex_str = str(hex(num))[2:]
+
+    if len(initial or '' + hex_str) == length:
+        return f'%s%s' % (initial, hex_str)
+    elif len(initial or '' + hex_str) < length:
+        return f'%s%s' % (initial, hex_str.zfill(length - 1))
+    #return f'%s%s' % (initial or '', hexStr if len(hexStr) == (length - 1) else hexStr.zfill(length - 1))
 
 ''' example of inserting data
 usn = 'admin'

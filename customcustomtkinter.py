@@ -136,6 +136,7 @@ class customcustomtkinter:
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None, 
                      
+
                      column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!30!30',
                      header_color: Union[str, tuple] = Color.Blue_Cobalt, data_grid_color: Union[list, tuple] = (Color.White_Ghost, Color.Grey_Bright_2),
                      selected_color: Union [tuple, str] = Color.Blue_Steel,
@@ -144,7 +145,7 @@ class customcustomtkinter:
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = Color.Blue_Maastricht,
                      nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None, **kwargs):
-            
+
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
 
@@ -226,8 +227,9 @@ class customcustomtkinter:
             confirmation = messagebox.askyesno('Warning', 'Are you sure you want to delete the data')
             if confirmation:
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
-                if self._bd_pop_list is not None or len(self._bd_pop_list) > 0:
-                    self._bd_pop_list.pop(data_mngr_index)
+                if self._bd_pop_list is not None:
+                    if len(self._bd_pop_list) > 0:
+                        self._bd_pop_list.pop(data_mngr_index)
                 self.data_grid_btn_mng._buttons.pop(data_mngr_index)
                 self.data_grid_btn_mng._og_color.pop(data_mngr_index)
                 #remove the row from the button manager
@@ -313,12 +315,12 @@ class customcustomtkinter:
 
         def bd_deduction(self, btn: ctk.CTkButton):
             for tup in self.bd_configs:
-                item = float(btn.master.master.winfo_children()[tup[0]]._text)
+                item = float(price_format_to_float(btn.master.master.winfo_children()[tup[0]]._text[1:]))
                 if isinstance(tup[1], list):
                     for lbls in tup[1]:
-                        lbls.configure(text = format_price(float(price_format_to_float(lbls._text)) - item))
+                        lbls.configure(text = format_price(float(price_format_to_float(lbls._text[1:])) - item))
                 else:
-                    tup[1].configure(text = format_price(float(price_format_to_float(tup[1]._text)) - item))
+                    tup[1].configure(text = format_price(float(price_format_to_float(tup[1]._text[1:])) - item))
 
         def delete_all_data(self):
             for frm in self.data_frames:
@@ -365,7 +367,7 @@ class customcustomtkinter:
             self.title("Calendar")
             self.geometry("%dx%d+%d+%d"%(400,400,position_X,position_Y))
             self.resizable(0,0)
-            
+
             date = datetime.datetime.now()
 
             self.cal = Calendar(self, year=date.year, month=date.month, day=date.day, showweeknumbers=False, date_pattern="mm-dd-yyyy",
@@ -500,6 +502,10 @@ class customcustomtkinter:
             if "val_range" in kwargs:
                 if isinstance(kwargs['val_range'], tuple):
                     self._val_range = kwargs['val_range']
+                    if self.value < self._val_range[0]:
+                        self.configure(value = self._val_range[0])
+                    elif self.value >  self._val_range[0]:
+                        self.configure(value = self._val_range[1])
                     kwargs.pop('val_range')
             if "state" in kwargs:
                 self.add_button.configure(state = kwargs["state"])
