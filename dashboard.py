@@ -721,7 +721,8 @@ class transaction_frame(ctk.CTkFrame):
         self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="0,000.00", font=("Arial", 14))
         self.services_total_amount.pack(side="right",  padx=(0,width*0.0075))
 
-        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right")
+        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",
+                                             command=lambda:self.show_proceed_transact.place(relx=0.5, rely=0.5, anchor="c"))
         self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025))
 
         """ self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)

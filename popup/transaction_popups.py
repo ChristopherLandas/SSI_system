@@ -466,7 +466,7 @@ def show_transaction_proceed(master, info:tuple, ) -> ctk.CTkFrame:
             self.change_amount = ctk.CTkLabel(self.change_frame, text="0,000.00", font=("Arial", 20), width=width*0.15, fg_color="light grey", corner_radius=5, anchor="e")
             self.change_amount.pack(side="right",  padx=(0,width*0.0075))
             
-            self.proceed_button = ctk.CTkButton(self.payment_frame, text='Proceed', font=("Aria", 20), height=height*0.085)
+            self.proceed_button = ctk.CTkButton(self.payment_frame, text='Proceed', font=("Arial", 20), height=height*0.085)
             self.proceed_button.pack(fill="x",side="bottom", pady=height*0.025, padx=(width*0.025))
             """
             self.total_frame = ctk.CTkFrame(self.rightmost_frame)
