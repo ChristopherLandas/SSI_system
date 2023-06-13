@@ -274,4 +274,15 @@ record_disposal_process = "INSERT INTO disposal_history (item_name, quan, date_o
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, quan, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
 
-#ACCOUNT CREATION
+#PET INFO
+get_owners = "SELECT o_name FROM pet_info"
+get_ids_pi = "SELECT id FROM pet_info"
+get_pet_info = "SELECT * FROM pet_info WHERE o_name = ?"
+record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+
+#HIST LOG
+get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
+                       log_history.date_logged,\
+                       log_history.time_in,\
+                       log_history.time_out\
+                FROM acc_info JOIN log_history ON acc_info.usn = log_history.usn"
