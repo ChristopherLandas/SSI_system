@@ -1997,60 +1997,60 @@ class user_setting_frame(ctk.CTkFrame):
             #refresh_staff_names()
         '''ACCOUNT CREATION: START'''
         #user info label
-        self.user_info_title_lbl = ctk.CTkLabel(self.box_frame, text='Create New Account',font=("Poppins", 35), text_color="#06283D")
+        self.user_info_title_lbl = ctk.CTkLabel(self.box_frame, text='Create New Account',font=("Arial", 20), text_color="#06283D")
         self.user_info_title_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw", columnspan=2)
 
         #account details frame
         self.account_details_frame = ctk.CTkFrame(self.box_frame)
-        self.account_details_frame.grid(row=1, column=0, sticky='nesw', padx = (0, width*0.024))
+        self.account_details_frame.grid(row=2, column=0, sticky='nesw', padx = (0))
 
         #username label
-        self.username_lbl = ctk.CTkLabel(self.account_details_frame, text='Username:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.username_lbl = ctk.CTkLabel(self.account_details_frame, text='Username:',font=("Arial"  ,15), text_color="#06283D")
         self.username_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         #username entry
-        self.username_entry = ctk.CTkEntry(self.account_details_frame, placeholder_text='assistant1', height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.username_entry = ctk.CTkEntry(self.account_details_frame, placeholder_text='assistant1', height=height*0.035   , width=width*0.25,font=("Arial", 15))
         self.username_entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
         #password label
-        self.password_lbl = ctk.CTkLabel(self.account_details_frame, text='Password:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.password_lbl = ctk.CTkLabel(self.account_details_frame, text='Password:',font=("Arial"  ,15), text_color="#06283D")
         self.password_lbl.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
         #password entry
-        self.password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=password_svar, height=height*0.08, width=width*0.25,font=("Poppins", 25), show='*')
+        self.password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=password_svar, height=height*0.035  , width=width*0.25,font=("Arial",15), show='*')
         self.password_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
 
         #Re-enter Password label
-        self.reenter_password_lbl = ctk.CTkLabel(self.account_details_frame, text='Re-enter Password:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.reenter_password_lbl = ctk.CTkLabel(self.account_details_frame, text='Re-enter Password:',font=("Arial", 15), text_color="#06283D")
         self.reenter_password_lbl.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
         #Re-enter Password entry
-        self.reenter_password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=repass_svar, height=height*0.08, width=width*0.25,font=("Poppins", 25), show='*')
+        self.reenter_password_entry = ctk.CTkEntry(self.account_details_frame, textvariable=repass_svar, height=height*0.035    , width=width*0.25,font=("Arial", 15) , show='*')
         self.reenter_password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="nsw")
 
         c1 = ctk.CTkSwitch(self.account_details_frame,text='Show Password',variable=c_v1,onvalue=1,offvalue=0,command=my_show)
         c1.grid(row=3,column=1)
 
         #position label
-        self.position_title_lbl = ctk.CTkLabel(self.account_details_frame, text='Position:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.position_title_lbl = ctk.CTkLabel(self.account_details_frame, text='Position:',font=("Arial", 15), text_color="#06283D")
         self.position_title_lbl.grid(row=4, column=0, padx=10, pady=10, sticky="w")
         #position cbox
-        self.position_cbox = ctk.CTkOptionMenu(self.account_details_frame, values=roles_list, font=("Poppins", 25), height=height*0.08,width=width*0.25, dropdown_font=('Poppins', 25), button_color='#3B8ED0', button_hover_color='#2C74B3')
+        self.position_cbox = ctk.CTkOptionMenu(self.account_details_frame, values=roles_list, font=("Arial",15), height=height*0.035    ,width=width*0.25, dropdown_font=("Arial",14), button_color='#3B8ED0', button_hover_color='#2C74B3')
         self.position_cbox.grid(row=4, column=1, padx=10, pady=(0, 10), sticky="ew")
 
         #personal info frame
-        self.personal_info_frame = ctk.CTkFrame(self.box_frame)
-        self.personal_info_frame.grid(row=1, column=1, sticky='nesw')
-
+        self.personal_info_frame = ctk.CTkFrame(self.box_frame, height=height*0.15,)
+        self.personal_info_frame.grid(row=1, column=0, sticky="ew", pady=(height*0.025))
+        
         #first name label
-        self.first_name_lbl = ctk.CTkLabel(self.personal_info_frame, text='First Name:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.first_name_lbl = ctk.CTkLabel(self.personal_info_frame, text='First Name:',font=("Arial", 15, "bold"), text_color="#06283D")
         self.first_name_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         #first name entry
-        self.first_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="John", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.first_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="John", height=height*0.035 , width=width*0.25,font=("Arial", 15) ,)
         self.first_name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="nsw")
         #last name name label
-        self.last_name_lbl = ctk.CTkLabel(self.personal_info_frame, text='Last Name:',font=("Poppins", 25, "bold"), text_color="#06283D")
+        self.last_name_lbl = ctk.CTkLabel(self.personal_info_frame, text='Last Name:',font=("Arial", 15, "bold"), text_color="#06283D")
         self.last_name_lbl.grid(row=1, column=0, padx=10, pady=10, sticky="w")
         #last name entry
-        self.last_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="Doe", height=height*0.08, width=width*0.25,font=("Poppins", 25))
+        self.last_name_entry = ctk.CTkEntry(self.personal_info_frame, placeholder_text="Doe", height=height*0.035   , width=width*0.25,font=("Arial", 15) )
         self.last_name_entry.grid(row=1, column=1, padx=10, pady=10, sticky="nsw")
         #contact no label
         #self.contact_no_lbl = ctk.CTkLabel(self.personal_info_frame, text='Contact No.:',font=("Poppins", 25, "bold"), text_color="#06283D")
@@ -2068,15 +2068,15 @@ class user_setting_frame(ctk.CTkFrame):
         self.bottom_frame= ctk.CTkFrame(self.box_frame, fg_color='white')
         self.bottom_frame.grid(row=10, column=0, padx=10, pady=10, sticky="s", columnspan=4)
         #create button
-        self.update_btn = ctk.CTkButton(self.bottom_frame, text='CREATE', command=check_entry,font=("Poppins", 25), fg_color='#2678F3', text_color='white')
-        self.update_btn.grid(row=0, column=0, padx=10, pady=10, sticky="sew")
+        self.create_btn = ctk.CTkButton(self.bottom_frame, text='CREATE', command=check_entry,font=("Arial", 14), fg_color='#2678F3', text_color='white')
+        self.create_btn.pack(side="right", padx=(width*0.035))
         #clear account creation fields button
-        self.update_btn = ctk.CTkButton(self.bottom_frame, text='CLEAR', command=clear_acc_creation_fields, font=("Poppins", 25), fg_color='white', text_color='#2678F3', border_color="#2678F3", border_width=2.5)
-        self.update_btn.grid(row=0, column=1, padx=10, pady=10, sticky="sew")
+        self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='CLEAR', command=clear_acc_creation_fields, font=("Arial", 14), fg_color='white', text_color='#2678F3', border_color="#2678F3", border_width=2.5)
+        self.cancel_btn.pack(side="left")
         '''ACCOUNT CREATION: START'''
         load_main_frame(0)
 
-        self.account_creation_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
+        """ self.account_creation_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.account_creation_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
@@ -2425,10 +2425,10 @@ class user_setting_frame(ctk.CTkFrame):
         #clear account creation fields button
         self.clear_btn = ctk.CTkButton(self.bottom_frame, text='CLEAR', command=clear_acc_creation_fields, font=("Arial", 25), fg_color='white', text_color='#2678F3', border_color="#2678F3", border_width=2.5)
         self.clear_btn.grid(row=0, column=0, padx=10, pady=10, sticky="sew")
-        '''ACCOUNT CREATION: START'''
+        '''ACCOUNT CREATION: START''' 
         
         
-        load_main_frame(0)
+        load_main_frame(0)"""
         
 class histlog_frame(ctk.CTkFrame):
     global width, height
@@ -2466,6 +2466,6 @@ class histlog_frame(ctk.CTkFrame):
         self.log_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.005), pady=(0,width * 0.005))
         
         self.actionlog_treeview = cctk.cctkTreeView(self.log_frame, width=width*0.8, height=height*0.8,
-                                               column_format=f'/No:{int(width*.025)}-#r/User:x-tl/DateLogged:{int(width*0.2)}-tc/TimeIn:{int(width*.15)}-tc/TimeOut:{int(width*.15)}-tc!30!30')
+                                               column_format=f'/No:{int(width*.025)}-#r/User:x-tl/DateLogged:{int(width*0.2)}-tc/Task:{int(width*0.2)}-tl/TimeIn:{int(width*.15)}-tc/TimeOut:{int(width*.15)}-tc!30!30')
         self.actionlog_treeview.pack(pady=(height*0.015))
 dashboard(None, 'admin', datetime.datetime.now)
