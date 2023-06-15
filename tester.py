@@ -1,7 +1,10 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import dashboard_popup
+from popup import transaction_popups
 from decimal import Decimal
+
+ctk.set_appearance_mode('light')
+
 
 class body(ctk.CTk):
     def __init__(self):
@@ -11,18 +14,17 @@ class body(ctk.CTk):
         self.attributes("-fullscreen", True)
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
-        test = dashboard_popup.status_bar(self, (250, 75), 'hello', '#121212', 12)
-        test.place(relx = .5, rely = .5, anchor = 'c')
+        print(type(self))
+
+        frame = ctk.CTkFrame(self, self.screen[0], self.screen[1], fg_color='green')
+        frame.pack_propagate(0)
+        frame.pack()
+
+        temp =cctk.info_tab(frame, tab_master=frame, tab=transaction_popups.customer_info, tab_size= self.screen)
+        self.bind('<Return>', lambda _: print(temp.value))
+        temp.place(relx = .5 ,rely = .5, anchor = 'c')
 
         self.mainloop()
 
 
-#body()
-
-i = [1,3,5,9]
-j = [2,4,6,8]
-
-for (t, s) in (i, j):
-    print(t, s)
-
-#print((s[1], t[1], s[2], t[2] for s, t in i, j))
+body()

@@ -1,5 +1,6 @@
 #GENERAL
 get_uid = "SELECT UID FROM item_general_info where name = ?"
+get_service_uid = "SELECT UID FROM service_info where service_name = ?"
 
 #SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.name,\
@@ -165,7 +166,7 @@ show_all_items = "SELECT NAME FROM item_general_info"
 show_reveiving_hist = "SELECT NAME, stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state != 1"
 
 #ADDING ITEMS THROUGH THE INVENTORY
-add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?)"
+add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
@@ -246,6 +247,21 @@ get_items_daily_sales = "SELECT CAST(SUM(item_transaction_content.price * item_t
                          FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
                          WHERE transaction_record.transaction_date = CURRENT_DATE;"
 
+get_services_daily_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
+                            FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                            WHERE transaction_record.transaction_date = ?;"
+
+get_items_daily_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
+                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                         WHERE transaction_record.transaction_date = ?;"
+
+get_items_monthly_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
+                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                         WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+get_services_monthly_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
+                            FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                            WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+
 #OR
 get_or = 'SELECT COUNT(*)+1 FROM transaction_record'
 
@@ -275,3 +291,19 @@ delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stoc
 get_disposal_hist = "SELECT item_name, quan, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
 
 #ACCOUNT CREATION
+
+#PET INFO
+get_owners = "SELECT DISTINCT o_name FROM pet_info"
+get_pet_name = "SELECT id, p_name FROM pet_info"
+
+get_ids_pi = "SELECT id FROM pet_info"
+get_pet_info = "SELECT * FROM pet_info WHERE o_name = ?"
+get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
+record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+
+#HIST LOG
+get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
+                       log_history.date_logged,\
+                       log_history.time_in,\
+                       log_history.time_out\
+                FROM acc_info JOIN log_history ON acc_info.usn = log_history.usn"

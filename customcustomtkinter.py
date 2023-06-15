@@ -134,8 +134,8 @@ class customcustomtkinter:
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                      fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
-                     overwrite_preferred_drawing_method: Union[str, None] = None, 
-                     
+                     overwrite_preferred_drawing_method: Union[str, None] = None,
+
 
                      column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!30!30',
                      header_color: Union[str, tuple] = Color.Blue_Cobalt, data_grid_color: Union[list, tuple] = (Color.White_Ghost, Color.Grey_Bright_2),
@@ -144,7 +144,9 @@ class customcustomtkinter:
                      row_font: tuple = ('Arial', 14), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'transparent',
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = Color.Blue_Maastricht,
                      nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
-                     bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None, **kwargs):
+                     bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
+                     c_bd_configs: Optional[Tuple[str, Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None]]] = None,
+                     bd_commands = None, **kwargs):
 
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
@@ -176,9 +178,11 @@ class customcustomtkinter:
             self._row_hover_color = row_hover_color
             self._double_click_command = double_click_command
             self.bd_configs = bd_configs
+            self.c_bd_configs = c_bd_configs
             self._record_text_color = record_text_color
             self._content_color = content_color
             self._nav_text_color = nav_text_color
+            self.bd_commands = bd_commands
             #encapsulate other arguments
 
             self.pack_propagate(0)
@@ -227,6 +231,8 @@ class customcustomtkinter:
             confirmation = messagebox.askyesno('Warning', 'Are you sure you want to delete the data')
             if confirmation:
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
+                self.bd_commands(data_mngr_index)
+
                 if self._bd_pop_list is not None:
                     if len(self._bd_pop_list) > 0:
                         self._bd_pop_list.pop(data_mngr_index)
@@ -239,6 +245,10 @@ class customcustomtkinter:
                 #active button was set to none if it was destroyed
                 if(self.bd_configs is not None):
                     self.bd_deduction(dlt_btn)
+
+                if(self.c_bd_configs is not None):
+                    if(self.c_bd_configs[0] in self._data[data_mngr_index]):
+                        self.c_bd_deduction(dlt_btn)
 
                 dlt_btn.master.master.destroy()
                 self._data.pop(data_mngr_index)
@@ -322,6 +332,15 @@ class customcustomtkinter:
                 else:
                     tup[1].configure(text = format_price(float(price_format_to_float(tup[1]._text[1:])) - item))
 
+        def c_bd_deduction(self, btn: ctk.CTkButton):
+            for tup in self.c_bd_configs[1]:
+                item = float(price_format_to_float(btn.master.master.winfo_children()[tup[0]]._text[1:]))
+                if isinstance(tup[1], list):
+                    for lbls in tup[1]:
+                        lbls.configure(text = format_price(float(price_format_to_float(lbls._text[1:])) - item))
+                else:
+                    tup[1].configure(text = format_price(float(price_format_to_float(tup[1]._text[1:])) - item))
+
         def delete_all_data(self):
             for frm in self.data_frames:
                 frm.destroy()
@@ -383,6 +402,8 @@ class customcustomtkinter:
     class cctkSpinnerCombo(ctk.CTkFrame):
         MAX_VAL = 2147483647
         MIN_VAL = -2147483648
+        NUM_ONLY = 'num_only'
+        CLICK_ONLY = 'click_only'
         def __init__(self, master: any, width: int = 100, height: int = 30, corner_radius: Optional[Union[int, str]] = None,
                     border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
@@ -488,6 +509,7 @@ class customcustomtkinter:
             self.num_entry.insert(0, str(value))
 
         def configure(self, require_redraw=False, **kwargs):
+
             if "value" in kwargs:
                 self.value = kwargs["value"]
                 self.num_entry.delete(0, "end")
@@ -512,6 +534,12 @@ class customcustomtkinter:
                 self.sub_button.configure(state = kwargs["state"])
                 self.num_entry.configure(state = kwargs["state"])
                 kwargs.pop('state')
+            if "mode" in kwargs:
+                self.num_entry.unbind('<Return>', None)
+                self.num_entry.unbind('<Button-1>', None)
+                self.num_entry.configure(textvariable = None)
+                self.num_entry.configure(state = 'readonly')
+                kwargs.pop('mode')
             return super().configure(require_redraw, **kwargs)
 
         def return_entry_func(self, _):
@@ -529,18 +557,21 @@ class customcustomtkinter:
             self.num_entry.configure(state = 'readonly')
 
     class info_tab(ctk.CTkFrame):
-        def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
+        def __init__(self, master: any, tab_master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
-                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = 'transparent', border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None, tab: ctk.CTkFrame = None,
-                     button_text: str = 'click to edit info', **kwargs):
+                     button_text: str = 'click to edit info', tab_size: Tuple[int, int] = None, **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color,
                              background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
-            self._tab = tab
-            self._button_text  = button_text
+            self.title = None
             self.value = None
-            self.button = ctk.CTkButton(self, width * .8, height * .8, 12, text = self._button_text)
+            self._tab_size = tab_size
+            self._tab: ctk.CTkFrame = tab(master if not isinstance(tab_master, ctk.CTkFrame) else tab_master, self._tab_size, self)
+            print(tab_master)
+            self._button_text  = button_text
+            self.button = ctk.CTkButton(self, width * .8, height * .7, 12, text = self._button_text, command= lambda: self._tab.place(relx = .5, rely=  .5, anchor = 'c'))
             self.button.place(relx = .5, rely = .5, anchor = 'c')
 
 class customcustomtkinterutil:
