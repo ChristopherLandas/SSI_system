@@ -39,9 +39,14 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         self._master = master
 
-        
+        global acc_info, acc_cred, date_logged, mainframes
+        acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
+        acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
+        date_logged = _date_logged;
+
+
         #makes the form full screen and removing the default tab bar
-        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
 
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -53,7 +58,7 @@ class dashboard(ctk.CTkToplevel):
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
-            del datakey
+            del datakey """
         #for preventing security breach through python code; enable it to test it """
 
         '''
@@ -677,7 +682,7 @@ class transaction_frame(ctk.CTkFrame):
         self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
 
         self.grid_columnconfigure((1), weight=1)
-        self.grid_rowconfigure((2), weight=1)
+        self.grid_rowconfigure((1), weight=1)
 
         self.or_num_label = ctk.CTkLabel(self, fg_color=Color.White_Ghost, corner_radius=5, width=width*0.125, height = height*0.05,
                                          text="OR#: 0001", font=("DM Sans Medium", 15))
@@ -691,17 +696,20 @@ class transaction_frame(ctk.CTkFrame):
         self.top_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
 
 
-        self.client_name_frame = ctk.CTkFrame(self.top_frame, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05,)
-        self.client_name_frame.pack(side="left",padx=(width*0.005))
+        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05,)
+        self.client_name_frame.grid(row=0, column=1, sticky="w", padx=(width*0.005))
         self.client_name_frame.pack_propagate(0)
 
         self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
         self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
 
-        self.client_name_entry = ctk.CTkEntry(self.client_name_frame, placeholder_text="Client's Name",font=("DM Sans Medium", 15), border_width=0, fg_color="white")
+        self.client_name_entry = ctk.CTkComboBox(self.client_name_frame,font=("DM Sans Medium", 15), border_width=0, fg_color="white")
+        self.client_name_entry.set('')
+        self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
+        self.client_name_entry.configure(values = self.client_names)
         self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
 
-        self.add_service = ctk.CTkButton(self.top_frame, image=self.service_icon, text="Add Service", height=height*0.05, width=width*0.1,font=("Arial", 14),
+        """ self.add_service = ctk.CTkButton(self.top_frame, image=self.service_icon, text="Add Service", height=height*0.05, width=width*0.1,font=("Arial", 14),
                                          command=lambda:self.show_services_list.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_service.pack(side="left")
 
@@ -711,9 +719,9 @@ class transaction_frame(ctk.CTkFrame):
         self.sched_service = ctk.CTkButton(self.top_frame, image=self.cal_icon, text="Scheduled Service",height=height*0.05, width=width*0.1, font=("Arial", 14),
                                            command=lambda:self.show_sched_service.place(relx=0.5, rely=0.5, anchor="c"))
         self.sched_service.pack(side="right", padx=(0,width*0.005))
-
+        """
         self.transact_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
-        self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="new", padx=(width*0.005), pady=(height*0.01))
+        self.transact_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
 
         '''self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.6,
                                                    column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-tc/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-tl!30!30')
@@ -758,7 +766,7 @@ class transaction_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025))'''
 
 
-        self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.6,
+        self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.675,
                                                    column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30')
         self.transact_treeview.pack(pady=(height*0.01,0))
         self.transact_treeview.bd_commands = bd_commands
@@ -767,9 +775,15 @@ class transaction_frame(ctk.CTkFrame):
         self.bottom_frame.pack(pady=(height*0.01), fill="x", padx=(width*0.005))
         #self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
 
+        self.add_particulars = ctk.CTkButton(self.bottom_frame, width=width*0.125, height=height*0.05, text='Add Particulars',
+                                             image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_particulars.pack(side="left",  padx=(width*0.005, 0))
+        
         self.patient_info = cctk.info_tab(self.bottom_frame, tab_master=self, width=width*0.125, height=height*0.05,
                                           tab=transaction_popups.customer_info, tab_size= (width, height), button_text='Patient Info')
-        self.patient_info.pack(side="left",  padx=(width*0.0075, 0))
+        self.patient_info.pack(side="left",  padx=(width*0.005, 0))
+        
+        
 
         self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
         self.price_total_frame.pack(side="right")
@@ -799,7 +813,7 @@ class transaction_frame(ctk.CTkFrame):
                                              command=lambda:transaction_popups.show_transaction_proceed(self, (width, height, acc_cred), self.services_total_amount._text,
                                                             self.item_total_amount._text, self.price_total_amount._text, self.patient_info.value, self.transact_treeview._data,
                                                             self.patient_info.title, self.client_name_entry.get() or 'N/A', self.transact_treeview).place(relx = .5, rely = .5, anchor = 'c'))
-        self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025))
+        self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025),padx=(0, width*0.005), sticky="e")
 
         """ self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
         self.service_frame.grid(row=1, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(0,height*0.005))
@@ -875,7 +889,8 @@ class transaction_frame(ctk.CTkFrame):
         #self.show_proceed_transact: ctk.CTkFrame =
         self.show_customer_info:ctk.CTkFrame = transaction_popups.customer_info(self, (width, height))
         self.show_sched_service:ctk.CTkFrame = transaction_popups.scheduled_services(self,(width, height))
-
+        self.show_particulars:ctk.CTkFrame = transaction_popups.add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_service, self.patient_info)
+        
     def change_total_value_item(self, value: float):
             value = float(value)
             self.item_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.item_total_amount._text[1:])) + value))
@@ -1351,6 +1366,12 @@ class patient_info_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         #self.label = ctk.CTkLabel(self, text='6').pack(anchor='w')
 
+        def update_table():
+            self.refresh_btn.configure(state = "disabled")
+            self.data = database.fetch_data('SELECT p_name, o_name, contact from pet_info')
+            self.pet_data_view.update_table(self.data)
+            self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+        
         self.grid_forget()
         self.grid_columnconfigure(3, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -1390,7 +1411,7 @@ class patient_info_frame(ctk.CTkFrame):
                                             command=lambda:self.new_record.place(relx = .5, rely = .5, anchor = 'c'))
         self.add_record_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=update_table)
         self.refresh_btn.grid(row=0, column=2, sticky="w")
 
         self.treeview_frame =ctk.CTkFrame(self,fg_color=Color.White_Color[3])
@@ -1399,7 +1420,7 @@ class patient_info_frame(ctk.CTkFrame):
 
         self.data = database.fetch_data('SELECT p_name, o_name, contact from pet_info')
         self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .75, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/PetName:x-tl/OwnerName:{int(width*.25)}-tr/LastUpdate:{int(width*.185)}-tr/Action:{int(width*.075)}-bD!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/PetName:x-tl/OwnerName:{int(width*.25)}-tl/ContactNo:{int(width*.185)}-tr/Action:{int(width*.075)}-bD!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
         self.pet_data_view.grid(row=0, column=0, columnspan=3, pady=(height*0.01))
@@ -2726,4 +2747,5 @@ class histlog_frame(ctk.CTkFrame):
         self.actionlog_treeview.update_table(database.fetch_data(sql_commands.get_hist_log))
         self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
         return super().place(**kwargs)
+
 #dashboard(None, 'Chris', datetime.datetime.now)

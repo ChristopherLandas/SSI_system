@@ -619,20 +619,24 @@ def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk
             self.client_name_label = ctk.CTkLabel(self.content_frame, text="Client's Pet Information",font=("Arial",18))
             self.client_name_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
             #Name label
-            ctk.CTkLabel(self.content_frame, text='Name:',font=("Arial", 14)).grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
-
+            ctk.CTkLabel(self.content_frame, text='Select Pet:',font=("Arial", 14)).grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
+            """ self.pet_frame = ctk.CTkScrollableFrame(self.content_frame, height=height*0.15, fg_color="transparent")
+            self.pet_frame.grid(row=2,column=0, sticky="we") """
             self.tables = database.fetch_data(sql_commands.get_pet_name)
             self.pet_values = [s[1] for s in self.tables]
+            """ 
+            for pet_index in range(len(self.pet_values)):
+                ctk.CTkButton(self.pet_frame, text=self.pet_values[pet_index]).pack() """
             self.pet_name = ctk.CTkOptionMenu(self.content_frame, width=width*0.45, font=("Arial", 14), values=self.pet_values, command= automate_fill)
             self.pet_name.set('')
             self.pet_name.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ns")
-
+            
             self.animal_breed_lbl = ctk.CTkLabel(self.content_frame, text='Breed and Animal Type:',font=("Arial", 14))
             self.animal_breed_lbl.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="nw")
             #Breed and Animal Type entry
             self.animal_breed_entry = ctk.CTkEntry(self.content_frame, width=width*0.45, font=("Arial", 14))
             self.animal_breed_entry.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="ns")
-
+            
             self.schedule_service_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
             self.schedule_service_frame.grid(row=5,  column=0, padx=10, pady=(10), sticky="ew")
             #Scheduled service label
@@ -656,7 +660,7 @@ def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk
             self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=discard, font=("Arial", 20))
             self.back_button.grid(row=0, column=1, padx=20, pady=(15, 15), sticky='s')
 
-            self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=record, font=("Arial", 20))
+            self.select_button = ctk.CTkButton(self.x_fr, text='Confirm', command=record, font=("Arial", 20))
             self.select_button.grid(row=0, column=2, padx=(0, 20), pady=(15, 15), sticky="se")
 
             sched_swtich_event()
@@ -717,3 +721,155 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             self.sched_treeview.pack()
 
     return instance(master, info, parent)
+
+def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func, customer_info: cctk.info_tab) -> ctk.CTkFrame:
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func, customer_info: cctk.info_tab):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, corner_radius= 0, fg_color="transparent")
+
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+
+            def hide():
+                self.place_forget()
+            def item_proceed(_: any = None):
+                if self.item_treeview.data_grid_btn_mng.active:
+                    data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
+                    add_data = (data[0], data[2], data[2])
+                    if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                        spinner.change_value()
+                    else: #if there's none
+                        root_treeview.add_data(add_data)
+                        temp_data = root_treeview._data[-1]
+                        temp_data = (temp_data[0], temp_data[1], 1, temp_data[2])
+                        root_treeview._data[-1] = temp_data
+                        data_frames = root_treeview.data_frames[-1]
+                        spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
+
+                        spinner.configure(val_range = (1, data[1]))
+                        change_val_func(price_format_to_float(data[2][1:]))
+                        #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
+
+                        def spinner_command(_: any = None):
+                            temp_frame = spinner.master.master
+                            temp_data = root_treeview._data[root_treeview.data_frames.index(temp_frame)]
+                            temp_data = (temp_data[0], temp_data[1], spinner.value, '₱' + format_price(price_format_to_float(temp_data[1][1:]) * spinner.value))
+                            root_treeview._data[root_treeview.data_frames.index(temp_frame)] = temp_data
+                            change_val_func(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+                            price = price_format_to_float(temp_frame.winfo_children()[2]._text[1:])
+                            temp_frame.winfo_children()[4].configure(text = '₱' + format_price(price * spinner.value))
+                            change_val_func(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+
+                        spinner.configure(command = spinner_command)
+
+                    self.place_forget()
+
+                
+            def service_proceed(_: any = None):
+                if self.service_treeview.data_grid_btn_mng.active:
+                    data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
+                    add_data = (data[0], data[1], data[1])
+                    if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                        spinner.change_value()
+                    else: #if there's none
+                        root_treeview.add_data(add_data)
+                        data_frames = root_treeview.data_frames[-1]
+                        spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
+
+                        spinner.configure(val_range = (1, cctk.cctkSpinnerCombo.MAX_VAL))
+                        change_val_func(price_format_to_float(data[1][1:]))
+                        #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
+
+                        """def spinner_command(_: any = None):
+                            temp_frame = spinner.master.master
+                            change_val_func(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+                            price = price_format_to_float(temp_frame.winfo_children()[2]._text[1:])
+                            temp_frame.winfo_children()[4].configure(text = '₱' + format_price(price * spinner.value))
+                            change_val_func(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+
+                        spinner.configure(command = spinner_command)"""
+                        spinner.add_button.destroy()
+                        spinner.sub_button.destroy()
+                        spinner.configure(mode = cctk.cctkSpinnerCombo.CLICK_ONLY)
+                    customer_info.title = add_data[0]
+                    customer_info.button.configure(state = ctk.NORMAL)
+                    customer_info.button._command()
+                    self.place_forget()
+
+            self.main_frame = ctk.CTkFrame(self, width=width*0.815, height=height*0.875, corner_radius=0,fg_color=Color.White_Color[3])
+            self.main_frame.pack()
+            self.main_frame.grid_columnconfigure((0), weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+            ctk.CTkLabel(self.top_frame, text='Particulars', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+            self.content_frame.grid(row=1, column=0,columnspan=2, sticky="nsew")
+            
+            self.content_frame.grid_columnconfigure(0, weight=1)
+            self.content_frame.grid_rowconfigure((1,2), weight=1)
+                
+            self.client_name_frame = ctk.CTkFrame(self.content_frame, fg_color="light grey", width=width*0.4, height=height*0.045,)
+            self.client_name_frame.grid(row=0, column=0, sticky="w", padx=(width*0.005), pady=(height*0.005))
+            self.client_name_frame.pack_propagate(0)
+
+            self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
+            self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
+
+            self.client_name_entry = ctk.CTkEntry(self.client_name_frame,font=("DM Sans Medium", 15), border_width=0, fg_color="white")
+            self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
+
+            self.service_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
+            self.service_frame.grid(row=1,column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
+            self.service_frame.pack_propagate(0)
+            
+            self.service_treeview = cctk.cctkTreeView(self.service_frame, height=height*0.4, width=width*0.8,corner_radius=0,double_click_command=service_proceed, column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
+            self.service_treeview.pack()
+            
+            self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
+            self.item_frame.grid(row=2, column=0, sticky="nsew",  padx=(width*0.005),pady=(0, height*0.01))
+            self.item_frame.pack_propagate(0)
+            
+            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.8,double_click_command=item_proceed, column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:x-tr!30!30",)
+            self.item_treeview.pack()
+            
+        def reset(self):
+            self.place_forget()
+
+        def place(self, **kwargs):
+            raw_data = database.fetch_data(sql_commands.get_services_and_their_price, None)
+            self.main_frame.pack()
+            self.data = [(s[1], s[3]) for s in raw_data]
+            self.service_treeview.update_table(self.data)
+            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            return super().place(**kwargs)
+        
+
+        def get_service(self, _: any = None):
+            #if there's a selected item
+            if self.service_treeview.data_grid_btn_mng.active is not None:
+                service_name =  self.service_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
+                #getting the needed information for the item list
+                transaction_data = database.fetch_data(sql_commands.get_services_data_for_transaction, (service_name, ))[0]
+                self._treeview.add_data(transaction_data+(0, transaction_data[2]))
+                info_tab:cctk.info_tab = self._treeview.data_frames[-1].winfo_children()[3]
+                info_tab._tab = customer_info(self._treeview.master.master, (info[0] * .8, info[1] * .8), info_tab)
+                info_tab.button.configure(command = lambda: info_tab._tab.place(relx = .5, rely = .5, anchor = 'c'))
+                self._data_reciever.append(info_tab)
+                info_tab._tab.place(relx = .5, rely = .5, anchor = 'c')
+
+
+                master.change_total_value_service(transaction_data[2])
+                self.service_treeview.data_grid_btn_mng.deactivate_active()
+                self.reset()
+    return instance(master, info, root_treeview, change_val_func, customer_info)
