@@ -39,14 +39,7 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         self._master = master
 
-        global acc_info, acc_cred, date_logged, mainframes
-        acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
-        acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
-        date_logged = _date_logged;
-
-
-        #makes the form full screen and removing the default tab bar
-        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
 
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -58,7 +51,7 @@ class dashboard(ctk.CTkToplevel):
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
-            del datakey """
+            del datakey 
         #for preventing security breach through python code; enable it to test it """
 
         '''
@@ -129,6 +122,7 @@ class dashboard(ctk.CTkToplevel):
             temp:inventory_frame = self.main_frames[4]
             temp.add_item_btn.destroy()
             del temp
+
         '''events'''
         def load_main_frame(title: str, cur_frame: int):
             self.title_label.configure(text= title.upper())
