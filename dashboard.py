@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 import datetime;
 import _tkinter
 import sql_commands
@@ -39,11 +39,7 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         self._master = master
 
-        '''global acc_info, acc_cred, date_logged, mainframes
-        acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
-        acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
-        date_logged = _date_logged;'''
-
+        
         #makes the form full screen and removing the default tab bar
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
 
@@ -60,8 +56,13 @@ class dashboard(ctk.CTkToplevel):
             del datakey
         #for preventing security breach through python code; enable it to test it """
 
-
+        '''
+        global acc_info, acc_cred, date_logged, mainframes
+        acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
+        acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
+        date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        '''
 
         '''Fonts'''
         try:
@@ -377,50 +378,51 @@ class dashboard(ctk.CTkToplevel):
 
         self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.settings_btn, self.acc_btn], Color.Platinum, True,
                                                           children=[self.notif_menu_bar, self.settings_menu_bar, self.acc_menu_bar])
-        print (*self.main_frames, sep = '\n')
         tempdel = 0
-        if not user_level_access[2]:
+        print(acc_info[0][0])
+        temp_user_lvl_access = database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0]
+        if not temp_user_lvl_access[1]:
             self.db_button.destroy()
             self.main_frames[0 - tempdel].destroy()
             del self.main_frames[0]
             del self.db_button
             tempdel += 1
-        if not user_level_access[3]:
+        if not temp_user_lvl_access[2]:
             self.transact_button.destroy()
             self.main_frames[1 - tempdel].destroy()
             del self.transact_button
             tempdel += 1
-        if not user_level_access[4]:
+        if not temp_user_lvl_access[3]:
             self.services_button.destroy()
             self.main_frames[2 - tempdel].destroy()
             del self.services_button
             tempdel += 1
-        if not user_level_access[5]:
+        if not temp_user_lvl_access[4]:
             self.sales_button.destroy()
             self.main_frames[3 - tempdel].destroy()
             del self.sales_button
             tempdel += 1
-        if not user_level_access[6]:
+        if not temp_user_lvl_access[5]:
             self.inventory_button.destroy()
             self.main_frames[4 - tempdel].destroy()
             del self.inventory_button
             tempdel += 1
-        if not user_level_access[7]:
+        if not temp_user_lvl_access[6]:
             self.patient_button.destroy()
             self.main_frames[5 - tempdel].destroy()
             del self.patient_button
             tempdel += 1
-        if not user_level_access[8]:
+        if not temp_user_lvl_access[7]:
             self.report_button.destroy()
             self.main_frames[6 - tempdel].destroy()
             del self.report_button
             tempdel+= 1
-        if not user_level_access[9]:
+        if not temp_user_lvl_access[8]:
             self.user_setting_button.destroy()
             self.main_frames[7 - tempdel].destroy()
             del self.user_setting_button
             tempdel += 1
-        if not user_level_access[10]:
+        if not temp_user_lvl_access[9]:
             self.histlog_button.destroy()
             self.main_frames[8 - tempdel].destroy()
             del self.histlog_button
@@ -1909,7 +1911,7 @@ class user_setting_frame(ctk.CTkFrame):
         #roles list
         roles_list = database.fetch_data('SELECT title FROM user_level_access')
         roles_list = [s[0] for s in roles_list]
-        print(roles_list)
+        #print(roles_list)
 
         #functions
         #disable all checkboxes
@@ -1992,7 +1994,39 @@ class user_setting_frame(ctk.CTkFrame):
         #pre watched
         get_staff_name()
 
-        #frame for roles tab
+        def update_staff_acc():
+            role_values = []
+            for i in range(len(self.changeFrame.access_lvls)):
+                role_values.append(self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].get())
+            print(role_values)
+            role_values = tuple(role_values) + (self.changeFrame.usn_option.get(),)
+            print(role_values)
+            database.exec_nonquery([['UPDATE account_access_level SET Dashboard = ?, Transaction = ?,\
+                                      Services = ?, Sales = ?, Inventory = ?, Pet_Info = ?, Report = ?,\
+                                      User = ?, Action = ? Where usn = ?', role_values]])
+
+        def set_checkBox(e:any = None):
+            self.changeFrame.accept_button.configure(state = ctk.NORMAL);
+            job_pos = database.fetch_data('SELECT job_position FROM acc_info WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0][0]
+            data = database.fetch_data('SELECT * FROM user_level_access WHERE title = ?', (job_pos,))[0]
+            print(data)
+            for i in range(len(self.changeFrame.access_lvls)):
+                if data[i+2] == 1:
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL) 
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                else:
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)
+
+        import acc_creation
+        self.changeFrame = acc_creation.frame2(self.sales_report_frame, width * .5, height * .6, 12, fg_color= 'gray')
+        self.changeFrame.place(relx = .5, rely = .5, anchor = 'c')
+        self.changeFrame.usn_option.configure(values = [s [0] for s in database.fetch_data('SELECT usn from acc_cred')],
+                                              command = set_checkBox)
+        self.changeFrame.accept_button.configure(state = ctk.DISABLED, command = update_staff_acc);
+
+
+        '''#frame for roles tab
         self.roles_inner_frame = ctk.CTkFrame(self.sales_report_frame)
         self.roles_inner_frame.pack(fill=tk.BOTH, expand=True)
         self.roles_inner_frame.grid_rowconfigure(4, weight=1)
@@ -2089,6 +2123,7 @@ class user_setting_frame(ctk.CTkFrame):
         #default
         #disable everything
         disable_privilege_checkboxes()
+        '''
 
         #account creation tab
         #account creation frame
@@ -2167,11 +2202,50 @@ class user_setting_frame(ctk.CTkFrame):
             clear_acc_creation_fields()
 
         def create_new_acc():
-            add_new_acc()
+            password1 = encrypt.pass_encrypt(self.acc_create.name_entry.get())
+            aula = (self.acc_create.name_entry.get(),)
+            temp = []
+            for i in range(len(self.acc_create.access_lvls)):
+                temp.append(self.acc_create.check_boxes[self.acc_create.access_lvls[i]].get())
+            aula = aula + tuple(temp);
+            print(aula,password1, password1['pass'], password1['salt'])
+            database.exec_nonquery([['INSERT INTO acc_cred VALUES(?, ?, ?, NULL)',(self.acc_create.name_entry.get(), password1['pass'], password1['salt'])],
+                                    ['INSERT INTO acc_info VALUES(?, ?, ?)', (self.acc_create.name_entry.get(), self.acc_create.name_entry.get(), self.acc_create.position_option.get())],
+                                    ['INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', aula]])
+            #add_new_acc()
             #clear_acc_creation_fields()
             #get_staff_name()
             #refresh_staff_names()
+
         '''ACCOUNT CREATION: START'''
+        
+        '''temporary implementation'''
+        def enable_checkboxes(e:any = None):
+            data = database.fetch_data('SELECT * FROM user_level_access WHERE Title = ?', (self.acc_create.position_option.get(),))[0]
+
+            self.acc_create.access_lvls
+            self.acc_create.check_boxes
+            for i in range(len(self.acc_create.access_lvls)):
+                if data[i+2] == 1:
+                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(state = ctk.NORMAL) 
+                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].select(False)
+                else:
+                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].deselect(False)
+                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(state = ctk.DISABLED)
+                #self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(value = data[i + 2])
+
+        self.acc_create = acc_creation.frame(self.box_frame, width * .5, height * .6, 12, fg_color= 'gray')
+        self.acc_create.place(relx = .5, rely = .5, anchor = 'c')
+
+        roles_list = database.fetch_data('SELECT title FROM user_level_access')
+        roles_list = [s[0] for s in roles_list]
+        #roles = roles_list = [s[0] for s in roles_list]
+        self.acc_create.position_option.set('Select Position');
+        self.acc_create.position_option.configure(values = roles_list, command = enable_checkboxes)
+
+        self.acc_create.accept_button.configure(command = create_new_acc)
+
+        '''
         #user info label
         self.user_info_title_lbl = ctk.CTkLabel(self.box_frame, text='Create New Account',font=("Arial", 20), text_color="#06283D")
         self.user_info_title_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw", columnspan=2)
@@ -2248,7 +2322,7 @@ class user_setting_frame(ctk.CTkFrame):
         self.create_btn.pack(side="right", padx=(width*0.035))
         #clear account creation fields button
         self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='CLEAR', command=clear_acc_creation_fields, font=("Arial", 14), fg_color='white', text_color='#2678F3', border_color="#2678F3", border_width=2.5)
-        self.cancel_btn.pack(side="left")
+        self.cancel_btn.pack(side="left")'''
         '''ACCOUNT CREATION: START'''
         load_main_frame(0)
 
@@ -2652,4 +2726,4 @@ class histlog_frame(ctk.CTkFrame):
         self.actionlog_treeview.update_table(database.fetch_data(sql_commands.get_hist_log))
         self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
         return super().place(**kwargs)
-#dashboard(None, 'admin', datetime.datetime.now)
+#dashboard(None, 'Chris', datetime.datetime.now)

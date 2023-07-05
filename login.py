@@ -76,6 +76,8 @@ class loginUI(ctk.CTk):
         self.show_icon = ctk.CTkImage(light_image=Image.open("image/view.png"),size=(28,28))
         self.hide_icon = ctk.CTkImage(light_image=Image.open("image/hide.png"),size=(28,28))
 
+        print(self.bg_img)
+
 
         '''Setting values of the root window'''
         title_name = "J.Z. Angeles Veterinary Clinic"
@@ -93,8 +95,8 @@ class loginUI(ctk.CTk):
         self.configure(fg_color=Color.Blue_Oxford)
 
         '''Background Image'''
-        self.main_bg = ctk.CTkLabel(self, text='', image=self.bg_img)
-        self.main_bg.place(x=0, y=0, relwidth=1, relheight=1)
+        #self.main_bg = ctk.CTkLabel(self, text='', image=self.bg_img)
+        #self.main_bg.place(x=0, y=0, relwidth=1, relheight=1)
 
         '''Main frame'''
         self.main_frame =  ctk.CTkFrame(self, width=360, height=550,corner_radius=5,
