@@ -1770,8 +1770,8 @@ class user_setting_frame(ctk.CTkFrame):
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)
 
         import acc_creation
-        self.changeFrame = acc_creation.frame2(self.sales_report_frame, width * .5, height * .6, 12, fg_color= 'gray')
-        self.changeFrame.place(relx = .5, rely = .5, anchor = 'c')
+        self.changeFrame = acc_creation.frame2(self.sales_report_frame, width * .5, height * .65, fg_color= 'light grey', corner_radius=5)
+        self.changeFrame.grid(row=1, column=1, sticky="w")
         self.changeFrame.usn_option.configure(values = [s [0] for s in database.fetch_data('SELECT usn from acc_cred')],
                                               command = set_checkBox)
         self.changeFrame.accept_button.configure(state = ctk.DISABLED, command = update_staff_acc);
@@ -1813,8 +1813,8 @@ class user_setting_frame(ctk.CTkFrame):
                     self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(state = ctk.DISABLED)
                 #self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(value = data[i + 2])
 
-        self.acc_create = acc_creation.frame(self.box_frame, width * .5, height * .6, 12, fg_color= 'gray')
-        self.acc_create.place(relx = .5, rely = .5, anchor = 'c')
+        self.acc_create = acc_creation.frame(self.box_frame, width * .5, height * .65, 5, fg_color= 'light grey')
+        self.acc_create.grid(row=1, column=1, sticky="w")
 
         roles_list = database.fetch_data('SELECT title FROM user_level_access')
         roles_list = [s[0] for s in roles_list]
