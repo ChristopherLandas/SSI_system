@@ -8,6 +8,7 @@ from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
 from decimal import Decimal
 import datetime
 from PIL import Image
+import copy
 
 def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
@@ -722,15 +723,17 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
 
     return instance(master, info, parent)
 
-def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func, customer_info: cctk.info_tab) -> ctk.CTkFrame:
+def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func, customer_info: cctk.info_tab):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict):
             width = info[0]
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
+            '''internal data'''
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self._service_dict = service_dict
 
             def hide():
                 self.place_forget()
@@ -750,7 +753,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
 
                         spinner.configure(val_range = (1, data[1]))
-                        change_val_func(price_format_to_float(data[2][1:]))
+                        change_val_func_item(price_format_to_float(data[2][1:]))
                         #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
 
                         def spinner_command(_: any = None):
@@ -758,10 +761,10 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                             temp_data = root_treeview._data[root_treeview.data_frames.index(temp_frame)]
                             temp_data = (temp_data[0], temp_data[1], spinner.value, '₱' + format_price(price_format_to_float(temp_data[1][1:]) * spinner.value))
                             root_treeview._data[root_treeview.data_frames.index(temp_frame)] = temp_data
-                            change_val_func(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+                            change_val_func_item(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
                             price = price_format_to_float(temp_frame.winfo_children()[2]._text[1:])
                             temp_frame.winfo_children()[4].configure(text = '₱' + format_price(price * spinner.value))
-                            change_val_func(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
+                            change_val_func_item(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
 
                         spinner.configure(command = spinner_command)
 
@@ -769,36 +772,57 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
 
                 
             def service_proceed(_: any = None):
-                if self.service_treeview.data_grid_btn_mng.active:
+                if len(self.client) < 1:
+                    messagebox.showerror('Invalid Process', 'Assign the Client first')
+                elif self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
                     if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
-                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                        print(*root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children(), sep = '\n')
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[4].winfo_children()[0]
                         spinner.change_value()
                     else: #if there's none
                         root_treeview.add_data(add_data)
-                        data_frames = root_treeview.data_frames[-1]
-                        spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
+                        data_frames: cctk.ctkButtonFrame = root_treeview.data_frames[-1]
 
-                        spinner.configure(val_range = (1, cctk.cctkSpinnerCombo.MAX_VAL))
-                        change_val_func(price_format_to_float(data[1][1:]))
-                        #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
+                        label: ctk.CTkLabel = data_frames.winfo_children()[1]
+                        label_text = copy.copy(label._text)
+                        label.destroy()
+                        #destroy the label
 
-                        """def spinner_command(_: any = None):
+                        import serviceAvailing
+                        def proceed_command(data):
+                            self._service_dict[label_text] = data
+                            print(self._service_dict)
+
+                        new_button = ctk.CTkButton(data_frames, corner_radius= 0,
+                                                   text=label_text, width = root_treeview.column_widths[1],
+                                                   command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
+                                                                                         proceed_command, None, self.winfo_screenwidth() * .65,
+                                                                                         self.winfo_screenheight() * .65, fg_color= 'red').place(relx = .5, rely = .5,anchor = 'c'))
+                        #make a button
+                        for i in data_frames.winfo_children():
+                            i.pack_forget()
+                        modified_data_frames:list = data_frames.winfo_children()
+                        modified_data_frames.insert(1, new_button)
+                        for i in modified_data_frames:
+                            i.pack(fill = 'y', side = 'left', padx = (1,0))
+                        #repack the button frame/data frame
+                        #make the label as button for patient access
+
+                        spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[2].winfo_children()[0]
+                        spinner.configure(val_range = (1, len(self.client)))
+                        change_val_func_service(price_format_to_float(data[1][1:]))
+                        def spinner_command(_: any = None):
                             temp_frame = spinner.master.master
-                            change_val_func(-price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
-                            price = price_format_to_float(temp_frame.winfo_children()[2]._text[1:])
-                            temp_frame.winfo_children()[4].configure(text = '₱' + format_price(price * spinner.value))
-                            change_val_func(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
-
-                        spinner.configure(command = spinner_command)"""
-                        spinner.add_button.destroy()
-                        spinner.sub_button.destroy()
+                            change_val_func_service(-price_format_to_float(temp_frame.winfo_children()[3]._text[1:]))
+                            price = price_format_to_float(temp_frame.winfo_children()[1]._text[1:])
+                            temp_frame.winfo_children()[3].configure(text = '₱' + format_price(price * spinner.value))
+                            change_val_func_service(price_format_to_float(temp_frame.winfo_children()[3]._text[1:]))
+                        spinner.configure(command = spinner_command)
                         spinner.configure(mode = cctk.cctkSpinnerCombo.CLICK_ONLY)
-                    customer_info.title = add_data[0]
-                    customer_info.button.configure(state = ctk.NORMAL)
-                    customer_info.button._command()
-                    self.place_forget()
+                        #set the spinner combo of the table
+                self.place_forget()
 
             self.main_frame = ctk.CTkFrame(self, width=width*0.815, height=height*0.875, corner_radius=0,fg_color=Color.White_Color[3])
             self.main_frame.pack()
@@ -847,12 +871,18 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.place_forget()
 
         def place(self, **kwargs):
+            if('client' in kwargs):
+                self.check_client(kwargs['client'])
+                kwargs.pop('client')
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price, None)
             self.main_frame.pack()
             self.data = [(s[1], s[3]) for s in raw_data]
             self.service_treeview.update_table(self.data)
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
             return super().place(**kwargs)
+        
+        def check_client(self, client_name: str):
+            self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
         
 
         def get_service(self, _: any = None):
@@ -862,6 +892,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 #getting the needed information for the item list
                 transaction_data = database.fetch_data(sql_commands.get_services_data_for_transaction, (service_name, ))[0]
                 self._treeview.add_data(transaction_data+(0, transaction_data[2]))
+                return
                 info_tab:cctk.info_tab = self._treeview.data_frames[-1].winfo_children()[3]
                 info_tab._tab = customer_info(self._treeview.master.master, (info[0] * .8, info[1] * .8), info_tab)
                 info_tab.button.configure(command = lambda: info_tab._tab.place(relx = .5, rely = .5, anchor = 'c'))
@@ -872,4 +903,4 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 master.change_total_value_service(transaction_data[2])
                 self.service_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
-    return instance(master, info, root_treeview, change_val_func, customer_info)
+    return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict)

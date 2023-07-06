@@ -38,7 +38,7 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
         self._master = master
-
+        '''
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
 
         if not datakey or entry_key == None:
@@ -53,14 +53,13 @@ class dashboard(ctk.CTkToplevel):
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey 
         #for preventing security breach through python code; enable it to test it """
-
         '''
+
         global acc_info, acc_cred, date_logged, mainframes
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        '''
 
         '''Fonts'''
         try:
@@ -497,8 +496,7 @@ class transaction_frame(ctk.CTkFrame):
             self.show_transaction_proceed.place(relx = .5, rely =.5, anchor = 'c')
 
         def bd_commands(i):
-            print(i)
-            if self.patient_info.title in self.transact_treeview._data[i]:
+            if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
                 self.patient_info.value = None
                 self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][1][1:]))
             else:
@@ -534,7 +532,7 @@ class transaction_frame(ctk.CTkFrame):
         self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
         self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
 
-        self.client_name_entry = ctk.CTkComboBox(self.client_name_frame,font=("DM Sans Medium", 15), border_width=0, fg_color="white")
+        self.client_name_entry = ctk.CTkOptionMenu(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color='black')
         self.client_name_entry.set('')
         self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
         self.client_name_entry.configure(values = self.client_names)
@@ -607,7 +605,7 @@ class transaction_frame(ctk.CTkFrame):
         #self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
 
         self.add_particulars = ctk.CTkButton(self.bottom_frame, width=width*0.125, height=height*0.05, text='Add Particulars',
-                                             image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c"))
+                                             image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
         self.add_particulars.pack(side="left",  padx=(width*0.005, 0))
         
         self.patient_info = cctk.info_tab(self.bottom_frame, tab_master=self, width=width*0.125, height=height*0.05,
@@ -720,7 +718,7 @@ class transaction_frame(ctk.CTkFrame):
         #self.show_proceed_transact: ctk.CTkFrame =
         self.show_customer_info:ctk.CTkFrame = transaction_popups.customer_info(self, (width, height))
         self.show_sched_service:ctk.CTkFrame = transaction_popups.scheduled_services(self,(width, height))
-        self.show_particulars:ctk.CTkFrame = transaction_popups.add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_service, self.patient_info)
+        self.show_particulars:ctk.CTkFrame = transaction_popups.add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
         
     def change_total_value_item(self, value: float):
             value = float(value)
@@ -1874,4 +1872,4 @@ class histlog_frame(ctk.CTkFrame):
         self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
         return super().place(**kwargs)
 
-#dashboard(None, 'Chris', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)

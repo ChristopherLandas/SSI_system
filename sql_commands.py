@@ -185,6 +185,7 @@ get_transaction_data = "SELECT * FROM transaction_record"
 
 #FOR SERVICES
 get_service_data = "SELECT service_name, price, date_added FROM service_info"
+get_services_names = "SELECT DISTINCT service_name FROM service_info"
 
 #FOR LOG AUDIT
 get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT_DATE"

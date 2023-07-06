@@ -280,7 +280,7 @@ class customcustomtkinter:
                 for j in range(len(self.column_widths)):
                     #for label type column
                     if self.column_types[j][0] in ['t', '#']:
-                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] == 't' else (len(self._data)), width = self.column_widths[j],
+                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] in ['t','T'] else (len(self._data)), width = self.column_widths[j],
                                             justify = ctk.RIGHT, font= self.row_font, text_color = self._record_text_color)
                         txt_clr = self._record_text_color if j not in self._conditional_colors else self._conditional_colors[j].get(temp._text, self._record_text_color)
                         temp.configure(text_color = txt_clr)
@@ -528,7 +528,7 @@ class customcustomtkinter:
                         self.configure(value = self._val_range[0])
                     elif self.value >  self._val_range[0]:
                         self.configure(value = self._val_range[1])
-                    kwargs.pop('val_range')
+                kwargs.pop('val_range')
             if "state" in kwargs:
                 self.add_button.configure(state = kwargs["state"])
                 self.sub_button.configure(state = kwargs["state"])
