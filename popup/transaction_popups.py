@@ -810,7 +810,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                    text=label_text, width = root_treeview.column_widths[1],
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .65, fg_color= 'red').place(relx = .5, rely = .5,anchor = 'c'))
+                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c'))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
