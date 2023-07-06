@@ -41,6 +41,7 @@ class pets(ctk.CTkFrame):
 
         def proceed_sequence():
             proceed_command(self.get_data())
+            self.destroy()
 
         ctk.CTkLabel(self, text = self._title, font = ('Arial', 48), anchor='w').grid(row = 0, column = 0, sticky = 'nsew', padx = (self._current_width * .015, 0), pady = self._current_height * .002)
 

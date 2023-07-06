@@ -641,7 +641,7 @@ class transaction_frame(ctk.CTkFrame):
         self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",
                                              command=lambda:transaction_popups.show_transaction_proceed(self, (width, height, acc_cred), self.services_total_amount._text,
                                                             self.item_total_amount._text, self.price_total_amount._text, self.patient_info.value, self.transact_treeview._data,
-                                                            self.patient_info.title, self.client_name_entry.get() or 'N/A', self.transact_treeview).place(relx = .5, rely = .5, anchor = 'c'))
+                                                            self.patient_info.title, self.client_name_entry.get() or 'N/A', self.transact_treeview, self.service_dict).place(relx = .5, rely = .5, anchor = 'c'))
         self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025),padx=(0, width*0.005), sticky="e")
 
         """ self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
@@ -739,7 +739,7 @@ class transaction_frame(ctk.CTkFrame):
         temp: dashboard_frame = mainframes[0]
         temp.show_pie()
         temp.generate_stat_tabs()
-        self.client_name_entry.delete(0, ctk.END)
+        self.client_name_entry.set('')
         self.transact_treeview.delete_all_data()
         self.price_total_amount.configure(text = '0.00')
         self.services_total_amount.configure(text = '0.00')
@@ -1872,4 +1872,4 @@ class histlog_frame(ctk.CTkFrame):
         self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
         return super().place(**kwargs)
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'Chris', datetime.datetime.now)
