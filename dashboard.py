@@ -1872,4 +1872,4 @@ class histlog_frame(ctk.CTkFrame):
         self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
         return super().place(**kwargs)
 
-dashboard(None, 'Chris', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
