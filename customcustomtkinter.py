@@ -11,6 +11,7 @@ from customtkinter.windows.widgets.font import CTkFont
 from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
 from tkcalendar import Calendar
 import Theme
+import datetime
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -228,8 +229,7 @@ class customcustomtkinter:
             lbl.configure(text = str(int(lbl.cget('text')) + val))
 
         def bd_func(self, dlt_btn: ctk.CTkButton):
-            confirmation = messagebox.askyesno('Warning', 'Are you sure you want to delete the data')
-            if confirmation:
+            if messagebox.askyesno('Warning', 'Are you sure you want to delete the data'):
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
                 self.bd_commands(data_mngr_index)
 
@@ -358,11 +358,10 @@ class customcustomtkinter:
 
     class tk_calendar(ctk.CTkToplevel):
         def __init__(self, label,format, *args, fg_color: str or Tuple[str, str] or None = None, date_format: str ="numerical",
-                     min_date = None, **kwargs):
+                     min_date = None, max_date = None, set_date_callback: callable = None, date_select_default: datetime.datetime = None
+                     ,**kwargs):
             super().__init__(*args, fg_color=fg_color, **kwargs)
-            import datetime
-            import util
-
+            
             def set_date():
                 date_text = None
                 if "numerical" in date_format:
@@ -372,11 +371,13 @@ class customcustomtkinter:
                     date_text = self.cal.selection_get()
                 elif "word" in date_format:
                     #label.configure(text= f"{util.date_to_words(str(self.cal.get_date()))}")
-                    date_text = str(util.date_to_words(str(self.cal.get_date())))
+                    date_text = str(date_to_words(str(self.cal.get_date())))
                 else:
                     date_text = "Invalid Format"
 
                 label.configure(text=date_text)
+                if set_date_callback:
+                    set_date_callback()
                 self.withdraw()
 
             position_X = (self.winfo_screenwidth()/2)
@@ -387,10 +388,10 @@ class customcustomtkinter:
             self.geometry("%dx%d+%d+%d"%(400,400,position_X,position_Y))
             self.resizable(0,0)
 
-            date = datetime.datetime.now()
+            date = date_select_default or datetime.datetime.now()
 
             self.cal = Calendar(self, year=date.year, month=date.month, day=date.day, showweeknumbers=False, date_pattern="mm-dd-yyyy",
-                                mindate=min_date, normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
+                                mindate=min_date, maxdate = max_date, normalbackground="#EAEAEA", weekendbackground="#F3EFE0")
             self.cal.pack(fill="both", expand=True, padx=5, pady=5)
 
             self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)

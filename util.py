@@ -7,6 +7,7 @@ from constants import db
 from functools import partial
 from Theme import *
 from typing import *
+import datetime
 from random import randint
 
 
@@ -110,6 +111,14 @@ def generateId(initial: Optional[str] = None, length: Union[int, None] = 12) -> 
     elif len(initial or '' + hex_str) < length:
         return f'%s%s' % (initial, hex_str.zfill(length - 1))
     #return f'%s%s' % (initial or '', hexStr if len(hexStr) == (length - 1) else hexStr.zfill(length - 1))
+
+def convert_date(date: str | datetime.datetime | datetime.date, date_format: str, convertion_format: str, value: Literal['str', 'datetime'] = 'str') -> str | datetime.datetime:
+    d = datetime.datetime.strptime(date, date_format) if isinstance(date, datetime.datetime | datetime.date) else date
+    val = datetime.datetime.strptime(d, date_format).strftime(convertion_format)
+    if value == 'datetime':
+        return datetime.datetime.strptime(val, convertion_format)
+    return val
+
 
 ''' example of inserting data
 usn = 'admin'

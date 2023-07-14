@@ -163,10 +163,10 @@ def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_
 
     return instance(master, info, root_treeview, change_val_func)
 
-def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func, customer_info: cctk.info_tab):
+def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
 
-        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func, customer_info: cctk.info_tab):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
             #self._data_reciever = data_reciever
             self._master = master
             width = info[0]
@@ -202,9 +202,6 @@ def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, cha
                         spinner.add_button.destroy()
                         spinner.sub_button.destroy()
                         spinner.configure(mode = cctk.cctkSpinnerCombo.CLICK_ONLY)
-                    customer_info.title = add_data[0]
-                    customer_info.button.configure(state = ctk.NORMAL)
-                    customer_info.button._command()
                     self.place_forget()
 
             #ctk.CTkLabel(self, text="HElp").pack()
@@ -285,7 +282,6 @@ def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, cha
                 transaction_data = database.fetch_data(sql_commands.get_services_data_for_transaction, (service_name, ))[0]
                 self._treeview.add_data(transaction_data+(0, transaction_data[2]))
                 info_tab:cctk.info_tab = self._treeview.data_frames[-1].winfo_children()[3]
-                info_tab._tab = customer_info(self._treeview.master.master, (info[0] * .8, info[1] * .8), info_tab)
                 info_tab.button.configure(command = lambda: info_tab._tab.place(relx = .5, rely = .5, anchor = 'c'))
                 self._data_reciever.append(info_tab)
                 info_tab._tab.place(relx = .5, rely = .5, anchor = 'c')
@@ -295,34 +291,20 @@ def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, cha
                 self.service_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
-    return instance(master, info, root_treeview, change_val_func, customer_info)
+    return instance(master, info, root_treeview, change_val_func)
 
-def show_transaction_proceed(master, info:tuple, service_price, item_price, total_price, patient_info, transaction_content, service, customer_info, parent_treeview, service_dict) -> ctk.CTkFrame:
+def show_transaction_proceed(master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, service_price, item_price, total_price, patient_info, transaction_content, service, customer_info, parent_treeview, service_dict):
+        def __init__(self, master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict):
             width = info[0]
             height = info[1]
             self.acc_cred = info[2]
             self._service_price = service_price
             self._item_price = item_price
             self._total_price = total_price
-            self._patient_info = patient_info
             self._transaction_content = transaction_content
-            self.service = service
             self._customer_info = customer_info
             self.service_dict = service_dict
-            #item_info: list, services_info, total_price: float, customer_info: str, pets_info: List
-            #item_info: list, services_info, total_price: float, customer_info: str, pets_raw_info: List
-            #basic inforamtion needed; measurement
-            """
-            self._pets_raw_info = pets_raw_info
-            if(self._pets_raw_info is not None):
-                self.pets_info = [s.value for s in self._pets_raw_info]
-            self.acc_cred = info[3]
-            self._treeview = info[2]
-            self._item_info = item_info
-            self._services_info = services_info
-            self._total_price = total_price """
             #encapsulation
 
             super().__init__(master, corner_radius= 0, fg_color='white')
@@ -353,20 +335,20 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
                     temp_service_data = []
                     for i in range(len(service)):
                         for j in self.service_dict[service[i][0]]:
-                            temp_service_data.append((record_id, database.fetch_data(sql_commands.get_service_uid,(service[i][0],))[0][0], service[i][0], j[1][0], j[1][1], price_format_to_float(service[i][1][1:]), 0, 0))
+                            print(j, 'pointer for j')
+                            temp_service_data.append((record_id, database.fetch_data(sql_commands.get_service_uid,(service[i][0],))[0][0], service[i][0], j[0], j[1], price_format_to_float(service[i][1][1:]), 0, 0))
                     service = temp_service_data
+                print(service)
+
                 if(len(item) > 0):
                     item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0], ))[0][0], s[0], s[2], price_format_to_float(s[1][1:]), 0) for s in item]
                 #making a modification through the old process
-                print((record_id, self.acc_cred[0], self._customer_info, price_format_to_float(self.total_amount._text[1:])))
+
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0][0], self._customer_info, price_format_to_float(self.total_amount._text[1:]))]])
                 #record the transaction
 
-                #modified_items_list = [(record_id, s[0], s[1], s[3], float(s[2]), 0) for s in item]
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in item])
-                #record the items from eithin the transaction
-
-                #modified_services_list = [(record_id, s[0], s[1], customer_info, str(datetime.datetime.strptime(self.pets_info[0][2], '%m-%d-%Y').strftime('%Y-%m-%d')), float(s[2]), 0, 0) for s in self._services_info]
+                #record the items from within the transaction
                 database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in service])
                 #record the services from within the transaction
 
@@ -389,7 +371,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
                                 else:
                                     database.exec_nonquery([['DELETE FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?', (st[0], st[2])]])
                                 break
-                #modify the stock
+                #modify the stock, applying the FIFO
 
                 payment = float(self.payment_entry.get())
                 self.change_amount.configure(text = format_price(payment - price_format_to_float(self.total_amount._text[1:])))
@@ -554,7 +536,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.total_amount.configure(text = self._total_price)
             return super().place(**kwargs)
             #item_info, services_info, total_price, customer_info, pets_info
-    return instance(master, info, service_price, item_price, total_price, patient_info, transaction_content, service, customer_info, parent_treeview, service_dict)
+    return instance(master, info, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict)
 
 def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):

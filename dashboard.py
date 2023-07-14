@@ -138,7 +138,6 @@ class dashboard(ctk.CTkToplevel):
 
         '''events'''
         def load_main_frame(title: str, cur_frame: int):
-            print(len(self.main_frames))
             self.title_label.configure(text= title.upper())
             if self.active_main_frame is not None:
                 self.active_main_frame.grid_forget()
@@ -476,31 +475,35 @@ class transaction_frame(ctk.CTkFrame):
         self.customer_infos = []
         self.service_dict: dict = {}
 
+        '''constants'''
+        self.services = [s[0] for s in database.fetch_data(sql_commands.get_service_data)]
+
         '''events'''
-        def clear_without_verification():
-            self.item_treeview.delete_all_data()
-            self.final_total_value.configure(text = format_price(float(price_format_to_float(self.final_total_value._text)) - float(price_format_to_float(self.final_total_value._text))))
-            self.item_total_value.configure(text = '0.00')
-
-        def proceed():
-            if not self.client_name_entry.get():
-                messagebox.showerror('Unable to Proceed', 'Customer\'s Name must be filled')
-                return
-            if price_format_to_float(self.final_total_value._text) == 0:
-                messagebox.showerror('Unable to Proceed', 'No Item Listed')
-                return
-            self.show_transaction_proceed = transaction_popups.show_transaction_proceed(self, (width, height, (self.item_treeview, self.service_treeview, acc_cred), acc_cred[0]),
-                                                                                        self.item_treeview._data, self.service_treeview._data,
-                                                                                        price_format_to_float(self.final_total_value._text),
-                                                                                        self.client_name_entry.get(), self.customer_infos or None)
-            self.show_transaction_proceed.place(relx = .5, rely =.5, anchor = 'c')
-
         def bd_commands(i):
             if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
-                self.patient_info.value = None
+                #self.patient_info.value = None
                 self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][1][1:]))
             else:
                 self.change_total_value_item(-price_format_to_float(self.transact_treeview._data[i][3][1:]))
+
+        def change_customer_callback(_:any):
+            if len(self.service_dict) > 0:
+                if messagebox.askyesno('Change Customer', 'All of the service and its\npatient info will be reset'):
+                    client = self.client_name_entry.get()
+                    
+                    self.service_dict = {}
+                    self.transact_treeview.delete_all_data()
+                    self.reset()
+
+                    self.client_name_entry.set(client)
+                    del client
+
+                    '''initial process'''
+                    #for i in range(len(self.transact_treeview._data)):
+                    #    print(self.transact_treeview._data[i][0])
+                    #    if self.transact_treeview._data[i][0] in self.services[i]:
+                    #        self.transact_treeview.bd_func(self.transact_treeview.data_frames[i].winfo_children()[-1].winfo_children()[0], True)
+                            #self.transact_treeview.bd_func()
 
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
@@ -525,75 +528,21 @@ class transaction_frame(ctk.CTkFrame):
         self.top_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
 
 
-        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05,)
+        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05)
         self.client_name_frame.grid(row=0, column=1, sticky="w", padx=(width*0.005))
         self.client_name_frame.pack_propagate(0)
 
         self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
         self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
 
-        self.client_name_entry = ctk.CTkOptionMenu(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color='black')
+        self.client_name_entry = ctk.CTkOptionMenu(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color='black', command= change_customer_callback)
         self.client_name_entry.set('')
         self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
         self.client_name_entry.configure(values = self.client_names)
         self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
 
-        """ self.add_service = ctk.CTkButton(self.top_frame, image=self.service_icon, text="Add Service", height=height*0.05, width=width*0.1,font=("Arial", 14),
-                                         command=lambda:self.show_services_list.place(relx=0.5, rely=0.5, anchor="c"))
-        self.add_service.pack(side="left")
-
-        self.add_item = ctk.CTkButton(self.top_frame, image=self.item_icon, text="Add item",height=height*0.05, width=width*0.1, font=("Arial", 14),
-                                      command=lambda:self.show_list_item.place(relx=0.5, rely=0.5, anchor="c"))
-        self.add_item.pack(side="left",padx=(width*0.005))
-        self.sched_service = ctk.CTkButton(self.top_frame, image=self.cal_icon, text="Scheduled Service",height=height*0.05, width=width*0.1, font=("Arial", 14),
-                                           command=lambda:self.show_sched_service.place(relx=0.5, rely=0.5, anchor="c"))
-        self.sched_service.pack(side="right", padx=(0,width*0.005))
-        """
         self.transact_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
         self.transact_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
-
-        '''self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.6,
-                                                   column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-tc/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-tl!30!30')
-        self.transact_treeview.pack(pady=(height*0.01,0))
-
-        self.bottom_frame = ctk.CTkFrame(self.transact_frame, fg_color="transparent", height=height*0.05)
-        self.bottom_frame.pack(pady=(height*0.01), fill="x", padx=(width*0.005))
-        #self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
-        """Testing ONLY REMOVE AFTER"""
-        self.test = ctk.CTkButton(self.bottom_frame, text="TEST",  height=height*0.05, width=width*0.05,
-                                  command=lambda: self.show_customer_info.place(relx=0.5, rely=0.5, anchor="c"))
-        self.test.pack(side="left")
-
-        self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
-        self.price_total_frame.pack(side="right")
-        self.price_total_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.price_total_frame, text="Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-        self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text="0,000.00", font=("Arial", 14))
-        self.price_total_amount.pack(side="right",  padx=(0,width*0.0075))
-
-        self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
-        self.item_total_frame.pack(side="right", padx=(0,width*0.0075))
-        self.item_total_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-        self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("Arial", 14))
-        self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
-
-        self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
-        self.services_total_frame.pack(side="right", padx=(0,width*0.0075))
-        self.services_total_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-        self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="0,000.00", font=("Arial", 14))
-        self.services_total_amount.pack(side="right",  padx=(0,width*0.0075))
-
-
-
-        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",
-                                             command=lambda:self.show_proceed_transact.place(relx=0.5, rely=0.5, anchor="center"))
-        self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025))'''
-
 
         self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.675,
                                                    column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30')
@@ -607,12 +556,6 @@ class transaction_frame(ctk.CTkFrame):
         self.add_particulars = ctk.CTkButton(self.bottom_frame, width=width*0.125, height=height*0.05, text='Add Particulars',
                                              image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
         self.add_particulars.pack(side="left",  padx=(width*0.005, 0))
-        
-        self.patient_info = cctk.info_tab(self.bottom_frame, tab_master=self, width=width*0.125, height=height*0.05,
-                                          tab=transaction_popups.customer_info, tab_size= (width, height), button_text='Patient Info')
-        self.patient_info.pack(side="left",  padx=(width*0.005, 0))
-        
-        
 
         self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
         self.price_total_frame.pack(side="right")
@@ -638,83 +581,14 @@ class transaction_frame(ctk.CTkFrame):
         self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="0,000.00", font=("Arial", 14))
         self.services_total_amount.pack(side="right",  padx=(0,width*0.0075))
 
-        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",
+        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",   
                                              command=lambda:transaction_popups.show_transaction_proceed(self, (width, height, acc_cred), self.services_total_amount._text,
-                                                            self.item_total_amount._text, self.price_total_amount._text, self.patient_info.value, self.transact_treeview._data,
-                                                            self.patient_info.title, self.client_name_entry.get() or 'N/A', self.transact_treeview, self.service_dict).place(relx = .5, rely = .5, anchor = 'c'))
+                                                            self.item_total_amount._text, self.price_total_amount._text, self.transact_treeview._data,
+                                                            self.client_name_entry.get() or 'N/A', self.transact_treeview, self.service_dict).place(relx = .5, rely = .5, anchor = 'c'))
         self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025),padx=(0, width*0.005), sticky="e")
 
-        """ self.service_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
-        self.service_frame.grid(row=1, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(0,height*0.005))
-        self.service_frame.grid_columnconfigure(0, weight=1)
-        self.service_frame.grid_rowconfigure(0, weight=1)
-
-        self.service_treeview = cctk.cctkTreeView(self.service_frame, width=width*0.8, height=height*0.3, bd_pop_list= self.customer_infos,
-                                                  column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ServiceName:x-tl/Pet:x-iT/Price:{int(width*.07)}-tr/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tc/Action:{int(width*.05)}-bD!50!40',)
-        self.service_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
-
-        self.service_clear_button = ctk.CTkButton(self.service_frame, text="", image=self.trash_icon, command=lambda:print("Clear All Service"),
-                                                  fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
-        self.service_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.service_add_button = ctk.CTkButton(self.service_frame, text="Add Service", image=self.add_icon, command= lambda: self.show_services_list.place(relx = .5, rely = .5, anchor = 'c'),
-                                                 font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
-        self.service_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.service_total_frame = ctk.CTkFrame(self.service_frame, height=height*0.045, width=width*0.2, corner_radius=5)
-        self.service_total_frame.grid(row=1, column=3, pady=(0,height*0.01), padx=(0, width*0.05))
-        self.service_total_frame.pack_propagate(0)
-        self.service_total_label = ctk.CTkLabel(self.service_total_frame, text="Service Total:", font=("DM Sans Medium", 14))
-        self.service_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.service_total_value = ctk.CTkLabel(self.service_total_frame, text="00,000.00", font=("DM Sans Medium", 14))
-        self.service_total_value.pack(side="right", padx=(0, width*0.01))
-
-        self.item_frame = ctk.CTkFrame(self, corner_radius=5, fg_color=Color.White_Ghost)
-        self.item_frame.grid(row=2, column=0, columnspan=3, stick="nsew", padx=(width*0.005),pady=(height*0.005,height*0.01))
-        self.item_frame.grid_columnconfigure(0, weight=1)
-        self.item_frame.grid_rowconfigure(0, weight=1)
-
-        self.item_treeview = cctk.cctkTreeView(self.item_frame, width=width*0.8, height=height*0.3, row_hover_color="light grey",
-                                               column_format=f'/No:{int(width*.03)}-#c/ItemCode:{int(width*0.08)}-tc/ItemName:x-tl/Price:{int(width*.07)}-tr/Quantity:{int(width*.15)}-id/Discount:{int(width*.08)}-tr/Total:{int(width*.08)}-tr/Action:{int(width*.05)}-bD!30!30')
-        self.item_treeview.grid(row=0, column=0, columnspan=4, padx=(width*0.005), pady=(height*0.01))
-
-
-        self.item_clear_button = ctk.CTkButton(self.item_frame, text="", image=self.trash_icon, command= self.clear_all_item,
-                                                  fg_color="#EB455F", width=width*0.028, height=height*0.045, hover_color="#A6001A")
-        self.item_clear_button.grid(row=1, column=1, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.item_add_button = ctk.CTkButton(self.item_frame, text="Add item", image=self.add_icon, command=lambda: self.show_list_item.place(relx = .5, rely= .5, anchor = 'c'),
-                                                 font=("DM Sans Medium", 14), width=width*0.1, height=height*0.045)
-        self.item_add_button.grid(row=1, column=2, pady=(0,height*0.01), padx=(0, width*0.005))
-        self.item_total_frame = ctk.CTkFrame(self.item_frame, height=height*0.045, width=width*0.2, corner_radius=5)
-        self.item_total_frame.grid(row=1, column=3, pady=(0,height*0.01), padx=(0, width*0.05))
-        self.item_total_frame.pack_propagate(0)
-        self.item_total_label = ctk.CTkLabel(self.item_total_frame, text="Item Total:", font=("DM Sans Medium", 14))
-        self.item_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.item_total_value = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("DM Sans Medium", 14))
-        self.item_total_value.pack(side="right", padx=(0, width*0.01))
-
-
-        self.bottom_frame = ctk.CTkFrame(self,height=height*0.05, fg_color="#E0E0E0")
-        self.bottom_frame.grid(row=3, column=0, columnspan=3, pady=(0,height*0.01), padx=(width*0.005),sticky="nsew")
-        self.bottom_frame.pack_propagate(0)
-
-
-        self.proceed_button = ctk.CTkButton(self.bottom_frame, text="Proceed", cursor="hand2", hover_color="#2C74B3", command= proceed)
-        self.proceed_button.pack(side="right", padx=10)
-
-        self.draft_button = ctk.CTkButton(self.bottom_frame, text="Draft", cursor="hand2", hover_color="#2C74B3")
-        self.draft_button.pack(side="right", padx=10)
-
-
-        self.total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.2, fg_color="#F9F9F9")
-        self.total_frame.pack(side="right", padx=10)
-        self.total_frame.pack_propagate(0)
-
-        self.final_total_label = ctk.CTkLabel(self.total_frame, text="Total:", font=("DM Sans Medium", 14))
-        self.final_total_label.pack(side="left", padx=(width*0.01, 0))
-        self.final_total_value = ctk.CTkLabel(self.total_frame, text="00,000,000.00", font=("DM Sans Medium", 14))
-          self.final_total_value.pack(side="right", padx=(0, width*0.01))"""
-
         self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height), self.transact_treeview, self.change_total_value_item)
-        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.transact_treeview, self.change_total_value_service, self.patient_info)
+        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.transact_treeview, self.change_total_value_service)
         #self.show_proceed_transact: ctk.CTkFrame =
         self.show_customer_info:ctk.CTkFrame = transaction_popups.customer_info(self, (width, height))
         self.show_sched_service:ctk.CTkFrame = transaction_popups.scheduled_services(self,(width, height))
@@ -736,9 +610,13 @@ class transaction_frame(ctk.CTkFrame):
                 self.reset()
 
     def reset(self):
-        temp: dashboard_frame = mainframes[0]
-        temp.show_pie()
-        temp.generate_stat_tabs()
+        for i in mainframes:
+            if isinstance(i, dashboard_frame):
+                temp: dashboard_frame = i
+                temp.show_pie()
+                temp.generate_stat_tabs()
+        #check if there are certain mainframes there, then update all of those needed process and ui
+
         self.client_name_entry.set('')
         self.transact_treeview.delete_all_data()
         self.price_total_amount.configure(text = '0.00')
@@ -1228,14 +1106,6 @@ class patient_info_frame(ctk.CTkFrame):
                                         width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
-        """ self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color=Color.White_Color[3])
-        self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
-        self.search_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("Arial", 14), text_color="black", fg_color=Color.White_Platinum)
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
-
         self.add_record_btn = ctk.CTkButton(self, width=width*0.08, height = height*0.05, text="Add Record",image=self.add_icon, font=("DM Sans Medium", 14),
                                             command=lambda:self.new_record.place(relx = .5, rely = .5, anchor = 'c'))
         self.add_record_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
@@ -1272,7 +1142,15 @@ class reports_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        #self.label = ctk.CTkLabel(self, text='7').pack(anchor='w')
+        '''constants'''
+        self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
+        self.days = [*range(1, 13, 1)]
+
+        '''variables'''
+        self.previous_date = 0;
+        self.previous_month = 0;
+        self.previous_year = 0;
+
         self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
 
         self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
@@ -1311,10 +1189,14 @@ class reports_frame(ctk.CTkFrame):
         selected_color = Color.Blue_Yale
 
         '''events'''
-        def update_graphs():
-            if 'Daily' in self.report_option_var.get():
+        def update_graphs(force_reload: Optional[bool] = None):
+            if force_reload:
+                self.previous_date = '-1'
+                self.previous_month = '-1'
+                self.previous_year = '-1'
+
+            if 'Daily' in self.report_option_var.get() and self.date_selected_label._text != self.previous_date:
                 date = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
-                print()
                 self.data = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp, (date,))[0][0] or 0),
                              float(database.fetch_data(sql_commands.get_services_daily_sales_sp, (date,))[0][0] or 0)]
                 self.show_pie(self.data)
@@ -1322,8 +1204,11 @@ class reports_frame(ctk.CTkFrame):
                 self.items_total.configure(text=f"Item:        {format_price(self.data[0])}")
                 self.service_total.configure(text=f"Services:        {format_price(self.data[1])}")
                 self.income_total.configure(text=f"Total:        {format_price(self.data[0]+self.data[1])}")
-                self.daily_data_view.update_table()
-            if 'Monthly' in self.report_option_var.get():
+                #self.daily_data_view.update_table(self.data) for adding data in the bottom treeview
+
+                self.previous_date = self.date_selected_label._text
+
+            if 'Monthly' in self.report_option_var.get() and (self.year_option.get()+self.month_option.get() != self.previous_year+self.previous_month):
                 m = datetime.datetime.strptime(self.month_option.get(), '%B').strftime('%m')
                 y = self.year_option.get()
                 monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m))[-1]+1, 1)]
@@ -1333,40 +1218,32 @@ class reports_frame(ctk.CTkFrame):
                 self.monthly_vbar_canvas.get_tk_widget().destroy()
                 self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
                 self.monthly_vbar_canvas.get_tk_widget().pack()
-            if 'Yearly' in self.report_option_var.get():
+
+                self.previous_month = self.month_option.get()
+                self.previous_year = self.year_option.get()
+
+            if 'Yearly' in self.report_option_var.get() and self.year_option != self.previous_year:
                 y = self.year_option.get()
-                months = [*range(1, 13, 1)]
-                yearly_label=["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
-                monthly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (s, y))[0][0] or 0 for s in months]
-                monthly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (s, y))[0][0] or 0 for s in months]
+
+                monthly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
+                monthly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
 
                 self.yearly_vbar_canvas.get_tk_widget().destroy()
-                self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=yearly_label)
+                self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=self.months)
                 self.yearly_vbar_canvas.get_tk_widget().pack()
-        '''Test DATA'''
 
-
+                self.previous_year = self.year_option.get()
+            #set the previous selection to avoid repeating load
 
         self.label=["Items", "Services"]
         self.info = [width*0.004,height*0.005,"#DBDBDB"]
 
-        #monthly_data_items=[4427, 4573, 765, 777, 1513, 528, 4132, 4975, 4826, 4998, 568, 3184, 4586, 3587, 59, 966, 3644, 1298, 823, 2134, 1786, 3505, 4735, 3221, 4746, 4394, 3719, 2040, 574, 21]
-        #monthly_data_service=[1235, 4541, 615, 767, 1455, 528, 4132, 4975, 4826, 4998, 568, 3184, 4586, 3587, 59, 966, 3644, 1298, 823, 2134, 1786, 3505, 4735, 3221, 4746, 4394, 3719, 2040, 574, 21]
-        #print(range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]))
         monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
-        monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-06-{s}',))[0][0] for s in monthly_label]
-        monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'2023-06-{s}',))[0][0] for s in monthly_label]
-        print(monthly_label)
-        #monthly_label=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
+        monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-06-{s}',))[0][0] or 0 for s in monthly_label]
+        monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'2023-06-{s}',))[0][0] or 0 for s in monthly_label]
 
-
-        '''yearly_data_service=[63186, 42850, 42820, 55140, 58043, 99675, 86688, 81409, 5547, 3301, 2170, 44858]
-        yearly_data_items=[63186, 42850, 42820, 55140, 58043, 99675, 86688, 81409, 5547, 3301, 2170, 44858]
-        yearly_label=["January", "Febuary", "March","April","May", "June", "July", "August","September","October", "November", "December"]'''
-        yearly_label=["January", "Febuary", "March","April","May", "June", "July", "August","September","October", "November", "December"]
-        months = [*range(1, 13, 1)]
-        yearly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in months]
-        yearly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in months]
+        yearly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in self.months]
+        yearly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in self.months]
 
         def load_main_frame(cur_frame: int):
             if self.active_report is not None:
@@ -1375,7 +1252,6 @@ class reports_frame(ctk.CTkFrame):
             self.active_report.grid(row =1, column =0, sticky = 'nsew',padx=width*0.005, pady=height*0.005)
 
         def report_menu_callback(report_type):
-
             if "Daily" in report_type:
                 self.monthly_graph.grid_forget()
                 self.month_option.grid_forget()
@@ -1400,6 +1276,7 @@ class reports_frame(ctk.CTkFrame):
                 self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.month_option.grid(row=0, column=1)
                 self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
+
             elif "Yearly" in report_type:
                 self.date_selected_label.grid_forget()
                 self.show_calendar.grid_forget()
@@ -1409,41 +1286,14 @@ class reports_frame(ctk.CTkFrame):
                 self.yearly_data_view.pack(pady=height*0.01, padx=width*0.005)
                 self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
+            update_graphs()
 
         def set_date():
-            cctk.tk_calendar(self.date_selected_label,"%s", date_format="word")
+            cctk.tk_calendar(self.date_selected_label,"%s", date_format="word", max_date = datetime.date.today(),
+                             set_date_callback= update_graphs, min_date= database.fetch_data(sql_commands.get_first_date)[0][0],
+                             date_select_default= datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y'))
 
-            '''def show_bar(master, data_service, data_item, info=[], label=[]):
-
-                height = info[1]
-                width =info[0]
-                fg_color = info[2]
-
-                _label = label
-                _data_service = data_service
-                _data_item = data_item
-
-                x_axis = np.arange(len(_label))
-
-                bar_figure= Figure(figsize=(width, height), dpi=100)
-                bar_figure.set_facecolor(fg_color)
-                ax = bar_figure.add_subplot(111)
-
-                ax.bar(x_axis-0.2, _data_item, width=0.4, label=_label[0], color=Color.Light_Green)
-                ax.bar(x_axis+0.2, _data_service, width=0.4, label = _label[1], color= Color.Red_Tulip)
-                ax.legend(["Income", "Services"])
-                ax.set_xticks(x_axis,_label)
-                #ax.set_xlabel("Income")
-
-                canvas = FigureCanvasTkAgg(bar_figure, master)
-                canvas.draw()
-                canvas.get_tk_widget().pack()'''
-
-        operational_year = ["2021","2022","2023"]
-        """ starting_year = 2014
-        for i in range((int(date.today().strftime('%Y'))+1)-starting_year):
-           operational_year.append(str(starting_year+i)) """
-
+        operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)]
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
 
@@ -1454,7 +1304,7 @@ class reports_frame(ctk.CTkFrame):
 
         ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
 
-        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B-%d-%Y'), font=("DM Sans Medium", 15),
+        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=3, sticky="n")
 
@@ -1500,7 +1350,7 @@ class reports_frame(ctk.CTkFrame):
                                                   command=partial(report_menu_callback))
         self.report_type_menu.grid(row=0, column=0, padx=(width*0.005), pady=height*0.005)
 
-        self.date_selected_label = ctk.CTkLabel(self.sales_report_top, text=f"{date.today().strftime('%Y-%m-%d')}", fg_color=Color.White_Color[3], corner_radius=5,
+        self.date_selected_label = ctk.CTkLabel(self.sales_report_top, text=f"{date.today().strftime('%B %d, %Y')}", fg_color=Color.White_Color[3], corner_radius=5,
                                                 width=width*0.1)
         self.date_selected_label.grid(row=0, column=1, padx=(0, width*0.005))
 
@@ -1508,12 +1358,12 @@ class reports_frame(ctk.CTkFrame):
                                            command=set_date)
         self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
 
-        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= update_graphs)
+        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: update_graphs(force_reload=True))
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
 
-        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values=["January", "Febuary", "March","April","May", "June", "July", "August","September","October", "November", "December"], anchor="center", width=width*0.1 )
-        self.month_option.set(f"{date.today().strftime('%m')}")
-        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center")
+        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values= self.months, anchor="center", width=width*0.1, command= lambda _: update_graphs(False))
+        self.month_option.set(f"{date.today().strftime('%B')}")
+        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center", command= lambda _: update_graphs(False))
         self.year_option.set(f"{date.today().strftime('%Y')}")
 
         self.daily_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
@@ -1564,8 +1414,7 @@ class reports_frame(ctk.CTkFrame):
                                            column_format=f"/No:{int(width*.025)}-#c/Month:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.yearly_data_view.pack()
 
-        #show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,"#DBDBDB"], label=yearly_label)
-        self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,"#DBDBDB"], label=yearly_label)
+        self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,"#DBDBDB"], label=self.months)
         self.yearly_vbar_canvas.get_tk_widget().pack()
         report_menu_callback("Daily")
 
@@ -1658,6 +1507,10 @@ class reports_frame(ctk.CTkFrame):
         #canvas.draw()
         #canvas.get_tk_widget().pack()
         return canvas
+    
+
+    def graphs_need_upgrade(self):
+        self.loaded_manager_val = [False for _ in range(3)]
 
 class user_setting_frame(ctk.CTkFrame):
     global width, height
@@ -1872,4 +1725,4 @@ class histlog_frame(ctk.CTkFrame):
         self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
         return super().place(**kwargs)
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'aila', datetime.datetime.now)

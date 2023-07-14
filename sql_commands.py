@@ -253,15 +253,16 @@ get_services_daily_sales_sp = "SELECT CAST(SUM(services_transaction_content.pric
                             WHERE transaction_record.transaction_date = ?;"
 
 get_items_daily_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
-                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                         WHERE transaction_record.transaction_date = ?;"
+                            FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                            WHERE transaction_record.transaction_date = ?;"
 
 get_items_monthly_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
-                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                         WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+                              FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                              WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+
 get_services_monthly_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
-                            FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
-                            WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+                                 FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                                 WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
 
 #OR
 get_or = 'SELECT COUNT(*)+1 FROM transaction_record'
@@ -308,3 +309,7 @@ get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
                        log_history.time_in,\
                        log_history.time_out\
                 FROM acc_info JOIN log_history ON acc_info.usn = log_history.usn"
+
+#DATES
+get_active_year_transaction = "SELECT DISTINCT Year(transaction_date) FROM transaction_record"
+get_first_date = "SELECT DISTINCT transaction_date FROM transaction_record ORDER BY transaction_date ASC"
