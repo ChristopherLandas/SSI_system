@@ -615,6 +615,9 @@ class transaction_frame(ctk.CTkFrame):
                 temp: dashboard_frame = i
                 temp.show_pie()
                 temp.generate_stat_tabs()
+            if isinstance(i, reports_frame):
+                temp: reports_frame = i
+                i.graphs_need_upgrade()
         #check if there are certain mainframes there, then update all of those needed process and ui
 
         self.client_name_entry.set('')
@@ -1147,9 +1150,10 @@ class reports_frame(ctk.CTkFrame):
         self.days = [*range(1, 13, 1)]
 
         '''variables'''
-        self.previous_date = 0;
-        self.previous_month = 0;
-        self.previous_year = 0;
+        self.data_loading_manager: List[bool] = [False for _ in range(3)]
+        self.previous_date = '0';
+        self.previous_month = '0';
+        self.previous_year = '0';
 
         self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
 
@@ -1189,51 +1193,7 @@ class reports_frame(ctk.CTkFrame):
         selected_color = Color.Blue_Yale
 
         '''events'''
-        def update_graphs(force_reload: Optional[bool] = None):
-            if force_reload:
-                self.previous_date = '-1'
-                self.previous_month = '-1'
-                self.previous_year = '-1'
 
-            if 'Daily' in self.report_option_var.get() and self.date_selected_label._text != self.previous_date:
-                date = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
-                self.data = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp, (date,))[0][0] or 0),
-                             float(database.fetch_data(sql_commands.get_services_daily_sales_sp, (date,))[0][0] or 0)]
-                self.show_pie(self.data)
-                self.show_hbar(self.data)
-                self.items_total.configure(text=f"Item:        {format_price(self.data[0])}")
-                self.service_total.configure(text=f"Services:        {format_price(self.data[1])}")
-                self.income_total.configure(text=f"Total:        {format_price(self.data[0]+self.data[1])}")
-                #self.daily_data_view.update_table(self.data) for adding data in the bottom treeview
-
-                self.previous_date = self.date_selected_label._text
-
-            if 'Monthly' in self.report_option_var.get() and (self.year_option.get()+self.month_option.get() != self.previous_year+self.previous_month):
-                m = datetime.datetime.strptime(self.month_option.get(), '%B').strftime('%m')
-                y = self.year_option.get()
-                monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m))[-1]+1, 1)]
-                monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'{y}-{m}-{s}',))[0][0] or 0 for s in monthly_label]
-                monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'{y}-{m}-{s}',))[0][0] or 0 for s in monthly_label]
-
-                self.monthly_vbar_canvas.get_tk_widget().destroy()
-                self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
-                self.monthly_vbar_canvas.get_tk_widget().pack()
-
-                self.previous_month = self.month_option.get()
-                self.previous_year = self.year_option.get()
-
-            if 'Yearly' in self.report_option_var.get() and self.year_option != self.previous_year:
-                y = self.year_option.get()
-
-                monthly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
-                monthly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
-
-                self.yearly_vbar_canvas.get_tk_widget().destroy()
-                self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=self.months)
-                self.yearly_vbar_canvas.get_tk_widget().pack()
-
-                self.previous_year = self.year_option.get()
-            #set the previous selection to avoid repeating load
 
         self.label=["Items", "Services"]
         self.info = [width*0.004,height*0.005,"#DBDBDB"]
@@ -1286,11 +1246,11 @@ class reports_frame(ctk.CTkFrame):
                 self.yearly_data_view.pack(pady=height*0.01, padx=width*0.005)
                 self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
-            update_graphs()
+            self.update_graphs()
 
         def set_date():
             cctk.tk_calendar(self.date_selected_label,"%s", date_format="word", max_date = datetime.date.today(),
-                             set_date_callback= update_graphs, min_date= database.fetch_data(sql_commands.get_first_date)[0][0],
+                             set_date_callback= self.update_graphs,
                              date_select_default= datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y'))
 
         operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)]
@@ -1347,7 +1307,7 @@ class reports_frame(ctk.CTkFrame):
         self.sales_report_top.grid(row=0, column=0, sticky="w", pady=(height*0.0025,0))
 
         self.report_type_menu = ctk.CTkOptionMenu(self.sales_report_top, values=["Daily Report", "Monthly Report", "Yearly Report"], variable=self.report_option_var,anchor="center",
-                                                  command=partial(report_menu_callback))
+                                                  command= report_menu_callback)
         self.report_type_menu.grid(row=0, column=0, padx=(width*0.005), pady=height*0.005)
 
         self.date_selected_label = ctk.CTkLabel(self.sales_report_top, text=f"{date.today().strftime('%B %d, %Y')}", fg_color=Color.White_Color[3], corner_radius=5,
@@ -1358,12 +1318,12 @@ class reports_frame(ctk.CTkFrame):
                                            command=set_date)
         self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
 
-        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: update_graphs(force_reload=True))
+        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
-
-        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values= self.months, anchor="center", width=width*0.1, command= lambda _: update_graphs(False))
+        
+        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values= self.months, anchor="center", width=width*0.1, command= self.update_graphs)
         self.month_option.set(f"{date.today().strftime('%B')}")
-        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center", command= lambda _: update_graphs(False))
+        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center", command= self.update_graphs)
         self.year_option.set(f"{date.today().strftime('%Y')}")
 
         self.daily_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
@@ -1386,9 +1346,6 @@ class reports_frame(ctk.CTkFrame):
         self.bars_daily_graph.grid(row=0, column= 3, sticky="nsew", padx=(width*0.005), pady=(height*0.01,0))
         self.bars_daily_graph.pack_propagate(0)
 
-        self.show_pie()
-        self.show_hbar()
-
         self.data_frame = ctk.CTkFrame(self.sales_report_frame, height=height*0.35)
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=height*0.0075)
 
@@ -1403,7 +1360,6 @@ class reports_frame(ctk.CTkFrame):
                                            column_format=f"/No:{int(width*.025)}-#c/Date:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.monthly_data_view.pack()
 
-        #show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
         self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
         self.monthly_vbar_canvas.get_tk_widget().pack()
 
@@ -1508,9 +1464,66 @@ class reports_frame(ctk.CTkFrame):
         #canvas.get_tk_widget().pack()
         return canvas
     
+    def update_graphs(self, force_reload: bool = False):
+        force_reload = str(force_reload) == 'True'
+        #as some of the caller of the function return their value, this will recheck the bool of the argument
+
+        #print(self.data_loading_manager)
+        #print(not self.date_selected_label._text != self.previous_date, not (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month, not self.year_option.get() != self.previous_year)
+        #print(force_reload)
+
+        if 'Daily' in self.report_option_var.get():
+            if not self.data_loading_manager[0] or self.date_selected_label._text != self.previous_date or force_reload:
+                print('loaded')
+                date = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
+                self.data = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp, (date,))[0][0] or 0),
+                            float(database.fetch_data(sql_commands.get_services_daily_sales_sp, (date,))[0][0] or 0)]
+                self.show_pie(self.data)
+                self.show_hbar(self.data)
+                self.items_total.configure(text=f"Item:        {format_price(self.data[0])}")
+                self.service_total.configure(text=f"Services:        {format_price(self.data[1])}")
+                self.income_total.configure(text=f"Total:        {format_price(self.data[0]+self.data[1])}")
+                #self.daily_data_view.update_table(self.data) for adding data in the bottom treeview
+
+                self.previous_date = self.date_selected_label._text
+                self.data_loading_manager[0] = True
+
+        if 'Monthly' in self.report_option_var.get():
+            if not self.data_loading_manager[1] or (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month or force_reload:
+                print('loaded')
+                m = datetime.datetime.strptime(self.month_option.get(), '%B').strftime('%m')
+                y = self.year_option.get()
+                monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m))[-1]+1, 1)]
+                monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'{y}-{m}-{s}',))[0][0] or 0 for s in monthly_label]
+                monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'{y}-{m}-{s}',))[0][0] or 0 for s in monthly_label]
+
+                self.monthly_vbar_canvas.get_tk_widget().destroy()
+                self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
+                self.monthly_vbar_canvas.get_tk_widget().pack()
+
+                self.data_loading_manager[1] = True
+                self.previous_month = self.month_option.get()
+                self.previous_year = self.year_option.get()
+
+        if 'Yearly' in self.report_option_var.get():
+            if not self.data_loading_manager[2] or self.year_option.get() != self.previous_year or force_reload:
+                print('loaded')
+                y = self.year_option.get()
+
+                monthly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
+                monthly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
+
+                self.yearly_vbar_canvas.get_tk_widget().destroy()
+                self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=self.months)
+                self.yearly_vbar_canvas.get_tk_widget().pack()
+
+                self.data_loading_manager[2] = True
+                self.previous_year = self.year_option.get()
+        #set the previous selection to avoid repeating load
 
     def graphs_need_upgrade(self):
-        self.loaded_manager_val = [False for _ in range(3)]
+        self.data_loading_manager = [False for _ in range(3)]
+        self.update_graphs(True)
 
 class user_setting_frame(ctk.CTkFrame):
     global width, height
