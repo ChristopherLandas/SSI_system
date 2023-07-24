@@ -147,7 +147,8 @@ class customcustomtkinter:
                      nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
                      c_bd_configs: Optional[Tuple[str, Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None]]] = None,
-                     bd_commands = None, **kwargs):
+                     bd_commands = None, spinner_config: Optional[Tuple[int, int, int, str, str, Literal['multiply', 'add']]] = None, 
+                     spinner_min_val: Tuple[int, int] = None, **kwargs):
 
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
@@ -184,6 +185,8 @@ class customcustomtkinter:
             self._content_color = content_color
             self._nav_text_color = nav_text_color
             self.bd_commands = bd_commands
+            self.spinner_min_val = spinner_min_val
+            self.spinner_config = spinner_config
             #encapsulate other arguments
 
             self.pack_propagate(0)
@@ -304,12 +307,43 @@ class customcustomtkinter:
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
                         elif self.column_types[j] == 'id':
-                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent')
+                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent', val_range= self.spinner_min_val, initial_val= self.spinner_min_val[0])
                             spinner.place(relx = .5, rely = .5, anchor = 'c')
 
                     if self.column_types[j][0] == 't':
                         tI += 1
                 # generates the content from the frame
+
+                if self.spinner_config:
+                    temp_spinner: customcustomtkinter.cctkSpinnerCombo = frm.winfo_children()[self.spinner_config[0]].winfo_children()[0]
+                    text_source: ctk.CTkLabel = frm.winfo_children()[self.spinner_config[1]]
+                    text_reciever: ctk.CTkLabel = frm.winfo_children()[self.spinner_config[2]]
+                    source_format = self.spinner_config[3]
+                    reciever_format = self.spinner_config[4]
+                    mode = self.spinner_config[5]
+                    modified_data:list = list(self._data[i])
+                    modified_data.insert(self.spinner_config[0], temp_spinner.value)
+
+                    temp_spinner_command = temp_spinner._command
+                    def modified_spinner_command(_: any = None):
+                        if source_format != "":
+                            formatted_text_source = float(re.sub(source_format, "", text_source._text))
+                        else:
+                            formatted_text_source = float(text_source._text)
+                        formatted_text_source = formatted_text_source * temp_spinner.value if mode == 'multiply' else formatted_text_source + temp_spinner.value
+                        if reciever_format != "":
+                            text_reciever.configure(text = reciever_format.format(formatted_text_source))
+                        modified_data[self.spinner_config[0]] = temp_spinner.value
+                        modified_data[self.spinner_config[2]] = text_reciever._text
+                        self._data[i] = tuple(modified_data)
+                        if temp_spinner_command:
+                            temp_spinner_command()
+                        print(self._data)
+                    #initial calling to modify the reciever
+
+                    temp_spinner.configure(command = modified_spinner_command)
+                    modified_spinner_command()
+                #sets on which spinner would interact on which table
 
                 frm.update_children()
                 frm.pack(fill = 'x', pady = (1,0))
@@ -480,7 +514,7 @@ class customcustomtkinter:
             except ValueError:
                 return
             if self._command is not None:
-                self._command(mul)
+                self._command()
             self.num_entry.configure(state = 'readonly')
 
         def entry_check_on_text_change_callback(self, _ = None, *__):
@@ -494,8 +528,8 @@ class customcustomtkinter:
                     self.num_entry.delete(0, ctk.END)
                     self.num_entry.insert(0, self._val_range[0] if int(txt) < self._val_range[0] else self._val_range[-1])
                 self.value = int(self.num_entry.get())
-                if self._command is not None:
-                    self._command(0)
+                if self._command is not None and self._mode == 'num_only':
+                    self._command()
             except IndexError:
                 pass
 
@@ -556,8 +590,9 @@ class customcustomtkinter:
                 self.num_entry.delete(0, ctk.END)
                 self.num_entry.insert(0, self.value)
             self.num_entry.configure(state = 'readonly')
+'''issue with the double call of the command'''
 
-    class info_tab(ctk.CTkFrame):
+class info_tab(ctk.CTkFrame):
         def __init__(self, master: any, tab_master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                      fg_color: Optional[Union[str, Tuple[str, str]]] = 'transparent', border_color: Optional[Union[str, Tuple[str, str]]] = None,

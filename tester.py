@@ -3,7 +3,7 @@ from customcustomtkinter import customcustomtkinter as cctk
 from popup import transaction_popups
 from decimal import Decimal
 
-ctk.set_appearance_mode('light')
+ctk.set_appearance_mode('dark')
 
 
 class body(ctk.CTk):
@@ -14,15 +14,15 @@ class body(ctk.CTk):
         self.attributes("-fullscreen", True)
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
-        print(type(self))
+        """treeview = cctk.cctkTreeView(self, ('₱2,120.50', '₱0.00'), self.screen[0] * .8, self.screen[1] * .8,
+                                     column_format= '/test:x-tl/test2:x-id/test3:x-tl!50!30',
+                                     spinner_min_val=(1, cctk.cctkSpinnerCombo.MAX_VAL), spinner_config=(1,0,2, r"[₱,]", '₱{:,.2f}', 'multiply'))"""
 
-        frame = ctk.CTkFrame(self, self.screen[0], self.screen[1], fg_color='green')
-        frame.pack_propagate(0)
-        frame.pack()
-
-        temp =cctk.info_tab(frame, tab_master=frame, tab=transaction_popups.customer_info, tab_size= self.screen)
-        self.bind('<Return>', lambda _: print(temp.value))
-        temp.place(relx = .5 ,rely = .5, anchor = 'c')
+        treeview = cctk.cctkTreeView(self, ('2', 'name', '2'), self.screen[0] * .8, self.screen[1] * .8,
+                                     column_format= '/test:x-tl/test2:x-id/test3:x-tl/test4:x-tc!50!30',
+                                     spinner_min_val=(1, cctk.cctkSpinnerCombo.MAX_VAL), spinner_config=(1,0,3, "", '₱{:,.2f}', 'multiply'))
+        treeview.place(relx = .5, rely = .5, anchor = 'c');
+        #print(treeview._data)
 
         self.mainloop()
 

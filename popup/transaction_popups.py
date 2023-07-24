@@ -538,7 +538,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             #item_info, services_info, total_price, customer_info, pets_info
     return instance(master, info, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict)
 
-def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk.CTkFrame:
+'''def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, parent_value: tuple = None):
             self.service = None
@@ -660,7 +660,7 @@ def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk
             sched_swtich_event()
             #on out
 
-    return instance(master, info, parent_value)
+    return instance(master, info, parent_value)'''
 
 def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):

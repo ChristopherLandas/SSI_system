@@ -1193,8 +1193,6 @@ class reports_frame(ctk.CTkFrame):
         selected_color = Color.Blue_Yale
 
         '''events'''
-
-
         self.label=["Items", "Services"]
         self.info = [width*0.004,height*0.005,"#DBDBDB"]
 
