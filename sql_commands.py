@@ -51,7 +51,7 @@ get_critical_inventory = "SELECT item_general_info.name,\
                                 CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
                                 CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                 DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
-                                case when SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Crit_factor then 'Critical' ELSE null END AS status\
+                                case when SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Crit_factor AND SUM(item_inventory_info.Stock) > 0 then 'Critical' ELSE null END AS status\
                           FROM item_general_info\
                           JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
@@ -313,3 +313,22 @@ get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
 #DATES
 get_active_year_transaction = "SELECT DISTINCT Year(transaction_date) FROM transaction_record"
 get_first_date = "SELECT DISTINCT transaction_date FROM transaction_record ORDER BY transaction_date ASC"
+
+
+#GET INVENTORY_REPORT
+get_current_stock_group_by_name = "SELECT item_general_info.name,\
+                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                   FROM item_general_info\
+                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                   GROUP BY item_general_info.name\
+                                   ORDER BY item_general_info.UID;"
+
+get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
+                                      		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
+                                      FROM item_transaction_content\
+                                      JOIN transaction_record ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
+                                      WHERE transaction_record.transaction_date = current_date\
+                                      GROUP BY item_transaction_content.item_name\
+                                      ORDER BY transaction_record.transaction_uid"

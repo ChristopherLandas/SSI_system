@@ -148,7 +148,7 @@ class customcustomtkinter:
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
                      c_bd_configs: Optional[Tuple[str, Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None]]] = None,
                      bd_commands = None, spinner_config: Optional[Tuple[int, int, int, str, str, Literal['multiply', 'add']]] = None, 
-                     spinner_min_val: Tuple[int, int] = None, **kwargs):
+                     spinner_val_range: Tuple[int, int] = None, **kwargs):
 
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
@@ -185,7 +185,7 @@ class customcustomtkinter:
             self._content_color = content_color
             self._nav_text_color = nav_text_color
             self.bd_commands = bd_commands
-            self.spinner_min_val = spinner_min_val
+            self.spinner_val_range = spinner_val_range
             self.spinner_config = spinner_config
             #encapsulate other arguments
 
@@ -307,7 +307,7 @@ class customcustomtkinter:
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
                         elif self.column_types[j] == 'id':
-                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent', val_range= self.spinner_min_val, initial_val= self.spinner_min_val[0])
+                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent', val_range= self.spinner_val_range, initial_val= self.spinner_val_range or 0)
                             spinner.place(relx = .5, rely = .5, anchor = 'c')
 
                     if self.column_types[j][0] == 't':
@@ -590,9 +590,9 @@ class customcustomtkinter:
                 self.num_entry.delete(0, ctk.END)
                 self.num_entry.insert(0, self.value)
             self.num_entry.configure(state = 'readonly')
-'''issue with the double call of the command'''
+    '''issue with the double call of the command'''
 
-class info_tab(ctk.CTkFrame):
+    class info_tab(ctk.CTkFrame):
         def __init__(self, master: any, tab_master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
                      fg_color: Optional[Union[str, Tuple[str, str]]] = 'transparent', border_color: Optional[Union[str, Tuple[str, str]]] = None,

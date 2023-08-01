@@ -538,7 +538,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             #item_info, services_info, total_price, customer_info, pets_info
     return instance(master, info, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict)
 
-'''def customer_info(master, info:tuple, parent_value: cctk.info_tab = None) -> ctk.CTkFrame:
+def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, parent_value: tuple = None):
             self.service = None
@@ -660,7 +660,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             sched_swtich_event()
             #on out
 
-    return instance(master, info, parent_value)'''
+    return instance(master, info, parent_value)
 
 def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
@@ -770,6 +770,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 elif self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
+                    print(add_data, type(root_treeview))
                     if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
                         print(*root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children(), sep = '\n')
                         spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[4].winfo_children()[0]
