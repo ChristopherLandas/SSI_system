@@ -196,15 +196,16 @@ class customcustomtkinter:
             #make the root frame fixed in sizesz
             for i in range(len(self.column_titles)):
                 btn = None
+                title = ' '.join(re.findall('([A-Z]+[a-z]*)', self.column_titles[i]))
                 if self.column_types[i] == 't' or self.column_types[i] == '#' or self.column_types[i] == 'q':
                     btn = customcustomtkinter.ctkButtonFrame(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                                              hover_color= brighten_color(self._header_color, 1.75))
-                    title = ctk.CTkLabel(btn, text=self.column_titles[i], font=self.navbar_font, text_color=self._nav_text_color)
+                    title = ctk.CTkLabel(btn, text=title, font=self.navbar_font, text_color=self._nav_text_color)
                     title.place(relx = .5, rely = .5, anchor = 'c',)
                     btn.update_children()
                 else:
                     btn = ctk.CTkLabel(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
-                                       text=self.column_titles[i], font= self.navbar_font, text_color=self._nav_text_color)
+                                       text=title, font= self.navbar_font, text_color=self._nav_text_color)
                 btn.grid(row = 0, column = i, sticky='we', padx = (1,0))
                 self.update()
             #generate the header bar
