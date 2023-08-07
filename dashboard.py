@@ -1166,8 +1166,8 @@ class reports_frame(ctk.CTkFrame):
         self.info = [width*0.004,height*0.005,"#DBDBDB"]
 
         monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
-        monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-06-{s}',))[0][0] or 0 for s in monthly_label]
-        monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'2023-06-{s}',))[0][0] or 0 for s in monthly_label]
+        monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-07-{s}',))[0][0] or 0 for s in monthly_label]
+        monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'2023-07-{s}',))[0][0] or 0 for s in monthly_label]
 
         yearly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in self.months]
         yearly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in self.months]
@@ -1289,6 +1289,7 @@ class reports_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
         
         self.generate_report_icon = ctk.CTkImage(light_image=Image.open("image/generate_report.png"),size=(18,20))
+
         def generate_report():
             from reportlab.graphics.shapes import Drawing, Rect, String
             from reportlab.graphics.charts.piecharts import Pie
@@ -1314,8 +1315,14 @@ class reports_frame(ctk.CTkFrame):
 
             desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
             def round_up_to_nearest_100000(num):
-                return math.ceil(num / 100000) * 100000
+                return math.ceil(num / 10000) * 10000
+            
+            def calculate_step_count(i: int, len_count: int = 1):
+                count = round(i/len_count)
+                len_div = len(str(count)[1:])
+                return math.ceil(count/10 ** len_div) * 10 ** len_div
             #yearly
+
             if 'Yearly' in self.report_option_var.get():
                 #start of data collection
                 #get year
@@ -1326,24 +1333,21 @@ class reports_frame(ctk.CTkFrame):
                 monthly_data_service_temp = [database.fetch_data(sql_commands.get_services_monthly_sales_sp_temp, (s, y_temp))[0][0] or 0 for s in months_temp]
                 #end of data collection
                 #path for charts
-                my_path = f'image\\charts.pdf'
+                my_path = f'image\charts.pdf'
                 #create page with letter size
                 d = Drawing(612, 792)
                 #get ceiling amount for bar chart
-                service_min = 0
-                service_max = 0
+                step_val = 0
+                data_max_val= 0
                 for x in monthly_data_items_temp:
-                    if x > service_max:
-                        service_max = x
+                    if x > data_max_val:
+                        data_max_val= x
                 for x in monthly_data_service_temp:
-                    if x > service_max:
-                        service_max = x
-                #round up max amount
-                service_max = round_up_to_nearest_100000(service_max)
-                #get steps for bar chart
-                service_min = service_max * 0.1
-                #round up steps
-                service_min = round(service_min, -3)
+                    if x > data_max_val:
+                        data_max_val= x
+
+                data_max_val = math.ceil(data_max_val/1000) * 1000
+                step_val = calculate_step_count(data_max_val, 10)
 
                 #create bar chart
                 bc = VerticalBarChart()
@@ -1359,8 +1363,8 @@ class reports_frame(ctk.CTkFrame):
                 bc.bars[0].fillColor = colors.lightgreen
                 bc.bars[1].fillColor = colors.pink
                 bc.valueAxis.valueMin = 0
-                bc.valueAxis.valueMax = service_max
-                bc.valueAxis.valueStep = service_min
+                bc.valueAxis.valueMax = data_max_val
+                bc.valueAxis.valueStep = step_val
                 bc.categoryAxis.labels.fontSize = 12
                 bc.categoryAxis.labels.fontName = 'Times-New-Roman'
                 bc.categoryAxis.labels.boxAnchor = 'ne'
@@ -1442,7 +1446,7 @@ class reports_frame(ctk.CTkFrame):
                 pdf.build(elems)
 
                 #content
-                filename = f'{desktop}/{y_temp}_yearly_report.pdf'
+                filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
                 pdf = SimpleDocTemplate(
                     filename=filename,
                     pagesize=letter
@@ -1545,19 +1549,20 @@ class reports_frame(ctk.CTkFrame):
                 #pdf compilation
                 merger = PdfWriter()
                 input1 = open(f"image/charts.pdf", "rb")
-                input2 = open(f"{desktop}/{y_temp}_yearly_report.pdf", "rb")
+                input2 = open(f"{desktop}\{y_temp}_yearly_report.pdf", "rb")
                 # add the first 3 pages of input1 document to output
+
                 merger.append(input2)
                 merger.append(input1)
                 # Write to an output PDF document
-                output = open(f"{desktop}/{y_temp}_yearly_report.pdf", "wb")
+                output = open(f"{desktop}\{y_temp}_yearly_report.pdf", "wb")
                 merger.write(output)
                 # Close File Descriptors
                 merger.close()
                 output.close()
                 #add footer
                 from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-                p1 = pdfrw1(f"{desktop}/{y_temp}_yearly_report.pdf")
+                p1 = pdfrw1(f"{desktop}\{y_temp}_yearly_report.pdf")
                 p2 = pdfrw1("image/footer.pdf")
 
                 for page in range(len(p1.pages)):
@@ -1565,15 +1570,15 @@ class reports_frame(ctk.CTkFrame):
                     merger.add(p2.pages[page]).render()
 
                 writer = pdfrw2()
-                writer.write(f"{desktop}/{y_temp}_yearly_report.pdf", p1)
+                writer.write(f"{desktop}\{y_temp}_yearly_report.pdf", p1)
                 messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
             
             #monthly
             if 'Monthly' in self.report_option_var.get():
                 #start of data collection
                 monthly_label_temp = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
-                monthly_data_items_temp2 = [database.fetch_data(sql_commands.get_items_daily_sales_sp_temp, (f'2023-06-{s}',))[0][0] for s in monthly_label]
-                monthly_data_service_temp2 = [database.fetch_data(sql_commands.get_services_daily_sales_sp_temp, (f'2023-06-{s}',))[0][0] for s in monthly_label]
+                monthly_data_items_temp2 = [database.fetch_data(sql_commands.get_items_daily_sales_sp_temp, (f'2023-07-{s}',))[0][0] for s in monthly_label]
+                monthly_data_service_temp2 = [database.fetch_data(sql_commands.get_services_daily_sales_sp_temp, (f'2023-07-{s}',))[0][0] for s in monthly_label]
 
                 monthly_data_items_temp = []
                 monthly_data_service_temp = []
@@ -1590,33 +1595,34 @@ class reports_frame(ctk.CTkFrame):
                     else:
                         monthly_data_service_temp.append(month)
 
-                m_temp = self.month_option.get()
+                m_temp = self.months.index(self.month_option.get())
                 y_temp = self.year_option.get()
                 monthly_label_temp = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m_temp))[-1]+1, 1)]
                 monthly_label_temp2 = []
                 for month in monthly_label_temp:
                     monthly_label_temp2.append(str(month))
 
-                full_date_temp = 1
-                full_date_temp = datetime.datetime.strptime(m_temp, '%m').strftime('%B')
+                #full_date_temp = datetime.datetime.strptime((m_temp), '%m').strftime('%B')
+                full_date_temp = self.months[m_temp-1]
 
-                #end
+                #endstep_val
                 #Charts
-                my_path = f'image\\charts.pdf'
+                my_path = f'image\charts.pdf'
                 d = Drawing(612, 792)
 
-                service_min = 1
-                service_max = 1
+                step_val = 1
+                data_max_val = 1
+                
                 for x in monthly_data_items_temp:
-                    if x > service_max:
-                        service_max = x
+                    if x > data_max_val:
+                        data_max_val = x
                 for x in monthly_data_service_temp:
-                    if x > service_max:
-                        service_max = x
-
-                service_max = round_up_to_nearest_100000(service_max)
-                service_min = service_max * 0.1
-                service_min = round(service_min, -3)
+                    if x > data_max_val:
+                        data_max_val = x
+                
+                data_max_val = math.ceil(data_max_val/1000) * 1000
+                step_val = calculate_step_count(data_max_val, 10)
+                #calculate the step value, and the max y-axis of graph
 
                 data5 = [monthly_data_items_temp , monthly_data_service_temp]
                 bc = VerticalBarChart()
@@ -1632,8 +1638,8 @@ class reports_frame(ctk.CTkFrame):
                 bc.bars[0].fillColor = colors.lightgreen
                 bc.bars[1].fillColor = colors.pink
                 bc.valueAxis.valueMin = 0
-                bc.valueAxis.valueMax = service_max
-                bc.valueAxis.valueStep = service_min
+                bc.valueAxis.valueMax = data_max_val
+                bc.valueAxis.valueStep = step_val
                 bc.categoryAxis.labels.fontSize = 12
                 bc.categoryAxis.labels.fontName = 'Times-New-Roman'
                 bc.categoryAxis.labels.boxAnchor = 'ne'
@@ -1717,7 +1723,7 @@ class reports_frame(ctk.CTkFrame):
                 pdf.build(elems)
 
                 #content
-                filename = f'{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf'
+                filename = f'{desktop}\\{full_date_temp}_{y_temp}_monthly_report.pdf'
                 pdf = SimpleDocTemplate(
                     filename=filename,
                     pagesize=letter
@@ -1813,19 +1819,19 @@ class reports_frame(ctk.CTkFrame):
                 #pdf compilation
                 merger = PdfWriter()
                 input1 = open(f"image/charts.pdf", "rb")
-                input2 = open(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf", "rb")
+                input2 = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "rb")
                 # add the first 3 pages of input1 document to output
                 merger.append(input2)
                 merger.append(input1)
                 # Write to an output PDF document
-                output = open(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf", "wb")
+                output = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "wb")
                 merger.write(output)
                 # Close File Descriptors
                 merger.close()
                 output.close()
                 #add footer
                 from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-                p1 = pdfrw1(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf")
+                p1 = pdfrw1(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf")
                 p2 = pdfrw1("image/footer.pdf")
 
                 for page in range(len(p1.pages)):
@@ -1833,7 +1839,7 @@ class reports_frame(ctk.CTkFrame):
                     merger.add(p2.pages[page]).render()
 
                 writer = pdfrw2()
-                writer.write(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf", p1)
+                writer.write(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", p1)
                 messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.")
 
             #daily
@@ -1861,10 +1867,10 @@ class reports_frame(ctk.CTkFrame):
                 y_temp = self.year_option.get()
                 #end
                 #Charts
-                my_path = f'image\\charts.pdf'
+                my_path = f'image\charts.pdf'
                 d = Drawing(612, 792)
 
-                service_min = 1
+                step_val = 1
                 service_max = 1
 
                 if data_temp[0] > service_max:
@@ -1873,8 +1879,8 @@ class reports_frame(ctk.CTkFrame):
                     service_max = data_temp[1]
 
                 service_max = round_up_to_nearest_100000(service_max)
-                service_min = service_max * 0.1
-                service_min = round(service_min, -3)
+                step_val = service_max * 0.1
+                step_val = round(step_val, -3)
                 d.add(String(265,380, 'Daily Sales', fontName = 'Times-New-Roman', fontSize=16))
                 d.add(Rect(120, 175, 380, 240, fillColor=colors.transparent, strokeColor=colors.gray))
                 
@@ -1926,7 +1932,8 @@ class reports_frame(ctk.CTkFrame):
                 pdf.build(elems)
 
                 #content
-                filename = f'{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
+                filename = f'{desktop}\\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
+                #filename = f'{desktop}\\report_Test.pdf'
                 pdf = SimpleDocTemplate(
                     filename=filename,
                     pagesize=letter
@@ -2046,24 +2053,28 @@ class reports_frame(ctk.CTkFrame):
                 elems.append(table_content)
                 #elems.append(table_content2)
                 #elems.append(table_content3)
+
                 pdf.build(elems)
                 #pdf compilation
                 merger = PdfWriter()
-                input1 = open(f"image/charts.pdf", "rb")
-                input2 = open(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", "rb")
+                input1 = open(f"image\charts.pdf", "rb")
+                #input2 = open(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", "rb")
+                input2 = open(filename, "rb")
                 
                 # add the first 3 pages of input1 document to output
                 merger.append(input2)
                 #merger.append(input1)
                 # Write to an output PDF document
-                output = open(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", "wb")
+                #output = open(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", "wb")
+                output = open(filename, "wb")
                 merger.write(output)
                 # Close File Descriptors
                 merger.close()
                 output.close()
                 #add footer
                 from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-                p1 = pdfrw1(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_monthly_report.pdf")
+                #p1 = pdfrw1(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_monthly_report.pdf")
+                p1 = pdfrw1(filename)
                 p2 = pdfrw1("image/footer.pdf")
                 p3 = pdfrw1("image/charts.pdf")
 
@@ -2075,7 +2086,8 @@ class reports_frame(ctk.CTkFrame):
                 merger.add(p3.pages[0]).render()
 
                 writer = pdfrw2()
-                writer.write(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", p1)
+                #writer.write(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", p1)
+                writer.write(filename, p1)
                 messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
 
                 #Inventory Report
@@ -2413,13 +2425,8 @@ class reports_frame(ctk.CTkFrame):
         force_reload = str(force_reload) == 'True'
         #as some of the caller of the function return their value, this will recheck the bool of the argument
 
-        #print(self.data_loading_manager)
-        #print(not self.date_selected_label._text != self.previous_date, not (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month, not self.year_option.get() != self.previous_year)
-        #print(force_reload)
-
         if 'Daily' in self.report_option_var.get():
             if not self.data_loading_manager[0] or self.date_selected_label._text != self.previous_date or force_reload:
-                print('loaded')
                 date = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
                 self.data = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp, (date,))[0][0] or 0),
                             float(database.fetch_data(sql_commands.get_services_daily_sales_sp, (date,))[0][0] or 0)]
@@ -2435,7 +2442,6 @@ class reports_frame(ctk.CTkFrame):
 
         if 'Monthly' in self.report_option_var.get():
             if not self.data_loading_manager[1] or (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month or force_reload:
-                print('loaded')
                 m = datetime.datetime.strptime(self.month_option.get(), '%B').strftime('%m')
                 y = self.year_option.get()
                 monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m))[-1]+1, 1)]
@@ -2452,7 +2458,6 @@ class reports_frame(ctk.CTkFrame):
 
         if 'Yearly' in self.report_option_var.get():
             if not self.data_loading_manager[2] or self.year_option.get() != self.previous_year or force_reload:
-                print('loaded')
                 y = self.year_option.get()
 
                 monthly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
@@ -2572,10 +2577,14 @@ class user_setting_frame(ctk.CTkFrame):
             self.changeFrame.accept_button.configure(state = ctk.NORMAL)
             job_pos = database.fetch_data('SELECT job_position FROM acc_info WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0][0]
             data = database.fetch_data('SELECT * FROM user_level_access WHERE title = ?', (job_pos,))[0]
+            active_access = database.fetch_data('Select * FROM account_access_level WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0]
             for i in range(len(self.changeFrame.access_lvls)):
                 if data[i+2] == 1:
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL) 
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)
+                    if(active_access[i+1] == 1):
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                    else:
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
                 else:
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)

@@ -4,6 +4,25 @@ from popup import transaction_popups
 from decimal import Decimal
 from util import *
 import sql_commands
+import PyPDF2
+from tkinter import filedialog
+
+from reportlab.graphics.shapes import Drawing, Rect, String
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.pdfgen.canvas import Canvas
+from datetime import datetime as datetime_temp
+from reportlab.lib import colors
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics import renderPDF
+from reportlab.platypus import SimpleDocTemplate
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import Table
+from reportlab.platypus import TableStyle
+from PyPDF2 import PdfWriter, PdfReader
+import math
+import os
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 ctk.set_appearance_mode('dark')
 
@@ -16,17 +35,8 @@ class body(ctk.CTk):
         self.attributes("-fullscreen", True)
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
-        '''treeview = cctk.cctkTreeView(self, ('2', 'name', '2'), self.screen[0] * .8, self.screen[1] * .8,
-                                     column_format= '/test:x-tl/test2:x-id/test3:x-tl/test4:x-tc!50!30',
-                                     spinner_min_val=(1, cctk.cctkSpinnerCombo.MAX_VAL), spinner_config=(1,0,3, "", '₱{:,.2f}', 'multiply'))
-        treeview.place(relx = .5, rely = .5, anchor = 'c');'''
-        
-        '''current_stock = database.fetch_data(sql_commands.get_current_stock_group_by_name)
-        bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)
-        bought_item = {s[0]: s[1] for s in bought_item}
+        print(os.path.isdir("C:\\Users\\chris\\Desktop\\Devstuff\\SSI_system"))
 
-        inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item else bought_item[s[0]]), s[1]) for s in current_stock]
-        print(*inventory_report_data, sep = '\n')'''
         self.mainloop()
 
 
