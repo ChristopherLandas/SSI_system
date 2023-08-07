@@ -2573,11 +2573,26 @@ class user_setting_frame(ctk.CTkFrame):
                                       Services = ?, Sales = ?, Inventory = ?, Pet_Info = ?, Report = ?,\
                                       User = ?, Action = ? Where usn = ?', role_values]])
 
+        '''def set_checkBox_accessess(data:list, e:any = None):
+            for i in range(len(self.changeFrame.access_lvls)):
+                if data[i+2] == 1:
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)
+                    if(active_access[i+1] == 1):
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                    else:
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
+                else:
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)'''
+        #TBA: proceed command config needed
+
         def set_checkBox(e:any = None):
             self.changeFrame.accept_button.configure(state = ctk.NORMAL)
+            self.changeFrame.selected_role_option.configure(state = ctk.NORMAL, values = [s[0] for s in database.fetch_data(sql_commands.get_all_position_titles)])
             job_pos = database.fetch_data('SELECT job_position FROM acc_info WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0][0]
             data = database.fetch_data('SELECT * FROM user_level_access WHERE title = ?', (job_pos,))[0]
             active_access = database.fetch_data('Select * FROM account_access_level WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0]
+            self.changeFrame.selected_role_option.set(job_pos)
             for i in range(len(self.changeFrame.access_lvls)):
                 if data[i+2] == 1:
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)

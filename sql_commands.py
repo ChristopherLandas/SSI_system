@@ -273,6 +273,7 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 
 #USER LEVEL ACCESS
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
+get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ? ,?, ?, ?)"
