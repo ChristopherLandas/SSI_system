@@ -1,9 +1,170 @@
+from typing import *
+from tkinter import *
+from tkinter import messagebox
+import customtkinter as ctk
+import os
+from tkinter import filedialog
+import datetime
+import re
+
 from util import *
 import sql_commands
 import calendar
-from tkinter import messagebox
 from constants import *
-import datetime
+
+
+def show_popup(master, info:tuple) -> ctk.CTkFrame:
+    class add_item(ctk.CTkFrame):
+        def __init__(self, master, info:tuple):
+            self.DEFAULT_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
+            self.DEFAULT_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August","September","October", "November", "December"]
+            self.CURRENT_DAY = datetime.datetime.now()
+            self.DEFAULT_YEAR = [str(self.CURRENT_DAY.year)]
+            width = info[0]
+            height = info[1]
+            #basic inforamtion needed; measurement
+
+            super().__init__(master, width, height, corner_radius= 0, fg_color="#B3B3B3")
+            #the actual frame, modification on the frame itself goes here
+
+            '''events'''
+            def generate_callback():
+                if self.file_name_entry.get() == "":
+                    messagebox.showwarning('Invalid', 'Fill the name of the report')
+                    return
+                elif not os.path.isdir(self.path_entry.get()):
+                    messagebox.showwarning('Invalid', 'Invalid File Path')
+                    return
+                elif os.path.isfile(f'{self.path_entry.get()}\{self.file_name_entry.get()}'):
+                    question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?')
+                    if question == False:
+                        change_name_entry(self.file_name_entry.get()+' (1)')
+                    elif question == None:
+                        return
+                generate_report(self.report_type_option.get(), 'aila', self.CURRENT_DAY.strftime('%B %d, %Y'),
+                                self.mothly_month_option.get(), self.mothly_year_option.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
+                                self.path_entry.get(), self.yearly_option.get())
+
+
+            def change_name_entry(name: str = None):
+                self.file_name_entry.delete(0, ctk.END)
+                self.file_name_entry.insert(0, name)
+
+            def daily_callback(e: any = None):
+                change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry.get()))+'_report.pdf')
+
+            def monthly_callback(e: any = None):
+                change_name_entry(f'{self.mothly_month_option.get()}_{self.mothly_year_option.get()}_mothly_report.pdf')
+
+            def yearly_callback(e: any = None):
+                change_name_entry(f'{self.yearly_option.get()}_yearly_report.pdf')
+
+            def change_date_entry(date: str = None):
+                self.daily_date_entry.configure(state = ctk.NORMAL)
+                self.daily_date_entry.delete(0, ctk.END)
+                self.daily_date_entry.insert(0, date or self.CURRENT_DAY.strftime('%B %d, %Y'))
+                self.daily_date_entry.configure(state = 'readonly')
+
+            def path_save_cmd():
+                save_path = filedialog.askdirectory(title= 'Save')
+                #callback
+                if save_path:
+                    self.path_entry.delete(0, ctk.END)
+                    self.path_entry.insert(0, save_path)
+
+            def show_report_fill(e: any = None):
+                if self.report_type_option.get() == 'Daily':
+                    self.title_setting.configure(text = 'Select Date')
+                    self.mothly_month_option.pack_forget()
+                    self.mothly_year_option.pack_forget()
+                    self.yearly_option.pack_forget()
+                    self.daily_date_entry.pack(side = ctk.LEFT, padx = (width * .0025))
+                    self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .0025))
+                    daily_callback()
+                if self.report_type_option.get() == 'Monthly':
+                    self.title_setting.configure(text = 'Select Month and Year')
+                    self.daily_date_entry.pack_forget()
+                    self.daily_calendar_button.pack_forget()
+                    self.yearly_option.pack_forget()
+                    self.mothly_month_option.pack(side = ctk.LEFT, padx = (width * .0025))
+                    self.mothly_year_option.pack(side = ctk.LEFT, padx = (0, width * .0025))
+                    monthly_callback()
+                if self.report_type_option.get() == 'Yearly':
+                    self.title_setting.configure(text = 'Select Year')
+                    self.daily_date_entry.pack_forget()
+                    self.daily_calendar_button.pack_forget()
+                    self.mothly_month_option.pack_forget()
+                    self.mothly_year_option.pack_forget()
+                    self.yearly_option.pack(side = ctk.LEFT, padx = (width * .0025))
+                    yearly_callback()
+
+            '''code goes here'''
+            #From here
+            self.box_frame = ctk.CTkFrame(self,fg_color="white")
+            self.box_frame.pack(fill=BOTH, expand=True)
+
+            #x button
+            ctk.CTkButton(self.box_frame, text='X', command=lambda: self.place_forget(),font=("Poppins", (height*0.023)), fg_color='red', text_color='white', width=width*0.025).grid(row=0, column=0, padx=(width*0.006), pady=((height*0.01), (height*0.03)), sticky="ne")
+
+            #file name label
+            ctk.CTkLabel(self.box_frame, text='File Name:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=1, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
+            #file name entry
+            self.file_name_entry = ctk.CTkEntry(self.box_frame, placeholder_text='report', height=height*0.03, width=width*0.25, corner_radius=20, font=("Poppins", (height*0.023)))
+            self.file_name_entry.grid(row=2, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="w")
+
+            #path label
+            ctk.CTkLabel(self.box_frame, text='Path:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=3, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
+            self.path_frame = ctk.CTkFrame(self.box_frame,fg_color="white")
+            self.path_frame.grid(row=4, column=0)
+            #path entry
+            self.path_entry = ctk.CTkEntry(self.path_frame, height=height*0.03,  width=width*0.22, corner_radius=20, font=("Poppins", (height*0.023)))
+            self.path_entry.insert(0, self.DEFAULT_PATH)
+            self.path_entry.grid(row=4, column=0, padx=((width*0.006),(width*0.00)), pady=(0, (height*0.01)), sticky="w")
+            #path button
+            ctk.CTkButton(self.path_frame, text='...', command=path_save_cmd,font=("Poppins", (height*0.023)), fg_color='#2678F3', text_color='white', width=width*0.025).grid(row=4, column=1, padx=((width*0.002),(width*0.006)), pady=(0, (height*0.01)), sticky="ne")
+
+            #file type label
+            #file type entry
+            #self.file_type_entry = ctk.CTkEntry(self.box_frame, height=height*0.03, corner_radius=20, font=("Poppins", (height*0.023)), show='*')
+            #self.file_type_entry.grid(row=6, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="nsw")
+            ctk.CTkLabel(self.box_frame, text='File type:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=5, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
+            self.report_type_option = ctk.CTkOptionMenu(self.box_frame,values=["Daily", "Monthly", "Yearly"], height=height*0.03,  width=width*0.25, corner_radius=20, font=("Poppins", (height*0.023)), dropdown_font=("Poppins", (height*0.023)), command=show_report_fill)
+            self.report_type_option.grid(row=6, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="nsw")
+
+            self.title_setting = ctk.CTkLabel(self.box_frame, text= 'Select Date', font=("Poppins", (height*0.015)))
+            self.title_setting.grid(row = 7, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.023, 0))
+
+            self.setting_frame = ctk.CTkFrame(self.box_frame, fg_color='transparent', height=height * .05)
+            self.setting_frame.pack_propagate(0)
+            self.setting_frame.grid(row = 8, column = 0, sticky = 'nwe', padx=(width*0.006))
+
+            #daily
+            self.daily_date_entry = ctk.CTkEntry(self.setting_frame, width * .213, height * .05, state='readonly', font=("Poppins", (height*0.023)))
+            change_date_entry()
+            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, width * .027, width *.03)
+
+            #monthly
+            self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("Poppins", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback)
+            self.mothly_month_option.set(self.CURRENT_DAY.strftime('%B'))
+            self.mothly_year_option = ctk.CTkOptionMenu(self.setting_frame, width * .1, height * .05, font=("Poppins", (height*0.023)), values = self.DEFAULT_YEAR, command= monthly_callback)
+
+            #yearly
+            self.yearly_option = ctk.CTkOptionMenu(self.setting_frame, width * 25, height * .05, font=("Poppins", (height*0.023)), values= ["2023", "2024"], command= yearly_callback)
+            show_report_fill()
+
+            #Generate button
+            self.generate_btn = ctk.CTkButton(self.box_frame, text='Generate', command= generate_callback,font=("Poppins", (height*0.023)), fg_color='#2678F3', text_color='white')
+            self.generate_btn.grid(row=9, column=0, padx=(width*0.01), pady=((height*0.05), (height*0.01)), sticky="sew")
+
+        def place(self, **kwargs):
+            if 'default_config' in kwargs:
+                txt = 'Daily' if 'Daily' in kwargs['default_config'] else 'Monthly' if 'Monthly' in kwargs['default_config'] else 'Yearly'
+                self.report_type_option.set(txt)
+                self.report_type_option._command()
+                kwargs.pop('default_config')
+            return super().place(**kwargs)
+
+    return add_item(master, info)
 
 
 def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int):
@@ -296,7 +457,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
                 m_temp = months_Text.index(monthly_month)+1
                 y_temp = monthly_year
 
-                monthly_label_temp = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
+                monthly_label_temp = [*range(1, calendar.monthrange(int(y_temp), m_temp)[-1]+1, 1)]
                 monthly_data_items_temp2 = [database.fetch_data(sql_commands.get_items_daily_sales_sp_temp, (f'{monthly_year}-{m_temp}-{s}',))[0][0] for s in monthly_label_temp]
                 monthly_data_service_temp2 = [database.fetch_data(sql_commands.get_services_daily_sales_sp_temp, (f'{monthly_year}-{m_temp}-{s}',))[0][0] for s in monthly_label_temp]
 
@@ -316,7 +477,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
                         monthly_data_service_temp.append(monthly_month)
 
                 
-                monthly_label_temp = [*range(1, calendar.monthrange(datetime.datetime.now().monthly_year, int(m_temp))[-1]+1, 1)]
+                #monthly_label_temp = [*range(1, calendar.monthrange(int(y_temp), int(m_temp))[-1]+1, 1)]
                 monthly_label_temp2 = []
                 for monthly_month in monthly_label_temp:
                     monthly_label_temp2.append(str(monthly_month))
