@@ -1258,3 +1258,4 @@ def show_payment_proceed(master, info:tuple,):
         def reset(self):
             self.place_forget()
     return instance(master, info)  
+
