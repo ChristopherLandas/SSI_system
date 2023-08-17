@@ -998,8 +998,11 @@ def add_invoice(master, info:tuple,):
             ctk.CTkLabel(self.top_frame, text='ADD INVOICE', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=reset).pack(side="right", padx=(0,width*0.01))
 
-            self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color="light grey", width=width*0.4, height=height*0.05)
-            self.client_name_frame.grid(row=1, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
+            self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="INV0001",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
+            self.invoice_id_label.grid(row=1, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
+
+            self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color="light grey", width=width*0.35, height=height*0.05)
+            self.client_name_frame.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
             self.client_name_frame.pack_propagate(0)
 
             self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
@@ -1013,7 +1016,7 @@ def add_invoice(master, info:tuple,):
             
             self.add_particulars = ctk.CTkButton(self.main_frame,text="Add Particulars", width=width*0.125, height=height*0.05, image=self.add_icon, font=("DM Sans Medium", 14),
                                                command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
-            self.add_particulars.grid(row=1, column=1, sticky="w")
+            self.add_particulars.grid(row=1, column=2, sticky="w")
 
             self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3])
             self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=(0))
@@ -1140,21 +1143,21 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_frame.grid_rowconfigure(1, weight=1)
             self.receipt_frame.grid_columnconfigure(1,weight=1)
             
+            self.or_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.15)
+            self.or_frame.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
+            self.or_frame.pack_propagate(0)
+            
+            ctk.CTkLabel(self.or_frame, text="OR#: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
+            self.or_name = ctk.CTkLabel(self.or_frame, text="0001",  font=("DM Sans Medium", 14))
+            self.or_name.pack(side="left")
+            
             self.client_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
-            self.client_frame.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
+            self.client_frame.grid(row=0, column=1, padx=(0,width*0.005), pady= height*0.007)
             self.client_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.client_frame, text="Client: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
             self.client_name = ctk.CTkLabel(self.client_frame, text="Jane Doe",  font=("DM Sans Medium", 14))
-            self.client_name.pack(side="left")
-            
-            """ self.pet_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
-            self.pet_frame.grid(row=0, column=2, padx=(0,width*0.005), pady= height*0.007)
-            self.pet_frame.pack_propagate(0)
-            
-            ctk.CTkLabel(self.pet_frame, text="Pet: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
-            self.pet_name = ctk.CTkLabel(self.pet_frame, text="Jane Doe",  font=("DM Sans Medium", 14))
-            self.pet_name.pack(side="left") """
+            self.client_name.pack(side="left") 
             
             self.receipt_table_frame = ctk.CTkFrame(self.receipt_frame)
             self.receipt_table_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=width*0.005, pady=(0,height*0.007) )
