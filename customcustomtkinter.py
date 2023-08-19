@@ -140,9 +140,9 @@ class customcustomtkinter:
 
                      column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!30!30',
                      header_color: Union[str, tuple] = Color.Blue_Cobalt, data_grid_color: Union[list, tuple] = (Color.White_Ghost, Color.Grey_Bright_2),
-                     selected_color: Union [tuple, str] = Color.Blue_Steel,
-                     conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 16),
-                     row_font: tuple = ('Arial', 14), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'transparent',
+                     selected_color: Union [tuple, str] = "#2C74B3",
+                     conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('DM Sans Medium', 16),
+                     row_font: tuple = ('DM Sans Medium', 14), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'transparent',
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = Color.Blue_Maastricht,
                      nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
