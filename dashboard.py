@@ -653,23 +653,25 @@ class transaction_frame(ctk.CTkFrame):
         self.edit_btn = ctk.CTkButton(self.invoice_frame,text="Edit", width=width*0.065, height = height*0.05, image=self.edit_icon, font=("DM Sans Medium", 14))
         self.edit_btn.grid(row=0, column=2, sticky="w",padx=(0,width*0.005), pady=(height*0.01))
         
-        self.refresh_btn = ctk.CTkButton(self.invoice_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn = ctk.CTkButton(self.invoice_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
         self.refresh_btn.grid(row=0, column=3, sticky="w",padx=(0,width*0.005), pady=(height*0.01))
 
         self.invoice_treeview_frame = ctk.CTkFrame(self.invoice_frame)
         self.invoice_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                            row_font=("Arial", 14),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
+        self.update_invoice_treeview()
         self.invoice_treeview.pack()
 
-        self.proceeed_button = ctk.CTkButton(self.invoice_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
+        self.proceeed_button = ctk.CTkButton(self.invoice_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
+                                             compound="right", command = self.proceed_to_payment)
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
         
         
-        self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height))
+        self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview)
         
         '''INVOICE FRAME: END'''
         
@@ -692,25 +694,52 @@ class transaction_frame(ctk.CTkFrame):
         """ self.view_btn = ctk.CTkButton(self.payment_frame,text="View Record", width=width*0.05, height = height*0.05, font=("DM Sans Medium",16))
         self.view_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025)) """
         
-        self.refresh_btn = ctk.CTkButton(self.payment_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn = ctk.CTkButton(self.payment_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
         self.refresh_btn.grid(row=0, column=2, sticky="w")
         
         self.payment_treeview_frame = ctk.CTkFrame(self.payment_frame)
         self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                            row_font=("Arial", 14),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
+        self.update_payment_treeview()
         self.payment_treeview.pack()
         
         self.proceeed_button = ctk.CTkButton(self.payment_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
-        self.proceeed_button.configure(command=lambda:self.show_payment_proceed.place(relx=0.5, rely=0.5, anchor="c"))
+        self.proceeed_button.configure(command= self.proceed_to_pay)
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
         
         #self.show_proceed:ctk.CTkFrame =transaction_popups.show_transaction_proceed_demo(self,(width, height))
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
         load_main_frame(0)
+
+    def proceed_to_pay(self):
+        data = self.payment_treeview.get_selected_data()
+        if(data):
+            self.show_payment_proceed.place(invoice_data= data, cashier= 'aila', treeview_callback= self.update_payment_treeview,
+                                            update_callback= self.reset,
+                                            relx = .5, rely = .5, anchor = 'c')
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the paying")            
+
+    def proceed_to_payment(self):
+        data = self.invoice_treeview.get_selected_data()
+        if(data):
+            database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
+            self.update_payment_treeview()
+            self.payment_treeview.data_frames[self.payment_treeview._data.index(data)].response()
+            self.payment_button.response()
+            self.update_invoice_treeview()
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
+    
+    def update_payment_treeview(self):
+        self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
+
+    def update_invoice_treeview(self):
+        self.invoice_treeview.update_table(database.fetch_data(sql_commands.get_invoice_info))
         
     def change_total_value_item(self, value: float):
             value = float(value)
@@ -739,11 +768,11 @@ class transaction_frame(ctk.CTkFrame):
                 i.update_invetory_graph()
         #check if there are certain mainframes there, then update all of those needed process and ui
 
-        self.client_name_entry.set('')
-        self.transact_treeview.delete_all_data()
-        self.price_total_amount.configure(text = '0.00')
-        self.services_total_amount.configure(text = '0.00')
-        self.item_total_amount.configure(text = '0.00')
+        #self.client_name_entry.set('')
+        #self.transact_treeview.delete_all_data()
+        #self.price_total_amount.configure(text = '0.00')
+        #self.services_total_amount.configure(text = '0.00')
+        #self.item_total_amount.configure(text = '0.00')
 
 class services_frame(ctk.CTkFrame):
     global width, height
@@ -2537,7 +2566,6 @@ class reports_frame(ctk.CTkFrame):
 
         if 'Daily' in self.report_option_var.get():
             if not self.data_loading_manager[0] or self.date_selected_label._text != self.previous_date or force_reload:
-                print('loaded')
                 date = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
                 self.data = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp, (date,))[0][0] or 0),
                             float(database.fetch_data(sql_commands.get_services_daily_sales_sp, (date,))[0][0] or 0)]
@@ -2553,7 +2581,6 @@ class reports_frame(ctk.CTkFrame):
 
         if 'Monthly' in self.report_option_var.get():
             if not self.data_loading_manager[1] or (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month or force_reload:
-                print('loaded')
                 m = datetime.datetime.strptime(self.month_option.get(), '%B').strftime('%m')
                 y = self.year_option.get()
                 monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m))[-1]+1, 1)]
@@ -2570,7 +2597,6 @@ class reports_frame(ctk.CTkFrame):
 
         if 'Yearly' in self.report_option_var.get():
             if not self.data_loading_manager[2] or self.year_option.get() != self.previous_year or force_reload:
-                print('loaded')
                 y = self.year_option.get()
 
                 monthly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]

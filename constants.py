@@ -1,8 +1,8 @@
 class db:
-    DB = 'ssi'
+    DB = 'ssi_copy'
     PORT = 3306
     HOST = '127.0.0.1'
-    PASSWORD = 'test123'
+    PASSWORD = 'hello123'
     #USERNAME = 'root'
 
     ACC_CRED = 'acc_cred'

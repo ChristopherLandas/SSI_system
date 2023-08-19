@@ -328,7 +328,6 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
                 #if self.service:
-                print(self._transaction_content)
 
                 list_of_service = database.fetch_data(sql_commands.get_services_names)
                 list_of_service = [s[0] for s in list_of_service]
@@ -340,10 +339,8 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
                     temp_service_data = []
                     for i in range(len(service)):
                         for j in self.service_dict[service[i][0]]:
-                            print(j, 'pointer for j')
                             temp_service_data.append((record_id, database.fetch_data(sql_commands.get_service_uid,(service[i][0],))[0][0], service[i][0], j[0], j[1], price_format_to_float(service[i][1][1:]), 0, 0))
                     service = temp_service_data
-                print(service)
 
                 if(len(item) > 0):
                     item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0], ))[0][0], s[0], s[2], price_format_to_float(s[1][1:]), 0) for s in item]
@@ -561,7 +558,6 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             self.sched_switch_var = ctk.StringVar(value="off")
 
             def automate_fill(_: any= None):
-                print(database.fetch_data(sql_commands.get_pet_info_for_cust_info, (self.pet_name.get())))
                 data = database.fetch_data(sql_commands.get_pet_info_for_cust_info, (self.pet_name.get(), ))[0]
                 self.animal_breed_entry.delete(0, ctk.END)
                 self.animal_breed_entry.insert(0, data[0])
@@ -775,9 +771,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 elif self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
-                    print(add_data, type(root_treeview))
                     if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
-                        print(*root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children(), sep = '\n')
                         spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[4].winfo_children()[0]
                         spinner.change_value()
                     else: #if there's none
@@ -792,7 +786,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         import serviceAvailing
                         def proceed_command(data):
                             self._service_dict[label_text] = data
-                            print(self._service_dict)
 
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0,
                                                    text=label_text, width = root_treeview.column_widths[1],
@@ -912,7 +905,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             return super().place(**kwargs)
         
         def check_client(self, client_name: str):
-            self.client = database.fetch_data(sql_commands.get_pet_info, (client_name ))
+            self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
             
         def get_service(self, _: any = None):
             #if there's a selected item
@@ -934,9 +927,9 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 self.reset()
     return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict)
 
-def add_invoice(master, info:tuple,):
+def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, treeview_content_update_callback: callable):
             width = info[0]
             height = info[1]
             super().__init__(master,width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
@@ -946,6 +939,8 @@ def add_invoice(master, info:tuple,):
             
             self.customer_infos = []
             self.service_dict: dict = {}
+
+            self._treeview_content_update_callback = treeview_content_update_callback
 
             '''constants'''
             self.services = [s[0] for s in database.fetch_data(sql_commands.get_service_data)]
@@ -971,14 +966,39 @@ def add_invoice(master, info:tuple,):
                         del client
 
                         '''initial process'''
-                        #for i in range(len(self.transact_treeview._data)):
-                        #    print(self.transact_treeview._data[i][0])
-                        #    if self.transact_treeview._data[i][0] in self.services[i]:
-                        #        self.transact_treeview.bd_func(self.transact_treeview.data_frames[i].winfo_children()[-1].winfo_children()[0], True)
-                                #self.transact_treeview.bd_func()
 
-            def reset():
-                self.place_forget()
+            def save_invoice_callback():
+                services = []
+                items = []
+                for st in self.transact_treeview._data:
+                    if(st[0] in self.service_dict):
+                        services.append(st)
+                    else:
+                        items.append(st)
+
+                print(services, items, self.service_dict)
+
+                formatted_svc_data = []
+                uid = generateId('P', 6)
+
+                for svc in services:
+                    for svc_inf in self.service_dict[svc[0]]:
+                        formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
+                #formatting the services into its service invoice content
+                database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, 'aila', self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+
+                for it in items:
+                    database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
+                #database insertion of items
+
+                for li in formatted_svc_data:
+                    database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
+                #database insertion of services
+
+                self._treeview_content_update_callback()
+                messagebox.showinfo('Success', 'Invoice Saved')
+                self.reset(True)
+
                 
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -996,7 +1016,7 @@ def add_invoice(master, info:tuple,):
 
             ctk.CTkLabel(self.top_frame, text='',image=self.invoice_icon).pack(side="left", padx=(width*0.015,0))
             ctk.CTkLabel(self.top_frame, text='ADD INVOICE', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
-            ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=reset).pack(side="right", padx=(0,width*0.01))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
 
             self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color="light grey", width=width*0.4, height=height*0.05)
             self.client_name_frame.grid(row=1, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
@@ -1060,16 +1080,16 @@ def add_invoice(master, info:tuple,):
                                                                 self.client_name_entry.get() or 'N/A', self.transact_treeview, self.service_dict).place(relx = .5, rely = .5, anchor = 'c'))
             self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025),padx=(0, width*0.005), sticky="e")  """
             
-            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Invoice",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16))
+            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Invoice",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command= save_invoice_callback)
             self.save_invoice_btn.pack(side="right")
             
             self.cancel_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip, height=height*0.05, width=width*0.06, font=("DM Sans Medium", 16))
-            self.cancel_invoice_btn.configure(command=reset)
+            self.cancel_invoice_btn.configure(command=self.reset)
             self.cancel_invoice_btn.pack(side="right", padx=(width*0.005))
             
             
             #self.show_particulars:ctk.CTkFrame = add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
-            self.show_particulars:ctk.CTkFrame = add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
+            self.show_particulars:ctk.CTkFrame = add_particulars(self, (width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
             #self.show_particulars:ctk.CTkFrame = add_particulars_demo(self,(width, height))
             
         def change_total_value_item(self, value: float):
@@ -1082,10 +1102,27 @@ def add_invoice(master, info:tuple,):
             self.services_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.services_total_amount._text[1:])) + value))
             self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
 
-            
-    return instance(master, info)
 
-
+        def reset(self, bypass_warning: bool = False):
+            if self.client_name_entry.get() != "" or len(self.transact_treeview._data) > 0:
+                if bypass_warning:
+                    self.client_name_entry.set("")
+                    self.transact_treeview.delete_all_data()
+                    self.services_total_amount.configure(text = format_price(0))
+                    self.item_total_amount.configure(text = format_price(0))
+                    self.price_total_amount.configure(text = format_price(0))
+                    self.service_dict.clear()
+                elif messagebox.askyesno("Cancel Invoice", "Are you sure you want to discard the invoice") or bypass_warning:
+                    self.client_name_entry.set("")
+                    self.transact_treeview.delete_all_data()
+                    self.services_total_amount.configure(text = format_price(0))
+                    self.item_total_amount.configure(text = format_price(0))
+                    self.price_total_amount.configure(text = format_price(0))
+                    self.service_dict.clear()
+                else:
+                    return
+            self.place_forget()  
+    return instance(master, info, treeview_content_update_callback)
 
 def show_payment_proceed(master, info:tuple,):
     class instance(ctk.CTkFrame):
@@ -1107,11 +1144,66 @@ def show_payment_proceed(master, info:tuple,):
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
+            
             self.content_frame.grid(row=1,column=0, sticky="nsew")
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_propagate(0)
             
             self.content_frame.grid_rowconfigure(1, weight=1)
+
+            '''events'''
+            def record_transaction():
+                record_id =  database.fetch_data(sql_commands.generate_id_transaction)[0][0]
+
+                if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
+                    messagebox.showinfo('Invalid', 'Pay the right amount')
+                    return
+                #if self.service:
+
+                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], s[2], 0) for s in self.items]
+                service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0], s[0], s[1], s[2], s[3], 0, 0) for s in self.services]
+                
+                print(self.cashier_name._text)
+                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
+                #record the transaction
+
+                database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in item])
+                #record the items from within the transaction
+                database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in service])
+                #record the services from within the transaction
+
+                for _item in item:
+                    print(_item)
+                    stocks = database.fetch_data(sql_commands.get_specific_stock, (_item[1], ))
+                    if stocks[0][2] is None:
+                        database.exec_nonquery([[sql_commands.update_non_expiry_stock, (-_item[3], _item[1])]])
+                    else:
+                        quan = _item[3]
+                        for st in stocks:
+                            if st[1] < quan:
+                                quan -= st[1]
+                                database.exec_nonquery([['DELETE FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?', (st[0], st[2])]])
+                            elif st[1] > quan:
+                                database.exec_nonquery([[sql_commands.update_expiry_stock, (-quan, _item[1], st[2])]])
+                                break
+                            else:
+                                if stocks[-1] == st:
+                                    database.exec_nonquery([[sql_commands.update_expiry_stock, (-quan, _item[1], st[2])]])
+                                else:
+                                    database.exec_nonquery([['DELETE FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?', (st[0], st[2])]])
+                                break
+                #modify the stock, applying the FIFO
+
+                payment = float(self.payment_entry.get())
+                self.change_total.configure(text = '₱' + format_price(payment - price_format_to_float(self.grand_total._text[1:])))
+                #calculate and show the change
+
+                database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
+                messagebox.showinfo('Succeed', 'Transaction Recorded')
+                self._update_callback()
+                self._treeview_callback()
+                self.place_forget()
+                #update the table
             
             '''Transaction Info'''
             self.client_info_frame = ctk.CTkFrame(self.content_frame)
@@ -1198,12 +1290,12 @@ def show_payment_proceed(master, info:tuple,):
             self.y_scrollbar.grid(row=0, column=1, sticky="ns")
             
             #Sample
-            for i in range(1, 10+1):
+            '''for i in range(1, 10+1):
                 if (i % 2) == 0:
                     tag = "even"
                 else:
                     tag ="odd"
-                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(f"{i} "," Sample",1,500,500), tags=tag )
+                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(f"{i} "," Sample",1,500,500), tags=tag )'''
 
             '''END TABLE SETUP'''
             self.receipt_total_frame = ctk.CTkFrame(self.receipt_frame, height=height*0.05, width=width*0.2, fg_color=Color.White_Lotion)
@@ -1226,18 +1318,18 @@ def show_payment_proceed(master, info:tuple,):
             self.pay_frame.grid_columnconfigure(1, weight=1)
             
             ctk.CTkLabel(self.pay_frame, text="Services: ", font=("DM Sans Medium",16),).grid(row=0, column=0, padx=(width*0.01), pady=(height*0.025,0))
-            self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16),)
-            self.services_total.grid(row=0, column=2, padx=(width*0.01), pady=(height*0.025,0))
+            self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.services_total.grid(row=0, column=2, padx=(width*0.01), pady=(height*0.025,0), sticky = 'e')
             
             ctk.CTkLabel(self.pay_frame, text="Items: ", font=("DM Sans Medium",16),).grid(row=1, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.items_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16),)
-            self.items_total.grid(row=1, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01),)
+            self.items_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor= 'e')
+            self.items_total.grid(row=1, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01), sticky = 'e')
             
             ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=2, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
             
             ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=3, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16),)
-            self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01),)
+            self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
             ctk.CTkLabel(self.pay_frame, text="Payment: ", font=("DM Sans Medium",16),).grid(row=4, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
             self.payment_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right")
@@ -1245,10 +1337,10 @@ def show_payment_proceed(master, info:tuple,):
             
             ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
             self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16))
-            self.change_total.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01),)
+            self.change_total.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01), sticky = 'e')
             self.change_total.focus()
             
-            self.complete_button = ctk.CTkButton(self.payment_frame, text="Complete",font=("DM Sans Medium",16))
+            self.complete_button = ctk.CTkButton(self.payment_frame, text="Complete",font=("DM Sans Medium",16), command= record_transaction)
             self.complete_button.grid(row=2, column=1, sticky="nsew", padx=(width*0.005), pady=(height*0.007))
             
             self.cancel_button = ctk.CTkButton(self.payment_frame, text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip
@@ -1257,4 +1349,29 @@ def show_payment_proceed(master, info:tuple,):
             self.cancel_button.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(height*0.007))
         def reset(self):
             self.place_forget()
+
+        def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, update_callback: callable, **kwargs):
+            self.cashier_name.configure(text = cashier)
+            self.client_name.configure(text = invoice_data[1])
+            self.services_total.configure(text = invoice_data[2])
+            self.items_total.configure(text = invoice_data[3])
+            self.grand_total.configure(text = invoice_data[4])
+            self._treeview_callback = treeview_callback
+            self._update_callback = update_callback
+            self._invoice_id = invoice_data[0]
+
+            for i in self.receipt_tree.get_children():
+                self.receipt_tree.delete(i)
+            #emptied out the treeview
+
+            self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_data[0], ))
+            self.items = database.fetch_data(sql_commands.get_invoice_item_content_by_id, (invoice_data[0], ))
+
+            modified_services = [(f'{s[0]} P:{s[1]} D:%s' % s[2].strftime('%m/%d/%y'), 1,  s[3]) for s in self.services]
+
+            temp = self.items + modified_services
+            for i in range(len(temp)):
+                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i])
+                
+            return super().place(**kwargs)
     return instance(master, info)  

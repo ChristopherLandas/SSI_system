@@ -40,7 +40,7 @@ class customcustomtkinter:
             self.update_button(hover)
             #set the property as a button
 
-        def response(self, _):
+        def response(self, _: any = None):
                 click_color = (brighten_color(self._hover_color[0], 1.25, brighten_color(self._hover_color[1], 1.25))) if isinstance(self._hover_color, tuple) else brighten_color(self._hover_color, 1.45)
                 self.configure(fg_color = click_color)
                 self.update()
@@ -389,6 +389,11 @@ class customcustomtkinter:
                     i.configure(double_click_command = kwargs['double_click_command'])
                 kwargs.pop('double_click_command')
             return super().configure(require_redraw, **kwargs)
+        
+        def get_selected_data(self):
+            if(self.data_grid_btn_mng.active is None):
+                return None
+            return self._data[self.data_frames.index(self.data_grid_btn_mng.active)]
 
     class tk_calendar(ctk.CTkToplevel):
         def __init__(self, label,format, *args, fg_color: str or Tuple[str, str] or None = None, date_format: str ="numerical",

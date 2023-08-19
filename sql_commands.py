@@ -332,3 +332,41 @@ get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,
                                       WHERE transaction_record.transaction_date = current_date\
                                       GROUP BY item_transaction_content.item_name\
                                       ORDER BY transaction_record.transaction_uid"
+
+#invoices
+insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
+get_invoice_info = "SELECT invoice_record.invoice_uid,\
+                           invoice_record.client_name,\
+                           CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                           CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                           CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                           DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                    FROM invoice_record\
+                    LEFT JOIN invoice_service_content\
+                        ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                    LEFT JOIN invoice_item_content\
+                        ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                    WHERE invoice_record.State = 0\
+                    GROUP BY invoice_record.invoice_uid"
+
+get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
+                                   invoice_record.client_name,\
+                                   CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                                   CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                                   CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                   DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                            FROM invoice_record\
+                            LEFT JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                            LEFT JOIN invoice_item_content\
+                                ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                            WHERE invoice_record.State = 1\
+                            GROUP BY invoice_record.invoice_uid"
+
+set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1 WHERE invoice_uid = ?"
+set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
+
+get_invoice_service_content_by_id = "SELECT service_name, patient_name, scheduled_date, FORMAT(price, 2) AS total FROM invoice_service_content WHERE invoice_uid = ?;"
+get_invoice_item_content_by_id = "SELECT item_name, quantity, FORMAT((price * quantity), 2) AS total FROM invoice_item_content WHERE invoice_uid = ?;"
