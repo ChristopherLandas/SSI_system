@@ -1118,6 +1118,7 @@ class reports_frame(ctk.CTkFrame):
         self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
         self.days = [*range(1, 13, 1)]
         self.save_as_popup = save_as_popup.show_popup(master, (width , height ))
+        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(master, (width, height))
 
         '''variables'''
         self.data_loading_manager: List[bool] = [False for _ in range(3)]
@@ -1351,6 +1352,7 @@ class reports_frame(ctk.CTkFrame):
         self.yearly_vbar_canvas.get_tk_widget().pack()
         report_menu_callback("Daily")
 
+        #region: inv rep
         '''INVENTORY REPORT'''
         self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
         self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.0025), pady=(height*0.005,0))
@@ -1362,11 +1364,14 @@ class reports_frame(ctk.CTkFrame):
 
         self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
         self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005,0))
+        self.generate_rep_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
+                                              command = lambda: self.save_as_inventory_rep_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.generate_rep_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005,0))
 
         self.bought_item_con_col = None
 
         self.rep_treeview_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="transparent")
-        self.rep_treeview_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
+        self.rep_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
 
         self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
                                            column_format=f"/No:{int(width*.025)}-#c/ItemName:x-tl/InitialStock:{int(width*.2)}-tr/CurrentStock:{int(width*.2)}-tr!30!30",
@@ -1374,6 +1379,8 @@ class reports_frame(ctk.CTkFrame):
         self.inventory_rep_treeview.pack()
         self.update_invetory_graph()
         self.update_invetory_graph()
+        #endregion
+
         load_main_frame(0)
 
     def update_invetory_graph(self):
@@ -1475,6 +1482,7 @@ class reports_frame(ctk.CTkFrame):
 
                 self.previous_date = self.date_selected_label._text
                 self.data_loading_manager[0] = True
+                self.daily_data_view.update_table(database.fetch_data(sql_commands.daily_report_treeview_data, (date, )))
 
         if 'Monthly' in self.report_option_var.get():
             if not self.data_loading_manager[1] or (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month or force_reload:
@@ -1491,6 +1499,7 @@ class reports_frame(ctk.CTkFrame):
                 self.data_loading_manager[1] = True
                 self.previous_month = self.month_option.get()
                 self.previous_year = self.year_option.get()
+                self.monthly_data_view.update_table(database.fetch_data(sql_commands.monthly_report_treeview_data, (m, y)))
 
         if 'Yearly' in self.report_option_var.get():
             if not self.data_loading_manager[2] or self.year_option.get() != self.previous_year or force_reload:
@@ -1505,6 +1514,7 @@ class reports_frame(ctk.CTkFrame):
 
                 self.data_loading_manager[2] = True
                 self.previous_year = self.year_option.get()
+                self.yearly_data_view.update_table(database.fetch_data(sql_commands.yearly_report_treeview_data, (y, )))
         #set the previous selection to avoid repeating load
 
     def graphs_need_upgrade(self):

@@ -1,28 +1,15 @@
+from typing import Callable, Optional, Tuple, Union
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import transaction_popups
+from popup import transaction_popups, notif_popup_entities as ntf
 from decimal import Decimal
 from util import *
 import sql_commands
 import PyPDF2
 from tkinter import filedialog
 
-from reportlab.graphics.shapes import Drawing, Rect, String
-from reportlab.graphics.charts.piecharts import Pie
-from reportlab.pdfgen.canvas import Canvas
-from datetime import datetime as datetime_temp
-from reportlab.lib import colors
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.graphics import renderPDF
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import Table
-from reportlab.platypus import TableStyle
-from PyPDF2 import PdfWriter, PdfReader
-import math
-import os
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+
+
 
 ctk.set_appearance_mode('dark')
 
@@ -35,9 +22,18 @@ class body(ctk.CTk):
         self.attributes("-fullscreen", True)
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
-        print(os.path.isdir("C:\\Users\\chris\\Desktop\\Devstuff\\SSI_system"))
+        #print(os.path.isdir("C:\\Users\\chris\\Desktop\\Devstuff\\SSI_system"))
+        self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
+        self.notif_frame.place(relx = .5, rely = .5, anchor = 'c')
+        self.update()
+        self.notif_frame._parent_canvas.configure(bg =  'green')
+
+        notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
+                                                 "The product Insert Product Name here was only at 50 percent",
+                                                 datetime.datetime(1967, 8, 10), self.notif_frame._desired_width-10, 100, 'white')
+        xample = ntf.create_entity(self.notif_frame, "Schedule", "CLient scheduled an", datetime.datetime.now(), height=100, font_sizes= (10, 10, 10))
+        #notif test here
+        
 
         self.mainloop()
-
-
 body()
