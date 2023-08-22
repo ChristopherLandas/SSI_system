@@ -131,6 +131,24 @@ get_non_expiry_inventory = "SELECT DISTINCT item_general_info.name,\
                             WHERE item_inventory_info.stock > 0\
                             HAVING stat = 'N/A'"
 
+get_category_specific_inventory = "SELECT item_general_info.name,\
+                                            CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                            CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                            DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                            case when SUM(item_inventory_info.Stock) < 1\
+                                                then 'Out Of Stock'\
+                                            when SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Crit_factor\
+                                                then 'Critical'\
+                                            when SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Reorder_factor\
+                                                then 'Reorder'\
+                                                ELSE 'Normal' END AS stats\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_general_info.Category = ?\
+                                    GROUP BY item_general_info.name\
+                                    ORDER BY item_general_info.UID"
+
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
 get_item_and_their_total_stock = "SELECT item_general_info.name,\
                                          CAST(SUM(item_inventory_info.Stock) as INT),\
@@ -281,6 +299,8 @@ get_recieving_items = "SELECT id, NAME, stock, supp_name from recieving_item whe
 get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
+update_recieving_item_partially_received = "UPDATE recieving_item SET reciever = ?, state = 3, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
+record_partially_received_item = "INSERT INTO partially_receiving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
@@ -390,3 +410,66 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
                                WHERE YEAR(transaction_record.transaction_date) = 2023\
                                GROUP BY month(transaction_record.transaction_date)\
                                ORDER BY transaction_record.transaction_date;"
+
+#invoices
+insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
+get_invoice_info = "SELECT invoice_record.invoice_uid,\
+                           invoice_record.client_name,\
+                           CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                           CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                           CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                           DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                    FROM invoice_record\
+                    LEFT JOIN invoice_service_content\
+                        ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                    LEFT JOIN invoice_item_content\
+                        ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                    WHERE invoice_record.State = 0\
+                    GROUP BY invoice_record.invoice_uid"
+
+get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
+                                   invoice_record.client_name,\
+                                   CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                                   CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                                   CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                   DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                            FROM invoice_record\
+                            LEFT JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                            LEFT JOIN invoice_item_content\
+                                ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                            WHERE invoice_record.State = 1\
+                            GROUP BY invoice_record.invoice_uid"
+
+set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1 WHERE invoice_uid = ?"
+set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
+
+get_invoice_service_content_by_id = "SELECT service_name, patient_name, scheduled_date, FORMAT(price, 2) AS total FROM invoice_service_content WHERE invoice_uid = ?;"
+get_invoice_item_content_by_id = "SELECT item_name, quantity, FORMAT((price * quantity), 2) AS total FROM invoice_item_content WHERE invoice_uid = ?;"
+
+
+#fast or slow moving item
+get_selling_rate = "SELECT item_general_info.name,\
+                            case when SUM(case when MONTH(transaction_record.transaction_date) = 8\
+                                                        then item_transaction_content.quantity\
+                                                        ELSE 0 END) > item_settings.Average_monthly_selling_rate\
+                                        then '🠉'\
+                                    when SUM(case when MONTH(transaction_record.transaction_date) = 8\
+                                                        then item_transaction_content.quantity\
+                                                        ELSE 0 END) < item_settings.Average_monthly_selling_rate\
+                                        then '🠋'\
+                                        ELSE '-'\
+                                                end\
+                    FROM item_inventory_info\
+                    JOIN item_general_info\
+                        ON item_inventory_info.UID = item_general_info.UID\
+                    JOIN item_settings\
+                        ON item_inventory_info.UID = item_settings.UID\
+                    LEFT JOIN item_transaction_content\
+                        ON item_inventory_info.UID = item_transaction_content.Item_uid\
+                    LEFT JOIN transaction_record\
+                        ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
+                    GROUP BY item_transaction_content.Item_uid\
+                    ORDER BY item_inventory_info.UID"

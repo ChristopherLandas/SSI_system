@@ -15,7 +15,7 @@ class Color:
     Blue_Cobalt = "#205295"
     Blue_Yale = "#0D5794"
     Blue_Steel = "#2C74B3"
-
+    Blue_Tufts = "#3B8ED0"
     
     Blue_LapisLazuli = "#296FA7"
     Blue_LapisLazuli_1 = "#296AA3"

@@ -54,8 +54,8 @@ class database:
                 try:
                     db_cur.execute(cmds[i][0], cmds[i][1])
                     db_con.commit()
-                except mariadb.IntegrityError:
-                    print(f'command {i+1} error pushing')
+                except mariadb.IntegrityError as e:
+                    print(f'command {i+1} error pushing', '\nreason: ', e)
         except mariadb.Error as e:
             print(e)
             return
