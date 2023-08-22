@@ -40,7 +40,7 @@ class customcustomtkinter:
             self.update_button(hover)
             #set the property as a button
 
-        def response(self, _):
+        def response(self, _: any = None):
                 click_color = (brighten_color(self._hover_color[0], 1.25, brighten_color(self._hover_color[1], 1.25))) if isinstance(self._hover_color, tuple) else brighten_color(self._hover_color, 1.45)
                 self.configure(fg_color = click_color)
                 self.update()
@@ -140,9 +140,9 @@ class customcustomtkinter:
 
                      column_format: str = '/Title1:x-t/Title2:x-t/Title3:x-t!30!30',
                      header_color: Union[str, tuple] = Color.Blue_Cobalt, data_grid_color: Union[list, tuple] = (Color.White_Ghost, Color.Grey_Bright_2),
-                     selected_color: Union [tuple, str] = Color.Blue_Steel,
-                     conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('Arial', 16),
-                     row_font: tuple = ('Arial', 14), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'transparent',
+                     selected_color: Union [tuple, str] = "#2C74B3",
+                     conditional_colors: Union[dict, None] = {-1: {-1:None}}, navbar_font: tuple = ('DM Sans Medium', 16),
+                     row_font: tuple = ('DM Sans Medium', 14), row_hover_color: Union [tuple, str] = '#2C74B3', content_color: Optional[Union[str, Tuple[str, str]]] = 'transparent',
                      double_click_command: Union[Callable[[],None], None] = None, record_text_color: Optional[Union[str, Tuple[str, str]]] = Color.Blue_Maastricht,
                      nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
@@ -390,6 +390,11 @@ class customcustomtkinter:
                     i.configure(double_click_command = kwargs['double_click_command'])
                 kwargs.pop('double_click_command')
             return super().configure(require_redraw, **kwargs)
+        
+        def get_selected_data(self):
+            if(self.data_grid_btn_mng.active is None):
+                return None
+            return self._data[self.data_frames.index(self.data_grid_btn_mng.active)]
 
     class tk_calendar(ctk.CTkToplevel):
         def __init__(self, label,format, *args, fg_color: str or Tuple[str, str] or None = None, date_format: str ="numerical",
