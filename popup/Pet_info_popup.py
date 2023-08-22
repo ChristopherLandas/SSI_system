@@ -10,6 +10,8 @@ from Theme import Color
 from customcustomtkinter import customcustomtkinterutil as cctku
 from functools import partial
 import sql_commands
+import tkinter as tk
+from tkinter import ttk
 
 def new_record(master, info:tuple):
     class instance(ctk.CTkFrame):
@@ -64,7 +66,7 @@ def new_record(master, info:tuple):
                     return
                 else:
                     ids = [s[0] for s in database.fetch_data(sql_commands.get_ids_pi)]
-                    uid = generateId('P', 6)
+                    name= generateId('P', 6)
                     bday = str(self.birthday_entry._text)
                     while(uid in ids):
                         uid = generateId('P', 6)
@@ -158,7 +160,7 @@ def view_record(master, info:tuple):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple ):
 
-            width = info[0]
+            """ width = info[0]
             height = info[1]
             acc_cred = info[2]
             acc_info = info[3]
@@ -332,5 +334,224 @@ def view_record(master, info:tuple):
                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
             self.vac_history_treeview.pack()
             '''VACCINE FRAME:END'''
-            load_main_frame(0)
+            load_main_frame(0) """
+    
+            width = info[0]
+            height = info[1]
+            acc_cred = info[2]
+            acc_info = info[3]
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
+
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+            
+            self.gen_icon = ctk.CTkImage(light_image=Image.open("image/patient_icon.png"),size=(18,20))
+            self.save_icon = ctk.CTkImage(light_image=Image.open("image/save.png"), size=(20,20))
+            self.ser_icon = ctk.CTkImage(light_image=Image.open("image/patient.png"),size=(18,20))
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+            self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
+            self.add_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(20,20))
+            self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
+            self.trash_icon = ctk.CTkImage(light_image= Image.open("image/trash.png"), size=(22,25))
+            self.pet_sample_icon = ctk.CTkImage(light_image=Image.open("image/pholder.png"),size=(160,160))
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Lotion)
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.0225)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(2, weight=1)
+            self.main_frame.grid_propagate(0)
+
+            
+
+            def reset():
+                self.place_forget()
+                entries_set_state("disabled")
+
+            def update_tables(_ :any = None):
+                self.refresh_btn.configure(state = ctk.DISABLED)
+                self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+
+            def edit_entries():
+                entries_set_state("normal")  
+                self.edit_info_button.grid_forget()
+                self.save_info_button.grid(row=0, column=3, sticky="nsw",  pady=(height*0.01))
+                
+            def save_changes():
+                entries_set_state("disabled")
+                self.edit_info_button.grid(row=0, column=3, sticky="nsw",  pady=(height*0.01)) 
+                self.save_info_button.grid_forget()
+                messagebox.showinfo(title=None, message="Info Successfully Changed!")
+        
+            def entries_set_state(state : str = "normal", color_normal :str = Color.White_Platinum, color_disabled :str = Color.White_Lotion):
+                entries = (self.breed_entry, self.type_entry, self.sex_entry, self.weight_entry, self.birthday_entry, self.owner_name_entry, self.address_entry,
+                           self.contact_no_entry, self.pet_name_entry) 
+                for i in range(len(entries)):
+                    if "normal" in state:
+                        set_color = color_normal
+                    elif "disabled" in state:
+                        set_color = color_disabled
+                    entries[i].configure(state=state, fg_color=set_color)
+            
+            self.header_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0)
+            self.header_frame.grid(row=0, column=0, sticky="ew")
+            self.header_frame.grid_propagate(0)
+            
+            ctk.CTkLabel(self.header_frame, image=self.gen_icon, text='').pack(side='left', padx=(width*0.01,width*0.005))
+            
+            ctk.CTkLabel(self.header_frame, text='PET INFORMATION', font=("DM Sans Medium", 16), text_color=Color.White_Color[3],
+                                            height = height*0.05, corner_radius=5).pack(side='left')
+
+            self.close_btn= ctk.CTkButton(self.header_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.pet_info_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Platinum)
+            self.pet_info_frame.grid(row=1,column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+            self.pet_info_frame.grid_columnconfigure(3, weight=1)
+            
+            self.pet_image = ctk.CTkLabel(self.pet_info_frame, image=self.pet_sample_icon, text='', width=width*0.08, height=width*0.08, fg_color=Color.White_Lotion, corner_radius=5)
+            self.pet_image.grid(row=0, column=0, rowspan=4 ,sticky="nsew", padx=(width*0.005,0),  pady=(height*0.01))
+
+            self.pet_name_frame = ctk.CTkFrame(self.pet_info_frame, fg_color="transparent")
+            self.pet_name_frame.grid(row=0, column=1, stick="nsew",padx=(width*0.005), pady=(height*0.01), columnspan=2,)
+            self.pet_id = ctk.CTkLabel(self.pet_name_frame, text='PPBIG', font=("DM Sans Medium", 14), height = height*0.05, fg_color=Color.White_Lotion,corner_radius=5, width=width*0.1)
+            self.pet_id.pack(side="left",padx=(0,width*0.005))
+            self.pet_entry_frame = ctk.CTkFrame(self.pet_name_frame, height = height*0.05, fg_color=Color.White_Lotion)
+            self.pet_entry_frame.pack(side="left", fill="both",expand=1)
+            self.pet_name_entry = ctk.CTkEntry(self.pet_entry_frame, border_width=0, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5)
+            self.pet_name_entry.pack(side="left", fill='x', expand=1,  padx=(width*0.0025), pady=(height*0.0025))
+            
+            self.edit_info_button = ctk.CTkButton(self.pet_info_frame, image=self.add_icon, text='', width=width*0.01, fg_color="#3b8dd0", command=edit_entries)
+            self.edit_info_button.grid(row=0, column=3, sticky="nsw",  pady=(height*0.01))
+
+            self.save_info_button = ctk.CTkButton(self.pet_info_frame, image=self.save_icon, text='', width=width*0.01, fg_color="#83bd75", hover_color="#82bd0b", command=save_changes)
+            #self.save_info_button.grid(row=0, column=3, sticky="nsw",  pady=(height*0.01))
+            
+            '''Breed'''           
+            self.breed_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.breed_frame.grid(row=1, column=1, columnspan=2, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.breed_frame, text='Breed:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.breed_entry = ctk.CTkEntry(self.breed_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.breed_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Type'''
+            self.type_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.type_frame.grid(row=2, column=1, sticky="nsew", padx=(width*0.005,0),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.type_frame, text='Type:',  font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.type_entry = ctk.CTkEntry(self.type_frame,border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.type_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Weight'''
+            self.weight_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.weight_frame.grid(row=3, column=1, sticky="nsew", padx=(width*0.005,0),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.weight_frame, text='Weight:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.weight_entry = ctk.CTkEntry(self.weight_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.weight_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Sex'''
+            self.sex_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.sex_frame.grid(row=2, column=2, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))                    
+            ctk.CTkLabel(self.sex_frame, text='Sex:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.sex_entry = ctk.CTkEntry(self.sex_frame,border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.sex_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Birthday'''
+            self.birthday_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.birthday_frame.grid(row=3, column=2, sticky="w", padx=(width*0.005),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.birthday_frame, text='Birthday:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.birthday_entry = ctk.CTkEntry(self.birthday_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.birthday_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Owner'''
+            self.owner_name_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.owner_name_frame.grid(row=1, column=3, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.owner_name_frame, text='Owner\'s Name:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.owner_name_entry = ctk.CTkEntry(self.owner_name_frame,  border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.owner_name_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Address'''
+            self.address_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.address_frame.grid(row=2, column=3, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.address_frame, text='Address:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.address_entry = ctk.CTkEntry(self.address_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.address_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            '''Contact'''
+            self.contact_no_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
+            self.contact_no_frame.grid(row=3, column=3, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
+            ctk.CTkLabel(self.contact_no_frame, text='Contact#:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
+            self.contact_no_entry = ctk.CTkEntry(self.contact_no_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion,)
+            self.contact_no_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            
+            self.pet_service_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Platinum)
+            self.pet_service_frame.grid(row=2,column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+
+            self.service_title_frame = ctk.CTkFrame(self.pet_service_frame, fg_color="transparent")
+            self.service_title_frame.pack(fill = 'x', padx=(width*0.005),  pady=(height*0.01))
+            
+            self.service_title_label = ctk.CTkLabel(self.service_title_frame, text="Service Record", font=("DM Sans Medium", 14), height=height*0.045,corner_radius=5,
+                                                    fg_color=Color.White_Color[3], text_color=Color.Blue_Maastricht)
+            self.service_title_label.pack(side="left")
+            self.refresh_btn = ctk.CTkButton(self.service_title_frame, image=self.refresh_icon, text='', width=height*0.045, height=height*0.045, fg_color="#83bd75", hover_color="#82bd0b")
+            self.refresh_btn.pack(side="left",  padx=(width*0.005))
+            
+            self.service_treeview_frame = ctk.CTkFrame(self.pet_service_frame, fg_color="blue")
+            self.service_treeview_frame.pack(fill='both', expand=1,  padx=(width*0.005),  pady=(0,height*0.01))
+            self.service_treeview_frame.grid_rowconfigure(0, weight=1)
+            self.service_treeview_frame.grid_columnconfigure(0, weight=1)
+            
+            '''Service Record Treeview'''
+            #style
+            self.tkstyle = ttk.Style()
+            self.tkstyle.theme_use('clam')
+            self.tkstyle.configure("Treeview", rowheight=int(height*0.045), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=0, font=("DM Sans Medium", 16) )
+            self.tkstyle.configure("Treeview.Heading", font=("DM Sans Medium", 18), background=Color.Blue_Cobalt, borderwidth=0, foreground=Color.White_AntiFlash)
+            self.tkstyle.layout("Treeview",[("Treeview.treearea",{"sticky": "nswe"})])
+            self.tkstyle.map("Treeview", background=[("selected",Color.Blue_Steel)])
+            self.service_record_data_view = ttk.Treeview(self.service_treeview_frame, show = 'headings')
+
+            self.service_record_data_view['columns'] = ('#', 'Service', 'Date', 'Attendant')
+            #create headings 
+            self.service_record_data_view.heading('#', text='#', anchor=tk.CENTER)
+            self.service_record_data_view.heading('Service', text='Service', anchor=tk.CENTER)
+            self.service_record_data_view.heading('Date', text='Date', anchor=tk.CENTER)     
+            self.service_record_data_view.heading('Attendant', text='Attendant', anchor=tk.CENTER)
+            #define columns
+            self.service_record_data_view.column('#', anchor="e", width=int(width*0.001))
+            self.service_record_data_view.column('Service', anchor="w", width=int(width*0.475))
+            self.service_record_data_view.column('Date', anchor="center", width=int(width*0.2))
+            self.service_record_data_view.column('Attendant', anchor="w", width=int(width*0.285))
+
+            #add sample data
+            service_data = ["Service 1", "Service 2", "Service 3", "Service 4", "Service 5", "Service 6", "Service 7", "Service 8", "Service 9", "Service 10", "Service 11", "Service 12", "Service 13", "Service 14", "Service 15", "Service 16"]
+
+            data_rows = []
+            for i in range(len(service_data)):
+                if (i % 2) == 0:
+                    tag = "even"
+                else:
+                    tag ="odd"
+                data = (f"{i+1} ", service_data[i], "MM-DD-YYYY", service_data[i])
+                data_rows.append(data)
+                self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)
+            
+            self.service_record_data_view.tag_configure("odd",background=Color.White_AntiFlash)
+            self.service_record_data_view.tag_configure("even",background=Color.White_Ghost)
+            
+            self.service_record_data_view.grid(row=0, column=0, sticky="nsew")
+            #scrollbar
+            self.y_scrollbar_service_record = ttk.Scrollbar(self.service_treeview_frame, orient=tk.VERTICAL, command=self.service_record_data_view.yview)
+            self.service_record_data_view.configure(yscroll=self.y_scrollbar_service_record.set)
+            self.y_scrollbar_service_record.grid(row=0, column=1, sticky="ns")   
+            '''GENERRAL INFO FRAME:END'''
+    
+            self.set_entries()
+            entries_set_state("disabled")
+            
+        def set_entries(self):
+            self.pet_id.configure(text="P00001")
+            self.pet_name_entry.insert(0, "Brutus")
+            self.service_title_label.configure(text="Brutus Service Record")
+            self.breed_entry.insert(0, "Mini Pinscher")
+            self.type_entry.insert(0, "Dog")
+            self.sex_entry.insert(0, "Male")
+            self.weight_entry.insert(0, "4.5kg")
+            self.birthday_entry.insert(0, "October 9, 2020")
+            self.owner_name_entry.insert(0, "James Vinas")
+            self.address_entry.insert(0, "Tala, Caloocan City")
+            self.contact_no_entry.insert(0, "09208902063")
     return instance(master, info)
