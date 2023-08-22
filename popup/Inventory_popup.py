@@ -12,6 +12,7 @@ import datetime
 from functools import partial
 from typing import *
 
+
 def add_item(master, info:tuple):
     class add_item(ctk.CTkFrame):
         def __init__(self, master, info:tuple):
@@ -860,6 +861,15 @@ def restock_confirmation(master, info:tuple,):
             def reset():
                 self.place_forget()
 
+            def update_stock():
+                if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
+                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self._inventory_info[0])]])
+                else:
+                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, ('acc_name' or 'klyde', self._inventory_info[0])],
+                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
+                self.place_forget()
+                self.after_callback()
+
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
             self.main_frame.grid_propagate(0)
@@ -906,8 +916,24 @@ def restock_confirmation(master, info:tuple,):
                                             font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
             
-            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',)
+            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
+                                         command = update_stock)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
+
+        def place(self, restocking_info: tuple, after_callback: callable, **kwargs):
+            self.after_callback = after_callback
+
+            self.receiving_id.configure(state = ctk.NORMAL)
+            self.receiving_id.insert(0, restocking_info[0])
+            self.receiving_id.configure(state = 'readonly')
+            self.item_name_entry.configure(state = ctk.NORMAL)
+            self.item_name_entry.insert(0, restocking_info[1])
+            self.item_name_entry.configure(state = 'readonly')
+            self.supplier_name_entry.configure(state = ctk.NORMAL)
+            self.supplier_name_entry.insert(0, restocking_info[-1])
+            self.supplier_name_entry.configure(state = 'readonly')
+            self.stock_spinner.configure(val_range = (1, restocking_info[2]))
+            return super().place(**kwargs)
             
             
     return restock_confirmation(master, info)
