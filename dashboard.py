@@ -917,6 +917,7 @@ class inventory_frame(ctk.CTkFrame):
         '''data'''
         selected_color = Color.Blue_Yale
         self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
+        self.sell_rate = {s[0]: s[1] for s in database.fetch_data(sql_commands.get_selling_rate)}
 
         def load_main_frame(cur_frame: int):
             if self.active_report is not None:
@@ -932,7 +933,9 @@ class inventory_frame(ctk.CTkFrame):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.refresh_btn.after(1000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             self.data_view1.pack_forget()
-            self.data_view1.update_table(self.list_show)
+            temp = [(self.sell_rate[s[0]], ) + s for s in self.list_show]
+            #self.data_view1.update_table(self.list_show)
+            self.data_view1.update_table(temp)
             self.data_view1.pack()
 
         def sort_status_callback(option):
@@ -970,6 +973,11 @@ class inventory_frame(ctk.CTkFrame):
                     self.list_show = database.fetch_data(sql_commands.get_expired_inventory)
                 elif 'No Exp' in self.sort_status_option.get():
                     self.list_show = database.fetch_data(sql_commands.get_non_expiry_inventory)
+            elif 'Category' in self.sort_type_option.get():
+                if "All" in self.sort_status_option.get():
+                    self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
+                else:
+                    self.list_show = database.fetch_data(sql_commands.get_category_specific_inventory, (self.sort_status_option.get(), ))
             update_tables()
 
         def search(_: any = None):
@@ -982,9 +990,7 @@ class inventory_frame(ctk.CTkFrame):
 
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
-            self.data2 = database.fetch_data(sql_commands.get_inventory_by_expiry, None)
             self.data_view1.update_table(self.data1)
-            self.data_view2.update_table(self.data2)
 
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
@@ -1088,10 +1094,11 @@ class inventory_frame(ctk.CTkFrame):
         self.tree_view_frame = ctk.CTkFrame(self.inventory_sub_frame, fg_color="transparent")
         self.tree_view_frame.grid(row=1, column=0,columnspan=6, sticky="nsew",padx=(width*0.005))
 
-        self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
-        self.data_view1 = cctk.cctkTreeView(self.tree_view_frame, self.data1, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.08)}-tc!30!30',
-                                           conditional_colors= {5: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'}})
+        #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
+        self.data_view1 = cctk.cctkTreeView(self.tree_view_frame, None, width= width * .805, height= height * .7, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/Rate:{int(width*.045)}-tc/ItemName:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.08)}-tc!30!30',
+                                           conditional_colors= {6: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'},
+                                                                1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}})
         self.data_view1.pack()
 
         self.refresh_btn.configure(command = refresh)
@@ -1101,9 +1108,19 @@ class inventory_frame(ctk.CTkFrame):
         '''INVENTORY FRAME: END'''
 
         '''RESTOCK: START'''
+        def refresh_rs_data_view1():
+            self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items))
+
+        def restocking_callback():
+            refresh_rs_data_view1()
+            update_tables()
+            self.inventory_button.response()
+
+
         def _restock(_: any = None):
-            
-            self.restock_confirm.place(relx= 0.5, rely=0.5, anchor="c")
+            if self.rs_data_view1.get_selected_data():
+                self.restock_confirm.place(relx= 0.5, rely=0.5, anchor="c", restocking_info= self.rs_data_view1.get_selected_data(),
+                                           after_callback = restocking_callback)
             """ self.restock_popup.stock(self.rs_data_view1)
             temp:dashboard_popup = mainframes[0]
             temp.generate_stat_tabs() """
@@ -1128,7 +1145,7 @@ class inventory_frame(ctk.CTkFrame):
                                            command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, relx = .5, rely = .5, anchor = 'c'))
         self.rs_add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= refresh_rs_data_view1)
 
         self.rs_refresh_btn.grid(row=0, column=2, sticky="w", padx=(0,width*0.005))
 
