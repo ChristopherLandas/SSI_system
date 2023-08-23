@@ -133,7 +133,7 @@ class customcustomtkinter:
     class cctkTreeView(ctk.CTkFrame):
         def __init__(self, master: any, data: Union [Union[tuple, list], None] = None, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
-                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = Color.Platinum, border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None,
 
@@ -308,7 +308,7 @@ class customcustomtkinter:
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
                         elif self.column_types[j] == 'id':
-                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 20), bg_color='transparent', fg_color='transparent', val_range= self.spinner_val_range, initial_val= self.spinner_val_range or 0)
+                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 16), bg_color='transparent', fg_color='transparent', val_range= self.spinner_val_range, initial_val= self.spinner_val_range or 0)
                             spinner.place(relx = .5, rely = .5, anchor = 'c')
 
                     if self.column_types[j][0] == 't':

@@ -1216,6 +1216,7 @@ def show_payment_proceed(master, info:tuple,):
             self.client_info_frame.grid_columnconfigure(2, weight=1)
             
             self.cashier_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
+
             self.cashier_frame.grid(row=0, column=0, padx=(width*0.005,0), pady= height*0.007)
             self.cashier_frame.pack_propagate(0)
             
@@ -1341,7 +1342,7 @@ def show_payment_proceed(master, info:tuple,):
             self.payment_entry.grid(row=4, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
             
             ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16))
+            self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",16))
             self.change_total.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01), sticky = 'e')
             self.change_total.focus()
             
@@ -1361,6 +1362,7 @@ def show_payment_proceed(master, info:tuple,):
             self.services_total.configure(text = invoice_data[2])
             self.items_total.configure(text = invoice_data[3])
             self.grand_total.configure(text = invoice_data[4])
+            self.receipt_total_amount.configure(text= invoice_data[4])
             self._treeview_callback = treeview_callback
             self._update_callback = update_callback
             self._invoice_id = invoice_data[0]
@@ -1377,6 +1379,5 @@ def show_payment_proceed(master, info:tuple,):
             temp = self.items + modified_services
             for i in range(len(temp)):
                 self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i])
-                
             return super().place(**kwargs)
     return instance(master, info)  

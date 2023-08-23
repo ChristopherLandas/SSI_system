@@ -258,6 +258,8 @@ get_expired_state = "SELECT item_general_info.name,\
                      HAVING exp;"
 
 #FOR DAILY SALES
+get_todays_transaction_count = "SELECT COUNT(*)  FROM transaction_record WHERE transaction_date = CURRENT_DATE"
+
 get_services_daily_sales = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
                             FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                             WHERE transaction_record.transaction_date = CURRENT_DATE;"
@@ -294,13 +296,13 @@ get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
-record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ? ,?, ?, ?)"
-get_recieving_items = "SELECT id, NAME, stock, supp_name from recieving_item where state = 1"
+record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ? ,?, ?, ?, CURRENT_TIMESTAMP, Null)"
+get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_name from recieving_item where state = 1"
 get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 update_recieving_item_partially_received = "UPDATE recieving_item SET reciever = ?, state = 3, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
-record_partially_received_item = "INSERT INTO partially_receiving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
+record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
