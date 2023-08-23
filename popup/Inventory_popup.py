@@ -29,6 +29,14 @@ def add_item(master, info:tuple):
             '''events'''
             def reset():
                 self.item_name_entry.delete(0, ctk.END)
+                self.unit_price_entry.delete(0, ctk.END)
+                self.markup_price_entry.delete(0, ctk.END)
+                self.supplier_entry.set("Supplier Name")
+                self.contact_person_entry.delete(0, ctk.END)
+                self.contact_entry.delete(0, ctk.END)
+                self.expiration_date_entry.configure(text="Set Expiry Date")
+                self.expiry_switch.deselect()
+                self.stock_entry.set(0)
                 self.place_forget()
 
             def add():
@@ -36,7 +44,7 @@ def add_item(master, info:tuple):
                    and self.category_entry.get() and self.supplier_entry.get() and self.stock_entry.get() and
                    ((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get())
                    or self.expiry_switch_val.get() == 'disabled')):
-                    self.warning_lbl.configure(text = '', fg_color='transparent')
+                    #self.warning_lbl.configure(text = '', fg_color='transparent')
                     uid = 'I'+str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(5)
                     #modified_dt: str = str(datetime.datetime.strptime(self.expiration_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')) if self.expiration_date_entry._text != 'Set Expiry Date' else None
                     modified_dt = self.expiration_date_entry._text if self.expiration_date_entry._text != 'Set Expiry Date' else None
@@ -44,7 +52,7 @@ def add_item(master, info:tuple):
                                             [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), modified_dt)],
                                             [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .75, .5, int(self.stock_entry.get()))],
                                             [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())]])
-                    messagebox.showinfo('Adding Succesfull')
+                    messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added\nin the inventory" )
                     #master.reset()
                     reset()
                 else:
@@ -82,7 +90,7 @@ def add_item(master, info:tuple):
                     self.expiry_switch.deselect()
                 expiry_switch_event()
 
-                print(category)
+                #print(category)
                 pass
 
 
@@ -159,13 +167,13 @@ def add_item(master, info:tuple):
             ctk.CTkLabel(self.supplier_name_frame, text='SUPPLIER', anchor='w',  font=("DM Sans Medium", 14)).grid(row = 0, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx= (width*0.01))
             
             ctk.CTkLabel(self.supplier_name_frame, text='Supplier Name: ', anchor='e', font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
-            self.supplier_option = ctk.CTkComboBox(self.supplier_name_frame, corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045)
-            self.supplier_option.grid(row = 1, column = 1, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
-            self.supplier_option.set("Supplier Name")
+            self.supplier_entry = ctk.CTkComboBox(self.supplier_name_frame, corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045)
+            self.supplier_entry.grid(row = 1, column = 1, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            self.supplier_entry.set("Supplier Name")
             
             ctk.CTkLabel(self.supplier_name_frame, text='Personnel: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
-            self.contact_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14))
-            self.contact_entry.grid(row = 2, column = 1,  sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            self.contact_person_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14))
+            self.contact_person_entry.grid(row = 2, column = 1,  sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
             
             ctk.CTkLabel(self.supplier_name_frame, text='Contact#: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 3, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
             self.contact_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14))
@@ -289,7 +297,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.item_init_price_change =ctk.CTkEntry(self.item_frame)
             self.item_init_price_change.grid(row=3, column=1, sticky="w")
 
-            ctk.CTkLabel(self.item_frame, text="Narkup Change:").grid(row=4, column=0,sticky="w",pady = (height*0.01), padx= (width*0.01))
+            ctk.CTkLabel(self.item_frame, text="Markup Change:").grid(row=4, column=0,sticky="w",pady = (height*0.01), padx= (width*0.01))
             self.item_markup_change =ctk.CTkEntry(self.item_frame)
             self.item_markup_change.grid(row=4, column=1,  sticky="w")
 
