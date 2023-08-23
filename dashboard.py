@@ -604,11 +604,7 @@ class transaction_frame(ctk.CTkFrame):
         self.invoice_button.configure(command=partial(load_main_frame, 0))
         self.invoice_button_icon = ctk.CTkLabel(self.invoice_button, text="", image=self.invoice_icon)
         self.invoice_button_icon.pack(side="left", padx=(width*0.01,width*0.005))
-<<<<<<< HEAD
-        self.invoice_button_label = ctk.CTkLabel(self.invoice_button, text="INVOICE", text_color="white",)
-=======
         self.invoice_button_label = ctk.CTkLabel(self.invoice_button, text="RECEPTION", text_color="white", font=("DM Sans Medium",14))
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.invoice_button_label.pack(side="left")
         self.invoice_button.grid()
         self.invoice_button.update_children()
@@ -620,11 +616,7 @@ class transaction_frame(ctk.CTkFrame):
         self.payment_button.configure(command=partial(load_main_frame, 1))
         self.payment_icon = ctk.CTkLabel(self.payment_button, text="",image=self.payment_icon)
         self.payment_icon.pack(side="left", padx=(width*0.01,width*0.005))
-<<<<<<< HEAD
-        self.payment_label = ctk.CTkLabel(self.payment_button, text="PAYMENT", text_color="white")
-=======
         self.payment_label = ctk.CTkLabel(self.payment_button, text="PAYMENT", text_color="white",  font=("DM Sans Medium",14))
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.payment_label.pack(side="left")
         self.payment_button.grid()
         self.payment_button.update_children()
@@ -639,7 +631,6 @@ class transaction_frame(ctk.CTkFrame):
         self.invoice_frame.grid_rowconfigure(1, weight=1)
         self.invoice_frame.grid_columnconfigure(3, weight=1)
         #invoice search button
-<<<<<<< HEAD
         self.search_frame = ctk.CTkFrame(self.invoice_frame,width=width*0.3, height = height*0.05, fg_color="light grey")
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
@@ -648,16 +639,6 @@ class transaction_frame(ctk.CTkFrame):
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color=Color.Blue_Yale,
-=======
-        self.search_frame = ctk.CTkFrame(self.invoice_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-        self.search_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
                                         width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
@@ -676,12 +657,8 @@ class transaction_frame(ctk.CTkFrame):
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
-<<<<<<< HEAD
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
                                            row_font=("Arial", 14),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
-=======
-                                           header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,)
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.update_invoice_treeview()
         self.invoice_treeview.pack()
 
@@ -699,16 +676,6 @@ class transaction_frame(ctk.CTkFrame):
         self.payment_frame.grid_rowconfigure(1, weight=1)
         self.payment_frame.grid_columnconfigure(2, weight=1)
         
-<<<<<<< HEAD
-        self.search_frame = ctk.CTkFrame(self.payment_frame,width=width*0.35, height = height*0.05, fg_color="light grey")
-        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-        self.search_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color=Color.Blue_Yale,
-=======
         self.search_frame = ctk.CTkFrame(self.payment_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
@@ -717,7 +684,6 @@ class transaction_frame(ctk.CTkFrame):
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
                                         width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
@@ -733,11 +699,7 @@ class transaction_frame(ctk.CTkFrame):
         self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-<<<<<<< HEAD
                                            row_font=("Arial", 14),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
-=======
-                                            nav_text_color="white", selected_color=Color.Blue_Steel)
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.update_payment_treeview()
         self.payment_treeview.pack()
         
@@ -756,11 +718,7 @@ class transaction_frame(ctk.CTkFrame):
                                             update_callback= self.reset,
                                             relx = .5, rely = .5, anchor = 'c')
         else:
-<<<<<<< HEAD
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the paying")            
-=======
             messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
 
     def proceed_to_payment(self):
         data = self.invoice_treeview.get_selected_data()
@@ -1090,20 +1048,14 @@ class inventory_frame(ctk.CTkFrame):
         self.inventory_sub_frame.grid_rowconfigure(1, weight=1)
         self.inventory_sub_frame.grid_columnconfigure(3, weight=1)
 
-<<<<<<< HEAD
-=======
         '''Search Reference'''
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-<<<<<<< HEAD
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
-=======
+
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
                                         width=width*0.005, command=search)
@@ -1115,7 +1067,6 @@ class inventory_frame(ctk.CTkFrame):
         
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
-<<<<<<< HEAD
         self.add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
         
         self.view_category = ctk.CTkButton(self.inventory_sub_frame, height=height*0.05,width=width*0.07, text="Category",  font=("DM Sans Medium", 14),
@@ -1132,24 +1083,6 @@ class inventory_frame(ctk.CTkFrame):
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=partial(sort_status_callback))
         self.sort_type_option.grid(row=0, column=0, padx=(width*0.0045,0), pady=(height*0.0065), sticky="e")
 
-=======
-        self.add_item_btn.grid(row=0, column=2, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
-        
-        """ self.edit_btn = ctk.CTkButton(self.inventory_sub_frame,text="Edit", width=width*0.065, height = height*0.05, image=self.edit_icon, font=("DM Sans Medium", 14))
-        self.edit_btn.grid(row=0, column=3, sticky="w",padx=(0,width*0.005), pady=(height*0.01)) """
-        
-        self.view_category = ctk.CTkButton(self.inventory_sub_frame, height=height*0.05,width=width*0.07, text="Category",  font=("DM Sans Medium", 14),
-                                           command = lambda: self.category_popup.place(relx=0.5, rely=0.5, anchor="c"))
-        self.view_category.grid(row=0, column=4, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
-
-        self.sort_frame = ctk.CTkFrame(self.inventory_sub_frame,  height = height*0.05, fg_color=Color.Platinum)
-        self.sort_frame.grid(row=0, column=5, padx=(width*0.005), pady=(height*0.007), sticky="e")
-
-        self.sort_type_option= ctk.CTkOptionMenu(self.sort_frame, values=self.sort_status_var, anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=partial(sort_status_callback))
-        self.sort_type_option.grid(row=0, column=0, padx=(width*0.0045,0), pady=(height*0.0065), sticky="e")
-
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
         self.sort_status_option= ctk.CTkOptionMenu(self.sort_frame, values=self.sort_type_var, anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=sort_status_configuration_callback)
         self.sort_status_option.grid(row=0, column=1, padx=(width*0.005), pady=(height*0.0065), sticky="e")
@@ -1229,11 +1162,7 @@ class inventory_frame(ctk.CTkFrame):
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-<<<<<<< HEAD
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/SupplierName:x-tl/Action:{int(width*.075)}-bD!30!30',
-=======
                                            column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/Remaining:{int(width*.08)}-tl/SupplierName:x-tl/Action:{int(width*.075)}-bD!30!30',
->>>>>>> 46556d0fe493149e1a651ea8d6c502b4bb26272a
                                             double_click_command= _restock)
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
