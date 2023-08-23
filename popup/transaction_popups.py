@@ -14,6 +14,7 @@ from datetime import datetime
 import threading
 from PIL import Image
 import copy
+from constants import action
 
 def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
@@ -997,6 +998,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
 
                 self._treeview_content_update_callback()
                 messagebox.showinfo('Success', 'Invoice Saved')
+                record_action('aila', action.INVOICE_TYPE, action.MAKE_INVOICE % ('aila', uid))
                 self.reset(True)
 
                 

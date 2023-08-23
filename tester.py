@@ -8,9 +8,6 @@ import sql_commands
 import PyPDF2
 from tkinter import filedialog
 
-
-
-
 ctk.set_appearance_mode('dark')
 
 
@@ -28,14 +25,14 @@ class body(ctk.CTk):
         self.update()
         self.notif_frame._parent_canvas.configure(bg =  'green')
 
-        '''notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
+        notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
                                                  "The product Insert Product Name here was only at 50 percent",
                                                  datetime.datetime(1967, 8, 10), self.notif_frame._desired_width-10, 100, 'white')
-        xample = ntf.create_entity(self.notif_frame, "Schedule", "CLient scheduled an", datetime.datetime.now(), height=100, font_sizes= (10, 10, 10))
+        self.mainloop()
         #notif test here
         
 
-        inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item else bought_item[s[0]]), s[1]) for s in current_stock]
+        '''inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item else bought_item[s[0]]), s[1]) for s in current_stock]
         print(*inventory_report_data, sep = '\n')
         print(database.fetch_data('SELECT ?', ('🠋',))[0][0])
         ctk.CTkLabel(self, text = '🠋', text_color ='green', font=('arial', 30)).place(relx = .5, rely = .5, anchor = 'c')

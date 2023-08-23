@@ -133,3 +133,5 @@ def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, 
                     break
                 
     lbl.configure(text = ''.join(txt_dvd))
+
+
