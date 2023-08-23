@@ -276,21 +276,7 @@ class dashboard_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Chinese)
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
-                   float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
-        def show_pie(master, data: list):
-            labels = ["Items", "Service"]
-
-            data = data if data[0] + data[1] > 0 else [1, 0]
-            pie_figure= Figure(figsize=(self.income_frame_width*0.006,self.income_frame_height*0.013), dpi=100)
-            pie_figure.set_facecolor(Color.White_Ghost)
-            ax =pie_figure.add_subplot(111)
-            ax.pie(data, autopct='%1.1f%%', startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Red_Tulip],
-                   textprops={'fontsize':18, 'color': Color.White_Ghost, 'family':'monospace', 'weight':'bold' },)
-            pie_figure.subplots_adjust(top=1,left=0,right=1, bottom=0)
-
-            canvas = FigureCanvasTkAgg(pie_figure, master)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 6)
+                    float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
 
         self.date_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, corner_radius= 5)
         self.date_frame.grid(row=0, column=7, padx = (width * .025, width * .01), pady= (height * .01), sticky='e')
@@ -315,26 +301,30 @@ class dashboard_frame(ctk.CTkFrame):
         self.num_transactions = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
         self.num_transactions.grid(row=2, column=0, sticky="nsew", padx=(self.income_frame_width*0.03), pady=(self.income_frame_height*0.05, self.income_frame_height*.015),)
         self.num_transactions.pack_propagate(0)
-        self.items_sales_label = ctk.CTkLabel(self.num_transactions, text="Transactions Today:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
-        self.items_sales_value = ctk.CTkLabel(self.num_transactions, text="0", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
+        ctk.CTkLabel(self.num_transactions, text="Transactions Today:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
+        self.transaction_today_count = ctk.CTkLabel(self.num_transactions, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
+        self.transaction_today_count.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
         self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.Light_Green, corner_radius=5)
         self.items_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(self.income_frame_width*0.03), pady=(self.income_frame_height*0.015, self.income_frame_height*.015),)
         self.items_sales_frame.pack_propagate(0)
         self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
-        self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, text=f"₱{format_price(self.data[0])}", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
+        self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
+        self.items_sales_value.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
         self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.Red_Tulip, corner_radius=5)
         self.services_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(self.income_frame_width*0.03),pady=( self.income_frame_height*.015))
         self.services_sales_frame.pack_propagate(0)
-        self.services_sales_label = ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
-        self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, text=f"₱{format_price(self.data[1])}", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
+        ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
+        self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
+        self.services_sales_value.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
         self.total_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.15, fg_color=Color.White_AntiFlash, corner_radius=5)
         self.total_sales_frame.grid(row=5, column=0, sticky="nsew", padx=(self.income_frame_width*0.03),pady=(self.income_frame_height*.015, self.income_frame_height*.05))
         self.total_sales_frame.pack_propagate(0)
-        self.total_sales_label = ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
-        self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, text=f"₱{format_price(self.data[1] + self.data[0])}", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
+        ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
+        self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
+        self.total_sales_value.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
         #Watermelon Pie
         '''Inventory Stat Frame'''
@@ -349,8 +339,6 @@ class dashboard_frame(ctk.CTkFrame):
         '''Inventory Stat Frame Contents'''
         self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
         self.inventory_stat_label.grid(row=0, column=1, sticky="w", padx=(self.inventory_frame_width*0.04,0),pady=(self.inventory_frame_height*0.04,self.inventory_frame_height*0.02))
-
-
 
         self.inventory_content_frame = ctk.CTkScrollableFrame(self.inventory_stat_frame, height=self.inventory_frame_height*0.16, fg_color=Color.White_Ghost)
         self.inventory_content_frame.grid_propagate()
@@ -395,9 +383,9 @@ class dashboard_frame(ctk.CTkFrame):
         self.current_total = ctk.CTkLabel(self.sales_history_frame, text="Total:   0,000.00", fg_color=Color.White_Chinese, corner_radius=5,height=height*0.05, width=width*0.125, anchor="e", font=("DM Sans Medium", 14))
         self.current_total.grid(row=2, column=1, sticky="e", padx=width*0.015, pady=(height*0.005,height*0.015))
 
-        self.view_more_button = ctk.CTkButton(self.sales_history_frame, text='View More',width= self.income_frame_width*0.16, height=self.income_frame_height*0.06, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.Blue_Maastricht,
+        '''self.view_more_button = ctk.CTkButton(self.sales_history_frame, text='View More',width= self.income_frame_width*0.16, height=self.income_frame_height*0.06, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.Blue_Maastricht,
                                               fg_color=Color.White_AntiFlash,hover_color=Color.Platinum, command=lambda:print("Go To Report Section"))
-        self.view_more_button.grid(row=2, column=0, sticky="w", padx=self.income_frame_width*0.035,pady=(0,self.income_frame_height*0.035))
+        self.view_more_button.grid(row=2, column=0, sticky="w", padx=self.income_frame_width*0.035,pady=(0,self.income_frame_height*0.035))'''
 
         '''Schedule Appointments'''
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
@@ -416,7 +404,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_data_treeview.pack()
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
-        self.show_pie()
+        self.generate_DISumarry()
         self.grid_forget()
 
     def show_status_popup(self, name: str, data):
@@ -442,6 +430,17 @@ class dashboard_frame(ctk.CTkFrame):
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 6)
 
+    def generate_DISumarry(self):
+        self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
+                    float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0),
+                    int(database.fetch_data(sql_commands.get_todays_transaction_count)[0][0] or 0)]
+        print(self.data)
+        self.items_sales_value.configure(text = f'₱{format_price(self.data[0])}')
+        self.services_sales_value.configure(text = f'₱{format_price(self.data[1])}')
+        self.total_sales_value.configure(text = f'₱{format_price(self.data[0] + self.data[1])}')
+        self.transaction_today_count.configure(text = self.data[2])
+        self.show_pie()
+
     def generate_stat_tabs(self):
         for i in self.stat_tabs:
             i.destroy()
@@ -461,9 +460,6 @@ class dashboard_frame(ctk.CTkFrame):
             self.stat_tabs.append(copy.copy(temp))
             self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(self.inventory_frame_width*0.001 ),pady=(0,self.inventory_frame_height*0.02))
             del temp
-
-    #def update_daily_services():
-
 
     def grid(self, **kwargs):
         return super().grid(**kwargs)
@@ -762,6 +758,7 @@ class transaction_frame(ctk.CTkFrame):
                 temp: dashboard_frame = i
                 temp.show_pie()
                 temp.generate_stat_tabs()
+                temp.generate_DISumarry()
             if isinstance(i, reports_frame):
                 temp: reports_frame = i
                 i.graphs_need_upgrade()
@@ -1158,7 +1155,7 @@ class inventory_frame(ctk.CTkFrame):
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/SupplierName:x-tl/Action:{int(width*.075)}-bD!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/Remaining:{int(width*.08)}-tl/SupplierName:x-tl/Action:{int(width*.075)}-bD!30!30',
                                             double_click_command= _restock)
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
