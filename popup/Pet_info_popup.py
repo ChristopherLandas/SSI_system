@@ -328,7 +328,7 @@ def view_record(master, info:tuple):
             self.pet_info_frame.grid(row=1,column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
             self.pet_info_frame.grid_columnconfigure(4, weight=1)
             
-            self.pet_image_frame = ctk.CTkFrame(self.pet_info_frame, fg_color="transparent", width=width*0.08, height=width*0.08,)
+            self.pet_image_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Lotion, width=width*0.08, height=width*0.08,)
             self.pet_image_frame.grid(row=0, column=0, rowspan=4 ,sticky="nsew", padx=(width*0.005,0),  pady=(height*0.01))
             self.pet_image_frame.grid_rowconfigure(0, weight=1)
             
