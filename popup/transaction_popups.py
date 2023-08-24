@@ -1238,13 +1238,16 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_frame.grid_rowconfigure(1, weight=1)
             self.receipt_frame.grid_columnconfigure(1,weight=1)
             
-            self.or_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.15)
+            """ self.or_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.15)
             self.or_frame.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
             self.or_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.or_frame, text="OR#: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
             self.or_name = ctk.CTkLabel(self.or_frame, text="0001",  font=("DM Sans Medium", 14))
-            self.or_name.pack(side="left")
+            self.or_name.pack(side="left") """
+            
+            self.or_button = ctk.CTkButton(self.receipt_frame,  text="OR#: 001",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
+            self.or_button.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
             
             self.client_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.client_frame.grid(row=0, column=1, padx=(0,width*0.005), pady= height*0.007)
@@ -1378,6 +1381,10 @@ def show_payment_proceed(master, info:tuple,):
 
             temp = self.items + modified_services
             for i in range(len(temp)):
-                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i])
+                if (i % 2) == 0:
+                    tag = "even"
+                else:
+                    tag ="odd"
+                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i],tags=tag)
             return super().place(**kwargs)
     return instance(master, info)  
