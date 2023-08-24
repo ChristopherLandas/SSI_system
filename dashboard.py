@@ -1226,7 +1226,7 @@ class patient_info_frame(ctk.CTkFrame):
 
         def update_table():
             self.refresh_btn.configure(state = "disabled")
-            self.data = database.fetch_data('SELECT p_name, o_name, contact from pet_info')
+            self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
             self.pet_data_view.update_table(self.data)
             self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
         
@@ -1269,25 +1269,32 @@ class patient_info_frame(ctk.CTkFrame):
         self.add_record_btn.pack(side="left",padx=(width*0.005), pady=(height*0.01))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.gen_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
-                                              command=lambda:self.view_record.place(relx = .5, rely = .5, anchor = 'c'))
+                                              command=self.view_record)
         self.view_record_btn.pack(side="left",padx=(0,width*0.005), pady=(height*0.01))
 
         self.treeview_frame =ctk.CTkFrame(self,fg_color=Color.White_Color[3],corner_radius=0)
         self.treeview_frame.grid(row=1, column=0, columnspan=5,sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
         self.treeview_frame.grid_columnconfigure(0, weight=1)
 
-        self.data = database.fetch_data('SELECT p_name, o_name, contact from pet_info')
+        self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
         self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/PetName:x-tl/OwnerName:{int(width*.25)}-tl/ContactNo:{int(width*.185)}-tr/Action:{int(width*.075)}-bD!30!30',)
+                                           column_format=f'/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!30',)
         self.pet_data_view.grid(row=0, column=0, columnspan=3, pady=(height*0.01))
 
         self.new_record = Pet_info_popup.new_record(self, (width, height, acc_cred, acc_info))
         self.view_record = Pet_info_popup.view_record(self, (width, height, acc_cred, acc_info))
 
     def update(self) -> None:
-        self.data = database.fetch_data('SELECT p_name, o_name, contact from pet_info')
+        self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
         self.pet_data_view.update_table(self.data)
         return super().update()
+    
+    def view_record(self):
+        pet_data = self.pet_data_view.get_selected_data()
+        if(pet_data):
+            self.view_record.place(relx = .5, rely = .5, anchor = 'c', pet_data=pet_data)
+            #print(database.fetch_data(f"SELECT * FROM pet_info WHERE id='{pet_data[0]}'"))
+        #print(pet_data[0])
 
 class reports_frame(ctk.CTkFrame):
     global width, height

@@ -321,7 +321,7 @@ get_pet_name = "SELECT id, p_name FROM pet_info"
 get_ids_pi = "SELECT id FROM pet_info"
 get_pet_info = "SELECT * FROM pet_info WHERE o_name = ?"
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
-record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?)"
 
 #HIST LOG
 get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
@@ -415,3 +415,5 @@ get_selling_rate = "SELECT item_general_info.name,\
                         ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
                     GROUP BY item_transaction_content.Item_uid\
                     ORDER BY item_inventory_info.UID"
+                    
+update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
