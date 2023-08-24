@@ -11,6 +11,7 @@ import datetime
 from random import randint
 
 
+
 class encrypt:
     def pass_encrypt(pss, slt = None):
         salt = base64.urlsafe_b64encode(uuid.uuid4().bytes) if slt == None else str(slt).encode('utf-8')
@@ -118,6 +119,10 @@ def convert_date(date: str | datetime.datetime | datetime.date, date_format: str
     if value == 'datetime':
         return datetime.datetime.strptime(val, convertion_format)
     return val
+
+def record_action(usn: str, _type: str, action_code: str):
+    database.exec_nonquery([["INSERT INTO action_history VALUES (?, ?, ?, CURRENT_TIMESTAMP)", (usn, _type,  action_code)]])
+
 
 
 ''' example of inserting data

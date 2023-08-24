@@ -25,5 +25,9 @@ class db:
         EMINEM = 'without me'
 
 class action:
+    INVOICE_TYPE = 'invoice'
+
+
     RESTOCKED_ITEM = f'RST/%s/%s/%s' #item stocked, stocked_change, success?
     ADD_ITEM = f'ADD/%s/%s' #UID of the item, success?
+    MAKE_INVOICE = f'INVM/%s/%s' # Invoice maked, user, uid

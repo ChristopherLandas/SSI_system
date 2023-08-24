@@ -19,7 +19,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from constants import db
 from constants import action
-from popup import Inventory_popup, Pet_info_popup, transaction_popups, Sales_popup, dashboard_popup
+from popup import Inventory_popup, Pet_info_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup
 import copy
 import calendar
 
@@ -631,14 +631,14 @@ class transaction_frame(ctk.CTkFrame):
         self.invoice_frame.grid_rowconfigure(1, weight=1)
         self.invoice_frame.grid_columnconfigure(3, weight=1)
         #invoice search button
-        self.search_frame = ctk.CTkFrame(self.invoice_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame = ctk.CTkFrame(self.invoice_frame,width=width*0.3, height = height*0.05, fg_color="light grey")
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color=Color.Blue_Yale,
                                         width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
@@ -657,7 +657,8 @@ class transaction_frame(ctk.CTkFrame):
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
-                                           header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,)
+                                           header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
+                                           row_font=("Arial", 14),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
         self.update_invoice_treeview()
         self.invoice_treeview.pack()
 
@@ -698,7 +699,7 @@ class transaction_frame(ctk.CTkFrame):
         self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-                                            nav_text_color="white", selected_color=Color.Blue_Steel)
+                                           row_font=("Arial", 14),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
         self.update_payment_treeview()
         self.payment_treeview.pack()
         
@@ -1053,6 +1054,7 @@ class inventory_frame(ctk.CTkFrame):
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
+
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
@@ -1065,14 +1067,14 @@ class inventory_frame(ctk.CTkFrame):
         
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.add_item_btn.grid(row=0, column=2, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
-        
-        """ self.edit_btn = ctk.CTkButton(self.inventory_sub_frame,text="Edit", width=width*0.065, height = height*0.05, image=self.edit_icon, font=("DM Sans Medium", 14))
-        self.edit_btn.grid(row=0, column=3, sticky="w",padx=(0,width*0.005), pady=(height*0.01)) """
+        self.add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
         
         self.view_category = ctk.CTkButton(self.inventory_sub_frame, height=height*0.05,width=width*0.07, text="Category",  font=("DM Sans Medium", 14),
                                            command = lambda: self.category_popup.place(relx=0.5, rely=0.5, anchor="c"))
-        self.view_category.grid(row=0, column=4, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+        self.view_category.grid(row=0, column=2, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+
+        self.refresh_btn = ctk.CTkButton(self.inventory_sub_frame,text="", width=width*0.0275, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=3, sticky="w")
 
         self.sort_frame = ctk.CTkFrame(self.inventory_sub_frame,  height = height*0.05, fg_color=Color.Platinum)
         self.sort_frame.grid(row=0, column=5, padx=(width*0.005), pady=(height*0.007), sticky="e")
@@ -1300,6 +1302,8 @@ class reports_frame(ctk.CTkFrame):
         '''constants'''
         self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
         self.days = [*range(1, 13, 1)]
+        self.save_as_popup = save_as_popup.show_popup(master, (width , height ))
+        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(master, (width, height))
 
         '''variables'''
         self.data_loading_manager: List[bool] = [False for _ in range(3)]
@@ -1349,8 +1353,8 @@ class reports_frame(ctk.CTkFrame):
         self.info = [width*0.004,height*0.005,"#DBDBDB"]
 
         monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
-        monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-06-{s}',))[0][0] or 0 for s in monthly_label]
-        monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'2023-06-{s}',))[0][0] or 0 for s in monthly_label]
+        monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-07-{s}',))[0][0] or 0 for s in monthly_label]
+        monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'2023-07-{s}',))[0][0] or 0 for s in monthly_label]
 
         yearly_data_items = [database.fetch_data(sql_commands.get_items_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in self.months]
         yearly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (s, datetime.datetime.year))[0][0] or 0 for s in self.months]
@@ -1403,7 +1407,7 @@ class reports_frame(ctk.CTkFrame):
                              set_date_callback= self.update_graphs,
                              date_select_default= datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y'))
 
-        operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)]
+        operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.datetime.now().year)]
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
 
@@ -1472,964 +1476,11 @@ class reports_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
         
         self.generate_report_icon = ctk.CTkImage(light_image=Image.open("image/generate_report.png"),size=(18,20))
-        def generate_report():
-            from reportlab.graphics.shapes import Drawing, Rect, String
-            from reportlab.graphics.charts.piecharts import Pie
-            from reportlab.pdfgen.canvas import Canvas
-            from datetime import datetime as datetime_temp
-            from reportlab.lib import colors
-            from reportlab.graphics.charts.barcharts import VerticalBarChart
-            from reportlab.graphics import renderPDF
-            from reportlab.platypus import SimpleDocTemplate
-            from reportlab.lib.pagesizes import letter
-            from reportlab.platypus import Table
-            from reportlab.platypus import TableStyle
-            from PyPDF2 import PdfWriter, PdfReader
-            import math
-            import os
-            from reportlab.pdfbase import pdfmetrics
-            from reportlab.pdfbase.ttfonts import TTFont
-            ttfFile = os.path.join('C:\Windows\Fonts', 'Times.ttf')
-            pdfmetrics.registerFont(TTFont("Times-New-Roman", ttfFile))
-            ttfFile = os.path.join('C:\Windows\Fonts', 'Timesbd.ttf')
-            pdfmetrics.registerFont(TTFont("Times-New-Roman-Bold", ttfFile))
-            #pdfmetrics.registerFont(TTFont('Times New Roman', 'TimesNewRoman.ttf'))
-
-            desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-            def round_up_to_nearest_100000(num):
-                return math.ceil(num / 100000) * 100000
-            #yearly
-            if 'Yearly' in self.report_option_var.get():
-                #start of data collection
-                #get year
-                y_temp = self.year_option.get()
-                #get months
-                months_temp = [*range(1, 13, 1)]
-                monthly_data_items_temp = [database.fetch_data(sql_commands.get_items_monthly_sales_sp_temp, (s, y_temp))[0][0] or 0 for s in months_temp]
-                monthly_data_service_temp = [database.fetch_data(sql_commands.get_services_monthly_sales_sp_temp, (s, y_temp))[0][0] or 0 for s in months_temp]
-                #end of data collection
-                #path for charts
-                my_path = f'image\\charts.pdf'
-                #create page with letter size
-                d = Drawing(612, 792)
-                #get ceiling amount for bar chart
-                service_min = 0
-                service_max = 0
-                for x in monthly_data_items_temp:
-                    if x > service_max:
-                        service_max = x
-                for x in monthly_data_service_temp:
-                    if x > service_max:
-                        service_max = x
-                #round up max amount
-                service_max = round_up_to_nearest_100000(service_max)
-                #get steps for bar chart
-                service_min = service_max * 0.1
-                #round up steps
-                service_min = round(service_min, -3)
-
-                #create bar chart
-                bc = VerticalBarChart()
-                bc.x = 86
-                bc.y = 405
-                bc.height = 270
-                bc.width = 480
-                bc.data = [monthly_data_items_temp , monthly_data_service_temp]
-                bc.strokeColor = colors.black
-                bc.groupSpacing = 10
-                bc.barSpacing = 1
-                #change bar color
-                bc.bars[0].fillColor = colors.lightgreen
-                bc.bars[1].fillColor = colors.pink
-                bc.valueAxis.valueMin = 0
-                bc.valueAxis.valueMax = service_max
-                bc.valueAxis.valueStep = service_min
-                bc.categoryAxis.labels.fontSize = 12
-                bc.categoryAxis.labels.fontName = 'Times-New-Roman'
-                bc.categoryAxis.labels.boxAnchor = 'ne'
-                bc.categoryAxis.labels.dx = 5
-                bc.categoryAxis.labels.dy = -2
-                bc.categoryAxis.labels.angle = 30
-                bc.categoryAxis.categoryNames = self.months
-                #legends
-                d.add(String(225,700, f'Yearly Sales Graph as of {y_temp}', fontName = 'Times-New-Roman', fontSize=16))
-                d.add(String(265,280, 'Yearly Sales', fontName = 'Times-New-Roman', fontSize=16))
-                d.add(Rect(120, 75, 380, 240, fillColor=colors.transparent, strokeColor=colors.gray))
-                d.add(Rect(350, 350, 15, 15, fillColor=colors.pink))
-                d.add(Rect(250, 350, 15, 15, fillColor=colors.lightgreen))
-                d.add(String(370,350, 'Services', fontName = 'Times-New-Roman', fontSize=12))
-                d.add(String(270,350, 'Items', fontName = 'Times-New-Roman', fontSize=12))
-                #add barchart to drawing
-                d.add(bc, '')
-                #get total amount for service and items income
-                total_item_income_temp = 0
-                for income in monthly_data_items_temp:
-                    total_item_income_temp += income
-                total_service_income_temp = 0
-                for income in monthly_data_service_temp:
-                    total_service_income_temp += income
-                total_income_temp = total_item_income_temp + total_service_income_temp
-                
-                #create piechart
-                pc = Pie()
-                pc.x = 231
-                pc.y = 100
-                pc.height = 150
-                pc.width = 150
-                pc.slices.strokeWidth=0
-                pc.slices.fontSize = 16
-                pc.slices.fontName = 'Times-New-Roman'
-                pc.simpleLabels = 0
-                pc.slices.label_simple_pointer = 1
-                pc.data = [total_item_income_temp, total_service_income_temp]
-                pc.labels = ['Items', 'Services']
-                pc.slices[0].fillColor = colors.lightgreen
-                pc.slices[1].fillColor = colors.pink
-                pc.slices[1].popout = 10
-                #add piechart on drawing
-                d.add(pc, '')
-                #create pdf
-                renderPDF.drawToFile(d, my_path, '')
-
-                #footer
-                filename = f'image/footer.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter,
-                )
-                pdf.bottomMargin = 20
-                pdf.leftMargin = 20
-                pdf.rightMargin = 20
-                footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 2']]
-                footer_content2 = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 2 of 2']]
-                table_footer = Table(footer_content)
-                table_footer2 = Table(footer_content2)
-                tbl_footer_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-                    #font style
-                    ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, -1), 14),
-                    ('FONTSIZE', (0, 0), (0, 0), 10),
-                    #space at the bottom
-                    ('TOPPADDING', (0, 0), (0, -1), 670),
-                    ('RIGHTPADDING', (0, 0), (0, 0), 300),
-                    ]
-                )
-                table_footer.setStyle(tbl_footer_style)
-                table_footer2.setStyle(tbl_footer_style)
-                elems = []
-                elems.append(table_footer)
-                elems.append(table_footer2)
-                pdf.build(elems)
-
-                #content
-                filename = f'{desktop}/{y_temp}_yearly_report.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter
-                )
-                #header
-                report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                              ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                              ['+ 02 774 6090']]
-                report_header = Table(report_header_temp)
-                tbl_header_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, 0), 18),
-                    ('FONTSIZE', (0, 1), (0, 2), 12),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-                    ('BOTTOMPADDING', (0, 2), (0, 2), 25),
-                    ]
-                )
-
-                report_header.setStyle(tbl_header_style)
-
-                total_item_income_temp = 0
-                for income in monthly_data_items_temp:
-                    total_item_income_temp += income
-                total_service_income_temp = 0
-                for income in monthly_data_service_temp:
-                    total_service_income_temp += income
-                total_income_temp = total_item_income_temp + total_service_income_temp
-                #header for table columns
-                yearly_report_content_temp = [[f'Yearly Sales Report as of {y_temp}'], [f'Prepared by: {str(acc_info[0][1])}', '', f'Date: {date.today()}', ''], ['Month', 'Items', 'Services', 'Total Income']]
-                #add data for table
-                yearly_report_total_items_temp = 0
-                yearly_report_total_services_temp = 0
-                monthlength = len(monthly_data_items_temp)
-                for i in range(0, monthlength):
-                    yearly_report_temp_data = []
-                    yearly_report_temp_data.append(self.months[i])
-                    yearly_report_temp_data.append(f'P{format_price(monthly_data_items_temp[i])}')
-                    yearly_report_temp_data.append(f'P{format_price(monthly_data_service_temp[i])}')
-                    yearly_report_temp_data.append(f'P{format_price(monthly_data_items_temp[i] + monthly_data_service_temp[i])}')
-                    yearly_report_content_temp.append(yearly_report_temp_data)
-                    yearly_report_total_items_temp += monthly_data_items_temp[i]
-                    yearly_report_total_services_temp += monthly_data_service_temp[i]
-                
-                yearly_report_total_all_temp = yearly_report_total_items_temp + yearly_report_total_services_temp
-                yearly_report_content_temp.append(["Total: ", f'P{format_price(yearly_report_total_items_temp)}', f'P{format_price(yearly_report_total_services_temp)}', f'P{format_price(yearly_report_total_all_temp)}'])
-                table_content = Table(yearly_report_content_temp)
-
-                #add table style
-                tbl_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('SPAN', (0, 0), (-1, 0)),
-                    ('SPAN', (0, 1), (1, 1)),
-                    ('SPAN', (2, 1), (3, 1)),
-                    ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-                    ('ALIGN', (0, 1), (-1, 1), 'LEFT'),
-                    ('ALIGN', (0, 2), (0, -1), 'LEFT'),
-                    ('ALIGN', (1, 3), (-1, -1), 'RIGHT'),
-                    ('ALIGN', (0, 2), (3, 2), 'CENTER'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 16),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-                    ('LEFTPADDING', (0, 3), (-1, -1), 10),
-                    ]
-                )
-
-                table_content.setStyle(tbl_style)
-
-                #alternate background color
-                rowNumb = len(yearly_report_content_temp)
-                for i in range(1, rowNumb):
-                    if i % 2 == 0:
-                        bc = colors.white
-                    else:
-                        bc = colors.lightgrey
-
-                    ts = TableStyle(
-                        [('BACKGROUND', (0, i), (-1, i), bc)]
-                    )
-                    table_content.setStyle(ts)
-
-                #add borders
-                ts = TableStyle([
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ])
-                table_content.setStyle(ts)
-                elems = []
-                elems.append(report_header)
-                elems.append(table_content)
-                pdf.build(elems)
-                #pdf compilation
-                merger = PdfWriter()
-                input1 = open(f"image/charts.pdf", "rb")
-                input2 = open(f"{desktop}/{y_temp}_yearly_report.pdf", "rb")
-                # add the first 3 pages of input1 document to output
-                merger.append(input2)
-                merger.append(input1)
-                # Write to an output PDF document
-                output = open(f"{desktop}/{y_temp}_yearly_report.pdf", "wb")
-                merger.write(output)
-                # Close File Descriptors
-                merger.close()
-                output.close()
-                #add footer
-                from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-                p1 = pdfrw1(f"{desktop}/{y_temp}_yearly_report.pdf")
-                p2 = pdfrw1("image/footer.pdf")
-
-                for page in range(len(p1.pages)):
-                    merger = pdfrw(p1.pages[page])
-                    merger.add(p2.pages[page]).render()
-
-                writer = pdfrw2()
-                writer.write(f"{desktop}/{y_temp}_yearly_report.pdf", p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
-            
-            #monthly
-            if 'Monthly' in self.report_option_var.get():
-                #start of data collection
-                monthly_label_temp = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
-                monthly_data_items_temp2 = [database.fetch_data(sql_commands.get_items_daily_sales_sp_temp, (f'2023-06-{s}',))[0][0] for s in monthly_label]
-                monthly_data_service_temp2 = [database.fetch_data(sql_commands.get_services_daily_sales_sp_temp, (f'2023-06-{s}',))[0][0] for s in monthly_label]
-
-                monthly_data_items_temp = []
-                monthly_data_service_temp = []
-
-                for month in monthly_data_items_temp2:
-                    if month is None:
-                        monthly_data_items_temp.append(0)
-                    else:
-                        monthly_data_items_temp.append(month)
-
-                for month in monthly_data_service_temp2:
-                    if month is None:
-                        monthly_data_service_temp.append(0)
-                    else:
-                        monthly_data_service_temp.append(month)
-
-                m_temp = self.month_option.get()
-                y_temp = self.year_option.get()
-                monthly_label_temp = [*range(1, calendar.monthrange(datetime.datetime.now().year, int(m_temp))[-1]+1, 1)]
-                monthly_label_temp2 = []
-                for month in monthly_label_temp:
-                    monthly_label_temp2.append(str(month))
-
-                full_date_temp = 1
-                full_date_temp = datetime.datetime.strptime(m_temp, '%m').strftime('%B')
-
-                #end
-                #Charts
-                my_path = f'image\\charts.pdf'
-                d = Drawing(612, 792)
-
-                service_min = 1
-                service_max = 1
-                for x in monthly_data_items_temp:
-                    if x > service_max:
-                        service_max = x
-                for x in monthly_data_service_temp:
-                    if x > service_max:
-                        service_max = x
-
-                service_max = round_up_to_nearest_100000(service_max)
-                service_min = service_max * 0.1
-                service_min = round(service_min, -3)
-
-                data5 = [monthly_data_items_temp , monthly_data_service_temp]
-                bc = VerticalBarChart()
-                bc.x = 86
-                bc.y = 405
-                bc.height = 270
-                bc.width = 480
-                bc.data = data5
-                bc.strokeColor = colors.black
-                bc.groupSpacing = 10
-                bc.barSpacing = 1
-                #change bar color
-                bc.bars[0].fillColor = colors.lightgreen
-                bc.bars[1].fillColor = colors.pink
-                bc.valueAxis.valueMin = 0
-                bc.valueAxis.valueMax = service_max
-                bc.valueAxis.valueStep = service_min
-                bc.categoryAxis.labels.fontSize = 12
-                bc.categoryAxis.labels.fontName = 'Times-New-Roman'
-                bc.categoryAxis.labels.boxAnchor = 'ne'
-                bc.categoryAxis.labels.dx = 5
-                bc.categoryAxis.labels.dy = -2
-                bc.categoryAxis.labels.angle = 0
-                bc.categoryAxis.categoryNames = monthly_label_temp2
-                #legends
-                d.add(String(195,700, f'Monthly Sales Graph as of {full_date_temp} {y_temp}',  fontName = 'Times-New-Roman', fontSize=16))
-                d.add(String(255,280, 'Monthly Sales', fontName = 'Times-New-Roman', fontSize=16))
-                d.add(Rect(120, 75, 380, 240, fillColor=colors.transparent, strokeColor=colors.gray))
-                d.add(Rect(350, 350, 15, 15, fillColor=colors.pink))
-                d.add(Rect(250, 350, 15, 15, fillColor=colors.lightgreen))
-                d.add(String(370,350, 'Services', fontName = 'Times-New-Roman', fontSize=12))
-                d.add(String(270,350, 'Items', fontName = 'Times-New-Roman', fontSize=12))
-
-                d.add(bc, '')
-                
-                pc = Pie()
-
-                total_item_income_temp = 0
-                for income in monthly_data_items_temp:
-                    total_item_income_temp += income
-                total_service_income_temp = 0
-                for income in monthly_data_service_temp:
-                    total_service_income_temp += income
-                total_income_temp = total_item_income_temp + total_service_income_temp
-                
-                pc.x = 231
-                pc.y = 100
-                pc.height = 150
-                pc.width = 150
-                pc.slices.strokeWidth=0
-                pc.slices.fontSize = 16
-                pc.slices.fontName = 'Times-New-Roman'
-                pc.simpleLabels = 0
-                pc.slices.label_simple_pointer = 1
-                pc.data = [total_item_income_temp, total_service_income_temp]
-                pc.labels = ['Items', 'Services']
-                pc.slices[0].fillColor = colors.lightgreen
-                pc.slices[1].fillColor = colors.pink
-                pc.slices[1].popout = 10
-                d.add(pc, '')
-                renderPDF.drawToFile(d, my_path, '')
-
-                #footer
-                filename = f'image/footer.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter,
-                )
-                pdf.bottomMargin = 20
-                pdf.leftMargin = 20
-                pdf.rightMargin = 20
-                footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 3']]
-                table_footer = Table(footer_content)
-                footer_content2 = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 2 of 3']]
-                table_footer2 = Table(footer_content2)
-                footer_content3 = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 3 of 3']]
-                table_footer3 = Table(footer_content3)
-                tbl_footer_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-                    #font style
-                    ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, -1), 14),
-                    ('FONTSIZE', (0, 0), (0, 0), 10),
-                    #space at the bottom
-                    ('TOPPADDING', (0, 0), (0, -1), 670),
-                    ('RIGHTPADDING', (0, 0), (0, 0), 300),
-                    ]
-                )
-                table_footer.setStyle(tbl_footer_style)
-                table_footer2.setStyle(tbl_footer_style)
-                table_footer3.setStyle(tbl_footer_style)
-                elems = []
-                elems.append(table_footer)
-                elems.append(table_footer2)
-                elems.append(table_footer3)
-                pdf.build(elems)
-
-                #content
-                filename = f'{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter
-                )
-                #header
-                report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                              ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                              ['+ 02 774 6090']]
-                report_header = Table(report_header_temp)
-                tbl_header_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, 0), 18),
-                    ('FONTSIZE', (0, 1), (0, 2), 12),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-                    ('BOTTOMPADDING', (0, 2), (0, 2), 25),
-                    ]
-                )
-
-                report_header.setStyle(tbl_header_style)
-                #header for table columns
-                yearly_report_content_temp = [
-                    [f'Monthly Sales Report as of {full_date_temp} {y_temp}'], [f'Prepared by: {str(acc_info[0][1])}', '', f'Date: {date.today()}', ''], ['Day', 'Items', 'Services', 'Total Income']
-                ]
-                #add data for table
-                yearly_report_total_items_temp = 0
-                yearly_report_total_services_temp = 0
-                monthlength = len(monthly_data_items_temp)
-                for i in range(0, monthlength):
-                    yearly_report_temp_data = []
-                    yearly_report_temp_data.append(monthly_label_temp[i])
-                    yearly_report_temp_data.append(f'P{format_price(monthly_data_items_temp[i])}')
-                    yearly_report_temp_data.append(f'P{format_price(monthly_data_service_temp[i])}')
-                    yearly_report_temp_data.append(f'P{format_price(monthly_data_items_temp[i] + monthly_data_service_temp[i])}')
-                    yearly_report_content_temp.append(yearly_report_temp_data)
-                    yearly_report_total_items_temp += monthly_data_items_temp[i]
-                    yearly_report_total_services_temp += monthly_data_service_temp[i]
-                
-                yearly_report_total_all_temp = yearly_report_total_items_temp + yearly_report_total_services_temp
-                yearly_report_content_temp.append(["Total: ", f'P{format_price(yearly_report_total_items_temp)}', f'P{format_price(yearly_report_total_services_temp)}', f'P{format_price(yearly_report_total_all_temp)}'])
-                table_content = Table(yearly_report_content_temp)
-
-                #add table style
-                tbl_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('SPAN', (0, 0), (-1, 0)),
-                    ('SPAN', (0, 1), (1, 1)),
-                    ('SPAN', (2, 1), (3, 1)),
-                    ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-                    ('ALIGN', (0, 1), (-1, 1), 'LEFT'),
-                    ('ALIGN', (0, 2), (0, -1), 'LEFT'),
-                    ('ALIGN', (1, 3), (-1, -1), 'RIGHT'),
-                    ('ALIGN', (0, 2), (3, 2), 'CENTER'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 16),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-                    ('LEFTPADDING', (0, 3), (-1, -1), 10),
-                    ]
-                )
-
-                table_content.setStyle(tbl_style)
-                #alternate background color
-                rowNumb = len(yearly_report_content_temp)
-                for i in range(1, rowNumb):
-                    if i % 2 == 0:
-                        bc = colors.white
-                    else:
-                        bc = colors.lightgrey
-
-                    ts = TableStyle(
-                        [('BACKGROUND', (0, i), (-1, i), bc)]
-                    )
-                    table_content.setStyle(ts)
-
-                #add borders
-                ts = TableStyle([
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ])
-                table_content.setStyle(ts)
-                elems = []
-                elems.append(report_header)
-                elems.append(table_content)
-                pdf.build(elems)
-                #pdf compilation
-                merger = PdfWriter()
-                input1 = open(f"image/charts.pdf", "rb")
-                input2 = open(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf", "rb")
-                # add the first 3 pages of input1 document to output
-                merger.append(input2)
-                merger.append(input1)
-                # Write to an output PDF document
-                output = open(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf", "wb")
-                merger.write(output)
-                # Close File Descriptors
-                merger.close()
-                output.close()
-                #add footer
-                from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-                p1 = pdfrw1(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf")
-                p2 = pdfrw1("image/footer.pdf")
-
-                for page in range(len(p1.pages)):
-                    merger = pdfrw(p1.pages[page])
-                    merger.add(p2.pages[page]).render()
-
-                writer = pdfrw2()
-                writer.write(f"{desktop}/{full_date_temp}_{y_temp}_monthly_report.pdf", p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.")
-
-            #daily
-            if 'Daily' in self.report_option_var.get():
-                #start of data collection
-                date_temp = 1
-                if self.date_selected_label._text.startswith(self.year_option.get()):
-                    date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%Y-%m-%d')
-                else:
-                    date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
-
-                full_date_temp = 1
-                if self.date_selected_label._text.startswith(self.year_option.get()):
-                    full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%B %d, %Y')
-                else:
-                    full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%B %d, %Y')
-
-                day_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%d')
-                month_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%B')
-
-                data_temp = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp_temp, (date_temp,))[0][0] or 0),
-                             float(database.fetch_data(sql_commands.get_services_daily_sales_sp_temp, (date_temp,))[0][0] or 0)]
-
-                m_temp = self.month_option.get()
-                y_temp = self.year_option.get()
-                #end
-                #Charts
-                my_path = f'image\\charts.pdf'
-                d = Drawing(612, 792)
-
-                service_min = 1
-                service_max = 1
-
-                if data_temp[0] > service_max:
-                    service_max = data_temp[0]
-                if data_temp[1] > service_max:
-                    service_max = data_temp[1]
-
-                service_max = round_up_to_nearest_100000(service_max)
-                service_min = service_max * 0.1
-                service_min = round(service_min, -3)
-                d.add(String(265,380, 'Daily Sales', fontName = 'Times-New-Roman', fontSize=16))
-                d.add(Rect(120, 175, 380, 240, fillColor=colors.transparent, strokeColor=colors.gray))
-                
-                pc = Pie()
-                pc.x = 231
-                pc.y = 200
-                pc.height = 150
-                pc.width = 150
-                pc.slices.strokeWidth=0
-                pc.slices.fontSize = 16
-                pc.slices.fontName = 'Times-New-Roman'
-                pc.simpleLabels = 0
-                pc.slices.label_simple_pointer = 1
-                pc.data = data_temp
-                pc.labels = ['Items', 'Services']
-                pc.slices[0].fillColor = colors.lightgreen
-                pc.slices[1].fillColor = colors.pink
-                pc.slices[1].popout = 10
-                d.add(pc, '')
-                renderPDF.drawToFile(d, my_path, '')
-
-                #footer
-                filename = f'image/footer.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter,
-                )
-                pdf.bottomMargin = 20
-                pdf.leftMargin = 20
-                pdf.rightMargin = 20
-                footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 1']]
-                table_footer = Table(footer_content)
-                tbl_footer_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-                    #font style
-                    ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, -1), 14),
-                    ('FONTSIZE', (0, 0), (0, 0), 10),
-                    #space at the bottom
-                    ('TOPPADDING', (0, 0), (0, -1), 670),
-                    ('RIGHTPADDING', (0, 0), (0, 0), 300),
-                    ]
-                )
-                table_footer.setStyle(tbl_footer_style)
-                elems = []
-                elems.append(table_footer)
-                pdf.build(elems)
-
-                #content
-                filename = f'{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter
-                )
-                #header
-                report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                              ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                              ['+ 02 774 6090']]
-                report_header = Table(report_header_temp)
-                tbl_header_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, 0), 18),
-                    ('FONTSIZE', (0, 1), (0, 2), 12),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-                    ('BOTTOMPADDING', (0, 2), (0, 2), 25),
-                    ]
-                )
-
-                report_header.setStyle(tbl_header_style)
-
-                yearly_report_content_temp = [[f'Daily Sales Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {str(acc_info[0][1])}', f'Date: {date.today()}'], ['Items', f'P{format_price(data_temp[0])}'], 
-                                              ['Services', f'P{format_price(data_temp[1])}'],
-                                              ['Total Income', f'P{format_price(data_temp[0] + data_temp[1])}']]
-                
-                inventory_report_temp = [['']]
-
-                inventory_report_data_temp = [[f'Inventory Report as of {y_temp}'], ['Item', 'Stock', 'Status']]
-                #add data for table
-                for x in database.fetch_data(sql_commands.get_inventory_by_group):
-                    temp_data = []
-                    temp_data.append(x[0])
-                    temp_data.append(x[1])
-                    temp_data.append(x[4])
-                    inventory_report_data_temp.append(temp_data)
-                
-                table_content = Table(yearly_report_content_temp)
-                table_content2 = Table(inventory_report_temp)
-                table_content3 = Table(inventory_report_data_temp)
-                
-                #add table style
-                from reportlab.platypus import TableStyle
-                tbl_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('SPAN', (0, 0), (-1, 0)),
-                    ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                    ('ALIGN', (0, 1), (0, -1), 'LEFT'),
-                    ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
-                    ('ALIGN', (2, 1), (2, -2), 'LEFT'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 16),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-                    ('LEFTPADDING', (1, 0), (1, -1), 10),
-                    ]
-                )
-
-                tbl_style2 = TableStyle(
-                    [
-                    #font style
-                    ('FONTSIZE', (0, 0), (-1, -1), 18),
-                    #space at the bottom
-                    ('TOPPADDING', (0, 0), (-1, -1), 60),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 45),
-                    ]
-                )
-
-                table_content.setStyle(tbl_style)
-                table_content2.setStyle(tbl_style2)
-                table_content3.setStyle(tbl_style)
-                #alternate background color
-                rowNumb = len(yearly_report_content_temp)
-                for i in range(1, rowNumb):
-                    if i % 2 == 0:
-                        bc = colors.white
-                    else:
-                        bc = colors.lightgrey
-
-                    ts = TableStyle(
-                        [('BACKGROUND', (0, i), (-1, i), bc)]
-                    )
-                    table_content.setStyle(ts)
-
-                rowNumb = len(inventory_report_data_temp)
-                for i in range(1, rowNumb):
-                    if i % 2 == 0:
-                        bc = colors.white
-                    else:
-                        bc = colors.lightgrey
-
-                    ts = TableStyle(
-                        [('BACKGROUND', (0, i), (-1, i), bc)]
-                    )
-                    table_content3.setStyle(ts)
-
-                #add borders
-                ts = TableStyle([
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ])
-                table_content.setStyle(ts)
-                table_content3.setStyle(ts)
-                
-                ts = TableStyle([
-                    ('ALIGN', (0, 1), (-1, 1), 'LEFT'),
-                ])
-                table_content.setStyle(ts)
-                elems = []
-                elems.append(report_header)
-                elems.append(table_content)
-                #elems.append(table_content2)
-                #elems.append(table_content3)
-                pdf.build(elems)
-                #pdf compilation
-                merger = PdfWriter()
-                input1 = open(f"image/charts.pdf", "rb")
-                input2 = open(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", "rb")
-                
-                # add the first 3 pages of input1 document to output
-                merger.append(input2)
-                #merger.append(input1)
-                # Write to an output PDF document
-                output = open(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", "wb")
-                merger.write(output)
-                # Close File Descriptors
-                merger.close()
-                output.close()
-                #add footer
-                from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-                p1 = pdfrw1(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_monthly_report.pdf")
-                p2 = pdfrw1("image/footer.pdf")
-                p3 = pdfrw1("image/charts.pdf")
-
-                for page in range(len(p1.pages)):
-                    merger = pdfrw(p1.pages[page])
-                    merger.add(p2.pages[page]).render()
-
-                merger = pdfrw(p1.pages[0])
-                merger.add(p3.pages[0]).render()
-
-                writer = pdfrw2()
-                writer.write(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
-
-                #Inventory Report
-                '''
-                #start of data collection
-                date_temp = 1
-                if self.date_selected_label._text.startswith(self.year_option.get()):
-                    date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%Y-%m-%d')
-                else:
-                    date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
-
-                full_date_temp = 1
-                if self.date_selected_label._text.startswith(self.year_option.get()):
-                    full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%B %d, %Y')
-                else:
-                    full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%B %d, %Y')
-
-                day_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%d')
-                month_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%B')
-
-                data_temp = [float(database.fetch_data(sql_commands.get_items_daily_sales_sp_temp, (date_temp,))[0][0] or 0),
-                             float(database.fetch_data(sql_commands.get_services_daily_sales_sp_temp, (date_temp,))[0][0] or 0)]
-
-                m_temp = self.month_option.get()
-                y_temp = self.year_option.get()
-                #end
-                
-                #footer
-                filename = f'image/footer.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter,
-                )
-                pdf.bottomMargin = 20
-                pdf.leftMargin = 20
-                pdf.rightMargin = 20
-                footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 1']]
-                table_footer = Table(footer_content)
-                tbl_footer_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-                    #font style
-                    ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, -1), 14),
-                    ('FONTSIZE', (0, 0), (0, 0), 10),
-                    #space at the bottom
-                    ('TOPPADDING', (0, 0), (0, -1), 670),
-                    ('RIGHTPADDING', (0, 0), (0, 0), 300),
-                    ]
-                )
-                table_footer.setStyle(tbl_footer_style)
-                elems = []
-                elems.append(table_footer)
-                pdf.build(elems)
-
-                #content
-                filename = f'{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_inventory_report.pdf'
-                pdf = SimpleDocTemplate(
-                    filename=filename,
-                    pagesize=letter
-                )
-                #header
-                report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                              ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                              ['+ 02 774 6090']]
-                report_header = Table(report_header_temp)
-                tbl_header_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (0, 0), 18),
-                    ('FONTSIZE', (0, 1), (0, 2), 12),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-                    ('BOTTOMPADDING', (0, 2), (0, 2), 25),
-                    ]
-                )
-
-                report_header.setStyle(tbl_header_style)
-
-                inventory_report_data_temp = [[f'Inventory Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {str(acc_info[0][1])}', f'Date: {date.today()}'], ['Item', 'Stock', 'Status']]
-                #add data for table
-                for x in database.fetch_data(sql_commands.get_inventory_by_group):
-                    temp_data = []
-                    temp_data.append(x[0])
-                    temp_data.append(x[1])
-                    temp_data.append(x[4])
-                    inventory_report_data_temp.append(temp_data)
-                table_content = Table(inventory_report_data_temp)
-                
-                #add table style
-                tbl_style = TableStyle(
-                    [
-                    #text alignment, starting axis, -1 = end
-                    ('SPAN', (0, 0), (-1, 0)),
-                    ('SPAN', (1, 1), (2, 1)),
-                    ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                    ('ALIGN', (0, 1), (0, -1), 'LEFT'),
-                    ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
-                    ('ALIGN', (2, 1), (2, -2), 'LEFT'),
-                    #font style
-                    ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 16),
-                    #space at the bottom
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-                    ('LEFTPADDING', (1, 0), (1, -1), 10),
-                    ]
-                )
-
-                tbl_style2 = TableStyle(
-                    [
-                    #font style
-                    ('FONTSIZE', (0, 0), (-1, -1), 18),
-                    #space at the bottom
-                    ('TOPPADDING', (0, 0), (-1, -1), 60),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 45),
-                    ]
-                )
-
-                table_content.setStyle(tbl_style)
-                #alternate background color
-
-                rowNumb = len(inventory_report_data_temp)
-                for i in range(1, rowNumb):
-                    if i % 2 == 0:
-                        bc = colors.white
-                    else:
-                        bc = colors.lightgrey
-
-                    ts = TableStyle(
-                        [('BACKGROUND', (0, i), (-1, i), bc)]
-                    )
-                    table_content.setStyle(ts)
-
-                #add borders
-                ts = TableStyle([
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ])
-                table_content.setStyle(ts)
-                
-                ts = TableStyle([
-                    ('ALIGN', (0, 1), (-1, 1), 'LEFT'),
-                ])
-                table_content.setStyle(ts)
-                elems = []
-                elems.append(report_header)
-                elems.append(table_content)
-                pdf.build(elems)
-                #pdf compilation
-                
-                #add footer
-                p1 = pdfrw1(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_inventory_report.pdf")
-                p2 = pdfrw1("image/footer.pdf")
-
-                for page in range(len(p1.pages)):
-                    merger = pdfrw(p1.pages[page])
-                    merger.add(p2.pages[page]).render()
-
-                writer = pdfrw2()
-                writer.write(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_inventory_report.pdf", p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.")
-                '''
-
         
+        '''self.show_gen_report = ctk.CTkButton(self.sales_report_top, text="", image=self.generate_report_icon, width=width*0.025,
+                                           command = generate_report)'''
         self.show_gen_report = ctk.CTkButton(self.sales_report_top, text="", image=self.generate_report_icon, width=width*0.025,
-                                           command=generate_report)
+                                             command = lambda: self.save_as_popup.place(relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
         self.show_gen_report.grid(row=0, column=3,  padx=(0, width*0.005))
         #generating reports end
 
@@ -2486,6 +1537,7 @@ class reports_frame(ctk.CTkFrame):
         self.yearly_vbar_canvas.get_tk_widget().pack()
         report_menu_callback("Daily")
 
+        #region: inv rep
         '''INVENTORY REPORT'''
         self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
         self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.0025), pady=(height*0.005,0))
@@ -2497,11 +1549,14 @@ class reports_frame(ctk.CTkFrame):
 
         self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
         self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005,0))
+        self.generate_rep_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
+                                              command = lambda: self.save_as_inventory_rep_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.generate_rep_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005,0))
 
         self.bought_item_con_col = None
 
         self.rep_treeview_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="transparent")
-        self.rep_treeview_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
+        self.rep_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
 
         self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
                                            column_format=f"/No:{int(width*.025)}-#c/ItemName:x-tl/InitialStock:{int(width*.2)}-tr/CurrentStock:{int(width*.2)}-tr!30!30",
@@ -2509,6 +1564,8 @@ class reports_frame(ctk.CTkFrame):
         self.inventory_rep_treeview.pack()
         self.update_invetory_graph()
         self.update_invetory_graph()
+        #endregion
+
         load_main_frame(0)
 
     def update_invetory_graph(self):
@@ -2596,10 +1653,6 @@ class reports_frame(ctk.CTkFrame):
         force_reload = str(force_reload) == 'True'
         #as some of the caller of the function return their value, this will recheck the bool of the argument
 
-        #print(self.data_loading_manager)
-        #print(not self.date_selected_label._text != self.previous_date, not (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month, not self.year_option.get() != self.previous_year)
-        #print(force_reload)
-
         if 'Daily' in self.report_option_var.get():
             if not self.data_loading_manager[0] or self.date_selected_label._text != self.previous_date or force_reload:
                 date = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')
@@ -2614,6 +1667,7 @@ class reports_frame(ctk.CTkFrame):
 
                 self.previous_date = self.date_selected_label._text
                 self.data_loading_manager[0] = True
+                self.daily_data_view.update_table(database.fetch_data(sql_commands.daily_report_treeview_data, (date, )))
 
         if 'Monthly' in self.report_option_var.get():
             if not self.data_loading_manager[1] or (self.year_option.get()+self.month_option.get()) != self.previous_year+self.previous_month or force_reload:
@@ -2630,6 +1684,7 @@ class reports_frame(ctk.CTkFrame):
                 self.data_loading_manager[1] = True
                 self.previous_month = self.month_option.get()
                 self.previous_year = self.year_option.get()
+                self.monthly_data_view.update_table(database.fetch_data(sql_commands.monthly_report_treeview_data, (m, y)))
 
         if 'Yearly' in self.report_option_var.get():
             if not self.data_loading_manager[2] or self.year_option.get() != self.previous_year or force_reload:
@@ -2644,6 +1699,7 @@ class reports_frame(ctk.CTkFrame):
 
                 self.data_loading_manager[2] = True
                 self.previous_year = self.year_option.get()
+                self.yearly_data_view.update_table(database.fetch_data(sql_commands.yearly_report_treeview_data, (y, )))
         #set the previous selection to avoid repeating load
 
     def graphs_need_upgrade(self):
@@ -2747,15 +1803,35 @@ class user_setting_frame(ctk.CTkFrame):
             database.exec_nonquery([['UPDATE account_access_level SET Dashboard = ?, Transaction = ?,\
                                       Services = ?, Sales = ?, Inventory = ?, Pet_Info = ?, Report = ?,\
                                       User = ?, Action = ? Where usn = ?', role_values]])
+            #implement the job pos change here
+
+        '''def set_checkBox_accessess(data:list, e:any = None):
+            for i in range(len(self.changeFrame.access_lvls)):
+                if data[i+2] == 1:
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)
+                    if(active_access[i+1] == 1):
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                    else:
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
+                else:
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)'''
+        #TBA: proceed command config needed
 
         def set_checkBox(e:any = None):
             self.changeFrame.accept_button.configure(state = ctk.NORMAL)
+            self.changeFrame.selected_role_option.configure(state = ctk.NORMAL, values = [s[0] for s in database.fetch_data(sql_commands.get_all_position_titles)])
             job_pos = database.fetch_data('SELECT job_position FROM acc_info WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0][0]
             data = database.fetch_data('SELECT * FROM user_level_access WHERE title = ?', (job_pos,))[0]
+            active_access = database.fetch_data('Select * FROM account_access_level WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0]
+            self.changeFrame.selected_role_option.set(job_pos)
             for i in range(len(self.changeFrame.access_lvls)):
                 if data[i+2] == 1:
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL) 
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)
+                    if(active_access[i+1] == 1):
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
+                    else:
+                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
                 else:
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)

@@ -28,6 +28,11 @@ class frame2(ctk.CTkFrame):
         self.usn_option.grid(row = 4, column = 0, padx = (7, 0))
         self.usn_option.set("Select a user")
 
+        ctk.CTkLabel(self.left_frame, text= "Position", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
+        self.selected_role_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8, state=ctk.DISABLED)
+        self.selected_role_option.grid(row = 6, column = 0, padx = (7, 0))
+        self.selected_role_option.set("Job Position")
+
         '''ctk.CTkLabel(self.left_frame, text= "USN", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
         self.usn_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
                                       state = 'readonly')

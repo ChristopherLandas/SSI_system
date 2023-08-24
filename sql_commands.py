@@ -293,6 +293,7 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 
 #USER LEVEL ACCESS
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
+get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ? ,?, ?, ?, CURRENT_TIMESTAMP, Null)"
@@ -354,6 +355,63 @@ get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,
                                       WHERE transaction_record.transaction_date = current_date\
                                       GROUP BY item_transaction_content.item_name\
                                       ORDER BY transaction_record.transaction_uid"
+
+get_items_daily_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS FLOAT)\
+                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                         WHERE transaction_record.transaction_date = ?;"
+
+get_services_daily_sales_sp_temp = "SELECT CAST(SUM(services_transaction_content.price) AS FLOAT)\
+                            FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                            WHERE transaction_record.transaction_date = ?;"
+
+get_items_monthly_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS FLOAT)\
+                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                         WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+
+get_services_monthly_sales_sp_temp = "SELECT CAST(SUM(services_transaction_content.price) AS FLOAT)\
+                            FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                            WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
+
+#REPORT TREEVIEWS
+daily_report_treeview_data = "SELECT transaction_record.transaction_uid,\
+                                      transaction_record.client_name,\
+                                      CONCAT('₱', FORMAT(COALESCE(SUM(item_transaction_content.price), 0) ,2)) AS item,\
+                                      CONCAT('₱', FORMAT(COALESCE(sum(services_transaction_content.price), 0) ,2)) AS service,\
+                                      CONCAT('₱', FORMAT(transaction_record.Total_amount ,2)) AS total\
+                              FROM transaction_record\
+                              left JOIN services_transaction_content\
+                                          ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                              LEFT JOIN item_transaction_content\
+                                          ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                              WHERE transaction_date = ?\
+                              GROUP BY transaction_record.transaction_uid"
+
+monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M %d, %Y') AS 'date',\
+                                        CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0), 2)) AS item,\
+                                        CONCAT('₱', FORMAT(COALESCE(sum(services_transaction_content.price), 0) ,2)) AS service,\
+                                        CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0) + coalesce(sum(services_transaction_content.price), 0), 2))\
+                                FROM transaction_record\
+                                left JOIN services_transaction_content\
+                                    ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                                LEFT JOIN item_transaction_content\
+                                    ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                                WHERE MONTH(transaction_record.transaction_date) = ?\
+                                    AND YEAR(transaction_record.transaction_date) = ?\
+                                GROUP BY transaction_record.transaction_date\
+                                ORDER BY transaction_record.transaction_date;"
+
+yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M') AS 'date',\
+                                      CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0), 2)) AS item,\
+                                      CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0) ,2)) AS service,\
+                                      CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS total\
+                               FROM transaction_record\
+                               left JOIN services_transaction_content\
+                                           ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
+                               LEFT JOIN item_transaction_content\
+                                           ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                               WHERE YEAR(transaction_record.transaction_date) = 2023\
+                               GROUP BY month(transaction_record.transaction_date)\
+                               ORDER BY transaction_record.transaction_date;"
 
 #invoices
 insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
