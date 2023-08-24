@@ -1290,8 +1290,8 @@ class patient_info_frame(ctk.CTkFrame):
         pet_data = self.pet_data_view.get_selected_data()
         if(pet_data):
             self.view_record.place(relx = .5, rely = .5, anchor = 'c', pet_data=pet_data)
-            #print(database.fetch_data(f"SELECT * FROM pet_info WHERE id='{pet_data[0]}'"))
-        #print(pet_data[0])
+        else:
+            messagebox.showwarning('Warning','No Record is selected')
 
 class reports_frame(ctk.CTkFrame):
     global width, height
