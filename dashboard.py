@@ -936,13 +936,22 @@ class inventory_frame(ctk.CTkFrame):
             self.data_view1.update_table(temp)
             self.data_view1.pack()
 
+        def get_categories():
+            
+            data = database.fetch_data("SELECT categ_name FROM categories")
+            category_data = ["All Items"]
+            for i in range(len(data)):
+                category_data.append(data[i][0])
+            
+            return category_data
+
         def sort_status_callback(option):
             if "Levels" in option:
                 self.sort_status_option.configure(values=["All", "Normal","Reorder","Critical", "Out of Stock"])
                 self.sort_status_option.set("All")
                 sort_status_configuration_callback()
             elif "Category" in option:
-                self.sort_status_option.configure(values=["All Items","Medicine", "Accessories", "Food"])
+                self.sort_status_option.configure(values=get_categories())
                 self.sort_status_option.set("All Items")
                 #sort_status_configuration_callback()
             else:
@@ -1062,8 +1071,8 @@ class inventory_frame(ctk.CTkFrame):
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         '''End'''
         
-        self.refresh_btn = ctk.CTkButton(self.inventory_sub_frame,text="", width=width*0.0275, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
-        self.refresh_btn.grid(row=0, column=1, sticky="w",padx=(0, width*0.005))
+        """ self.refresh_btn = ctk.CTkButton(self.inventory_sub_frame,text="", width=width*0.0275, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1, sticky="w",padx=(0, width*0.005)) """
         
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
@@ -1276,6 +1285,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.treeview_frame.grid_columnconfigure(0, weight=1)
 
         self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
+        #print(self.data)
         self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .775, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!30',)
         self.pet_data_view.grid(row=0, column=0, columnspan=3, pady=(height*0.01))

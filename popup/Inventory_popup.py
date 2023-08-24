@@ -11,6 +11,7 @@ from PIL import Image
 import datetime
 from functools import partial
 from typing import *
+import tkinter as tk
 
 
 def add_item(master, info:tuple):
@@ -50,7 +51,7 @@ def add_item(master, info:tuple):
                     modified_dt = self.expiration_date_entry._text if self.expiration_date_entry._text != 'Set Expiry Date' else None
                     database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.category_entry.get())],
                                             [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), modified_dt)],
-                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .75, .5, int(self.stock_entry.get()))],
+                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .75, .5, int(self.stock_entry.get()),5)],
                                             [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())]])
                     messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added\nin the inventory" )
                     #master.reset()
@@ -58,14 +59,13 @@ def add_item(master, info:tuple):
                 else:
                     #self.warning_lbl.configure(text = 'Enter Required Fields', text_color='red')
                     messagebox.showwarning("Missing Field Entry", "Enter Required Fields", )
+                    
             def expiry_switch_event():
                 self.show_calendar.configure(state=self.expiry_switch_val.get())
                 if(self.expiry_switch_val.get()=="normal"):
                     self.show_calendar.configure(fg_color=Color.Blue_Yale)
                     self.expiration_date_entry.configure(fg_color=Color.White_Platinum, text_color="black")
-                    #self.expiry_switch.configure(text="Yes")
                 else:
-                    #self.expiry_switch.configure(text="No")
                     self.show_calendar.configure(fg_color=Color.Grey_Bright_2)
                     self.expiration_date_entry.configure(fg_color=Color.Grey_Bright_2, text_color="grey")
 
@@ -84,21 +84,17 @@ def add_item(master, info:tuple):
                     self.markup_price_entry.insert(0, round(float(self.unit_price_entry.get()) / (float(self.selling_price_entry.get()) / 100), 2))
 
             def category_expiry_callback(category):
-                if ("Vaccine" in category or "Medicine" in category):
-                    self.expiry_switch.select()
-                else:
-                    self.expiry_switch.deselect()
+                for i in range(len(self.data)):
+                    if category in self.data[i][0]:
+                        self.expiry_switch.select() if self.data[i][1] == 1 else self.expiry_switch.deselect()
                 expiry_switch_event()
-
-                #print(category)
-                pass
-
-
+                
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
-            self.item_category = ["Vaccine","Medicine","Accessories"]
-
+            
+            self.item_category = []
+        
             self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], corner_radius=0)
             self.main_frame.grid(row=0, column=0, padx=(width*0.005), pady=(height*0.01))
 
@@ -128,10 +124,11 @@ def add_item(master, info:tuple):
             self.item_name_entry = ctk.CTkEntry(self.item_name_frame, corner_radius=5, placeholder_text='Required', font=("DM Sans Medium",14), height=height*0.045)
             self.item_name_entry.grid(row = 0, column = 1,sticky = 'nsew', pady = (height*0.025,height*0.01), padx = (0, width*0.01), columnspan=5)
 
+            
             ctk.CTkLabel(self.item_name_frame, text='Category: ', anchor='e', font=("DM Sans Medium", 14),  width=width*0.075,).grid(row = 1, column = 0, sticky = 'nsew',  pady = (0,height*0.01), padx = (width*0.005,0))
-            self.category_entry = ctk.CTkComboBox(self.item_name_frame, corner_radius=5, values=self.item_category, font=("DM Sans Medium",14), height=height*0.045,command=partial(category_expiry_callback))
+            self.category_entry = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=self.item_category, font=("DM Sans Medium",14), height=height*0.045,command=category_expiry_callback)
             self.category_entry.grid(row = 1, column = 1, sticky = 'nsew', pady = (0,height*0.01), padx = (0, width*0.01), columnspan=5)
-            self.category_entry.set(self.item_category[2])
+            #self.category_entry.set(self.item_category[2])
 
             ctk.CTkLabel(self.item_name_frame, text='Unit Price: ', font=("DM Sans Medium", 14),  width=width*0.075, anchor="e").grid(row = 2, column = 0, sticky="nsew",pady = (0,height*0.01), padx = (width*0.004,0))
             self.unit_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.1, textvariable= ctk.StringVar(), height=height*0.045,  font=("DM Sans Medium",14),justify="right",corner_radius=5,)
@@ -167,9 +164,9 @@ def add_item(master, info:tuple):
             ctk.CTkLabel(self.supplier_name_frame, text='SUPPLIER', anchor='w',  font=("DM Sans Medium", 14)).grid(row = 0, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx= (width*0.01))
             
             ctk.CTkLabel(self.supplier_name_frame, text='Supplier Name: ', anchor='e', font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
-            self.supplier_option = ctk.CTkComboBox(self.supplier_name_frame, corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045)
-            self.supplier_option.grid(row = 1, column = 1, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
-            self.supplier_option.set("Supplier Name")
+            self.supplier_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045)
+            self.supplier_entry.grid(row = 1, column = 1, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            #self.supplier_entry.set("Supplier Name")
             
             """ ctk.CTkLabel(self.supplier_name_frame, text='Personnel: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
             self.contact_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14))
@@ -224,8 +221,22 @@ def add_item(master, info:tuple):
             self.add_btn.pack(side="left",fill="x", expand=1,  padx = (width*0.0075), pady= height*0.01)
 
             
-            category_expiry_callback(self.item_category[2])
+            
             expiry_switch_event()
+            
+        def set_categories(self):
+            self.data = database.fetch_data("SELECT categ_name FROM categories")
+            print(self.data)
+            self.category_data = []
+            for i in range(len(self.data)):
+                self.category_data.append(self.data[i][0])
+            
+            self.category_entry.configure(values=self.category_data)
+            self.category_entry.set(self.category_data[0])
+            
+        def place(self, **kwargs):
+            self.set_categories()
+            return super().place(**kwargs)
     return add_item(master, info)
 
 def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
@@ -331,11 +342,12 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=recieve_stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
             
+            
         def place(self, default_data: str, update_cmds: list = None, **kwargs):
             self.update_cmds = update_cmds
             if default_data:
-                self.item_name_entry._current_value = default_data.winfo_children()[1]._text
-                self.item_name_entry._text_label.configure(text = default_data.winfo_children()[1]._text)
+                self.item_name_entry._current_value = default_data.winfo_children()[2]._text
+                self.item_name_entry._text_label.configure(text = default_data.winfo_children()[2]._text)
                 self.item_name_entry._command(None)
             else:
                 self.item_name_entry._current_value = self.item_name_entry._values[0]
@@ -486,17 +498,17 @@ def supplier_list(master, info:tuple,):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
-            self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+            """ self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
             self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
 
             self.search_frame.pack_propagate(0)
             ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
-            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
 
             self.add_item_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Supplier",image=self.add_icon, font=("DM Sans Medium", 14),
                                            command=show_supplier_popup)
-            self.add_item_btn.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+            self.add_item_btn.grid(row=1, column=1, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
             self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
                                               command=update_tables)
@@ -506,11 +518,10 @@ def supplier_list(master, info:tuple,):
             self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
             #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
-            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .735, height= height * .725, corner_radius=0,
-                                            column_format=f'/No:{int(width*.025)}-#r/SupplierName:x-tl/Contact:{int(width*.25)}-tc/Action:{int(width*.075)}-tc!30!30',
-                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
-            self.data_view1.pack()
+            self.supplier_data = database.fetch_data("SELECT Supplier, Contacts FROM item_supplier_info")
+            self.supplier_treeview = cctk.cctkTreeView(self.treeview_frame, data=self.supplier_data,width= width * .735, height= height * .725, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/SupplierName:x-tl/Contact:{int(width*.175)}-tr!30!30')
+            self.supplier_treeview.pack()
 
             self.pop_top_frame = ctk.CTkFrame(self.create_supplier, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
             self.pop_top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
@@ -687,29 +698,51 @@ def show_category(master, info:tuple,):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
-            self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+            """ self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
             self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.0075,width*0.005), pady=(height*0.01))
             self.search_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
-            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
 
             self.add_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Category",image=self.add_icon, font=("DM Sans Medium", 14),)
             self.add_category_btn.configure(command=lambda:add_category(self,(width, height)).place(relx=0.5, rely=0.5, anchor="c"))
-            self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+            self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
-            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",)
+            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=self.refresh_table)
             self.refresh_btn.grid(row=1, column=2, sticky="w")
 
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
-            self.data_view1 = cctk.cctkTreeView(self.treeview_frame,width= width*0.635, height= height*0.5, corner_radius=0,
-                                            column_format=f'/No:{int(width*.025)}-#r/Category:x-tl/HasExpiry:{int(width*.075)}-tc/DateAdded:{int(width*.15)}-tc!30!30')
+            self.category_data = self.conv_data()
+            
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data = self.category_data, width= width*0.635, height= height*0.5, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/Category:x-tl/HasExpiry:{int(width*.095)}-tc!30!30')
             self.data_view1.pack()
 
+        def conv_data(self):
+            self.data = database.fetch_data("SELECT * FROM categories")
+            self.ret = []
+            for i in range(len(self.data)):
+                temp = list(self.data[i])
+                if temp[1] == 0:
+                    temp[1] = "No"
+                else:
+                    temp[1] = "Yes" 
+                self.ret.append(tuple(temp))
+                
+            return self.ret
+            
+        def refresh_table(self):
+            self.data_view1.update_table(self.conv_data())
+            self.data_view1.pack()
 
+        def place(self, **kwargs):
+            self.conv_data()
+    
+            return super().place(**kwargs)
     return show_category(master, info)
 
 def add_category(master, info:tuple,):
@@ -727,7 +760,17 @@ def add_category(master, info:tuple,):
             
             def reset():
                 self.place_forget()
-
+                self.category_name_entry.delete(0, tk.END)
+                self.expiry_switch.deselect()
+                
+                
+            def add_category():
+                if self.category_name_entry.get()=='':
+                    messagebox.showwarning("Missing Information", "Complete required fields")
+                else:
+                    database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get())]])
+                    reset()
+            
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
             self.main_frame.grid_propagate(0)
@@ -752,9 +795,9 @@ def add_category(master, info:tuple,):
             self.category_name_entry = ctk.CTkEntry(self.add_category_frame, corner_radius=5, placeholder_text='Required', font=("DM Sans Medium",14), height=height*0.045)
             self.category_name_entry.grid(row = 0, column = 1,sticky = 'nsew', pady = (height*0.025,height*0.01), padx = (0, width*0.01), columnspan=5)
             
-            self.expiry_switch_val= ctk.StringVar(value="disabled")
+            self.expiry_switch_val= ctk.StringVar(value="0")
             ctk.CTkLabel(self.add_category_frame, text="Expiry: ", font=("DM Sans Medium", 14), width=width*0.1, anchor="e").grid(row=1, column=0, pady = (0,height*0.01), padx = (width*0.01,0))
-            self.expiry_switch = ctk.CTkSwitch(self.add_category_frame, text="", variable=self.expiry_switch_val, onvalue="normal", offvalue="disabled",
+            self.expiry_switch = ctk.CTkSwitch(self.add_category_frame, text="", variable=self.expiry_switch_val, onvalue="1", offvalue="0",
                                                 font=("DM Sans Medium", 14))
             self.expiry_switch.grid(row=1,column=1, sticky="w", padx = (width*0.01))
             
@@ -767,7 +810,8 @@ def add_category(master, info:tuple,):
                                             font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
             
-            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add Category',)
+            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add Category',
+                                         command=add_category)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
             
     return add_category(master, info)
