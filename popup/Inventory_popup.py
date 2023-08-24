@@ -262,7 +262,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 expiry = None if 'Set'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
                 #item information
 
-                data = (generateId('R', 6), self.item_name_entry.get(), self.stock_entry.get(), supplier, expiry, None, 1, None)
+                data = (generateId('R', 6), self.item_name_entry.get(), self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None, 1)
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))
@@ -871,9 +871,10 @@ def restock_confirmation(master, info:tuple,):
 
             def update_stock():
                 if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
-                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self._inventory_info[0])]])
+                    #if it's full restocking of the initial
+                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
                 else:
-                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, ('acc_name' or 'klyde', self._inventory_info[0])],
+                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, ('acc_name' or 'klyde', self.receiving_id.get())],
                                             [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
                 self.place_forget()
                 self.after_callback()
@@ -932,12 +933,15 @@ def restock_confirmation(master, info:tuple,):
             self.after_callback = after_callback
 
             self.receiving_id.configure(state = ctk.NORMAL)
+            self.receiving_id.delete(0, ctk.END)
             self.receiving_id.insert(0, restocking_info[0])
             self.receiving_id.configure(state = 'readonly')
             self.item_name_entry.configure(state = ctk.NORMAL)
+            self.item_name_entry.delete(0, ctk.END)
             self.item_name_entry.insert(0, restocking_info[1])
             self.item_name_entry.configure(state = 'readonly')
             self.supplier_name_entry.configure(state = ctk.NORMAL)
+            self.supplier_name_entry.delete(0, ctk.END)
             self.supplier_name_entry.insert(0, restocking_info[-1])
             self.supplier_name_entry.configure(state = 'readonly')
             self.stock_spinner.configure(val_range = (1, restocking_info[2]))
