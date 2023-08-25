@@ -434,7 +434,6 @@ class dashboard_frame(ctk.CTkFrame):
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0),
                     int(database.fetch_data(sql_commands.get_todays_transaction_count)[0][0] or 0)]
-        print(self.data)
         self.items_sales_value.configure(text = f'₱{format_price(self.data[0])}')
         self.services_sales_value.configure(text = f'₱{format_price(self.data[1])}')
         self.total_sales_value.configure(text = f'₱{format_price(self.data[0] + self.data[1])}')
