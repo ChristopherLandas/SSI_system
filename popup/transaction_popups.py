@@ -14,7 +14,6 @@ from datetime import datetime
 import threading
 from PIL import Image
 import copy
-from constants import action
 
 def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
@@ -998,7 +997,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
 
                 self._treeview_content_update_callback()
                 messagebox.showinfo('Success', 'Invoice Saved')
-                record_action('aila', action.INVOICE_TYPE, action.MAKE_INVOICE % ('aila', uid))
                 self.reset(True)
 
                 
@@ -1211,18 +1209,17 @@ def show_payment_proceed(master, info:tuple,):
                 #update the table
             
             '''Transaction Info'''
-            self.client_info_frame = ctk.CTkFrame(self.content_frame)
+            self.client_info_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Platinum)
             self.client_info_frame.grid(row=0, column=0,sticky="nsew", columnspan=2, padx=width*0.005, pady=height*0.01)
             self.client_info_frame.grid_columnconfigure(2, weight=1)
             
-            self.cashier_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
-
+            self.cashier_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05,)
             self.cashier_frame.grid(row=0, column=0, padx=(width*0.005,0), pady= height*0.007)
             self.cashier_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.cashier_frame, text="Cashier: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01))
             self.cashier_name = ctk.CTkLabel(self.cashier_frame, text="Jane Doe",  font=("DM Sans Medium", 14))
-            self.cashier_name.pack(side="left")
+            self.cashier_name.pack(side="left",padx=(0,width*0.005))
             
             self.time_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.time_frame.grid(row=0, column=3, padx=width*0.005, pady= height*0.007, sticky="nse")
@@ -1233,7 +1230,7 @@ def show_payment_proceed(master, info:tuple,):
             self.date_label = ctk.CTkLabel(self.time_frame, fg_color=Color.White_Platinum, corner_radius=5, font=("DM Sans Medium", 14), text=date.today().strftime('%B %d, %Y'), width=width*0.1)
             self.date_label.pack(side="right", padx=(width*0.005))
             
-            self.receipt_frame = ctk.CTkFrame(self.content_frame)
+            self.receipt_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Platinum)
             self.receipt_frame.grid(row=1, column=0, sticky="nsew",padx=width*0.005, pady=(0,height*0.01))
             self.receipt_frame.grid_rowconfigure(1, weight=1)
             self.receipt_frame.grid_columnconfigure(1,weight=1)
@@ -1248,6 +1245,7 @@ def show_payment_proceed(master, info:tuple,):
             
             self.or_button = ctk.CTkButton(self.receipt_frame,  text="OR#: 001",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
             self.or_button.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
+
             
             self.client_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.client_frame.grid(row=0, column=1, padx=(0,width*0.005), pady= height*0.007)
@@ -1257,7 +1255,7 @@ def show_payment_proceed(master, info:tuple,):
             self.client_name = ctk.CTkLabel(self.client_frame, text="Jane Doe",  font=("DM Sans Medium", 14))
             self.client_name.pack(side="left") 
             
-            self.receipt_table_frame = ctk.CTkFrame(self.receipt_frame)
+            self.receipt_table_frame = ctk.CTkFrame(self.receipt_frame,)
             self.receipt_table_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=width*0.005, pady=(0,height*0.007) )
             self.receipt_table_frame.grid_columnconfigure(0,weight=1)
             self.receipt_table_frame.grid_rowconfigure(0, weight=1)
@@ -1315,7 +1313,7 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 000,000.00",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
             
-            self.payment_frame= ctk.CTkFrame(self.content_frame, width=width*0.25)
+            self.payment_frame= ctk.CTkFrame(self.content_frame, width=width*0.25, fg_color=Color.White_Platinum)
             self.payment_frame.grid(row=1, column=1, sticky="nsew", padx=(0,width*0.005), pady=(0,height*0.01))
             self.payment_frame.grid_columnconfigure(1, weight=1)
             self.payment_frame.grid_rowconfigure(1, weight=1)
@@ -1377,7 +1375,7 @@ def show_payment_proceed(master, info:tuple,):
             self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_data[0], ))
             self.items = database.fetch_data(sql_commands.get_invoice_item_content_by_id, (invoice_data[0], ))
 
-            modified_services = [(f'{s[0]} P:{s[1]} D:%s' % s[2].strftime('%m/%d/%y'), 1,  s[3]) for s in self.services]
+            modified_services = [(f' {s[0]}  P:{s[1]} D:%s' % s[2].strftime('%m/%d/%y'), 1,  s[3]) for s in self.services]
 
             temp = self.items + modified_services
             for i in range(len(temp)):
