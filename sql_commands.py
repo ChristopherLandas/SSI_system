@@ -479,6 +479,4 @@ get_selling_rate = "SELECT item_general_info.name,\
 
 get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
 update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
-
-
 insert_new_category = "INSERT INTO categories VALUES (?, ?)"

@@ -22,6 +22,7 @@ from constants import action
 from popup import Inventory_popup, Pet_info_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup
 import copy
 import calendar
+import acc_creation
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -1314,8 +1315,8 @@ class patient_info_frame(ctk.CTkFrame):
                                            column_format=f'/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!30',)
         self.pet_data_view.grid(row=0, column=0, columnspan=3, pady=(height*0.01))
 
-        self.new_record = Pet_info_popup.new_record(self, (width, height, acc_cred, acc_info))
-        self.view_record = Pet_info_popup.view_record(self, (width, height, acc_cred, acc_info))
+        self.new_record = Pet_info_popup.new_record(self, (width, height, acc_cred, acc_info), self.update)
+        self.record_view = Pet_info_popup.view_record(self, (width, height, acc_cred, acc_info), self.update)
 
     def update(self) -> None:
         self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
@@ -1325,7 +1326,7 @@ class patient_info_frame(ctk.CTkFrame):
     def view_record(self):
         pet_data = self.pet_data_view.get_selected_data()
         if(pet_data):
-            self.view_record.place(relx = .5, rely = .5, anchor = 'c', pet_data=pet_data)
+            self.record_view.place(relx = .5, rely = .5, anchor = 'c', pet_data=pet_data)
         else:
             messagebox.showwarning('Warning','No Record is selected')
 
@@ -1744,87 +1745,93 @@ class user_setting_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        #self.label = ctk.CTkLabel(self, text='8').pack(anchor='w')
-        #self.grid_forget()
-        #self.label = ctk.CTkLabel(self, text='7').pack(anchor='w')
-        self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
-        #call roles icon
-        self.roles_icon = ctk.CTkImage(light_image=Image.open("image/patient.png"), size=(16,16))
-        #call account creation tab icon
-        self.account_creation_icon = ctk.CTkImage(light_image = Image.open("image/person_icon.png"), size=(24,25))
-
-        self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
-        self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
-        self.base_frame.grid_propagate(0)
-        self.base_frame.grid_columnconfigure(0, weight=1)
-        self.base_frame.grid_rowconfigure(1, weight=1)
-
-        #frame for roles tab
-
-        self.roles_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
-        #frame for account creation tab
-        self.account_creation_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
-
-        self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
-        self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color="green")
-
-        self.sales_report_frame.grid_columnconfigure(1, weight=1)
-        self.sales_report_frame.grid_rowconfigure(2, weight=1)
-
-        self.inventory_report_frame.grid_columnconfigure(1, weight=1)
-
-        self.report_frames=[self.sales_report_frame, self.inventory_report_frame]
-        self.active_report = None
-
+        
+        selected_color = Color.Blue_Yale
+        
         self.grid_forget()
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
+        
+        self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
+        self.accounts_icon = ctk.CTkImage(light_image=Image.open("image/accounts.png"), size=(24,24))
+        self.account_creation_icon = ctk.CTkImage(light_image = Image.open("image/create_acc.png"), size=(24,24))
+        self.roles_icon = ctk.CTkImage(light_image = Image.open("image/role.png"), size=(24,24))
+        self.deactivated_icon = ctk.CTkImage(light_image = Image.open("image/deact.png"), size=(24,24))
 
-        selected_color = Color.Blue_Yale
+        '''TAB SETUP'''
+        self.base_frame = ctk.CTkFrame(self, corner_radius=0,fg_color=Color.White_Lotion)
+        self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
+        self.base_frame.grid_propagate(0)
+        self.base_frame.grid_columnconfigure(0, weight=1)
+        self.base_frame.grid_rowconfigure(0, weight=1)
+
+        self.account_base_frame = acc_creation.accounts_frame(self.base_frame, width=width, height=height, fg_color=Color.White_Lotion, corner_radius=0)
+        self.acc_creation_frame = acc_creation.creation_frame(self.base_frame, width=width, height=height, fg_color=Color.White_Lotion, corner_radius=0)
+        self.role_account_frame = acc_creation.roles_frame(self.base_frame, width=width, height=height, fg_color=Color.White_Lotion, corner_radius=0)
+        self.deactivated_frame = acc_creation.deactivated_frame(self.base_frame, width=width, height=height, fg_color=Color.White_Lotion, corner_radius=0)
+
+        self.report_frames=[self.account_base_frame, self.acc_creation_frame, self.role_account_frame, self.deactivated_frame]
+        self.active_report = None
 
         def load_main_frame(cur_frame: int):
             if self.active_report is not None:
                 self.active_report.grid_forget()
             self.active_report = self.report_frames[cur_frame]
-            self.active_report.grid(row =1, column =0, sticky = 'nsew',padx=width*0.005, pady=height*0.005)
+            self.active_report.grid(row=0, column=0, sticky="nsew")
 
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
-        self.top_frame.grid_columnconfigure(2, weight=1)
-        #date on top right
-        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
-
-        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
-                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=3, sticky="n")
-
-        #first tab on top frame
-        self.roles_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
-                                                       fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
-
-        self.roles_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.roles_button.configure(command=partial(load_main_frame, 0))
-        roles_tab_icon = ctk.CTkLabel(self.roles_button, text="",image=self.roles_icon)
-        roles_tab_icon.pack(side="left", padx=(width*0.01,width*0.005))
-        roles_label = ctk.CTkLabel(self.roles_button, text="ROLES", text_color="white",font=('Poppins', 15))
-        roles_label.pack(side="left")
-        self.roles_button.grid()
-        self.roles_button.update_children()
+        self.top_frame.grid_columnconfigure(4, weight=1)
         
-        #second tab on top frame
-        self.account_creation_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.155,
-                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=6, sticky="nsew")
+        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15), fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=5, sticky="n")
 
+        '''ACCOUNTS BUTTON TAB'''
+        self.accounts_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        self.accounts_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.accounts_button.configure(command=partial(load_main_frame, 0))
+        self.account_tab_icon = ctk.CTkLabel(self.accounts_button, text="",image=self.accounts_icon)
+        self.account_tab_icon.pack(side="left", padx=(width*0.01,width*0.0025))
+        self.accounts_label = ctk.CTkLabel(self.accounts_button, text="ACCOUNTS", text_color="white",font=('DM Sans Medium', 14))
+        self.accounts_label.pack(side="left")
+        self.accounts_button.grid()
+        self.accounts_button.update_children()
+        
+        '''ACCOUNT CREATION TAB'''
+        self.account_creation_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125, fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
         self.account_creation_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
         self.account_creation_button.configure(command=partial(load_main_frame, 1))
         self.account_creation_tab_icon = ctk.CTkLabel(self.account_creation_button, text="",image=self.account_creation_icon)
         self.account_creation_tab_icon.pack(side="left", padx=(width*0.01,width*0.005))
-        self.inventory_report_label = ctk.CTkLabel(self.account_creation_button, text="ACCOUNT CREATION", text_color="white",font=('Poppins', 15))
-        self.inventory_report_label.pack(side="left")
+        self.account_creation_label = ctk.CTkLabel(self.account_creation_button, text="CREATION", text_color="white",font=('DM Sans Medium', 14))
+        self.account_creation_label.pack(side="left")
         self.account_creation_button.grid()
         self.account_creation_button.update_children()
 
-        self.button_manager = cctku.button_manager([self.roles_button, self.account_creation_button], selected_color, False, 0)
+        '''ROLES CREATION TAB'''
+        self.roles_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        self.roles_button.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.roles_button.configure(command=partial(load_main_frame, 2))
+        self.roles_tab_icon = ctk.CTkLabel(self.roles_button, text="",image=self.roles_icon)
+        self.roles_tab_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.roles_label = ctk.CTkLabel(self.roles_button, text="ROLES", text_color="white",font=('DM Sans Medium', 14))
+        self.roles_label.pack(side="left")
+        self.roles_button.grid()
+        self.roles_button.update_children()
+
+        '''DEACTIVATED TAB'''
+        self.deactivated_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.135, fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        self.deactivated_button.grid(row=0, column=3, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.deactivated_button.configure(command=partial(load_main_frame, 3))
+        self.deactivated_tab_icon = ctk.CTkLabel(self.deactivated_button, text="",image=self.deactivated_icon)
+        self.deactivated_tab_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.deactivated_label = ctk.CTkLabel(self.deactivated_button, text="DEACTIVATED", text_color="white",font=('DM Sans Medium', 14))
+        self.deactivated_label.pack(side="left")
+        self.deactivated_button.grid()
+        self.deactivated_button.update_children()
+
+        self.button_manager = cctku.button_manager([self.accounts_button, self.account_creation_button, self.roles_button, self.deactivated_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
@@ -1870,12 +1877,18 @@ class user_setting_frame(ctk.CTkFrame):
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
                     self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)
 
-        import acc_creation
-        self.changeFrame = acc_creation.frame2(self.sales_report_frame, width * .5, height * .65, fg_color= 'light grey', corner_radius=5)
-        self.changeFrame.grid(row=1, column=1, sticky="w")
-        self.changeFrame.usn_option.configure(values = [s [0] for s in database.fetch_data('SELECT usn from acc_cred')],
-                                              command = set_checkBox)
-        self.changeFrame.accept_button.configure(state = ctk.DISABLED, command = update_staff_acc);
+        """
+
+        self.creationFrame = acc_creation.creation_frame(self.acc_creation_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
+        self.creationFrame.grid(row=1, column=1, sticky="w")
+
+        self.rolesFrame = acc_creation.roles_frame(self.roles_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
+        self.rolesFrame.grid(row=1, column=1, sticky="w")
+
+        self.deactivatedFrame = acc_creation.deactivated_frame(self.deactivated_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
+        self.deactivatedFrame.grid(row=1, column=1, sticky="w")
+        #self.changeFrame.usn_option.configure(values = [s [0] for s in database.fetch_data('SELECT usn from acc_cred')], command = set_checkBox)
+        #self.changeFrame.accept_button.configure(state = ctk.DISABLED, command = update_staff_acc);
 
         #account creation tab
         #account creation frame
@@ -1900,6 +1913,7 @@ class user_setting_frame(ctk.CTkFrame):
         '''ACCOUNT CREATION: START'''
         
         '''temporary implementation'''
+        
         def enable_checkboxes(e:any = None):
             data = database.fetch_data('SELECT * FROM user_level_access WHERE Title = ?', (self.acc_create.position_option.get(),))[0]
 
@@ -1914,9 +1928,9 @@ class user_setting_frame(ctk.CTkFrame):
                     self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(state = ctk.DISABLED)
                 #self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(value = data[i + 2])
 
-        self.acc_create = acc_creation.frame(self.box_frame, width * .5, height * .65, 5, fg_color= 'light grey')
+        self.acc_create = acc_creation.creation_frame(self.box_frame, width * .85, height * .82, 5, fg_color= 'light grey')
         self.acc_create.grid(row=1, column=1, sticky="w")
-
+        '''
         roles_list = database.fetch_data('SELECT title FROM user_level_access')
         roles_list = [s[0] for s in roles_list]
         #roles = roles_list = [s[0] for s in roles_list]
@@ -1924,6 +1938,7 @@ class user_setting_frame(ctk.CTkFrame):
         self.acc_create.position_option.configure(values = roles_list, command = enable_checkboxes)
 
         self.acc_create.accept_button.configure(command = create_new_acc)
+        ''' """
         load_main_frame(0)
 
 class histlog_frame(ctk.CTkFrame):
