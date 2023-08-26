@@ -324,7 +324,7 @@ get_pet_name = "SELECT id, p_name FROM pet_info"
 get_ids_pi = "SELECT id FROM pet_info"
 get_pet_info = "SELECT * FROM pet_info WHERE o_name = ?"
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
-record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?)"
 
 #HIST LOG
 get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
@@ -491,3 +491,10 @@ check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity < SUM(item
                                      ON invoice_item_content.Item_uid = item_inventory_info.UID\
                                  WHERE invoice_item_content.invoice_uid = ?\
                                  GROUP BY invoice_item_content.Item_uid"
+                    
+
+get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
+update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
+
+
+insert_new_category = "INSERT INTO categories VALUES (?, ?)"
