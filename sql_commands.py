@@ -296,7 +296,7 @@ get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
-record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ? ,?, ?, ?, CURRENT_TIMESTAMP, Null)"
+record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ? ,?, ?, 1, CURRENT_TIMESTAMP, Null)"
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_name from recieving_item where state = 1 or state = 3"
 get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
@@ -451,6 +451,7 @@ set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date
 get_invoice_service_content_by_id = "SELECT service_name, patient_name, scheduled_date, FORMAT(price, 2) AS total FROM invoice_service_content WHERE invoice_uid = ?;"
 get_invoice_item_content_by_id = "SELECT item_name, quantity, FORMAT((price * quantity), 2) AS total FROM invoice_item_content WHERE invoice_uid = ?;"
 
+get_current_invoice_count = "SELECT COUNT(*) FROM recieving_item where id like '?%'"
 
 #fast or slow moving item
 get_selling_rate = "SELECT item_general_info.name,\
@@ -475,3 +476,18 @@ get_selling_rate = "SELECT item_general_info.name,\
                         ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
                     GROUP BY item_transaction_content.Item_uid\
                     ORDER BY item_inventory_info.UID"
+
+#LOG
+get_raw_action_history = "SELECT * FROM ACTION_HISTORY WHERE DATE(action_date) = ?"
+get_log_history = "SELECT log_history.USN, acc_info.job_position, log_history.DATE_LOGGED, log_history.TIME_IN, log_history.TIME_OUT\
+                    FROM log_history\
+                    JOIN acc_info\
+                        ON log_history.usn = acc_info.usn\
+                    WHERE log_history.DATE_LOGGED = ?"
+
+#transaction
+check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity < SUM(item_inventory_info.Stock)\
+                                 FROM invoice_item_content JOIN item_inventory_info\
+                                     ON invoice_item_content.Item_uid = item_inventory_info.UID\
+                                 WHERE invoice_item_content.invoice_uid = ?\
+                                 GROUP BY invoice_item_content.Item_uid"

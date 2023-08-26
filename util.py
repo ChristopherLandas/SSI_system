@@ -123,6 +123,12 @@ def convert_date(date: str | datetime.datetime | datetime.date, date_format: str
 def record_action(usn: str, _type: str, action_code: str):
     database.exec_nonquery([["INSERT INTO action_history VALUES (?, ?, ?, CURRENT_TIMESTAMP)", (usn, _type,  action_code)]])
 
+def decode_action(type_code: str):
+    if type_code.startswith('INVM'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Make the Invoice {temp[-1]}' 
+
+
 
 
 ''' example of inserting data

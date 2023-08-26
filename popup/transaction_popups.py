@@ -976,9 +976,9 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
                     else:
                         items.append(st)
 
-                print(services, items, self.service_dict)
-
                 formatted_svc_data = []
+                
+                uid = f'%s%s' % (datetime.now().strftime('%m%d%y'), str().zfill(3))
                 uid = generateId('P', 6)
 
                 for svc in services:
@@ -1166,7 +1166,7 @@ def show_payment_proceed(master, info:tuple,):
                 item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], s[2], 0) for s in self.items]
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0], s[0], s[1], s[2], s[3], 0, 0) for s in self.services]
                 
-                print(self.cashier_name._text)
+                (self.cashier_name._text)
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
                 #record the transaction
 
@@ -1176,7 +1176,6 @@ def show_payment_proceed(master, info:tuple,):
                 #record the services from within the transaction
 
                 for _item in item:
-                    print(_item)
                     stocks = database.fetch_data(sql_commands.get_specific_stock, (_item[1], ))
                     if stocks[0][2] is None:
                         database.exec_nonquery([[sql_commands.update_non_expiry_stock, (-_item[3], _item[1])]])

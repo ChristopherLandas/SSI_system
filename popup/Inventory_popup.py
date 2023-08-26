@@ -90,7 +90,6 @@ def add_item(master, info:tuple):
                     self.expiry_switch.deselect()
                 expiry_switch_event()
 
-                #print(category)
                 pass
 
 
@@ -262,8 +261,9 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 expiry = None if 'Set'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
                 #item information
 
-                data = (generateId('R', 6), self.item_name_entry.get(), self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None, 1)
+                data = (generateId('R', 6), self.item_name_entry.get(), uid, self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None)
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
+                print("here")
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))
                 messagebox.showinfo("Sucess", "Order process success\nCheck the recieving tab")
@@ -331,92 +331,10 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=recieve_stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
 
-
-            '''
-            #top bar
-            ctk.CTkLabel(self.top_frame, text='RESTOCK', anchor='w', corner_radius=0, font=("Arial", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
-            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
-            #change here go reset
-            self.item_frame =ctk.CTkFrame(self.main_frame, corner_radius=0)
-            self.item_frame.pack(fill="x", expand=0, padx=width*0.008, pady=height*0.01)
-            self.item_frame.grid_columnconfigure(1, weight=1)
-            #item title
-            ctk.CTkLabel(self.item_frame, text='ITEM', anchor='w', font=('Arial', height*0.03), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
-            #item name title
-            ctk.CTkLabel(self.item_frame, text='Item Name', anchor='w', font=('Arial', height*0.024)).grid(row = 1, column = 0, padx= (width*0.02), pady=(0, height*0.005), sticky = 'nsew')
-
-            item = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)]
-
-            self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
-                                                           values= list(item),)
-            self.item_name_entry.configure(font=('Arial', height*0.024), dropdown_font=('Arial', height*0.02))
-            self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx= (width*0.02), pady = (0, height*0.01))
-
-            #category entry
-            ctk.CTkLabel(self.item_frame, text="Category:", font=('Arial', height*0.024)).grid(row=3, column=0, sticky="w",pady = (height*0.01), padx= (width*0.02))
-            self.category_entry =ctk.CTkEntry(self.item_frame, state="disabled", font=('Arial', height*0.024), width=width*0.12)
-            self.category_entry.grid(row=3, column=1, sticky="w", pady = (height*0.01))
-
-            #supplier combobox
-            ctk.CTkLabel(self.item_frame, text="Supplier:", font=('Arial', height*0.024)).grid(row=4, column=0, sticky="w",pady = (height*0.01), padx= (width*0.02))
-            self.supplier_combo_box =ctk.CTkComboBox(self.item_frame, values=["ABD", "J&J", "Pfizer"], state='readonly', font=('Arial', height*0.024), width=width*0.12, dropdown_font=('Arial', height*0.02))
-            self.supplier_combo_box.grid(row=4, column=1, sticky="w", pady = (height*0.01,0))
-
-            #initial price change
-            ctk.CTkLabel(self.item_frame, text="Initial Price Change:", font=('Arial', height*0.024)).grid(row=5, column=0, sticky="w",pady = (height*0.01), padx= (width*0.02))
-            self.item_init_price_change =ctk.CTkEntry(self.item_frame, font=('Arial', height*0.024), width=width*0.12, justify='right', state='disabled')
-            self.item_init_price_change.grid(row=5, column=1, sticky="w", pady = (height*0.01,0))
-
-            #markup change
-            ctk.CTkLabel(self.item_frame, text="Markup Change:", font=('Arial', height*0.024)).grid(row=6, column=0,sticky="w",pady = (height*0.01), padx= (width*0.02))
-            self.item_markup_change =ctk.CTkEntry(self.item_frame, font=('Arial', height*0.024), width=width*0.12, justify='right')
-            self.item_markup_change.grid(row=6, column=1,  sticky="w", pady = (height*0.01,0))
-
-            #eend of a
-
-            self.restock_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
-            self.restock_frame.pack(fill="both", expand=1, padx=width*0.008, pady=(0,height*0.01))
-            self.restock_frame.grid_columnconfigure((1,2), weight=1)
-            #inventory title
-            ctk.CTkLabel(self.restock_frame, text='INVENTORY', anchor='w', font=('Arial', height*0.03), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
-
-            #initial stock
-            ctk.CTkLabel(self.restock_frame, text="Initial Stock:", font=('Arial', height*0.024)).grid(row=1, column=0,sticky="w",pady = (height*0.01), padx= (width*0.02))
-            self.initial_stock_entry =ctk.CTkEntry(self.restock_frame, state='disabled', width=width*0.06, justify='right', font=('Arial', height*0.024))
-            self.initial_stock_entry.grid(row=1, column=1,  sticky="w")
-            #Restock
-            ctk.CTkLabel(self.restock_frame, text='Restock Amount:', anchor='w', font=('Arial', height*0.024)).grid(row = 2, column = 0, padx= (width*0.02))
-            self.stock_entry = cctk.cctkSpinnerCombo(self.restock_frame, val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL), state=ctk.NORMAL, width=width*0.04)
-            self.stock_entry.grid(row = 2, column = 1, columnspan=2, sticky = 'w',padx=(0,width*0.01))
-
-            #expiration set
-            ctk.CTkLabel(self.restock_frame, text='Expiration Date:', anchor='w', font=('Arial', height*0.024)).grid(row = 3, column = 0, columnspan=4, padx = (width*0.02), sticky = 'nsew',pady = (height*0.01))
-            self.expiry_date_entry = ctk.CTkLabel(self.restock_frame, height * .05, fg_color="white", text="Set Expiry Date", text_color="grey", corner_radius=3, font=('Arial', height*0.024))
-            self.expiry_date_entry.grid(row = 4, column = 0, columnspan=3,sticky = 'nsew', padx = ((width*0.02),(width*0.008)), pady = (0, 12))
-
-            self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
-                                               command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
-            self.show_calendar.grid(row=4, column=3, padx = (0,width*0.01), pady = (0,height*0.015), sticky="w")
-            #end of expiration setter
-            #bottom buttons frame
-            self.action_frame = ctk.CTkFrame(self.main_frame, height=height*0.15,corner_radius=0, fg_color='transparent')
-            self.action_frame.pack(padx=width*0.008, pady=(0,height*0.01))
-            #removed
-            #self.warning_text =  ctk.CTkLabel(self.action_frame, text='TEST', text_color='red')
-            #self.warning_text.grid(row = 0, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))
-            #end removed
-            self.leave_btn = ctk.CTkButton(self.action_frame, width * .15, height * .05, corner_radius=3, text='BACK', command = reset, font=('Arial', 14))
-            self.leave_btn.pack(side="left", padx=(width*0.025))
-
-            self.action_btn = ctk.CTkButton(self.action_frame, width * .15, height * .05, corner_radius=3, text='RESTOCK', state=ctk.DISABLED, font=('Arial', 14))
-            self.action_btn.pack(side="right",  padx=(width*0.025))
-            '''
-
-        def place(self, default_data: str, update_cmds: list = None, **kwargs):
+        def place(self, default_data: str, update_cmds: callable = None, **kwargs):
             self.update_cmds = update_cmds
             if default_data:
-                self.item_name_entry._current_value = default_data.winfo_children()[1]._text
-                self.item_name_entry._text_label.configure(text = default_data.winfo_children()[1]._text)
+                self.item_name_entry.set(default_data.winfo_children()[2]._text)
                 self.item_name_entry._command(None)
             else:
                 self.item_name_entry._current_value = self.item_name_entry._values[0]
@@ -457,7 +375,8 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
 
             if isinstance(inventory_info, cctk.cctkTreeView):
                 inventory_info.update_table(database.fetch_data(sql_commands.get_recieving_items))
-
+            
+            self.update_cmds()
             messagebox.showinfo('Success', 'Restocking Successful')
     return restock(master, info, data_view)
 
@@ -870,6 +789,7 @@ def restock_confirmation(master, info:tuple,):
                 self.place_forget()
 
             def update_stock():
+                self.after(1000)
                 if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
                     database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
                     messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
@@ -878,15 +798,25 @@ def restock_confirmation(master, info:tuple,):
                                             [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
                     messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
 
-
                     
-                    if inventory_data: # if there was an already existing table; update the existing table
+                recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
+                print(recieving_info)
+                if recieving_info[6]:
+                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expriy_Date = ?")[0][0] == 0:
+                        database.exec_nonquery([[sql_commands.add_new_instance, (recieving_info[2], self.stock_spinner.value, recieving_info[6])]])
+                    else:
+                        database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  recieving_info[6])]]) 
+                else:
+                    database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self.stock_spinner.value, recieving_info[2])]])
+
+
+                    '''if inventory_data: # if there was an already existing table; update the existing table
                         if inventory_data[0][2] is None:#updating non-expiry stock
                             database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self._inventory_info[2], uid)]])
                         else: #updating expiry stock
                             database.exec_nonquery([[sql_commands.update_expiry_stock, (self._inventory_info[2], uid, inventory_data[0][2])]])
                     else:# if there's no exisiting table; create new instance of an item
-                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])
+                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])'''
                     
                 self.place_forget()
                 self.after_callback()
@@ -956,7 +886,9 @@ def restock_confirmation(master, info:tuple,):
             self.supplier_name_entry.delete(0, ctk.END)
             self.supplier_name_entry.insert(0, restocking_info[-1])
             self.supplier_name_entry.configure(state = 'readonly')
-            self.stock_spinner.configure(val_range = (1, restocking_info[2]))
+            self.stock_spinner.configure(val_range = (1, restocking_info[3]))
+            self.stock_spinner.num_entry.delete(0, ctk.END)
+            self.stock_spinner.num_entry.insert(0, 1)
             return super().place(**kwargs)
             
             
