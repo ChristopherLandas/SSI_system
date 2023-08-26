@@ -172,6 +172,7 @@ def add_item(master, info:tuple):
             """ ctk.CTkLabel(self.supplier_name_frame, text='Personnel: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
             self.contact_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14))
             self.contact_entry.grid(row = 2, column = 1,  sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01)) """
+
             
             ctk.CTkLabel(self.supplier_name_frame, text='Contact#: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 3, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
             self.contact_entry = ctk.CTkEntry(self.supplier_name_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14))
@@ -694,19 +695,20 @@ def show_category(master, info:tuple):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
-            """ self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+            self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
             self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.0075,width*0.005), pady=(height*0.01))
             self.search_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
-            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
+
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
 
             self.add_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Category",image=self.add_icon, font=("DM Sans Medium", 14),)
             self.add_category_btn.configure(command=lambda:add_category(self,(width, height), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
             self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
-            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=self.refresh_table)
+            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",)
             self.refresh_btn.grid(row=1, column=2, sticky="w")
 
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
@@ -767,7 +769,7 @@ def add_category(master, info:tuple, table_update_callback: callable):
                 else:
                     database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get())]])
                     reset()
-            
+
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
             self.main_frame.grid_propagate(0)
@@ -795,6 +797,7 @@ def add_category(master, info:tuple, table_update_callback: callable):
             self.expiry_switch_val= ctk.StringVar(value="0")
             ctk.CTkLabel(self.add_category_frame, text="Expiry: ", font=("DM Sans Medium", 14), width=width*0.1, anchor="e").grid(row=1, column=0, pady = (0,height*0.01), padx = (width*0.01,0))
             self.expiry_switch = ctk.CTkSwitch(self.add_category_frame, text="", variable=self.expiry_switch_val, onvalue="1", offvalue="0",
+
                                                 font=("DM Sans Medium", 14))
             self.expiry_switch.grid(row=1,column=1, sticky="w", padx = (width*0.01))
             
@@ -828,6 +831,28 @@ def restock_confirmation(master, info:tuple,):
             
             def reset():
                 self.place_forget()
+
+            def update_stock():
+                if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
+                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
+                    messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
+                else:
+                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, (self.stock_spinner.value, self.receiving_id.get())],
+                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
+                    messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
+
+
+                    
+                    if inventory_data: # if there was an already existing table; update the existing table
+                        if inventory_data[0][2] is None:#updating non-expiry stock
+                            database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self._inventory_info[2], uid)]])
+                        else: #updating expiry stock
+                            database.exec_nonquery([[sql_commands.update_expiry_stock, (self._inventory_info[2], uid, inventory_data[0][2])]])
+                    else:# if there's no exisiting table; create new instance of an item
+                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])
+                    
+                self.place_forget()
+                self.after_callback()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -875,8 +900,26 @@ def restock_confirmation(master, info:tuple,):
                                             font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
             
-            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',)
+            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
+                                         command = update_stock)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
-            
+
+        def place(self, restocking_info: tuple, after_callback: callable, **kwargs):
+            self.after_callback = after_callback
+
+            self.receiving_id.configure(state = ctk.NORMAL)
+            self.receiving_id.delete(0, ctk.END)
+            self.receiving_id.insert(0, restocking_info[0])
+            self.receiving_id.configure(state = 'readonly')
+            self.item_name_entry.configure(state = ctk.NORMAL)
+            self.item_name_entry.delete(0, ctk.END)
+            self.item_name_entry.insert(0, restocking_info[1])
+            self.item_name_entry.configure(state = 'readonly')
+            self.supplier_name_entry.configure(state = ctk.NORMAL)
+            self.supplier_name_entry.delete(0, ctk.END)
+            self.supplier_name_entry.insert(0, restocking_info[-1])
+            self.supplier_name_entry.configure(state = 'readonly')
+            self.stock_spinner.configure(val_range = (1, restocking_info[2]))
+            return super().place(**kwargs)
             
     return restock_confirmation(master, info)

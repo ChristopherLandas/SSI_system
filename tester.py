@@ -25,9 +25,15 @@ class body(ctk.CTk):
         self.update()
         self.notif_frame._parent_canvas.configure(bg =  'green')
 
-        notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
+
+        data = {s[1]: s[0] for s in database.fetch_data('SELECT UID, NAME FROM ITEM_GENERAL_INFO')}
+
+        ids = database.fetch_data('SELECT ID, NAME FROM RECIEVING_ITEM')
+        for t in ids:
+            database.exec_nonquery([['UPDATE RECIEVING_ITEM SET ITEM_UID = ? WHERE ID = ?', (data[t[1]], t[0])]])
+        '''notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
                                                  "The product Insert Product Name here was only at 50 percent",
-                                                 datetime.datetime(1967, 8, 10), self.notif_frame._desired_width-10, 100, 'white')
+                                                 datetime.datetime(1967, 8, 10), self.notif_frame._desired_width-10, 100, 'white')'''
         #inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item else bought_item[s[0]]), s[1]) for s in current_stock]
         #print(*inventory_report_data, sep = '\n')
         '''
