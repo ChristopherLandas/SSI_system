@@ -1163,9 +1163,9 @@ def show_payment_proceed(master, info:tuple,):
                     return
                 #if self.service:
 
-                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], s[2], 0) for s in self.items]
+                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], price_format_to_float(s[2]), 0) for s in self.items]
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0], s[0], s[1], s[2], s[3], 0, 0) for s in self.services]
-                
+
                 (self.cashier_name._text)
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
                 #record the transaction

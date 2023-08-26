@@ -486,7 +486,7 @@ get_log_history = "SELECT log_history.USN, acc_info.job_position, log_history.DA
                     WHERE log_history.DATE_LOGGED = ?"
 
 #transaction
-check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity < SUM(item_inventory_info.Stock)\
+check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity <= SUM(item_inventory_info.Stock)\
                                  FROM invoice_item_content JOIN item_inventory_info\
                                      ON invoice_item_content.Item_uid = item_inventory_info.UID\
                                  WHERE invoice_item_content.invoice_uid = ?\
