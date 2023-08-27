@@ -84,6 +84,7 @@ def add_item(master, info:tuple):
                     self.markup_price_entry.insert(0, round(float(self.unit_price_entry.get()) / (float(self.selling_price_entry.get()) / 100), 2))
 
             def category_expiry_callback(category):
+                print(f"{self.data} | {category}")
                 for i in range(len(self.data)):
                     if category in self.data[i][0]:
                         self.expiry_switch.select() if self.data[i][1] == 1 else self.expiry_switch.deselect()
@@ -221,12 +222,10 @@ def add_item(master, info:tuple):
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add New Item', command= add)
             self.add_btn.pack(side="left",fill="x", expand=1,  padx = (width*0.0075), pady= height*0.01)
 
-            
-            
             expiry_switch_event()
             
         def set_categories(self):
-            self.data = database.fetch_data("SELECT categ_name FROM categories")
+            self.data = database.fetch_data("SELECT * FROM categories")
             print(self.data)
             self.category_data = []
             for i in range(len(self.data)):
@@ -658,7 +657,7 @@ def disposal_history(master, info:tuple,):
 
     return disposal_history(master, info)
 
-def show_category(master, info:tuple,):
+def show_category(master, info:tuple):
     class show_category(ctk.CTkFrame):
         def __init__(self, master, info:tuple, ):
             width = info[0]
@@ -680,9 +679,6 @@ def show_category(master, info:tuple,):
             
             def reset():
                 self.place_forget()
-                
-            def hide_category_popup():
-                self.add_category.grid_forget()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.635)
             self.main_frame.grid(row=0, column=0, padx=width*0.01, pady=height*0.025)
@@ -709,8 +705,8 @@ def show_category(master, info:tuple,):
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
 
             self.add_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Category",image=self.add_icon, font=("DM Sans Medium", 14),)
-            self.add_category_btn.configure(command=lambda:add_category(self,(width, height)).place(relx=0.5, rely=0.5, anchor="c"))
-            self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+            self.add_category_btn.configure(command=lambda:add_category(self,(width, height), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
+            self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
             self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",)
             self.refresh_btn.grid(row=1, column=2, sticky="w")
@@ -718,15 +714,38 @@ def show_category(master, info:tuple,):
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
-            self.data_view1 = cctk.cctkTreeView(self.treeview_frame,width= width*0.635, height= height*0.5, corner_radius=0,
-                                            column_format=f'/No:{int(width*.025)}-#r/Category:x-tl/HasExpiry:{int(width*.075)}-tc/DateAdded:{int(width*.15)}-tc!30!30')
+            #self.category_data = self.conv_data()
+            
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, width= width*0.635, height= height*0.5, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/Category:x-tl/HasExpiry:{int(width*.095)}-tc!30!30')
             self.data_view1.pack()
 
+        def conv_data(self):
+            self.data = database.fetch_data("SELECT * FROM categories")
+            self.ret = []
+            for i in range(len(self.data)):
+                temp = list(self.data[i])
+                if temp[1] == 0:
+                    temp[1] = "No"
+                else:
+                    temp[1] = "Yes" 
+                self.ret.append(tuple(temp))
+            
+            self.data_view1.update_table(self.ret)
+            self.data_view1.pack()
+            
+        def refresh_table(self):
+            self.conv_data()
+            
+        def place(self, **kwargs):
+            self.conv_data()
+    
+            return super().place(**kwargs)
     return show_category(master, info)
 
-def add_category(master, info:tuple,):
+def add_category(master, info:tuple, table_update_callback: callable):
     class add_category(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, ):
+        def __init__(self, master, info:tuple, table_update_callback: callable):
             width = info[0]
             height = info[1]
             super().__init__(master, width=width*0.35, height=height*0.4, corner_radius= 0, fg_color='transparent')
@@ -736,12 +755,13 @@ def add_category(master, info:tuple,):
             self.grid_propagate(0)
 
             self.add_item = ctk.CTkImage(light_image=Image.open("image/add_item.png"), size=(20,20))
+            self._table_update_callback = table_update_callback 
             
             def reset():
                 self.place_forget()
                 self.category_name_entry.delete(0, tk.END)
                 self.expiry_switch.deselect()
-                
+                self._table_update_callback()
                 
             def add_category():
                 if self.category_name_entry.get()=='':
@@ -794,7 +814,7 @@ def add_category(master, info:tuple,):
                                          command=add_category)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
             
-    return add_category(master, info)
+    return add_category(master, info, table_update_callback)
 
 def restock_confirmation(master, info:tuple,):
     class restock_confirmation(ctk.CTkFrame):

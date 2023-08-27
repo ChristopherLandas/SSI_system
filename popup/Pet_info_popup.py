@@ -14,9 +14,9 @@ import tkinter as tk
 from tkinter import ttk
 import datetime
 
-def new_record(master, info:tuple):
+def new_record(master, info:tuple, table_update_callback: callable):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple ):
+        def __init__(self, master, info:tuple, table_update_callback: callable):
 
             width = info[0]
             height = info[1]
@@ -24,6 +24,7 @@ def new_record(master, info:tuple):
             acc_info = info[3]
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
 
+            self._callback=table_update_callback
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
@@ -32,21 +33,22 @@ def new_record(master, info:tuple):
             def automate_fields(_: any = None):
                 if  self.owner_name_entry._values.index(self.owner_name_entry.get()) != len(self.owner_name_entry._values) - 1:
                     data = database.fetch_data(sql_commands.get_pet_info, (self.owner_name_entry.get(), ))[0]
+                    print(data)
                     self.owner_name_entry.configure(ctk.DISABLED)
                     self.address_entry.delete(0, ctk.END)
-                    self.address_entry.insert(0, data[6])
+                    self.address_entry.insert(0, data[8])
                     self.address_entry.configure(state = ctk.DISABLED)
-                    self.contact_no_entry.delete(0, ctk.END)
-                    self.contact_no_entry.insert(0, data[-1])
-                    self.contact_no_entry.configure(state = ctk.DISABLED)
+                    self.contact_entry.delete(0, ctk.END)
+                    self.contact_entry.insert(0, data[-1])
+                    self.contact_entry.configure(state = ctk.DISABLED)
                 else:
                     self.owner_name_entry.configure(state = ctk.NORMAL)
                     self.owner_name_entry.set('')
                     if self.address_entry._state == ctk.DISABLED:
                         self.address_entry.configure(state = ctk.NORMAL)
-                        self.contact_no_entry.configure(state = ctk.NORMAL)
+                        self.contact_entry.configure(state = ctk.NORMAL)
                         self.address_entry.delete(0, ctk.END)
-                        self.contact_no_entry.delete(0, ctk.END)
+                        self.contact_entry.delete(0, ctk.END)
 
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             self.new_record = ctk.CTkImage(light_image=Image.open("image/new_record.png"),size=(22,22))
@@ -62,7 +64,8 @@ def new_record(master, info:tuple):
                 self.weight_entry.delete(0, ctk.END)
                 self.address_entry.delete(0, ctk.END)
                 self.contact_entry.delete(0, ctk.END)
-
+                self._callback()
+                
             def proceed():
                 if (self.owner_name_entry.get() == '' and self.patient_name_entry.get() == '' and self.breed_option.get() == ''
                     and self.type_option.get() == '' and self.sex_option.get() == '' and self.address_entry.get() == ''
@@ -216,17 +219,19 @@ def new_record(master, info:tuple):
             self.owner_name_entry.configure(values = [s[0] for s in database.fetch_data(sql_commands.get_owners)])
             return super().place(**kwargs)
 
-    return instance(master, info)
+    return instance(master, info, table_update_callback)
 
 
-def view_record(master, info:tuple):
+def view_record(master, info:tuple, table_update_callback: callable):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple ):
+        def __init__(self, master, info:tuple,table_update_callback: callable ):
             width = info[0]
             height = info[1]
             acc_cred = info[2]
             acc_info = info[3]
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
+
+            self.callback_command=table_update_callback
 
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -476,6 +481,7 @@ def view_record(master, info:tuple):
             self.place_forget()
             self.entries_set_state("normal")
             self.reset_entries()
+            self.callback_command()
             
         def reset_entries(self):
             for i in range(len(self.entries)):
@@ -504,4 +510,4 @@ def view_record(master, info:tuple):
             self.set_entries(self.data)
 
             return super().place(**kwargs)
-    return instance(master, info)
+    return instance(master, info, table_update_callback)
