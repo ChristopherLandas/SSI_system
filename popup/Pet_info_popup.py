@@ -32,6 +32,7 @@ def new_record(master, info:tuple):
             def automate_fields(_: any = None):
                 if  self.owner_name_entry._values.index(self.owner_name_entry.get()) != len(self.owner_name_entry._values) - 1:
                     data = database.fetch_data(sql_commands.get_pet_info, (self.owner_name_entry.get(), ))[0]
+                    print(data)
                     self.owner_name_entry.configure(ctk.DISABLED)
                     self.address_entry.delete(0, ctk.END)
                     self.address_entry.insert(0, data[6])

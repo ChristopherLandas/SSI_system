@@ -2190,4 +2190,4 @@ class histlog_frame(ctk.CTkFrame):
                 tag ="odd"
             self.log_audit_tree.insert(parent='', index='end', iid=i, text="", values= (i + 1, )+ temp[i], tags=tag )
 
-dashboard(None, 'aila', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
