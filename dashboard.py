@@ -719,11 +719,15 @@ class transaction_frame(ctk.CTkFrame):
     def proceed_to_payment(self):
         data = self.invoice_treeview.get_selected_data()
         if(data):
-            database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
-            self.update_payment_treeview()
-            self.payment_treeview.data_frames[self.payment_treeview._data.index(data)].response()
-            self.payment_button.response()
-            self.update_invoice_treeview()
+            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+            if 0 not in stock_quan: 
+                database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
+                self.update_payment_treeview()
+                self.payment_treeview.data_frames[self.payment_treeview._data.index(data)].response()
+                self.payment_button.response()
+                self.update_invoice_treeview()
+            else:
+                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
         else:
             messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
     
@@ -1121,7 +1125,7 @@ class inventory_frame(ctk.CTkFrame):
         self.sort_status_option.grid(row=0, column=1, padx=(width*0.005), pady=(height*0.0065), sticky="e")
 
         self.restock_btn = ctk.CTkButton(self.inventory_sub_frame, width=width*0.1, height = height*0.05, text="Stock Order", image=self.restock_icon, font=("DM Sans Medium", 14),
-                                         command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, update_cmds=[mainframes[0].generate_stat_tabs, ], relx = .5, rely = .5, anchor = 'c'))
+                                        command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, update_cmds=self.update_tables, relx = .5, rely = .5, anchor = 'c'))
         self.restock_btn.grid(row=3, column=5, pady=(height*0.01), sticky="e", padx=(0, width*0.005))
         self.tree_view_frame = ctk.CTkFrame(self.inventory_sub_frame, fg_color="transparent")
         self.tree_view_frame.grid(row=1, column=0,columnspan=6, sticky="nsew",padx=(width*0.005))
@@ -1249,6 +1253,18 @@ class inventory_frame(ctk.CTkFrame):
         
         sort_status_callback("View by Levels")
         load_main_frame(0)
+
+    def update_tables(self):
+        for i in mainframes:
+            if isinstance(i, dashboard_frame):
+                temp: dashboard_frame = i
+                temp.show_pie()
+                temp.generate_stat_tabs()
+                temp.generate_DISumarry()
+            if isinstance(i, reports_frame):
+                temp: reports_frame = i
+                i.graphs_need_upgrade()
+                i.update_invetory_graph()
 
 class patient_info_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
@@ -2032,13 +2048,16 @@ class histlog_frame(ctk.CTkFrame):
         self.date_sort_label.pack(side="left", fill="both", expand=1,pady=(height*0.0065),padx=(width*0.001) )
         
         self.date_button = ctk.CTkButton(self.sort_date_frame, text="", height=height*0.045, width=width*0.025, image=self.calendar,
-                                         command=lambda: cctk.tk_calendar(self.date_sort_label, "%s", date_format="word", max_date=datetime.datetime.now()))
+                                         command=lambda: cctk.tk_calendar(self.date_sort_label, "%s", date_format="word", max_date=datetime.datetime.now(), set_date_callback= self.update_action_content))
         self.date_button.pack(side="left",padx=(0,width*0.005),pady=(height*0.0065))
         
         self.sort_role_frame = ctk.CTkFrame(self.action_log_frame, width=width*0.1,  height = height*0.055,fg_color=Color.Platinum)
         self.sort_role_frame.grid(row=0, column=1, sticky="nsew", padx=(0,width*0.005), pady=(height*0.01))
         
-        self.sort_role_option = ctk.CTkOptionMenu(self.sort_role_frame, values=["Owner", "Admin", "Receptionist", "Cashier"],anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+        roles = database.fetch_data('SELECT DISTINCT TITLE FROM user_level_access')
+        roles = [s[0] for s in roles]
+
+        self.sort_role_option = ctk.CTkOptionMenu(self.sort_role_frame, values= roles,anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts)
         self.sort_role_option.pack(fill="both", expand=1,pady=(height*0.0065),padx=(width*0.0045))
         
@@ -2062,7 +2081,7 @@ class histlog_frame(ctk.CTkFrame):
             
             
         self.columns = ("rec_no", "username","role","action","time")
-        self.column_names = ("No", "Username","Role", "Action", "Time")
+        self.column_names = ("No", "Username","Type", "Description", "Time")
         
             
         self.action_tree = ttk.Treeview(self.action_table_frame, columns=self.columns, show="headings",)
@@ -2075,10 +2094,10 @@ class histlog_frame(ctk.CTkFrame):
         for i in range(len(self.columns)):
             self.action_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
 
-        self.action_tree.column("rec_no", width=int(width*0.001),anchor="e")
-        self.action_tree.column("username", width=int(width*0.35), anchor="w")
-        self.action_tree.column("role", width=int(width*0.15), anchor="w")
-        self.action_tree.column("action", width=int(width*0.2), anchor="w")
+        self.action_tree.column("rec_no", width=int(width*0.001),anchor="w")
+        self.action_tree.column("username", width=int(width*0.15), anchor="w")
+        self.action_tree.column("role", width=int(width*0.1), anchor="w")
+        self.action_tree.column("action", width=int(width*0.45), anchor="w")
         self.action_tree.column("time", width=int(width*0.15), anchor="c")
             
         self.action_tree.tag_configure("odd",background=Color.White_AntiFlash)
@@ -2089,14 +2108,7 @@ class histlog_frame(ctk.CTkFrame):
         self.y_scrollbar = ttk.Scrollbar(self.action_table_frame, orient=tk.VERTICAL, command=self.action_tree.yview)
         self.action_tree.configure(yscroll=self.y_scrollbar.set)
         self.y_scrollbar.grid(row=0, column=1, sticky="ns")
-            
-            #Sample
-        for i in range(1, 100+1):
-            if (i % 2) == 0:
-                tag = "even"
-            else:
-                tag ="odd"
-            self.action_tree.insert(parent='', index='end', iid=i, text="", values=(f"{i} ",f" Sample{i}","Role","Action","MM-DD-YYYY | HH-MM"), tags=tag )
+
         """Table End"""
         
         '''ACTION HISTORY - END'''
@@ -2108,12 +2120,12 @@ class histlog_frame(ctk.CTkFrame):
         self.sort_date_frame.pack_propagate(0)
         
         ctk.CTkLabel(self.sort_date_frame, text="Sort by Date:", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht).pack(side="left", padx=(width*0.01, width*0.001),pady=(height*0.01))
-        self.date_sort_label = ctk.CTkLabel(self.sort_date_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, corner_radius=5, fg_color=Color.White_Lotion)
-        self.date_sort_label.pack(side="left", fill="both", expand=1,pady=(height*0.0065),padx=(width*0.001) )
+        self.login_date_sort_label = ctk.CTkLabel(self.sort_date_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, corner_radius=5, fg_color=Color.White_Lotion)
+        self.login_date_sort_label.pack(side="left", fill="both", expand=1,pady=(height*0.0065),padx=(width*0.001) )
         
-        self.date_button = ctk.CTkButton(self.sort_date_frame, text="", height=height*0.045, width=width*0.025, image=self.calendar,
-                                         command=lambda: cctk.tk_calendar(self.date_sort_label, "%s", date_format="word", max_date=datetime.datetime.now()))
-        self.date_button.pack(side="left",padx=(0,width*0.005),pady=(height*0.0065))
+        self.date_button_log = ctk.CTkButton(self.sort_date_frame, text="", height=height*0.045, width=width*0.025, image=self.calendar,
+                                         command=lambda: cctk.tk_calendar(self.login_date_sort_label, "%s", date_format="word", max_date=datetime.datetime.now(), set_date_callback= self.update_login_audit))
+        self.date_button_log.pack(side="left",padx=(0,width*0.005),pady=(height*0.0065))
         
         self.refresh_btn = ctk.CTkButton(self.log_history_frame,text="", width=width*0.03, height = height*0.055, image=self.refresh_icon, fg_color="#83BD75")
         self.refresh_btn.grid(row=0, column=1, sticky="w",padx=(0,width*0.005), pady=(height*0.01))
@@ -2138,80 +2150,59 @@ class histlog_frame(ctk.CTkFrame):
         self.column_names = ("No", "Username","Role", "Date", "TimeIn", "TimeOut")
         
             
-        self.action_tree = ttk.Treeview(self.login_table_frame, columns=self.columns, show="headings",)
+        self.log_audit_tree = ttk.Treeview(self.login_table_frame, columns=self.columns, show="headings",)
            
         for i in range(len(self.columns)):
-            self.action_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
+            self.log_audit_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
 
-        self.action_tree.column("rec_no", width=int(width*0.001),anchor="e")
-        self.action_tree.column("username", width=int(width*0.35), anchor="w")
-        self.action_tree.column("role", width=int(width*0.15), anchor="w")
-        self.action_tree.column("date", width=int(width*0.15), anchor="c")
-        self.action_tree.column("time_in", width=int(width*0.15), anchor="c")
-        self.action_tree.column("time_out", width=int(width*0.15), anchor="c")
+        self.log_audit_tree.column("rec_no", width=int(width*0.01),anchor="w")
+        self.log_audit_tree.column("username", width=int(width*0.35), anchor="w")
+        self.log_audit_tree.column("role", width=int(width*0.15), anchor="w")
+        self.log_audit_tree.column("date", width=int(width*0.15), anchor="c")
+        self.log_audit_tree.column("time_in", width=int(width*0.15), anchor="c")
+        self.log_audit_tree.column("time_out", width=int(width*0.15), anchor="c")
             
-        self.action_tree.tag_configure("odd",background=Color.White_AntiFlash)
-        self.action_tree.tag_configure("even",background=Color.White_Ghost)
+        self.log_audit_tree.tag_configure("odd",background=Color.White_AntiFlash)
+        self.log_audit_tree.tag_configure("even",background=Color.White_Ghost)
             
-        self.action_tree.grid(row=0, column=0, sticky="nsew")
+        self.log_audit_tree.grid(row=0, column=0, sticky="nsew")
             
-        self.y_scrollbar = ttk.Scrollbar(self.login_table_frame, orient=tk.VERTICAL, command=self.action_tree.yview)
-        self.action_tree.configure(yscroll=self.y_scrollbar.set)
+        self.y_scrollbar = ttk.Scrollbar(self.login_table_frame, orient=tk.VERTICAL, command=self.log_audit_tree.yview)
+        self.log_audit_tree.configure(yscroll=self.y_scrollbar.set)
         self.y_scrollbar.grid(row=0, column=1, sticky="ns")
-            
-            #Sample
-        for i in range(1, 100+1):
-            if (i % 2) == 0:
-                tag = "even"
-            else:
-                tag ="odd"
-            self.action_tree.insert(parent='', index='end', iid=i, text="", values=(f"{i} ",f" Sample{i}","Role","MM-DD-YYYY","HH-MM","HH-MM"), tags=tag )
-            
         """Table End"""
         
         '''LOGIN HISTORY - END'''        
         
-        
-        
+        self.update_login_audit()
+        self.update_action_content()
         load_main_frame(0)
-        """ # Searchbar
-        
-        self.search_frame = ctk.CTkFrame(self.inventory_sub_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-        self.search_frame.pack_propagate(0)
-        
-        
-        self.search_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], width=width*0.35, height = height*0.05,)
-        self.search_frame.grid(row=0, column=0,padx=(width*0.005), pady=(width * 0.005))
-        self.search_frame.pack_propagate(0)
+    
+    def update_action_content(self):
+        for i in self.action_tree.get_children():
+            self.action_tree.delete(i)
+        temp = database.fetch_data(sql_commands.get_raw_action_history, (datetime.datetime.strptime(self.date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'),))
+        modified_data = [(temp.index(s) + 1, s[0], s[1].capitalize(), decode_action(s[2]), s[3].strftime("%m/%d/%Y at %I:%M %p")) for s in temp]
+            
+        for i in range(len(modified_data)):
+            if (i % 2) == 0:
+                tag = "even"
+            else:
+                tag ="odd"
+            #self.action_tree.insert(parent='', index='end', iid=i, text="", values=(f"{i} ",f" Sample{i}","Role","Action","MM-DD-YYYY | HH-MM"), tags=tag )
+            self.action_tree.insert(parent='', index='end', iid=i, text="", values= modified_data[i], tags=tag )
+    
 
-        self.search_bar_frame = ctk.CTkFrame(self.search_frame, fg_color="light grey")
-        self.search_bar_frame.pack(fill="both", padx=width*0.005, pady=height*0.0075)
+    def update_login_audit(self):
+        for i in self.log_audit_tree.get_children():
+            self.log_audit_tree.delete(i)
+        temp = database.fetch_data(sql_commands.get_log_history, (datetime.datetime.strptime(self.login_date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'),))
+        temp = [(s[0], s[1], s[2].strftime('%m/%d/%y'), s[3], s[4]) for s in temp]
+        for i in range(len(temp)):
+            if (i % 2) == 0:
+                tag = "even"
+            else:
+                tag ="odd"
+            self.log_audit_tree.insert(parent='', index='end', iid=i, text="", values= (i + 1, )+ temp[i], tags=tag )
 
-        ctk.CTkLabel(self.search_bar_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
-        self.search_entry = ctk.CTkEntry(self.search_bar_frame, placeholder_text="Search", border_width=0, fg_color="light grey")
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-
-        self.actionlog_refresh_btn = ctk.CTkButton(self, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
-        self.actionlog_refresh_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005))
-
-        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
-                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=3,padx=(width*0.005), pady=(width * 0.005))
-
-        self.log_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
-        self.log_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.005), pady=(0,width * 0.005))
-
-        self.data = database.fetch_data(sql_commands.get_hist_log)
-        self.actionlog_treeview = cctk.cctkTreeView(self.log_frame, data = self.data, width=width*0.8, height=height*0.8,
-                                               #column_format=f'/No:{int(width*.025)}-#r/User:x-tl/DateLogged:{int(width*0.2)}-tc/Task:{int(width*0.2)}-tl/TimeIn:{int(width*.15)}-tc/TimeOut:{int(width*.15)}-tc!30!30')
-                                               column_format=f'/No:{int(width*.025)}-#r/User:x-tl/DateLogged:{int(width*0.2)}-tc/TimeIn:{int(width*.15)}-tc/TimeOut:{int(width*.15)}-tc!30!30')
-        self.actionlog_treeview.pack(pady=(height*0.015)) """
-
-    def place(self, **kwargs):
-        self.actionlog_treeview.pack_forget()
-        self.actionlog_treeview.update_table(database.fetch_data(sql_commands.get_hist_log))
-        self.after(1000, self.actionlog_treeview.pack(pady=(height*0.015)))
-        return super().place(**kwargs)
-
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'aila', datetime.datetime.now)

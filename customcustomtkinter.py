@@ -235,7 +235,8 @@ class customcustomtkinter:
         def bd_func(self, dlt_btn: ctk.CTkButton):
             if messagebox.askyesno('Warning', 'Are you sure you want to delete the data'):
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
-                self.bd_commands(data_mngr_index)
+                if callable(self.bd_commands):
+                    self.bd_commands(data_mngr_index)
 
                 if self._bd_pop_list is not None:
                     if len(self._bd_pop_list) > 0:
