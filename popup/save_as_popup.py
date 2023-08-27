@@ -12,23 +12,7 @@ import sql_commands
 import calendar
 from constants import *
 
-from reportlab.graphics.shapes import Drawing, Rect, String
-from reportlab.graphics.charts.piecharts import Pie
-from reportlab.pdfgen.canvas import Canvas
-from datetime import datetime as datetime_temp
-from reportlab.lib import colors
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.graphics import renderPDF
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import Table
-from reportlab.platypus import TableStyle
-from PyPDF2 import PdfWriter, PdfReader
-import math
-import os
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
+
 
 
 
@@ -296,7 +280,25 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
 
 
 def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int):
-            
+    from reportlab.graphics.shapes import Drawing, Rect, String
+    from reportlab.graphics.charts.piecharts import Pie
+    from reportlab.pdfgen.canvas import Canvas
+    from datetime import datetime as datetime_temp
+    from reportlab.lib import colors
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics import renderPDF
+    from reportlab.platypus import SimpleDocTemplate
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import Table
+    from reportlab.platypus import TableStyle
+    from PyPDF2 import PdfWriter, PdfReader
+    import math
+    import os
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
+
+
     ttfFile = os.path.join('C:\Windows\Fonts', 'Times.ttf')
     pdfmetrics.registerFont(TTFont("Times-New-Roman", ttfFile))
     ttfFile = os.path.join('C:\Windows\Fonts', 'Timesbd.ttf')
@@ -1251,6 +1253,24 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         '''
 
 def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num: str, date_txt: str, month: int|str, year: int|str, path: str):
+    from reportlab.graphics.shapes import Drawing, Rect, String
+    from reportlab.graphics.charts.piecharts import Pie
+    from reportlab.pdfgen.canvas import Canvas
+    from datetime import datetime as datetime_temp
+    from reportlab.lib import colors
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics import renderPDF
+    from reportlab.platypus import SimpleDocTemplate
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import Table
+    from reportlab.platypus import TableStyle
+    from PyPDF2 import PdfWriter, PdfReader
+    import math
+    import os
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
+
     ttfFile = os.path.join('C:\Windows\Fonts', 'Times.ttf')
     pdfmetrics.registerFont(TTFont("Times-New-Roman", ttfFile))
     ttfFile = os.path.join('C:\Windows\Fonts', 'Timesbd.ttf')

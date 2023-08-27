@@ -89,7 +89,7 @@ def add_item(master, info:tuple):
                     if category in self.data[i][0]:
                         self.expiry_switch.select() if self.data[i][1] == 1 else self.expiry_switch.deselect()
                 expiry_switch_event()
-                
+            
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
@@ -273,8 +273,9 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 expiry = None if 'Set'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
                 #item information
 
-                data = (generateId('R', 6), self.item_name_entry.get(), self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None, 1)
+                data = (generateId('R', 6), self.item_name_entry.get(), uid, self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None)
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
+                print("here")
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))
                 messagebox.showinfo("Sucess", "Order process success\nCheck the recieving tab")
@@ -341,13 +342,11 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
 
             self.action_btn = ctk.CTkButton(self.action_frame, width * .04, height * .05, corner_radius=3, text='Restock', command=recieve_stock, state=ctk.DISABLED)
             self.action_btn.grid(row = 1, column = 1, sticky = 'nsew', padx = 12, pady = (0, 12))
-            
-            
-        def place(self, default_data: str, update_cmds: list = None, **kwargs):
+
+        def place(self, default_data: str, update_cmds: callable = None, **kwargs):
             self.update_cmds = update_cmds
             if default_data:
-                self.item_name_entry._current_value = default_data.winfo_children()[2]._text
-                self.item_name_entry._text_label.configure(text = default_data.winfo_children()[2]._text)
+                self.item_name_entry.set(default_data.winfo_children()[2]._text)
                 self.item_name_entry._command(None)
             else:
                 self.item_name_entry._current_value = self.item_name_entry._values[0]
@@ -388,7 +387,8 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
 
             if isinstance(inventory_info, cctk.cctkTreeView):
                 inventory_info.update_table(database.fetch_data(sql_commands.get_recieving_items))
-
+            
+            self.update_cmds()
             messagebox.showinfo('Success', 'Restocking Successful')
     return restock(master, info, data_view)
 
@@ -833,6 +833,7 @@ def restock_confirmation(master, info:tuple,):
                 self.place_forget()
 
             def update_stock():
+                self.after(1000)
                 if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
                     database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
                     messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
@@ -841,18 +842,28 @@ def restock_confirmation(master, info:tuple,):
                                             [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
                     messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
 
-
                     
-                    """ if inventory_data: # if there was an already existing table; update the existing table
+                recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
+                print(recieving_info)
+                if recieving_info[6]:
+                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expriy_Date = ?")[0][0] == 0:
+                        database.exec_nonquery([[sql_commands.add_new_instance, (recieving_info[2], self.stock_spinner.value, recieving_info[6])]])
+                    else:
+                        database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  recieving_info[6])]]) 
+                else:
+                    database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self.stock_spinner.value, recieving_info[2])]])
+
+
+                    '''if inventory_data: # if there was an already existing table; update the existing table
                         if inventory_data[0][2] is None:#updating non-expiry stock
                             database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self._inventory_info[2], uid)]])
                         else: #updating expiry stock
                             database.exec_nonquery([[sql_commands.update_expiry_stock, (self._inventory_info[2], uid, inventory_data[0][2])]])
                     else:# if there's no exisiting table; create new instance of an item
-                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]]) """
+                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])'''
                     
-                self.place_forget()
-                self.after_callback()
+            self.place_forget()
+            self.after_callback()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -919,7 +930,9 @@ def restock_confirmation(master, info:tuple,):
             self.supplier_name_entry.delete(0, ctk.END)
             self.supplier_name_entry.insert(0, restocking_info[-1])
             self.supplier_name_entry.configure(state = 'readonly')
-            self.stock_spinner.configure(val_range = (1, restocking_info[2]))
+            self.stock_spinner.configure(val_range = (1, restocking_info[3]))
+            self.stock_spinner.num_entry.delete(0, ctk.END)
+            self.stock_spinner.num_entry.insert(0, 1)
             return super().place(**kwargs)
             
     return restock_confirmation(master, info)
