@@ -496,5 +496,4 @@ check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity <= SUM(ite
 get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
 update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
 
-
 insert_new_category = "INSERT INTO categories VALUES (?, ?)"
