@@ -102,11 +102,14 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
-            self.sub_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
-            self.sub_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.content_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+            
+            self.sub_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion)
+            self.sub_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
             self.sub_frame.grid_columnconfigure((0,1), weight=1)
             
-            self.pet_image_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, width=width*0.11, height=width*0.08,)
+            self.pet_image_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, width=width*0.11, height=width*0.08,)
             self.pet_image_frame.grid(row=0, column=2, rowspan=3 ,sticky="nsew", padx=(0,width*0.005),  pady=(height*0.01))
             self.pet_image_frame.grid_rowconfigure(0, weight=1)
             
@@ -114,15 +117,15 @@ def new_record(master, info:tuple, table_update_callback: callable):
             #self.pet_image.grid(row=0, column=0, sticky="nsew", padx=(width*0.005),  pady=(height*0.01))
             
             '''PET NAME ENTRY'''
-            self.pet_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.pet_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.pet_frame.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
             
             ctk.CTkLabel(self.pet_frame, text="Pet's Name: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
-            self.patient_name_entry = ctk.CTkEntry(self.pet_frame, placeholder_text="Pet Name",font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=0, fg_color=Color.White_Platinum)
+            self.patient_name_entry = ctk.CTkEntry(self.pet_frame, placeholder_text="Pet Name",font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=2, fg_color=Color.White_Lotion)
             self.patient_name_entry.pack(fill="both", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
             
             '''OWNER NAME ENTRY'''
-            self.owner_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.owner_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.owner_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.owner_frame, text="Owner's Name: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
@@ -135,7 +138,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.owner_name_entry.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
 
             '''PET TYPE ENTRY'''
-            self.type_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.type_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.type_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.type_frame, text="Pet Type: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
@@ -144,7 +147,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.type_option.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
             
             '''SEX ENTRY'''
-            self.sex_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.sex_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.sex_frame.grid(row=2, column=1, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.sex_frame, text="Sex: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
@@ -153,7 +156,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.sex_option.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
               
             '''BREED ENTRY'''
-            self.breed_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.breed_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.breed_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.breed_frame, text="Breed: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
@@ -163,16 +166,16 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.breed_option.set("")
             
             '''WEIGHT ENTRY'''
-            self.weight_entry_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.weight_entry_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.weight_entry_frame.grid(row=4, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.weight_entry_frame, text="Weight: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
-            self.weight_entry = ctk.CTkEntry(self.weight_entry_frame, placeholder_text="Weight",font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=0, fg_color=Color.White_Platinum)
+            self.weight_entry = ctk.CTkEntry(self.weight_entry_frame, placeholder_text="Weight",font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=2, fg_color=Color.White_Lotion)
             self.weight_entry.pack(side="left", fill="both", expand=1, padx=(0), pady=(height*0.005))
             ctk.CTkLabel(self.weight_entry_frame, text="kg",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.095, anchor="w").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
             
             '''BDAY'''
-            self.bday_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.bday_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.bday_frame.grid(row=4, column=1, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.bday_frame, text="Birthday: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.05, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
@@ -184,41 +187,41 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.show_calendar.pack(side="left", padx=(width*0.0025), pady=(height*0.005))
             
             '''ADDRESS ENTRY'''
-            self.address_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.address_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.address_frame.grid(row=5, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.address_frame, text="Address: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
-            self.address_entry = ctk.CTkEntry(self.address_frame, placeholder_text='Address', font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=0, fg_color=Color.White_Platinum)
+            self.address_entry = ctk.CTkEntry(self.address_frame, placeholder_text='Address', font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=2, fg_color=Color.White_Lotion)
             self.address_entry.pack(fill="both", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
             
             '''CONTACT ENTRY'''
-            self.contact_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Lotion, height=height*0.065)
+            self.contact_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.065)
             self.contact_frame.grid(row=6, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
             ctk.CTkLabel(self.contact_frame, text="Contact: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.065, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
-            self.contact_entry = ctk.CTkEntry(self.contact_frame, placeholder_text='Contact Number', font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=0, fg_color=Color.White_Platinum)
+            self.contact_entry = ctk.CTkEntry(self.contact_frame, placeholder_text='Contact Number', font=("DM Sans Medium", 14), placeholder_text_color="grey", border_width=2, fg_color=Color.White_Lotion)
             self.contact_entry.pack(fill="both", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
            
             '''BOT FRAME'''
-            self.bot_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.bot_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
             self.bot_frame.grid(row=2,column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
            
             self.cancel_btn = ctk.CTkButton(self.bot_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
                                             font=("DM Sans Medium", 16), text='Cancel', command=reset)
-            self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
+            self.cancel_btn.pack(side="left",) 
             
             self.add_btn = ctk.CTkButton(self.bot_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add Record',
                                          command=proceed)
-            self.add_btn.pack(side="right", padx = (width*0.0075), pady= height*0.01)
+            self.add_btn.pack(side="right",)
 
             self.breed_option.set("")
             self.type_option.set("")
-            self.sex_option.set("")
+            self.sex_option.set("") 
 
         def place(self, **kwargs):
             self.owner_name_entry.configure(values = [s[0] for s in database.fetch_data(sql_commands.get_owners)])
             return super().place(**kwargs)
-
+            
     return instance(master, info, table_update_callback)
 
 

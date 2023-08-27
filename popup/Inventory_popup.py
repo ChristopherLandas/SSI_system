@@ -843,13 +843,13 @@ def restock_confirmation(master, info:tuple,):
 
 
                     
-                    if inventory_data: # if there was an already existing table; update the existing table
+                    """ if inventory_data: # if there was an already existing table; update the existing table
                         if inventory_data[0][2] is None:#updating non-expiry stock
                             database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self._inventory_info[2], uid)]])
                         else: #updating expiry stock
                             database.exec_nonquery([[sql_commands.update_expiry_stock, (self._inventory_info[2], uid, inventory_data[0][2])]])
                     else:# if there's no exisiting table; create new instance of an item
-                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])
+                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]]) """
                     
                 self.place_forget()
                 self.after_callback()

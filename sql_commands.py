@@ -480,3 +480,12 @@ get_selling_rate = "SELECT item_general_info.name,\
 get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
 update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
 insert_new_category = "INSERT INTO categories VALUES (?, ?)"
+
+update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
+
+#TESTING - James
+
+get_service_data_test = "SELECT UID, service_name, category, price FROM service_info_test"
+get_service_category_test = "SELECT category FROM service_category_test"
+
+insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"

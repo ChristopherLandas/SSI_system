@@ -5,6 +5,11 @@ import tkinter as tk;
 from customcustomtkinter import customcustomtkinter as cctk
 from PIL import Image
 from Theme import Color
+from util import database
+from tkinter import messagebox 
+import sql_commands
+from popup import account_popup
+
 
 """ class frame2(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -134,7 +139,7 @@ class frame(ctk.CTkFrame):
 
         self.mainloop() """
 
-class frame2(ctk.CTkFrame):
+""" class frame2(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
         self._fg_color ="white"
@@ -193,8 +198,6 @@ class frame2(ctk.CTkFrame):
         self.accept_button = ctk.CTkButton(self, 140, 50, 12, text="Proceed")
         self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125))
 
-
-
 class frame(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
@@ -245,7 +248,7 @@ class frame(ctk.CTkFrame):
             
 
         self.accept_button = ctk.CTkButton(self, 140, 50, 12, text="Proceed")
-        self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125))
+        self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125)) """
 
 class accounts_frame(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -256,6 +259,17 @@ class accounts_frame(ctk.CTkFrame):
          
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
+        
+        """ def deactivate_account():
+            selected_acc = self.account_treeview.get_selected_data()
+            if selected_acc:
+                confirm = messagebox.askyesno("Deactivate Account Confirmation",f"Are you sure you want to deactivate this account: {selected_acc[0]}")
+                if confirm:
+                    print(selected_acc[0])
+                    database.exec_nonquery([[sql_commands.update_deactivate_account,  (selected_acc[0],)]])
+                    self.refresh_table()
+            else:
+                messagebox.showerror("No Data Selected", "Select a record first") """
         
         
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
@@ -273,29 +287,31 @@ class accounts_frame(ctk.CTkFrame):
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
-        self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color='#74bc8a')
+        self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color='#74bc8a',
+                                         command=self.refresh_table)
         self.refresh_btn.pack(side="left")
         
-        """
-        self.sort_search_frame = ctk.CTkFrame(self.top_frame, height = height*0.05, fg_color="light grey")
-        self.sort_search_frame.grid(row=0, column=2,sticky="nw", padx=(width*0.005), pady=(height*0.01))
-        self.sort_search_frame.pack_propagate(0)
-        ctk.CTkLabel(self.sort_search_frame,text="All", font=("DM Sans Medium", 16), text_color="grey", fg_color="white", width=width*0.08).pack(side="left", padx=(width*0.0075,0))
-        self.sort_search_btn = ctk.CTkButton(self.sort_search_frame, text="", fg_color="#0d578f", hover_color="#0d58c1",
-                                        width=width*0.02)
-        self.sort_search_btn.pack(side="left", padx=(0, 0)) """
-        
-        self.deactivate_acc_btn = ctk.CTkButton(self.top_frame, height = height*0.05, text="Deactivate Account",fg_color="#ff6464", font=("DM Sans Medium", 14), text_color="white",cursor='hand2')
+        self.deactivate_acc_btn = ctk.CTkButton(self.top_frame, height = height*0.05, text="Deactivate Account",fg_color="#ff6464", font=("DM Sans Medium", 14), text_color="white",)
         self.deactivate_acc_btn.pack(side='right')
+        
+        self.password_change_btn = ctk.CTkButton(self.top_frame, height = height*0.05, text="Change Password", font=("DM Sans Medium", 14), text_color="white",
+                                                command = lambda: account_popup.change_password(self,(width,height)).place(relx = .5, rely = .5, anchor = 'c'))
+        self.password_change_btn.pack(side='right', padx=(width*0.005))
         
         self.treeview_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum, corner_radius=0)
         self.treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
 
         self.account_treeview = cctk.cctkTreeView(self.treeview_frame, height= height*0.735, width=width*0.8025,
-                                           column_format=f'/No:{int(width*.025)}-#r/Username:x-tl/FullName:{int(width*.3)}-tr/Role:{int(width*.175)}-tr!30!30',)
+                                           column_format=f'/No:{int(width*.025)}-#r/Username:x-tl/FullName:{int(width*.3)}-tl/Position:{int(width*.185)}-tl!30!30',)
         self.account_treeview.pack()
         
-        #/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!30'
+        self.refresh_table()
+    def refresh_table(self):
+        self.data = database.fetch_data("SELECT usn, full_name, job_position FROM acc_info WHERE state = 1")
+        #print(self.data)
+        self.account_treeview.update_table(self.data)
+        self.account_treeview.pack()
+     
 
 class creation_frame(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
