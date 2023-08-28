@@ -844,9 +844,8 @@ def restock_confirmation(master, info:tuple,):
 
                     
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
-                print(recieving_info)
-                if recieving_info[6]:
-                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expriy_Date = ?")[0][0] == 0:
+                if recieving_info[5]:
+                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expriy_Date = ?", (recieving_info[0], recieving_info[5]))[0][0] == 0:
                         database.exec_nonquery([[sql_commands.add_new_instance, (recieving_info[2], self.stock_spinner.value, recieving_info[6])]])
                     else:
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  recieving_info[6])]]) 
