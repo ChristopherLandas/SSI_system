@@ -520,3 +520,11 @@ create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, 
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
                                                            WHERE usn = ?"
+
+#dashboard
+get_monthly_sales_data = "SELECT transaction_date,\
+                               CONCAT('₱', FORMAT(sum(total_amount), 2)) AS price\
+                          FROM transaction_record\
+                          WHERE MONTH(transaction_date) = ?\
+                               AND YEAR(transaction_date) = ?\
+                          GROUP BY DAY(transaction_date)"

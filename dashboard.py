@@ -406,7 +406,15 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.generate_DISumarry()
+        self.load_saled_data_treeview()
         self.grid_forget()
+
+    def load_saled_data_treeview(self):
+        date = datetime.datetime.now()
+        data = database.fetch_data(sql_commands.get_monthly_sales_data, (date.month, date.year))
+        total = sum([price_format_to_float(s[-1][1:]) for s in data])
+        self.current_total.configure(text = 'Total:   ' + '₱' + format_price(total))
+        self.sales_data_treeview.update_table(data)
 
     def show_status_popup(self, name: str, data):
             self.status_popup.status_label.configure(text = name)
