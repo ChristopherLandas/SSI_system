@@ -861,8 +861,8 @@ def restock_confirmation(master, info:tuple,):
                     else:# if there's no exisiting table; create new instance of an item
                         database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])'''
                     
-                self.place_forget()
-                self.after_callback()
+            self.place_forget()
+            self.after_callback()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")

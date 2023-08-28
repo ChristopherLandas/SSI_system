@@ -861,7 +861,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_rowconfigure((1,2), weight=1)
                 
-            self.search_frame = ctk.CTkFrame(self.content_frame, width=width*0.35, height = height*0.05, fg_color="light grey")
+            """ self.search_frame = ctk.CTkFrame(self.content_frame, width=width*0.35, height = height*0.05, fg_color="light grey")
             self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
             self.search_frame.pack_propagate(0)
 
@@ -870,11 +870,11 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
             self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color=Color.Blue_Yale,
                                             width=width*0.005)
-            self.search_btn.pack(side="left", padx=(0, width*0.0025))
+            self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
             
             self.filter_optionmenu = ctk.CTkOptionMenu(self.content_frame, width=width*0.1, height=height*0.05, fg_color="light grey", values=["All", "Services", "Items"], text_color="black", anchor="center")
             self.filter_optionmenu.configure(command=filter_func)
-            self.filter_optionmenu.grid(row=0, column=1, sticky="nse", padx=(width*0.005), pady=(height*0.01))
+            self.filter_optionmenu.grid(row=0, column=1, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
             
             self.service_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.service_frame.pack_propagate(0)
