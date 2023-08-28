@@ -779,6 +779,7 @@ class transaction_frame(ctk.CTkFrame):
                 temp.show_pie()
                 temp.generate_stat_tabs()
                 temp.generate_DISumarry()
+                temp.load_saled_data_treeview()
             if isinstance(i, reports_frame):
                 temp: reports_frame = i
                 i.graphs_need_upgrade()
