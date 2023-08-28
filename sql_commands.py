@@ -512,3 +512,8 @@ get_service_data_test = "SELECT UID, service_name, category, price FROM service_
 get_service_category_test = "SELECT category FROM service_category_test"
 
 insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"
+
+#ACCOUNTS
+create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
+create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
+create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"

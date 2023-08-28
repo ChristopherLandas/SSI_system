@@ -37,7 +37,7 @@ class database:
             pass
         return None
 
-    def fetch_data(cmd, tup:tuple = None):
+    def fetch_data(cmd, tup:tuple = None) -> list | None:
         db_con = database.fetch_db_profile()
         try:
             db_cur = db_con.cursor()
@@ -58,6 +58,7 @@ class database:
                 except mariadb.IntegrityError as e:
                     print(f'command {i+1} error pushing', '\nreason: ', e)
         except mariadb.Error as e:
+            print(cmds[0][0])
             print(e)
             return
         db_cur.close()

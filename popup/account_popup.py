@@ -12,6 +12,7 @@ import datetime
 from functools import partial
 from typing import *
 import tkinter as tk
+from util import encrypt
 
 def change_password(master, info:tuple,):
     class change_password(ctk.CTkFrame):
@@ -57,11 +58,15 @@ def change_password(master, info:tuple,):
             self.username_label.pack(side='left', fill="x", expand=1, padx=(0, width*0.005), pady=(height*0.0075))
            
             '''PASSWORD FRAME'''
-            self.password_frame =ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion)
+            self.password_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion)
             self.password_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
             ctk.CTkLabel(self.password_frame, text="New Password: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
             self.password_entry = ctk.CTkEntry(self.password_frame,fg_color="white", placeholder_text="New Password", placeholder_text_color='light grey',font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.045 )
             self.password_entry.pack(side='left', fill="x", expand=1, padx=(0, width*0.005), pady=(height*0.0075))
+
+            #'''AUTO GENERATE'''
+            #self.auto_generate_btn = ctk.CTkButton(self.content_frame, text= 'Generate')
+            #self.auto_generate_btn = 
            
             '''BOTTOM'''
             self.bottom_frame = ctk.CTkFrame(self, fg_color='transparent')
@@ -70,8 +75,28 @@ def change_password(master, info:tuple,):
             self.cance__btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Cancel", fg_color=Color.Red_Pastel, font=("DM Sans Medium", 14))
             self.cance__btn.pack(side='left')
             
-            self.update_password_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, width=width*0.075, text="Update Password", font=("DM Sans Medium", 14))
+            self.update_password_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, width=width*0.075, text="Update Password", font=("DM Sans Medium", 14), command= self.update_pass)
             self.update_password_btn.pack(side='right')
-    return change_password(master, info)
 
+        def place(self, username: str, **kwargs):
+            if(username is None):
+                messagebox.showerror("Invalid", "Select an account to change")
+                return
+            self.username_label.configure(text = username[0])
+            return super().place(**kwargs)
+        
+        def update_pass(self):
+            if len(self.password_entry.get() or []) < 5:
+                messagebox.showerror("Invalid", "password must atleast\n5 characters long")
+                return
+            new_pass = encrypt.pass_encrypt(self.password_entry.get())
+            database.exec_nonquery([["UPDATE acc_cred SET pss = ?, slt = ? WHERE usn = ?", (new_pass['pass'], new_pass['salt'],
+                                                                                            self.username_label._text)]])
+            messagebox.showinfo("Success", f"{self.username_label._text}%s\nPassword is changed\nPassword: {self.password_entry.get()}" % "'" if self.username_label._text.endswith("s") else "s")
+            self.place_forget()
+            self.pack_forget()
+            self.grid_forget()
+            #print(new_pass)
+
+    return change_password(master, info)
 #That place is not for  any man or particles of bread

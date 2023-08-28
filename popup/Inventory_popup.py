@@ -274,8 +274,8 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 #item information
 
                 data = (generateId('R', 6), self.item_name_entry.get(), uid, self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None)
+                print(data)
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
-                print("here")
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))
                 messagebox.showinfo("Sucess", "Order process success\nCheck the recieving tab")
@@ -845,24 +845,14 @@ def restock_confirmation(master, info:tuple,):
                     
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
                 if recieving_info[5]:
-                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expriy_Date = ?", (recieving_info[0], recieving_info[5]))[0][0] == 0:
+                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?", (recieving_info[0], recieving_info[5]))[0][0] == 0:
                         database.exec_nonquery([[sql_commands.add_new_instance, (recieving_info[2], self.stock_spinner.value, recieving_info[6])]])
                     else:
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  recieving_info[6])]]) 
                 else:
                     database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self.stock_spinner.value, recieving_info[2])]])
 
-
-                    '''if inventory_data: # if there was an already existing table; update the existing table
-                        if inventory_data[0][2] is None:#updating non-expiry stock
-                            database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self._inventory_info[2], uid)]])
-                        else: #updating expiry stock
-                            database.exec_nonquery([[sql_commands.update_expiry_stock, (self._inventory_info[2], uid, inventory_data[0][2])]])
-                    else:# if there's no exisiting table; create new instance of an item
-                        database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])'''
-                    
-            self.place_forget()
-            self.after_callback()
+                self.after_callback()             
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -913,6 +903,9 @@ def restock_confirmation(master, info:tuple,):
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
                                          command = update_stock)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
+
+            
+            self.place_forget()
 
         def place(self, restocking_info: tuple, after_callback: callable, **kwargs):
             self.after_callback = after_callback
