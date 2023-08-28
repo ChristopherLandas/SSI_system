@@ -517,3 +517,6 @@ insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
 create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
 create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
+                                                           Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
+                                                           WHERE usn = ?"
