@@ -417,6 +417,7 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
 insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
+cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
 get_invoice_info = "SELECT invoice_record.invoice_uid,\
                            invoice_record.client_name,\
                            CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
@@ -478,7 +479,12 @@ get_selling_rate = "SELECT item_general_info.name,\
                     ORDER BY item_inventory_info.UID"
 
 #LOG
-get_raw_action_history = "SELECT * FROM ACTION_HISTORY WHERE DATE(action_date) = ?"
+get_raw_action_history = "SELECT *\
+                          FROM action_history\
+                          JOIN acc_info\
+                              ON action_history.usn = acc_info.usn\
+                          WHERE DATE(action_date) = ?\
+                              AND acc_info.job_position = ?"
 get_log_history = "SELECT log_history.USN, acc_info.job_position, log_history.DATE_LOGGED, log_history.TIME_IN, log_history.TIME_OUT\
                     FROM log_history\
                     JOIN acc_info\

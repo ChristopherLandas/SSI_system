@@ -968,6 +968,9 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
                         '''initial process'''
 
             def save_invoice_callback():
+                if len(self.transact_treeview._data) == 0:
+                    return
+
                 services = []
                 items = []
                 for st in self.transact_treeview._data:
@@ -1161,12 +1164,12 @@ def show_payment_proceed(master, info:tuple,):
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
-                #if self.service:
-
-                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], price_format_to_float(s[2]), 0) for s in self.items]
+                #if self.service
+                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0], s[0], s[1], s[2], s[3], 0, 0) for s in self.services]
 
-                (self.cashier_name._text)
+                print(self.items)
+
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
                 #record the transaction
 

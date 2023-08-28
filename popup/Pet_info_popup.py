@@ -221,7 +221,6 @@ def new_record(master, info:tuple, table_update_callback: callable):
         def place(self, **kwargs):
             self.owner_name_entry.configure(values = [s[0] for s in database.fetch_data(sql_commands.get_owners)])
             return super().place(**kwargs)
-            
     return instance(master, info, table_update_callback)
 
 
