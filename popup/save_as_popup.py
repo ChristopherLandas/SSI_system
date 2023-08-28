@@ -6,15 +6,12 @@ import os
 from tkinter import filedialog
 import datetime
 import re
-
+from PIL import Image
 from util import *
 import sql_commands
 import calendar
 from constants import *
-
-
-
-
+from customcustomtkinter import customcustomtkinter as cctk
 
 def show_popup(master, info:tuple) -> ctk.CTkFrame:
     class add_item(ctk.CTkFrame):
@@ -27,9 +24,13 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
             height = info[1]
             #basic inforamtion needed; measurement
 
-            super().__init__(master, width, height, corner_radius= 0, fg_color="#B3B3B3")
+            super().__init__(master,  corner_radius= 0, fg_color="#B3B3B3")
             #the actual frame, modification on the frame itself goes here
-
+            
+            self.gen_report = ctk.CTkImage(light_image=Image.open("image/gen_report.png"), size=(26,26))
+            self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),  size=(20,20)) 
+            self.folder_icon = ctk.CTkImage(light_image=Image.open("image/folder.png"), size=(25,25))   
+                        
             '''events'''
             def generate_callback():
                 if self.file_name_entry.get() == "":
@@ -47,14 +48,14 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
                 generate_report(self.report_type_option.get(), 'aila', self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 self.mothly_month_option.get(), self.mothly_year_option.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 self.path_entry.get(), self.yearly_option.get())
-
+                reset()
 
             def change_name_entry(name: str = None):
                 self.file_name_entry.delete(0, ctk.END)
                 self.file_name_entry.insert(0, name)
 
             def daily_callback(e: any = None):
-                change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry.get()))+'_report.pdf')
+                change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry._text))+'_report.pdf')
 
             def monthly_callback(e: any = None):
                 change_name_entry(f'{self.mothly_month_option.get()}_{self.mothly_year_option.get()}_mothly_report.pdf')
@@ -63,10 +64,11 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
                 change_name_entry(f'{self.yearly_option.get()}_yearly_report.pdf')
 
             def change_date_entry(date: str = None):
-                self.daily_date_entry.configure(state = ctk.NORMAL)
-                self.daily_date_entry.delete(0, ctk.END)
-                self.daily_date_entry.insert(0, date or self.CURRENT_DAY.strftime('%B %d, %Y'))
-                self.daily_date_entry.configure(state = 'readonly')
+                #self.daily_date_entry.configure(state = ctk.NORMAL)
+                #self.daily_date_entry.delete(0, ctk.END)
+                #self.daily_date_entry.insert(0, date or self.CURRENT_DAY.strftime('%B %d, %Y'))
+                #self.daily_date_entry.configure(state = 'readonly')
+                self.daily_date_entry.configure(text=f"{date or self.CURRENT_DAY.strftime('%B %d, %Y')}")
 
             def path_save_cmd():
                 save_path = filedialog.askdirectory(title= 'Save')
@@ -77,87 +79,116 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
 
             def show_report_fill(e: any = None):
                 if self.report_type_option.get() == 'Daily':
-                    self.title_setting.configure(text = 'Select Date')
+                    self.title_setting.configure(text = 'Select Date:')
                     self.mothly_month_option.pack_forget()
                     self.mothly_year_option.pack_forget()
                     self.yearly_option.pack_forget()
-                    self.daily_date_entry.pack(side = ctk.LEFT, padx = (width * .0025))
-                    self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .0025))
+                    self.daily_date_entry.pack(side = ctk.LEFT, fill="x", expand=1, padx = (width * .005), pady=(height*0.005))
+                    self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .005), pady=(height*0.005))
                     daily_callback()
                 if self.report_type_option.get() == 'Monthly':
-                    self.title_setting.configure(text = 'Select Month and Year')
+                    self.title_setting.configure(text = 'Select Month and Year:')
                     self.daily_date_entry.pack_forget()
                     self.daily_calendar_button.pack_forget()
                     self.yearly_option.pack_forget()
-                    self.mothly_month_option.pack(side = ctk.LEFT, padx = (width * .0025))
-                    self.mothly_year_option.pack(side = ctk.LEFT, padx = (0, width * .0025))
+                    self.mothly_month_option.pack(side = ctk.LEFT,fill="x", expand=1, padx = (width * .005))
+                    self.mothly_year_option.pack(side = ctk.LEFT,fill="x", expand=1, padx = (0, width * .005))
                     monthly_callback()
                 if self.report_type_option.get() == 'Yearly':
-                    self.title_setting.configure(text = 'Select Year')
+                    self.title_setting.configure(text = 'Select Year:')
                     self.daily_date_entry.pack_forget()
                     self.daily_calendar_button.pack_forget()
                     self.mothly_month_option.pack_forget()
                     self.mothly_year_option.pack_forget()
-                    self.yearly_option.pack(side = ctk.LEFT, padx = (width * .0025))
+                    self.yearly_option.pack(side = ctk.LEFT,fill="x", expand=1, padx = (width * .005))
                     yearly_callback()
 
+            def reset():
+                self.place_forget()
             '''code goes here'''
             #From here
-            self.box_frame = ctk.CTkFrame(self,fg_color="white")
-            self.box_frame.pack(fill=BOTH, expand=True)
+            self.main_frame = ctk.CTkFrame(self, width=width*0.385, height=height*0.55, fg_color=Color.White_Lotion, corner_radius=0)
+            self.main_frame.pack(fill=BOTH, expand=True)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
 
-            #x button
-            ctk.CTkButton(self.box_frame, text='X', command=lambda: self.place_forget(),font=("Poppins", (height*0.023)), fg_color='red', text_color='white', width=width*0.025).grid(row=0, column=0, padx=(width*0.006), pady=((height*0.01), (height*0.03)), sticky="ne")
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, sticky="ew")
+            self.top_frame.pack_propagate(0)
 
-            #file name label
-            ctk.CTkLabel(self.box_frame, text='File Name:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=1, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
-            #file name entry
-            self.file_name_entry = ctk.CTkEntry(self.box_frame, placeholder_text='report', height=height*0.03, width=width*0.25, corner_radius=20, font=("Poppins", (height*0.023)))
-            self.file_name_entry.grid(row=2, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="w")
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.gen_report).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="GENERATE REPORT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+            
+            #ctk.CTkButton(self.main_frame, text='X', command=lambda: self.place_forget(),font=("DM Sans Medium", (height*0.023)), fg_color='red', text_color='white', width=width*0.025).grid(row=0, column=0, padx=(width*0.006), pady=((height*0.01), (height*0.03)), sticky="ne")
 
-            #path label
-            ctk.CTkLabel(self.box_frame, text='Path:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=3, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
-            self.path_frame = ctk.CTkFrame(self.box_frame,fg_color="white")
-            self.path_frame.grid(row=4, column=0)
-            #path entry
-            self.path_entry = ctk.CTkEntry(self.path_frame, height=height*0.03,  width=width*0.22, corner_radius=20, font=("Poppins", (height*0.023)))
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.content_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+
+            self.sub_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion)
+            self.sub_frame.pack(fill=BOTH, expand=1, padx=(width*0.005), pady=(height*0.01))
+            self.sub_frame.grid_columnconfigure(0, weight=1)
+            
+            '''FILE NAME'''
+            self.file_name_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.file_name_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.025,height*0.01))
+            ctk.CTkLabel(self.file_name_frame, text='File Name:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht, height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
+            self.file_name_entry = ctk.CTkEntry(self.file_name_frame, placeholder_text='report', fg_color=Color.White_Lotion, font=("DM Sans Medium", 14),height=height*0.055)
+            self.file_name_entry.pack(side="left", fill='x', expand=1)
+            #(height*0.023)
+
+            '''PATH FRAME'''
+            self.path_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.path_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
+            ctk.CTkLabel(self.path_frame, text='File Path:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht,height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
+            self.path_entry = ctk.CTkEntry(self.path_frame, font=("DM Sans Medium", 14),height=height*0.055)
             self.path_entry.insert(0, self.DEFAULT_PATH)
-            self.path_entry.grid(row=4, column=0, padx=((width*0.006),(width*0.00)), pady=(0, (height*0.01)), sticky="w")
-            #path button
-            ctk.CTkButton(self.path_frame, text='...', command=path_save_cmd,font=("Poppins", (height*0.023)), fg_color='#2678F3', text_color='white', width=width*0.025).grid(row=4, column=1, padx=((width*0.002),(width*0.006)), pady=(0, (height*0.01)), sticky="ne")
-
-            #file type label
-            #file type entry
-            #self.file_type_entry = ctk.CTkEntry(self.box_frame, height=height*0.03, corner_radius=20, font=("Poppins", (height*0.023)), show='*')
+            self.path_entry.pack(side="left", fill='x', expand=1)
+            ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
+            #self.file_type_entry = ctk.CTkEntry(self.main_frame, height=height*0.03, corner_radius=20, font=("DM Sans Medium", (height*0.023)), show='*')
             #self.file_type_entry.grid(row=6, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="nsw")
-            ctk.CTkLabel(self.box_frame, text='File type:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=5, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
-            self.report_type_option = ctk.CTkOptionMenu(self.box_frame,values=["Daily", "Monthly", "Yearly"], height=height*0.03,  width=width*0.25, corner_radius=20, font=("Poppins", (height*0.023)), dropdown_font=("Poppins", (height*0.023)), command=show_report_fill)
-            self.report_type_option.grid(row=6, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="nsw")
+            
+            '''FILE TYPE FRAME'''
+            self.file_type_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.file_type_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
+            ctk.CTkLabel(self.file_type_frame, text='File Type:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht, height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
+            self.report_type_option = ctk.CTkOptionMenu(self.file_type_frame,values=["Daily", "Monthly", "Yearly"], height=height*0.055,  width=width*0.25, font=("DM Sans Medium", 14), dropdown_font=("DM Sans Medium", 12), command=show_report_fill)
+            self.report_type_option.pack(side="left", fill='x', expand=1)
 
-            self.title_setting = ctk.CTkLabel(self.box_frame, text= 'Select Date', font=("Poppins", (height*0.015)))
-            self.title_setting.grid(row = 7, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.023, 0))
-
-            self.setting_frame = ctk.CTkFrame(self.box_frame, fg_color='transparent', height=height * .05)
+            '''TITLE SETTING'''
+            self.title_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.title_frame.grid(row=3, column=0, sticky="nsew", padx=(width*0.005))
+            self.title_setting = ctk.CTkLabel(self.title_frame, text= 'Select Date:', font=("DM Sans Medium", 14))
+            self.title_setting.grid(row = 0, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.02, 0))
+            
+            self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
             self.setting_frame.pack_propagate(0)
-            self.setting_frame.grid(row = 8, column = 0, sticky = 'nwe', padx=(width*0.006))
-
+            self.setting_frame.grid(row=4, column=0, sticky = 'nsew', padx=(width*0.005))
             #daily
-            self.daily_date_entry = ctk.CTkEntry(self.setting_frame, width * .213, height * .05, state='readonly', font=("Poppins", (height*0.023)))
+            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5)
             change_date_entry()
-            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, width * .027, width *.03)
-
+            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
+                                                       command=lambda:cctk.tk_calendar(self.daily_date_entry, "%s", date_format="word", max_date=datetime.datetime.now()) )
             #monthly
-            self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("Poppins", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback)
+            self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback, anchor="center")
             self.mothly_month_option.set(self.CURRENT_DAY.strftime('%B'))
-            self.mothly_year_option = ctk.CTkOptionMenu(self.setting_frame, width * .1, height * .05, font=("Poppins", (height*0.023)), values = self.DEFAULT_YEAR, command= monthly_callback)
+            self.mothly_year_option = ctk.CTkOptionMenu(self.setting_frame, width * .1, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_YEAR, command= monthly_callback, anchor="center")
 
             #yearly
-            self.yearly_option = ctk.CTkOptionMenu(self.setting_frame, width * 25, height * .05, font=("Poppins", (height*0.023)), values= ["2023", "2024"], command= yearly_callback)
+            self.yearly_option = ctk.CTkOptionMenu(self.setting_frame, width * 25, height * .05, font=("DM Sans Medium", (height*0.023)), values= ["2023", "2024"], command= yearly_callback, anchor="center")
             show_report_fill()
 
             #Generate button
-            self.generate_btn = ctk.CTkButton(self.box_frame, text='Generate', command= generate_callback,font=("Poppins", (height*0.023)), fg_color='#2678F3', text_color='white')
-            self.generate_btn.grid(row=9, column=0, padx=(width*0.01), pady=((height*0.05), (height*0.01)), sticky="sew")
+            self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+            self.bottom_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+            
+            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel)
+            self.cancel_btn.pack(side="left")
+            
+            self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback,font=("DM Sans Medium", 14),height=height*0.055)
+            self.generate_btn.pack(side="right")
 
         def place(self, **kwargs):
             if 'default_config' in kwargs:
@@ -183,6 +214,10 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
             super().__init__(master, width, height, corner_radius= 0, fg_color="#B3B3B3")
             #the actual frame, modification on the frame itself goes here
 
+            self.gen_report = ctk.CTkImage(light_image=Image.open("image/gen_report.png"), size=(26,26))
+            self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),  size=(20,20)) 
+            self.folder_icon = ctk.CTkImage(light_image=Image.open("image/folder.png"), size=(25,25))  
+            
             '''events'''
             def generate_callback():
                 if self.file_name_entry.get() == "":
@@ -197,10 +232,11 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
                         change_name_entry(self.file_name_entry.get()+' (1)')
                     elif question == None:
                         return
-                daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry.get(), '%B %d, %Y')
+                daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
                 generate_inventory_report('aila', self.file_name_entry.get(), daily_date_select_temp.strftime('%Y-%m-%d'),
-                                          self.daily_date_entry.get(), daily_date_select_temp.month, daily_date_select_temp.year,
+                                          self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
                                           self.path_entry.get())
+                reset()
 
 
             def change_name_entry(name: str = None):
@@ -208,10 +244,11 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
                 self.file_name_entry.insert(0, name)
 
             def change_date_entry(date: str = None):
-                self.daily_date_entry.configure(state = ctk.NORMAL)
-                self.daily_date_entry.delete(0, ctk.END)
-                self.daily_date_entry.insert(0, date or self.CURRENT_DAY.strftime('%B %d, %Y'))
-                self.daily_date_entry.configure(state = 'readonly')
+                #self.daily_date_entry.configure(state = ctk.NORMAL)
+                #self.daily_date_entry.delete(0, ctk.END)
+                #self.daily_date_entry.insert(0, date or self.CURRENT_DAY.strftime('%B %d, %Y'))
+                #self.daily_date_entry.configure(state = 'readonly')
+                self.daily_date_entry.configure(text=f"{date or self.CURRENT_DAY.strftime('%B %d, %Y')}")
 
             def path_save_cmd():
                 save_path = filedialog.askdirectory(title= 'Save')
@@ -219,60 +256,124 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
                 if save_path:
                     self.path_entry.delete(0, ctk.END)
                     self.path_entry.insert(0, save_path)
+            
+            def reset():
+                self.place_forget()
 
             '''code goes here'''
             #From here
-            self.box_frame = ctk.CTkFrame(self,fg_color="white")
-            self.box_frame.pack(fill=BOTH, expand=True)
+            self.main_frame = ctk.CTkFrame(self, width=width*0.385, height=height*0.55, fg_color=Color.White_Lotion, corner_radius=0)
+            self.main_frame.pack(fill=BOTH, expand=True)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
 
-            #x button
-            ctk.CTkButton(self.box_frame, text='X', command=lambda: self.place_forget(),font=("Poppins", (height*0.023)), fg_color='red', text_color='white', width=width*0.025).grid(row=0, column=0, padx=(width*0.006), pady=((height*0.01), (height*0.03)), sticky="ne")
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, sticky="ew")
+            self.top_frame.pack_propagate(0)
 
-            #file name label
-            ctk.CTkLabel(self.box_frame, text='File Name:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=1, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.gen_report).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="GENERATE INVENTORY REPORT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+            
+            #ctk.CTkButton(self.main_frame, text='X', command=lambda: self.place_forget(),font=("DM Sans Medium", (height*0.023)), fg_color='red', text_color='white', width=width*0.025).grid(row=0, column=0, padx=(width*0.006), pady=((height*0.01), (height*0.03)), sticky="ne")
+
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.content_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+
+            self.sub_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion)
+            self.sub_frame.pack(fill=BOTH, expand=1, padx=(width*0.005), pady=(height*0.01))
+            self.sub_frame.grid_columnconfigure(0, weight=1)
+            
+            '''FILE NAME'''
+            self.file_name_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.file_name_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.025,height*0.01))
+            ctk.CTkLabel(self.file_name_frame, text='File Name:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht, height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
+            self.file_name_entry = ctk.CTkEntry(self.file_name_frame, placeholder_text='report', fg_color=Color.White_Lotion, font=("DM Sans Medium", 14),height=height*0.055)
+            self.file_name_entry.pack(side="left", fill='x', expand=1)
+            
+            '''PATH FRAME'''
+            self.path_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.path_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
+            ctk.CTkLabel(self.path_frame, text='File Path:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht,height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
+            self.path_entry = ctk.CTkEntry(self.path_frame, font=("DM Sans Medium", 14),height=height*0.055)
+            self.path_entry.insert(0, self.DEFAULT_PATH)
+            self.path_entry.pack(side="left", fill='x', expand=1)
+            ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
+            
+            '''TITLE SETTING'''
+            self.title_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.title_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005))
+            self.title_setting = ctk.CTkLabel(self.title_frame, text= 'Select Date:', font=("DM Sans Medium", 14))
+            self.title_setting.grid(row = 0, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.02, 0))
+            
+            self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
+            self.setting_frame.pack_propagate(0)
+            self.setting_frame.grid(row=4, column=0, sticky = 'nsew', padx=(width*0.005))
+            #daily
+            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5)
+            self.daily_date_entry.pack(side = ctk.LEFT, fill="x", expand=1, padx = (width * .005), pady=(height*0.005))
+            change_date_entry()
+            change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry._text))+'_report.pdf')
+            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
+                                                       command=lambda:cctk.tk_calendar(self.daily_date_entry, "%s", date_format="word", max_date=datetime.datetime.now()) )
+            self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .005), pady=(height*0.005))
+            
+            self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+            self.bottom_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+            
+            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel)
+            self.cancel_btn.pack(side="left")
+            
+            self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback, font=("DM Sans Medium", 14),height=height*0.055)
+            self.generate_btn.pack(side="right")
+            
+            """ #file name label
+            ctk.CTkLabel(self.box_frame, text='File Name:',font=("DM Sans Medium", (height*0.023)), text_color="#06283D").grid(row=1, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
             #file name entry
-            self.file_name_entry = ctk.CTkEntry(self.box_frame, placeholder_text='report', height=height*0.03, width=width*0.25, corner_radius=20, font=("Poppins", (height*0.023)))
+            self.file_name_entry = ctk.CTkEntry(self.box_frame, placeholder_text='report', height=height*0.03, width=width*0.25, corner_radius=20, font=("DM Sans Medium", (height*0.023)))
             self.file_name_entry.grid(row=2, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="w")
 
             #path label
-            ctk.CTkLabel(self.box_frame, text='Path:',font=("Poppins", (height*0.023)), text_color="#06283D").grid(row=3, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
+            ctk.CTkLabel(self.box_frame, text='Path:',font=("DM Sans Medium", (height*0.023)), text_color="#06283D").grid(row=3, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
             self.path_frame = ctk.CTkFrame(self.box_frame,fg_color="white")
             self.path_frame.grid(row=4, column=0)
             #path entry
-            self.path_entry = ctk.CTkEntry(self.path_frame, height=height*0.03,  width=width*0.22, corner_radius=20, font=("Poppins", (height*0.023)))
+            self.path_entry = ctk.CTkEntry(self.path_frame, height=height*0.03,  width=width*0.22, corner_radius=20, font=("DM Sans Medium", (height*0.023)))
             self.path_entry.insert(0, self.DEFAULT_PATH)
             self.path_entry.grid(row=4, column=0, padx=((width*0.006),(width*0.00)), pady=(0, (height*0.01)), sticky="w")
             #path button
-            ctk.CTkButton(self.path_frame, text='...', command=path_save_cmd,font=("Poppins", (height*0.023)), fg_color='#2678F3', text_color='white', width=width*0.025).grid(row=4, column=1, padx=((width*0.002),(width*0.006)), pady=(0, (height*0.01)), sticky="ne")
+            ctk.CTkButton(self.path_frame, text='...', command=path_save_cmd,font=("DM Sans Medium", (height*0.023)), fg_color='#2678F3', text_color='white', width=width*0.025).grid(row=4, column=1, padx=((width*0.002),(width*0.006)), pady=(0, (height*0.01)), sticky="ne")
 
             #file type label
             #file type entry
-            #self.file_type_entry = ctk.CTkEntry(self.box_frame, height=height*0.03, corner_radius=20, font=("Poppins", (height*0.023)), show='*')
+            #self.file_type_entry = ctk.CTkEntry(self.box_frame, height=height*0.03, corner_radius=20, font=("DM Sans Medium", (height*0.023)), show='*')
             #self.file_type_entry.grid(row=6, column=0, padx=(width*0.006), pady=(0, (height*0.01)), sticky="nsw")
-            self.title_setting = ctk.CTkLabel(self.box_frame, text= 'Select Date', font=("Poppins", (height*0.015)))
+            self.title_setting = ctk.CTkLabel(self.box_frame, text= 'Select Date', font=("DM Sans Medium", (height*0.015)))
             self.title_setting.grid(row = 7, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.023, 0))
 
             self.setting_frame = ctk.CTkFrame(self.box_frame, fg_color='transparent', height=height * .05)
             self.setting_frame.pack_propagate(0)
-            self.setting_frame.grid(row = 8, column = 0, sticky = 'nwe', padx=(width*0.006))
+            self.setting_frame.grid(row = 8, column = 0, sticky = 'nwe', padx=(width*0.006)) """
 
             #daily
-            self.daily_date_entry = ctk.CTkEntry(self.setting_frame, width * .213, height * .05, state='readonly', font=("Poppins", (height*0.023)))
+            """ self.daily_date_entry = ctk.CTkEntry(self.setting_frame, width * .213, height * .05, state='readonly', font=("DM Sans Medium", (height*0.023)))
             change_date_entry()
             change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry.get()))+'_report.pdf')
             self.daily_calendar_button = ctk.CTkButton(self.setting_frame, width * .027, width *.03)
             self.daily_date_entry.pack(side = ctk.LEFT, padx = (width * .0025))
-            self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .0025))
+            self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .0025)) """
 
             #Generate button
-            self.generate_btn = ctk.CTkButton(self.box_frame, text='Generate', command= generate_callback,font=("Poppins", (height*0.023)), fg_color='#2678F3', text_color='white')
-            self.generate_btn.grid(row=9, column=0, padx=(width*0.01), pady=((height*0.05), (height*0.01)), sticky="sew")
+            """ self.generate_btn = ctk.CTkButton(self.box_frame, text='Generate', command= generate_callback,font=("DM Sans Medium", (height*0.023)), fg_color='#2678F3', text_color='white')
+            self.generate_btn.grid(row=9, column=0, padx=(width*0.01), pady=((height*0.05), (height*0.01)), sticky="sew") """
 
         def place(self, **kwargs):
             if 'default_config' in kwargs:
                 txt = 'Daily' if 'Daily' in kwargs['default_config'] else 'Monthly' if 'Monthly' in kwargs['default_config'] else 'Yearly'
-                self.report_type_option.set(txt)
-                self.report_type_option._command()
+                #self.report_type_option.set(txt)
+                #self.report_type_option._command()
                 kwargs.pop('default_config')
             return super().place(**kwargs)
 

@@ -629,31 +629,38 @@ class transaction_frame(ctk.CTkFrame):
         '''INVOICE FRAME: START'''
         
         self.invoice_frame.grid_rowconfigure(1, weight=1)
-        self.invoice_frame.grid_columnconfigure(3, weight=1)
+        self.invoice_frame.grid_columnconfigure(0, weight=1)
+        
+        '''TOP FRAME'''
+        self.top_con_frame = ctk.CTkFrame(self.invoice_frame,fg_color="transparent")
+        self.top_con_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         #invoice search button
-        self.search_frame = ctk.CTkFrame(self.invoice_frame,width=width*0.3, height = height*0.05, fg_color="light grey")
-        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame = ctk.CTkFrame(self.top_con_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame.pack(side="left")
         self.search_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
+        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color=Color.Blue_Yale,
-                                        width=width*0.005)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
+                                        width=width*0.005,)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
-        self.add_item_btn = ctk.CTkButton(self.invoice_frame,width=width*0.1, height = height*0.05, text="Add Invoice",image=self.add_icon, font=("DM Sans Medium", 14))
+        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.05, text="Add Invoice",image=self.add_icon, font=("DM Sans Medium", 14))
         self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
-        self.add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+        self.add_item_btn.pack(side="left", padx=(width*0.005))
 
-        self.edit_btn = ctk.CTkButton(self.invoice_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, image=self.edit_icon, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
-        self.edit_btn.grid(row=0, column=2, sticky="w",padx=(0,width*0.005), pady=(height*0.01))
+        self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
+        self.refresh_btn.pack(side="left", padx=(0,width*0.005))
         
-        self.refresh_btn = ctk.CTkButton(self.invoice_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
-        self.refresh_btn.grid(row=0, column=3, sticky="w",padx=(0,width*0.005), pady=(height*0.01))
-
+        #self.edit_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        #self.edit_btn.pack(side="right")
+        
+        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        self.cancel_invoice_btn.pack(side="right")
+        
+        '''INVOICE FRAME'''
         self.invoice_treeview_frame = ctk.CTkFrame(self.invoice_frame)
-        self.invoice_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
+        self.invoice_treeview_frame.grid(row=1, column=0, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30')
@@ -662,7 +669,7 @@ class transaction_frame(ctk.CTkFrame):
 
         self.proceeed_button = ctk.CTkButton(self.invoice_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
                                              compound="right", command = self.proceed_to_payment)
-        self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
+        self.proceeed_button.grid(row=2, column=0, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
         
         
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview)
@@ -1384,8 +1391,7 @@ class reports_frame(ctk.CTkFrame):
         '''constants'''
         self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
         self.days = [*range(1, 13, 1)]
-        self.save_as_popup = save_as_popup.show_popup(master, (width , height ))
-        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(master, (width, height))
+        
 
         '''variables'''
         self.data_loading_manager: List[bool] = [False for _ in range(3)]
@@ -1394,12 +1400,11 @@ class reports_frame(ctk.CTkFrame):
         self.previous_year = '0';
 
         self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
-
         self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
         self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
-
+        self.generate_report_icon = ctk.CTkImage(light_image=Image.open("image/gen_report.png"),size=(26,26))
 
         self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
         self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
@@ -1410,8 +1415,8 @@ class reports_frame(ctk.CTkFrame):
         self.sales_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
         self.inventory_report_frame = ctk.CTkFrame(self.base_frame,fg_color=Color.White_Color[3])
 
-        self.sales_report_frame.grid_columnconfigure(1, weight=1)
-        self.sales_report_frame.grid_rowconfigure(2, weight=1)
+        self.sales_report_frame.grid_columnconfigure(0, weight=1)
+        self.sales_report_frame.grid_rowconfigure((1,2), weight=1)
 
         self.inventory_report_frame.grid_columnconfigure(1, weight=1)
         self.inventory_report_frame.grid_rowconfigure(1, weight=1)
@@ -1432,7 +1437,7 @@ class reports_frame(ctk.CTkFrame):
 
         '''events'''
         self.label=["Items", "Services"]
-        self.info = [width*0.004,height*0.005,"#DBDBDB"]
+        self.info = [width*0.0055,height*0.005,Color.White_Platinum]
 
         monthly_label = [*range(1, calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[-1]+1, 1)]
         monthly_data_items = [database.fetch_data(sql_commands.get_items_daily_sales_sp, (f'2023-07-{s}',))[0][0] or 0 for s in monthly_label]
@@ -1450,38 +1455,37 @@ class reports_frame(ctk.CTkFrame):
         def report_menu_callback(report_type):
             if "Daily" in report_type:
                 self.monthly_graph.grid_forget()
-                self.month_option.grid_forget()
-                self.year_option.grid_forget()
-                self.year_option.grid_forget()
+                self.month_option.pack_forget()
+                self.year_option.pack_forget()
                 self.yearly_graph.grid_forget()
-                self.daily_data_view.pack(pady=height*0.01, padx=width*0.005)
+                self.daily_data_view.pack()
                 self.monthly_data_view.pack_forget()
                 self.yearly_data_view.pack_forget()
                 self.daily_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
-                self.date_selected_label.grid(row=0, column=1, padx=(0, width*0.005))
-                self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
+                self.date_selected_label.pack(side="left", padx=(0, width*0.005))
+                self.show_calendar.pack(side="left",  padx=(0, width*0.005))
 
             elif "Monthly" in report_type:
-                self.date_selected_label.grid_forget()
-                self.show_calendar.grid_forget()
-                self.daily_graph.grid_forget()
+                self.date_selected_label.pack_forget()
+                self.show_calendar.pack_forget()
+                self.daily_graph.pack_forget()
                 self.daily_data_view.pack_forget()
                 self.yearly_graph.grid_forget()
                 self.yearly_data_view.pack_forget()
-                self.monthly_data_view.pack(pady=height*0.01, padx=width*0.005)
+                self.monthly_data_view.pack()
                 self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
-                self.month_option.grid(row=0, column=1)
-                self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
+                self.month_option.pack(side="left", padx=(0, width*0.005))
+                self.year_option.pack(side="left", padx=(0, width*0.005))
 
             elif "Yearly" in report_type:
-                self.date_selected_label.grid_forget()
-                self.show_calendar.grid_forget()
-                self.month_option.grid_forget()
+                self.date_selected_label.pack_forget()
+                self.show_calendar.pack_forget()
+                self.month_option.pack_forget()
                 self.daily_graph.grid_forget()
                 self.monthly_data_view.pack_forget()
-                self.yearly_data_view.pack(pady=height*0.01, padx=width*0.005)
+                self.yearly_data_view.pack()
                 self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
-                self.year_option.grid(row=0, column=2, padx=(width*0.005, width*0.01))
+                self.year_option.pack(side="left", padx=(0, width*0.005))
             self.update_graphs()
 
         def set_date():
@@ -1512,7 +1516,7 @@ class reports_frame(ctk.CTkFrame):
         self.sales_report_button.configure(command=partial(load_main_frame, 0))
         self.sales_report_icon = ctk.CTkLabel(self.sales_report_button, text="",image=self.sales_icon)
         self.sales_report_icon.pack(side="left", padx=(width*0.01,width*0.005))
-        self.sales_report_label = ctk.CTkLabel(self.sales_report_button, text="SALES REPORT", text_color="white",)
+        self.sales_report_label = ctk.CTkLabel(self.sales_report_button, text="SALES REPORT", text_color="white", font=("DM Sans Medium", 14))
         self.sales_report_label.pack(side="left")
         self.sales_report_button.grid()
         self.sales_report_button.update_children()
@@ -1527,7 +1531,7 @@ class reports_frame(ctk.CTkFrame):
         self.inventory_report_button.configure(command=partial(load_main_frame, 1))
         self.inventory_report_icon = ctk.CTkLabel(self.inventory_report_button, text="",image=self.inventory_icon)
         self.inventory_report_icon.pack(side="left", padx=(width*0.01,width*0.005))
-        self.inventory_report_label = ctk.CTkLabel(self.inventory_report_button, text="INVENTORY REPORT", text_color="white")
+        self.inventory_report_label = ctk.CTkLabel(self.inventory_report_button, text="INVENTORY REPORT", text_color="white", font=("DM Sans Medium", 14))
         self.inventory_report_label.pack(side="left")
         self.inventory_report_button.grid()
         self.inventory_report_button.update_children()
@@ -1537,103 +1541,106 @@ class reports_frame(ctk.CTkFrame):
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
 
+        
+        
+        '''SALES REPORT'''
         self.report_option_var = ctk.StringVar(value="Daily Report")
+        
+        self.top_con_frame = ctk.CTkFrame(self.sales_report_frame, fg_color="transparent")
+        self.top_con_frame.grid(row=0, column=0, sticky="nsew", pady=(height*0.005,0) )
 
-        self.sales_report_top = ctk.CTkFrame(self.sales_report_frame)
-        self.sales_report_top.grid(row=0, column=0, sticky="w", pady=(height*0.0025,0))
-
+        self.sales_report_top = ctk.CTkFrame(self.top_con_frame, fg_color=Color.White_Platinum, height=height*0.0575)
+        self.sales_report_top.pack(side="left", fill="y")
+        
         self.report_type_menu = ctk.CTkOptionMenu(self.sales_report_top, values=["Daily Report", "Monthly Report", "Yearly Report"], variable=self.report_option_var,anchor="center",
+                                                  font=("DM Sans Medium",14), height=height*0.045, width=width*0.135,
                                                   command= report_menu_callback)
-        self.report_type_menu.grid(row=0, column=0, padx=(width*0.005), pady=height*0.005)
+        self.report_type_menu.pack(side="left", padx=(width*0.003, width*0.005))
 
-        self.date_selected_label = ctk.CTkLabel(self.sales_report_top, text=f"{date.today().strftime('%B %d, %Y')}", fg_color=Color.White_Color[3], corner_radius=5,
-                                                width=width*0.1)
-        self.date_selected_label.grid(row=0, column=1, padx=(0, width*0.005))
+        self.date_selected_label = ctk.CTkLabel(self.sales_report_top, text=f"{date.today().strftime('%B %d, %Y')}", fg_color=Color.White_Color[3], corner_radius=5, height=height*0.045, font=("DM Sans Medium",14),
+                                                width=width*0.125)
+        self.date_selected_label.pack(side="left", padx=(0, width*0.005))
 
-        self.show_calendar = ctk.CTkButton(self.sales_report_top, text="", image=self.calendar_icon, width=width*0.025,
-                                           command=set_date)
-        self.show_calendar.grid(row=0, column=2,  padx=(0, width*0.005))
+        self.show_calendar = ctk.CTkButton(self.sales_report_top, text="", image=self.calendar_icon, height=height*0.045, width=width*0.025, command=set_date)
+        self.show_calendar.pack(side="left",  padx=(0, width*0.0025))
 
-        self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
-        self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
+        """ self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
+        self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0)) """
         
-        self.generate_report_icon = ctk.CTkImage(light_image=Image.open("image/generate_report.png"),size=(18,20))
-        
-        '''self.show_gen_report = ctk.CTkButton(self.sales_report_top, text="", image=self.generate_report_icon, width=width*0.025,
-                                           command = generate_report)'''
-        self.show_gen_report = ctk.CTkButton(self.sales_report_top, text="", image=self.generate_report_icon, width=width*0.025,
+        self.show_gen_report = ctk.CTkButton(self.top_con_frame, image=self.generate_report_icon, width=width*0.125,  text="Generate Report", height=height*0.0575, font=("DM Sans Medium", 14),
                                              command = lambda: self.save_as_popup.place(relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
-        self.show_gen_report.grid(row=0, column=3,  padx=(0, width*0.005))
+        self.show_gen_report.pack(side="right")
         #generating reports end
 
-        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values= self.months, anchor="center", width=width*0.1, command= self.update_graphs)
+        self.month_option = ctk.CTkOptionMenu(self.sales_report_top, values= self.months, anchor="center", width=width*0.1, font=("DM Sans Medium",14), height=height*0.045, command= self.update_graphs)
         self.month_option.set(f"{date.today().strftime('%B')}")
-        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, anchor="center", command= self.update_graphs)
+        self.year_option = ctk.CTkOptionMenu(self.sales_report_top, values=operational_year, width=width*0.075, font=("DM Sans Medium",14), height=height*0.045, anchor="center", command= self.update_graphs)
         self.year_option.set(f"{date.today().strftime('%Y')}")
 
-        self.daily_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
+        self.daily_graph = ctk.CTkFrame(self.sales_report_frame, fg_color=Color.White_Platinum)
         self.daily_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
         self.daily_graph.grid_columnconfigure((3), weight=2)
         self.daily_graph.grid_rowconfigure((0), weight=1)
 
-        self.sales_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color="#DBDBDB")
+        self.sales_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color=Color.White_Platinum)
         self.sales_daily_graph.grid(row=0, column= 0,columnspan=3, sticky="nsew",  padx=(width*0.005,0), pady=(height*0.01))
 
-
-        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(self.data[0])}", corner_radius=5, fg_color="white")
-        self.items_total.grid(row=1, column=0,padx=(width*0.005,0), pady=(0,height*0.007))
-        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(self.data[1])}", corner_radius=5, fg_color="white")
-        self.service_total.grid(row=1, column=1, padx=(width*0.005), pady=(0,height*0.007))
-        self.income_total = ctk.CTkLabel(self.daily_graph,text=f"Total    {format_price(self.data[0] + self.data[1])}", corner_radius=5, fg_color="white")
+        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(self.data[0])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
+        self.items_total.grid(row=1, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.007))
+        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(self.data[1])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
+        self.service_total.grid(row=1, column=1, sticky="nsew",padx=(width*0.005), pady=(0,height*0.007))
+        self.income_total = ctk.CTkLabel(self.daily_graph,text=f"Total    {format_price(self.data[0] + self.data[1])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
         self.income_total.grid(row=1, column=2, sticky="nsew", pady=(0,height*0.007))
 
-        self.bars_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color="#DBDBDB", height=height*0.35)
+        self.bars_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color=Color.White_Platinum, height=height*0.35)
         self.bars_daily_graph.grid(row=0, column= 3, sticky="nsew", padx=(width*0.005), pady=(height*0.01,0))
         self.bars_daily_graph.pack_propagate(0)
 
-        self.data_frame = ctk.CTkFrame(self.sales_report_frame, height=height*0.35)
-        self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=height*0.0075)
+        self.data_frame = ctk.CTkFrame(self.sales_report_frame, fg_color=Color.White_Platinum, corner_radius=0, height=height*0.35)
+        self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=(0, height*0.0075))
 
-        self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.785, height=height *0.35,
-                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.075)}-tc/Client:x-tl/Service:{int(width*0.2)}-tc/Item:{int(width*0.2)}-tr/Total:{int(width*0.1)}-tl!30!30')
-        self.daily_data_view.pack(pady=height*0.01, padx=width*0.005)
+        self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.4,
+                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Service:{int(width*0.185)}-tc/Item:{int(width*0.185)}-tr/Total:{int(width*0.125)}-tl!30!30')
+        self.daily_data_view.pack()
 
-        self.monthly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
+
+        self.monthly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color=Color.White_Platinum)
         self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
-        self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5,
+        self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.5,
                                            column_format=f"/No:{int(width*.025)}-#c/Date:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.monthly_data_view.pack()
 
-        self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
-        self.monthly_vbar_canvas.get_tk_widget().pack()
+        self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.005,Color.White_Platinum], label=monthly_label)
+        self.monthly_vbar_canvas.get_tk_widget().pack(pady=(10))
 
-        self.yearly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color="#DBDBDB")
+        self.yearly_graph = ctk.CTkFrame(self.sales_report_frame, fg_color=Color.White_Platinum)
         self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
-        self.yearly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.795, height=height *0.5,
+        self.yearly_data_view = cctk.cctkTreeView(self.data_frame,  width=width*0.8, height=height *0.5,
                                            column_format=f"/No:{int(width*.025)}-#c/Month:x-tl/Item:{int(width*.2)}-tr/Service:{int(width*.2)}-tr/Total:{int(width*.1)}-tc!30!30")
         self.yearly_data_view.pack()
 
-        self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,"#DBDBDB"], label=self.months)
-        self.yearly_vbar_canvas.get_tk_widget().pack()
+        self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,Color.White_Platinum], label=self.months)
+        self.yearly_vbar_canvas.get_tk_widget().pack(pady=(10))
         report_menu_callback("Daily")
 
         #region: inv rep
         '''INVENTORY REPORT'''
-        self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
+        """  self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
         self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.0025), pady=(height*0.005,0))
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("Arial", 14), text_color="black", fg_color=Color.White_Color[3])
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
 
-        self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
-        self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005,0))
-        self.generate_rep_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
+        self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.03, height = height*0.0575, image=self.refresh_icon, fg_color="#83BD75")
+        self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005), padx=(width*0.005))
+        
+        self.generate_rep_btn = ctk.CTkButton(self.inventory_report_frame,  image=self.generate_report_icon, width=width*0.175,  text="Generate Inventory Report", height=height*0.0575, font=("DM Sans Medium", 14),
                                               command = lambda: self.save_as_inventory_rep_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.generate_rep_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005,0))
+        self.generate_rep_btn.grid(row=0, column=0, sticky="w", pady=(height*0.005))
 
         self.bought_item_con_col = None
 
@@ -1644,10 +1651,13 @@ class reports_frame(ctk.CTkFrame):
                                            column_format=f"/No:{int(width*.025)}-#c/ItemName:x-tl/InitialStock:{int(width*.2)}-tr/CurrentStock:{int(width*.2)}-tr!30!30",
                                            conditional_colors= self.bought_item_con_col)
         self.inventory_rep_treeview.pack()
+        
         self.update_invetory_graph()
         self.update_invetory_graph()
         #endregion
 
+        self.save_as_popup = save_as_popup.show_popup(self, (width , height))
+        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height))
         load_main_frame(0)
 
     def update_invetory_graph(self):
@@ -1728,7 +1738,7 @@ class reports_frame(ctk.CTkFrame):
 
         canvas = FigureCanvasTkAgg(bar_figure, master)
         #canvas.draw()
-        #canvas.get_tk_widget().pack()
+        canvas.get_tk_widget().pack(pady=(10))
         return canvas
     
     def update_graphs(self, force_reload: bool = False):
@@ -1760,7 +1770,7 @@ class reports_frame(ctk.CTkFrame):
                 monthly_data_service = [database.fetch_data(sql_commands.get_services_daily_sales_sp, (f'{y}-{m}-{s}',))[0][0] or 0 for s in monthly_label]
 
                 self.monthly_vbar_canvas.get_tk_widget().destroy()
-                self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=monthly_label)
+                self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.005,Color.White_Platinum], label=monthly_label)
                 self.monthly_vbar_canvas.get_tk_widget().pack()
 
                 self.data_loading_manager[1] = True
@@ -1776,7 +1786,7 @@ class reports_frame(ctk.CTkFrame):
                 monthly_data_service = [database.fetch_data(sql_commands.get_services_monthly_sales_sp, (self.months.index(s)+1, y))[0][0] or 0 for s in self.months]
 
                 self.yearly_vbar_canvas.get_tk_widget().destroy()
-                self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.0045,"#DBDBDB"], label=self.months)
+                self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.005,Color.White_Platinum], label=self.months)
                 self.yearly_vbar_canvas.get_tk_widget().pack()
 
                 self.data_loading_manager[2] = True
