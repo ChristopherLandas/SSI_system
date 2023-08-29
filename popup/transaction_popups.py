@@ -897,7 +897,9 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             if('client' in kwargs):
                 self.check_client(kwargs['client'])
                 kwargs.pop('client')
-            raw_data = database.fetch_data(sql_commands.get_services_and_their_price, None)
+                
+            '''TESTING JAMES'''
+            raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test, None)
             self.main_frame.pack()
             self.data = [(s[1], s[3]) for s in raw_data]
             self.service_treeview.update_table(self.data)
@@ -1136,6 +1138,8 @@ def show_payment_proceed(master, info:tuple,):
             width = info[0]
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
+            
+            self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
             self.main_frame.pack()
@@ -1146,7 +1150,8 @@ def show_payment_proceed(master, info:tuple,):
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            ctk.CTkLabel(self.top_frame, text='Payment', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.payment_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="PAYMENT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)

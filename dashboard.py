@@ -931,7 +931,11 @@ class sales_frame(ctk.CTkFrame):
         self.data_view = cctk.cctkTreeView(self.treeview_frame, width=width * .8, height=height * .8,
                                            column_format=f'/No:{int(width*0.025)}-#r/OR:{int(width*0.075)}-tc/Client:x-tl/Date:{int(width*0.15)}-tc/Total:{int(width*0.085)}-tr/Cashier:{int(width*.175)}-tl!30!30')
         #self.data_view.configure(double_click_command = lambda _: Sales_popup.show_sales_record_info(self, (width, height), ('a', 'b', 'c'), [None, None]).place(relx = .5, rely = .5, anchor = 'c') )
+        self.data_view._double_click_command = lambda _: self.show_sale_info.place(relx=0.5, rely=0.5, anchor="c")
         self.data_view.pack()
+        
+        
+        self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height)) 
         
     def grid(self, **kwargs):
         self.data_view.update_table(database.fetch_data(f"SELECT transaction_uid, client_name, transaction_date, Total_amount, Attendant_usn FROM transaction_record WHERE transaction_date='{date.today()}'"))

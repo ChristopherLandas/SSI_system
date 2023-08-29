@@ -36,16 +36,20 @@ def add_service(master, info:tuple, update_callback: callable):
                 self.update_callback()
                 
             def new_service():
-                a = util.generateId(initial='S', length=6)
+                
                 
                 if self.service_name_entry.get() == "" and self.price_entry.get() == "" and self.category_option.get() == "Set Category":
                     messagebox.showerror("Missing Data", "Complete all the fields to continue")   
                     
                 else:    
+                    a = util.generateId(initial='S', length=6)
                     database.exec_nonquery([[sql_commands.insert_service_test, (a, self.service_name_entry.get(), 'test', self.price_entry.get(), 
-                                                                                self.category_option.get(), 1, date.today())]])
+                                                                                self.category_option.get(), self.radio_var.get(), 1, date.today())]])
                     messagebox.showinfo("Service Added", "New service is added")
                     reset()
+                    
+            def radio_callback():
+                print(self.radio_var.get())
 
             
             self.service_icon = ctk.CTkImage(light_image= Image.open("image/services.png"), size=(20,20))
@@ -97,6 +101,17 @@ def add_service(master, info:tuple, update_callback: callable):
             self.price_entry = ctk.CTkEntry(self.price_frame, fg_color=Color.White_Lotion, placeholder_text="Price", placeholder_text_color='light grey',font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.045)
             self.price_entry.pack(side='left', fill="x", expand=1, padx=(0, width*0.005), pady=(height*0.0075))
            
+            '''DURATION TYPE'''
+            self.duration_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.duration_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
+            ctk.CTkLabel(self.duration_frame, text="Duration: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
+            
+            self.radio_var = tk.IntVar(value=0) 
+            self.one_rb_button = ctk.CTkRadioButton(self.duration_frame, text="one day", variable=self.radio_var, font=("DM Sans Medium", 14), value=0, command=radio_callback)
+            self.one_rb_button.pack(side="left", padx=(width*0.005,0))
+            self.more_rb_button = ctk.CTkRadioButton(self.duration_frame, text="multiple days", variable=self.radio_var, font=("DM Sans Medium", 14), value=1,  command=radio_callback)
+            self.more_rb_button.pack(side="left")
+            
             '''BOTTOM'''
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color='transparent')
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005), pady = (0, height*0.01))

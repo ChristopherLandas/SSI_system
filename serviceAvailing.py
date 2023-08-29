@@ -78,12 +78,16 @@ class pets(ctk.CTkFrame):
         def cancel_sequence():
             if cancel_command:
                 cancel_command()
-            self.destroy()
+            #self.destroy()
+            self.place_forget()
+            print("close")
 
         def proceed_sequence():
             proceed_command(self.get_data())
-            self.destroy()
-
+            #self.destroy()
+            self.place_forget()
+            print("close1")
+            
         def update_frames_selection(sender: ctk.CTkOptionMenu, to_remove: str) -> None:
             for i in self.frames:
                 if i is not sender:
