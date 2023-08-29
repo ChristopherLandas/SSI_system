@@ -62,7 +62,8 @@ class pet_info_frame(ctk.CTkFrame):
         if data_format == 'metadata':
             return {'name': self.name.get(), 'schedule': self.date.get()}
         elif data_format == 'tuple':
-            return (self.name.get(), datetime.datetime.now().strftime('%Y-%m-%d'))
+            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
+            return (self.name.get(), d_temp)
 
 class pets(ctk.CTkFrame):
     def __init__(self, master: any, length:int, title: str, pets_name: List[str], proceed_command:callable, cancel_command:callable = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -124,14 +125,22 @@ class pets(ctk.CTkFrame):
         self.cancel_btn.pack(side="right",  padx=(width*0.025))
 
 
-       
-
     '''functions'''
     def get_data(self) -> list:
         data = []
         for i in self.frames:
             data.append(i.get_data(data_format='tuple'))
         return data
+    
+    def place(self, service_dict: dict, **kwargs):
+        if(self._title in service_dict):
+            for i in range(len(service_dict[self._title])):
+                print(service_dict)
+                self.frames[i].name.set(service_dict[self._title][i][0])
+                d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime("%m-%d-%Y")
+                self.frames[i].first_date_entry.configure(text =  d_temp)
+
+        return super().place(**kwargs)
     
 class body(ctk.CTk):
     def __init__(self):

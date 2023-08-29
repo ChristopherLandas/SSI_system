@@ -786,12 +786,12 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         import serviceAvailing
                         def proceed_command(data):
                             self._service_dict[label_text] = data
-
+                        
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0,
                                                    text=label_text, width = root_treeview.column_widths[1],
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c'))
+                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c', service_dict = service_dict))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -933,7 +933,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
             width = info[0]
             height = info[1]
             super().__init__(master,width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
-            
+            self.services_lists = [s[0] for s in database.fetch_data("SELECT service_name FROM service_info GROUP BY UID")]
             self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
             self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
             
@@ -970,6 +970,15 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
             def save_invoice_callback():
                 if len(self.transact_treeview._data) == 0:
                     return
+                for dt in self.transact_treeview._data:
+                    if(dt[0] in self.service_dict and dt[0] in self.services_lists):
+                        for li in self.service_dict[dt[0]]:
+                            if li[0] == '':
+                                messagebox.showwarning("Cannot Proceed", "Fill the remaining Information")
+                                return
+                    elif(dt[0] not in self.service_dict and dt[0] in self.services_lists):
+                        messagebox.showwarning("Cannot Proceed", "Fill the remaining Information")
+                        return
 
                 services = []
                 items = []
