@@ -981,13 +981,16 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
 
                 formatted_svc_data = []
                 
-                uid = f'%s%s' % (datetime.now().strftime('%m%d%y'), str().zfill(3))
-                uid = generateId('P', 6)
+                uid = self.invoice_id_label._text
+                #uid = generateId('P', 6)
 
                 for svc in services:
                     for svc_inf in self.service_dict[svc[0]]:
-                        formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
+                        pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (svc_inf[0], self.client_name_entry.get()))[0][0]
+                        formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], pet_uid, svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
                 #formatting the services into its service invoice content
+                print(formatted_svc_data[0])
+
                 database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, 'aila', self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
 
                 for it in items:
@@ -1128,6 +1131,12 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
                 else:
                     return
             self.place_forget()  
+        
+        def place(self, **kwargs):
+            count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%m%d%y'), '%')")[0][0]
+            self.invoice_id_label.configure(text = '%s%s' % (datetime.now().strftime('%m%d%y'), str(count).zfill(2)))
+            return super().place(**kwargs)
+        
     return instance(master, info, treeview_content_update_callback)
 
 def show_payment_proceed(master, info:tuple,):
@@ -1164,11 +1173,13 @@ def show_payment_proceed(master, info:tuple,):
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
-                #if self.service
+                
                 item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
-                service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0], s[0], s[1], s[2], s[3], 0, 0) for s in self.services]
 
-                print(self.items)
+                service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0],
+                            s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (s[1], self.client_name._text))[0][0],
+                            s[1], s[2], s[3], 0, 0) for s in self.services]
+
 
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
                 #record the transaction
@@ -1207,6 +1218,7 @@ def show_payment_proceed(master, info:tuple,):
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
                 self._update_callback()
                 self._treeview_callback()
+                self.reset()
                 self.place_forget()
                 #update the table
             
@@ -1245,7 +1257,7 @@ def show_payment_proceed(master, info:tuple,):
             self.or_name = ctk.CTkLabel(self.or_frame, text="0001",  font=("DM Sans Medium", 14))
             self.or_name.pack(side="left") """
             
-            self.or_button = ctk.CTkButton(self.receipt_frame,  text="OR#: 001",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
+            self.or_button = ctk.CTkButton(self.receipt_frame,  text="OR#: ___",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
             self.or_button.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
 
             
@@ -1357,9 +1369,16 @@ def show_payment_proceed(master, info:tuple,):
             self.cancel_button.configure(command=self.reset)
             self.cancel_button.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(height*0.007))
         def reset(self):
+            self.payment_entry.delete(0, ctk.END)
+            self.change_total.configure(text = "--.--")
             self.place_forget()
 
         def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, update_callback: callable, **kwargs):
+            if self.or_button._text.endswith("_"):
+                count = database.fetch_data("SELECT transaction_uid FROM transaction_record ORDER BY CAST(transaction_uid AS INT) desc")[0][0]
+                self.or_button.configure(text = f"OR#: {str(int(count)+1).zfill(3)}")
+            #set up the or button
+
             self.cashier_name.configure(text = cashier)
             self.client_name.configure(text = invoice_data[1])
             self.services_total.configure(text = invoice_data[2])

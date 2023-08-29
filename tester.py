@@ -49,11 +49,18 @@ class body(ctk.CTk):
         ctk.CTkLabel(self, text = '🠋', text_color ='green', font=('arial', 30)).place(relx = .5, rely = .5, anchor = 'c')
         self.mainloop()'''
 
-        d =  database.fetch_data("SELECT * FROM item_general_info")
+        #d =  database.fetch_data("SELECT * FROM item_general_info")
+        #d = {s[1]: s[0] for s in d}
+        #keys = d.keys()
+
+        #for k in keys:
+        #    database.exec_nonquery([["UPDATE recieving_item set item_uid = ? WHERE NAME = ?", (d[k], k)]])
+
+        d = database.fetch_data("SELECT DISTINCT(id), p_name from pet_info")
         d = {s[1]: s[0] for s in d}
-        keys = d.keys()
+        keys = list(d.keys())
 
         for k in keys:
-            database.exec_nonquery([["UPDATE recieving_item set item_uid = ? WHERE NAME = ?", (d[k], k)]])
+            database.exec_nonquery([["UPDATE invoice_service_content SET pet_uid = ? WHERE patient_name = ?", (d[k], k)]])
         
 body()

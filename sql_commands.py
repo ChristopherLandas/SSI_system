@@ -193,7 +193,7 @@ add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, CURRENT_DATE)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?)"
-record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
@@ -415,7 +415,7 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
 
 #invoices
 insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
-insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
 cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
 get_invoice_info = "SELECT invoice_record.invoice_uid,\
@@ -528,3 +528,12 @@ get_monthly_sales_data = "SELECT transaction_date,\
                           WHERE MONTH(transaction_date) = ?\
                                AND YEAR(transaction_date) = ?\
                           GROUP BY DAY(transaction_date)"
+
+get_specific_pet_record = "SELECT services_transaction_content.service_name,\
+                                   services_transaction_content.scheduled_date,\
+                                   transaction_record.Attendant_usn\
+                           FROM services_transaction_content\
+                           JOIN transaction_record\
+                               ON services_transaction_content.transaction_uid = transaction_record.transaction_uid\
+                           WHERE  services_transaction_content.pet_uid = ?"
+                           #    AND services_transaction_content.`status` = 0"

@@ -451,7 +451,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
             #add sample data
             service_data = ["Service 1", "Service 2", "Service 3", "Service 4", "Service 5", "Service 6", "Service 7", "Service 8", "Service 9", "Service 10", "Service 11", "Service 12", "Service 13", "Service 14", "Service 15", "Service 16"]
 
-            data_rows = []
+            '''data_rows = []
             for i in range(len(service_data)):
                 if (i % 2) == 0:
                     tag = "even"
@@ -459,7 +459,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
                     tag ="odd"
                 data = (f"{i+1} ", service_data[i], "MM-DD-YYYY", service_data[i])
                 data_rows.append(data)
-                self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)
+                self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)'''
             
             self.service_record_data_view.tag_configure("odd",background=Color.White_AntiFlash)
             self.service_record_data_view.tag_configure("even",background=Color.White_Ghost)
@@ -507,9 +507,25 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.entries_set_state("disabled")
             
         def place(self, pet_data, **kwargs):
-            
             self.data=database.fetch_data(f"SELECT * FROM pet_info WHERE id='{pet_data[0]}'")
             self.set_entries(self.data)
-
+            self.load_history()
             return super().place(**kwargs)
+        
+        def load_history(self):
+            for c in self.service_record_data_view.get_children():
+                self.service_record_data_view.delete(c)
+
+            svc_data = database.fetch_data(sql_commands.get_specific_pet_record, (self.pet_id.get(), ))
+            print(svc_data)
+
+            for i in range(len(svc_data)):
+                if (i % 2) == 0:
+                    tag = "even"
+                else:
+                    tag ="odd"
+                data = (f"{i+1} ", svc_data[i][0], svc_data[i][1].strftime("%b %d, %Y"), svc_data[i][2])
+                #data_rows.append(data)
+                self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)
+            #data = '''
     return instance(master, info, table_update_callback)
