@@ -535,3 +535,9 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
                                ON services_transaction_content.transaction_uid = transaction_record.transaction_uid\
                            WHERE  services_transaction_content.pet_uid = ?"
                            #    AND services_transaction_content.`status` = 0"
+
+check_if_item_does_expire = "SELECT does_expire\
+                            FROM categories\
+                            JOIN item_general_info\
+                                ON categories.categ_name = item_general_info.Category\
+                            WHERE item_general_info.UID = ?"

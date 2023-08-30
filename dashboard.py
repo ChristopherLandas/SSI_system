@@ -1211,9 +1211,9 @@ class inventory_frame(ctk.CTkFrame):
             self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items))
 
         def restocking_callback():
-            refresh_rs_data_view1()
             update_tables()
             self.inventory_button.response()
+            refresh_rs_data_view1()
 
         def disposal_callback(i: int):
             data = self.rs_data_view1._data[i]
@@ -1222,7 +1222,7 @@ class inventory_frame(ctk.CTkFrame):
                                     ["UPDATE recieving_item SET state = -1 WHERE id = ?", (data[0], )]])
             messagebox.showinfo("Succeed", "Item Disposed")
 
-        def full_dispose_all():
+        '''def full_dispose_all():
             data = self.rs_data_view1._data
             for d in data:
                 print(d)
@@ -1230,7 +1230,7 @@ class inventory_frame(ctk.CTkFrame):
                 database.exec_nonquery([[sql_commands.record_disposal_process, (d[0], item_id, d[1], d[2], d[3])],
                                         ["UPDATE recieving_item SET state = -1 WHERE id = ?", (d[0], )]])
             messagebox.showinfo("Succeed", "Item Disposed")
-            self.update_disposal_treeview()
+            self.update_disposal_treeview()'''
 
         def _restock(_: any = None):
             if self.rs_data_view1.get_selected_data():

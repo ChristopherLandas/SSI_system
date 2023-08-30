@@ -249,6 +249,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
+            self.does_expire = False
 
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             '''events'''
@@ -258,19 +259,27 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             def validate_acc(_):
                 self.item_uid = database.fetch_data("SELECT uid FROM item_general_info WHERE NAME = ?", (self.item_name_entry.get(),))
                 self.item_uid = self.item_uid[0][0] if self.item_uid else None
+                self.does_expire =  database.fetch_data(sql_commands.check_if_item_does_expire, (self.item_uid, ))[0][0] == 1
                 if self.item_uid is None:
                     return
-                if database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, ))is not None:
-                    self.show_calendar.configure(state = ctk.NORMAL)
+                if self.does_expire:
+                    self.show_calendar.configure(state = ctk.NORMAL, fg_color = Color.Blue_Yale)
+                    self.expiry_date_entry.configure(text = 'Set Expiry Date')
                 else:
-                    self.show_calendar.configure(state = ctk.DISABLED)
+                    self.show_calendar.configure(state = ctk.DISABLED, fg_color = Color.Grey_Davy)
+                    self.expiry_date_entry.configure(text = 'Item doesn\'t expire')
                 self.stock_entry.configure(state = ctk.NORMAL)
+                self.stock_entry.set(1)
                 self.action_btn.configure(state = ctk.NORMAL)
 
             def recieve_stock():
+                if self.item_name_entry.get() == "_" or (self.does_expire and self.expiry_date_entry._text == 'Set Expiry Date'):
+                    messagebox.showerror("Info Missing", "Fill the required information")
+                    return
+
                 uid = database.fetch_data(sql_commands.get_uid, (self.item_name_entry.get(), ))[0][0]
                 supplier = database.fetch_data(sql_commands.get_supplier, (uid, ))[0][0]
-                expiry = None if 'Set'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
+                expiry = None if 'Set'in self.expiry_date_entry._text or 'doesn\'t'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
                 #item information
 
                 data = (generateId('R', 6), self.item_name_entry.get(), uid, self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None)
@@ -301,7 +310,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
 
             self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
                                                            values= list(item),)
-
+            self.item_name_entry.set("_")
             self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))
 
             ctk.CTkLabel(self.item_frame, text="Initial Price Change:").grid(row=3, column=0, sticky="w",pady = (height*0.01,0), padx= (width*0.01))
@@ -321,7 +330,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.expiry_date_entry = ctk.CTkLabel(self.restock_frame, height * .05, fg_color="white", text="Set Expiry Date", text_color="grey", corner_radius=3)
             self.expiry_date_entry.grid(row = 2, column = 0, columnspan=3,sticky = 'nsew', padx = 12, pady = (0, 12))
 
-            self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
+            self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Grey_Davy, state = ctk.DISABLED,
                                                command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
             self.show_calendar.grid(row=2, column=3, padx = (0,width*0.01), pady = (0,height*0.015), sticky="w")
 
@@ -815,7 +824,7 @@ def add_category(master, info:tuple, table_update_callback: callable):
             
     return add_category(master, info, table_update_callback)
 
-def restock_confirmation(master, info:tuple,):
+def restock_confirmation(master, info:tuple, ):
     class restock_confirmation(ctk.CTkFrame):
         def __init__(self, master, info:tuple, ):
             width = info[0]
@@ -829,19 +838,14 @@ def restock_confirmation(master, info:tuple,):
             self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
             
             def reset():
+                self.stock_spinner.set(0)
                 self.place_forget()
 
             def update_stock():
-                self.after(1000)
-                if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
-                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
-                    messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
-                else:
-                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, (self.stock_spinner.value, self.receiving_id.get())],
-                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
-                    messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
-
-                    
+                if(self.stock_spinner.value == 0):
+                    messagebox.showerror("Fail to proceed", "Stock must be at least 1")
+                    return
+                self.place_forget()
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
                 if recieving_info[5]:
                     if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?", (recieving_info[0], recieving_info[5]))[0][0] == 0:
@@ -850,7 +854,17 @@ def restock_confirmation(master, info:tuple,):
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  recieving_info[6])]]) 
                 else:
                     database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self.stock_spinner.value, recieving_info[2])]])
-                self.after_callback()             
+
+                if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
+                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
+                    messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
+                else:
+                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, (self.stock_spinner.value, self.receiving_id.get())],
+                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
+                    messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
+
+                self.after_callback()
+                reset()         
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
