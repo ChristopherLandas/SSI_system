@@ -961,7 +961,6 @@ class sales_frame(ctk.CTkFrame):
     def update_table(self):
         self.data_view.update_table(database.fetch_data(f"SELECT transaction_uid, client_name, transaction_date, Total_amount, Attendant_usn FROM transaction_record WHERE transaction_date='{date.today()}'"))
 
-
 class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, mainframes
     def __init__(self, master):
