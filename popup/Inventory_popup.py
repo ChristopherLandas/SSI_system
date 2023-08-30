@@ -644,11 +644,11 @@ def disposal_history(master, info:tuple,):
             self.treeview_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
             #data = database.fetch_data(sql_commands.get_disposal_hist)
-            '''self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=data,width= width * .8, height= height * .775, corner_radius=0,
-                                             column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*0.07)}-tr/DateDisposed:{int(width*.2)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, width= width * .8, height= height * .775, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/InitialQuantity:{int(width*0.1)}-tr/FinalQuantity:{int(width*0.1)}-tr/FullDisposedDate:{int(width*.2)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
                                             header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
-            self.data_view1.pack()'''
+                                            row_font=("Arial", 16), navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
+            self.data_view1.pack()
 
         def place(self, **kwargs):
             self.data_view1.update_table(database.fetch_data(sql_commands.get_disposal_hist))
