@@ -406,7 +406,20 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
         self.generate_DISumarry()
+        self.load_saled_data_treeview()
+        self.load_scheduled_service()
         self.grid_forget()
+
+    def load_scheduled_service(self):
+        data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
+        self.sched_data_treeview.update_table(data)
+
+    def load_saled_data_treeview(self):
+        date = datetime.datetime.now()
+        data = database.fetch_data(sql_commands.get_monthly_sales_data, (date.month, date.year))
+        total = sum([price_format_to_float(s[-1][1:]) for s in data])
+        self.current_total.configure(text = 'Total:   ' + '₱' + format_price(total))
+        self.sales_data_treeview.update_table(data)
 
     def show_status_popup(self, name: str, data):
             self.status_popup.status_label.configure(text = name)
@@ -721,7 +734,7 @@ class transaction_frame(ctk.CTkFrame):
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
         else:
-            if(messagebox.showwarning("Cancel Invoice", "Are you really want\nto cancel this invoice")):
+            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")):
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
 
         self.update_invoice_treeview()
@@ -778,6 +791,8 @@ class transaction_frame(ctk.CTkFrame):
                 temp.show_pie()
                 temp.generate_stat_tabs()
                 temp.generate_DISumarry()
+                temp.load_saled_data_treeview()
+                temp.load_scheduled_service()
             if isinstance(i, reports_frame):
                 temp: reports_frame = i
                 i.graphs_need_upgrade()
@@ -1304,6 +1319,8 @@ class inventory_frame(ctk.CTkFrame):
                 temp.show_pie()
                 temp.generate_stat_tabs()
                 temp.generate_DISumarry()
+                temp.load_saled_data_treeview()
+                temp.load_scheduled_service()
             if isinstance(i, reports_frame):
                 temp: reports_frame = i
                 i.graphs_need_upgrade()

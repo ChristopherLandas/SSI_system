@@ -36,7 +36,7 @@ def add_service(master, info:tuple, update_callback: callable):
                 self.update_callback()
                 
             def new_service():
-                
+                a = util.generateId(initial='S', length=6)
                 
                 if self.service_name_entry.get() == "" and self.price_entry.get() == "" and self.category_option.get() == "Set Category":
                     messagebox.showerror("Missing Data", "Complete all the fields to continue")   
@@ -50,7 +50,6 @@ def add_service(master, info:tuple, update_callback: callable):
                     
             def radio_callback():
                 print(self.radio_var.get())
-
             
             self.service_icon = ctk.CTkImage(light_image= Image.open("image/services.png"), size=(20,20))
             
