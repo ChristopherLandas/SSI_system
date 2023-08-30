@@ -795,8 +795,11 @@ class transaction_frame(ctk.CTkFrame):
                 temp.load_scheduled_service()
             if isinstance(i, reports_frame):
                 temp: reports_frame = i
-                i.graphs_need_upgrade()
-                i.update_invetory_graph()
+                temp.graphs_need_upgrade()
+                temp.update_invetory_graph()
+            if isinstance(i, sales_frame):
+                temp: sales_frame = i
+                temp.update_table()
         #check if there are certain mainframes there, then update all of those needed process and ui
 
         #self.client_name_entry.set('')
@@ -949,13 +952,15 @@ class sales_frame(ctk.CTkFrame):
         self.data_view._double_click_command = lambda _: self.show_sale_info.place(relx=0.5, rely=0.5, anchor="c")
         self.data_view.pack()
         
-        
         self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height)) 
-        
+        self.update_table()
+
     def grid(self, **kwargs):
-        self.data_view.update_table(database.fetch_data(f"SELECT transaction_uid, client_name, transaction_date, Total_amount, Attendant_usn FROM transaction_record WHERE transaction_date='{date.today()}'"))
-        self.date_select_entry.configure(text=date.today())
         return super().grid(**kwargs)
+    
+    def update_table(self):
+        self.data_view.update_table(database.fetch_data(f"SELECT transaction_uid, client_name, transaction_date, Total_amount, Attendant_usn FROM transaction_record WHERE transaction_date='{date.today()}'"))
+
 
 class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, mainframes
@@ -1323,8 +1328,11 @@ class inventory_frame(ctk.CTkFrame):
                 temp.load_scheduled_service()
             if isinstance(i, reports_frame):
                 temp: reports_frame = i
-                i.graphs_need_upgrade()
-                i.update_invetory_graph()
+                temp.graphs_need_upgrade()
+                temp.update_invetory_graph()
+            if isinstance(i, sales_frame):
+                temp: sales_frame = i
+                temp.update_table()
 
 class patient_info_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info
