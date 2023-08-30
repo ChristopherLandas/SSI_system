@@ -800,6 +800,7 @@ class transaction_frame(ctk.CTkFrame):
             if isinstance(i, sales_frame):
                 temp: sales_frame = i
                 temp.update_table()
+            self.show_invoice.update_particular_pop_up()
         #check if there are certain mainframes there, then update all of those needed process and ui
 
         #self.client_name_entry.set('')

@@ -897,7 +897,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             if('client' in kwargs):
                 self.check_client(kwargs['client'])
                 kwargs.pop('client')
-                
             '''TESTING JAMES'''
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test, None)
             self.main_frame.pack()
@@ -905,6 +904,9 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.service_treeview.update_table(self.data)
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
             return super().place(**kwargs)
+    
+        def update_items_stocks(self):
+            self.item_treeview.update_table(database.fetch_data(sql_commands.get_item_and_their_total_stock, None))
         
         def check_client(self, client_name: str):
             self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
@@ -1106,10 +1108,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.cancel_invoice_btn.configure(command=self.reset)
             self.cancel_invoice_btn.pack(side="right", padx=(width*0.005))
             
-            
-            #self.show_particulars:ctk.CTkFrame = add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
-            self.show_particulars:ctk.CTkFrame = add_particulars(self, (width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
-            #self.show_particulars:ctk.CTkFrame = add_particulars_demo(self,(width, height))
+            self.show_particulars:add_particulars = add_particulars(self, (width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
             
         def change_total_value_item(self, value: float):
             value = float(value)
@@ -1146,6 +1145,9 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%m%d%y'), '%')")[0][0]
             self.invoice_id_label.configure(text = '%s%s' % (datetime.now().strftime('%m%d%y'), str(count).zfill(2)))
             return super().place(**kwargs)
+
+        def update_particular_pop_up(self):
+            self.show_particulars.update_items_stocks()
         
     return instance(master, info, treeview_content_update_callback)
 
