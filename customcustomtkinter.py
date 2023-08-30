@@ -293,7 +293,7 @@ class customcustomtkinter:
                         temp_lbl._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
                         temp_lbl._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
                         temp_lbl.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
-                        text_overflow_elipsis(temp_lbl, self.column_widths[j] * .92)
+                        text_overflow_elipsis(temp_lbl, self.column_widths[j] * .9)
                     #for info tab column
                     elif self.column_types[j] == 'iT':
                         temp:customcustomtkinter.info_tab = customcustomtkinter.info_tab(frm, width= self.column_widths[j], corner_radius= 0,

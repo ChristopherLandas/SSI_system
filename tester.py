@@ -48,9 +48,10 @@ class body(ctk.CTk):
         text_overflow_elipsis(lbl)
 
 
-        treeview = cctk.cctkTreeView(self, ("j", "1"), self.screen[0] * .5, self.screen[1] * .5,
+        treeview = cctk.cctkTreeView(self, ("wejfioejdfvnerhiwoejdowedwnv", "1"), self.screen[0] * .5, self.screen[1] * .5,
                                      column_format="/Title2:120-tl/Title3:x-tl!30!30")
         treeview.place(relx = .5, rely = .5, anchor = 'c')
+        print(treeview._data)
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))
