@@ -305,13 +305,8 @@ update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3,
 record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
-get_for_disposal_items = "SELECT DISTINCT item_general_info.name,\
-                              item_inventory_info.Stock\
-                          FROM item_general_info\
-                          JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                          INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                          WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE"
-record_disposal_process = "INSERT INTO disposal_history (item_name, quan, date_of_disposal, disposed_by) VALUES (?, ?, CURRENT_TIMESTAMP, ?);"
+get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
+record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal, disposed_by) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, quan, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
 

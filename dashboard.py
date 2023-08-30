@@ -1215,6 +1215,13 @@ class inventory_frame(ctk.CTkFrame):
             update_tables()
             self.inventory_button.response()
 
+        def disposal_callback(i: int):
+            data = self.rs_data_view1._data[i]
+            item_id = database.fetch_data("Select item_uid from recieving_item where id = ?", (data[0], ))[0][0]
+            database.exec_nonquery([[sql_commands.record_disposal_process, (data[0], item_id, data[1], data[2], data[3], acc_cred[0][0])],
+                                    ["UPDATE recieving_item SET state = -1 WHERE id = ?", (data[0], )]])
+            messagebox.showinfo("Succeed", "Item Disposed")
+            #refresh_rs_data_view1()
 
         def _restock(_: any = None):
             if self.rs_data_view1.get_selected_data():
@@ -1263,7 +1270,7 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/Remaining:{int(width*.08)}-tl/SupplierName:{int(width*.15)}-tl/Action:{int(width*.075)}-bD!30!30',
-                                            double_click_command= _restock)
+                                            double_click_command= _restock, bd_commands= disposal_callback)
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
         
@@ -1276,7 +1283,7 @@ class inventory_frame(ctk.CTkFrame):
             uid = database.fetch_data(sql_commands.get_uid, (data[0], ))[0][0]
             if messagebox.askyesno('Dispose item', 'Are you sure you wan\'t to\nDispose the item?'):
                 database.exec_nonquery([[sql_commands.delete_disposing_items, (uid, data[1])]])
-                database.exec_nonquery([[sql_commands.record_disposal_process, data + ('klyde', )]])
+                #database.exec_nonquery([[sql_commands.record_disposal_process, data + ('klyde', )]])
                 self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_for_disposal_items))
 
         self.disposal_frame.grid_propagate(0)
@@ -1286,11 +1293,11 @@ class inventory_frame(ctk.CTkFrame):
         self.ds_treeview_frame = ctk.CTkFrame(self.disposal_frame,fg_color="transparent")
         self.ds_treeview_frame.grid(row=1, column=0, columnspan=5, sticky="nsew", padx=width*0.005)
 
-        self.ds_data = database.fetch_data(sql_commands.get_for_disposal_items)
-        self.ds_data_view1 = cctk.cctkTreeView(self.ds_treeview_frame, data= self.ds_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*.15)}-tr/Action:{int(width*.075)}-bD!30!30',
+        #self.ds_data = database.fetch_data(sql_commands.get_for_disposal_items)
+        self.ds_data_view1 = cctk.cctkTreeView(self.ds_treeview_frame, data = None, width= width * .805, height= height * .725, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/InitialQuantity:{int(width*.1)}-tr/CurrentQuantity:{int(width*.1)}-tr/DateOfDisposal:{int(width*.125)}-tl/DisposedBy:{int(width*.085)}-tl!30!30',
                                            header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-                                           row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel, double_click_command=dispose_item)
+                                           row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel)
         self.ds_data_view1.pack()
 
         self.ds_disposal_history = ctk.CTkButton(self.disposal_frame, width=width*0.025, height = height*0.05, text="Disposal Record", image=self.history_icon, font=("DM Sans Medium", 14),
@@ -1302,7 +1309,7 @@ class inventory_frame(ctk.CTkFrame):
 
         self.ds_dispose_all = ctk.CTkButton(self.disposal_frame, width=width*0.025, height = height*0.05, text="Dispose All", image=self.disposal_icon, font=("DM Sans Medium", 14))
         self.ds_dispose_all.grid(row=0, column=4, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
-
+        self.update_disposal_treeview()
 
         '''ITEM DISPOSAL: END'''
 
@@ -1316,6 +1323,10 @@ class inventory_frame(ctk.CTkFrame):
         
         sort_status_callback("View by Levels")
         load_main_frame(0)
+
+    def update_disposal_treeview(self):
+        print(*database.fetch_data(sql_commands.get_for_disposal_items), sep = '\n')
+        self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_for_disposal_items))
 
     def update_tables(self):
         for i in mainframes:
