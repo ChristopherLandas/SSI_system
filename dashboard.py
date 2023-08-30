@@ -685,7 +685,7 @@ class transaction_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=0, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
         
         
-        self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview)
+        self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview, acc_cred[0][0])
         
         '''INVOICE FRAME: END'''
         
@@ -742,7 +742,7 @@ class transaction_frame(ctk.CTkFrame):
     def proceed_to_pay(self):
         data = self.payment_treeview.get_selected_data()
         if(data):
-            self.show_payment_proceed.place(invoice_data= data, cashier= 'aila', treeview_callback= self.update_payment_treeview,
+            self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
                                             update_callback= self.reset,
                                             relx = .5, rely = .5, anchor = 'c')
         else:
@@ -2242,7 +2242,6 @@ class histlog_frame(ctk.CTkFrame):
             self.action_tree.delete(i)
         temp = database.fetch_data(sql_commands.get_raw_action_history, (datetime.datetime.strptime(self.date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'), self.sort_role_option.get()))
         modified_data = [(temp.index(s) + 1, s[0], s[1].capitalize(), decode_action(s[2]), s[3].strftime("%m/%d/%Y at %I:%M %p")) for s in temp]
-        print(modified_data)
         for i in range(len(modified_data)):
             if (i % 2) == 0:
                 tag = "even"

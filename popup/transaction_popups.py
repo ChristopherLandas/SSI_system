@@ -929,7 +929,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 self.reset()
     return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict)
 
-def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
+def add_invoice(master, info:tuple, treeview_content_update_callback: callable, attendant: str):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, treeview_content_update_callback: callable):
             width = info[0]
@@ -938,7 +938,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
             self.services_lists = [s[0] for s in database.fetch_data("SELECT service_name FROM service_info GROUP BY UID")]
             self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
             self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-            
+            self._attentdant = attendant
             self.customer_infos = []
             self.service_dict: dict = {}
 
@@ -994,15 +994,14 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable):
                 
                 uid = self.invoice_id_label._text
                 #uid = generateId('P', 6)
-
                 for svc in services:
-                    for svc_inf in self.service_dict[svc[0]]:
+                    for i in range(svc[2]):
+                        svc_inf = self.service_dict[svc[0]][i]
                         pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (svc_inf[0], self.client_name_entry.get()))[0][0]
                         formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], pet_uid, svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
                 #formatting the services into its service invoice content
-                print(formatted_svc_data[0])
 
-                database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, 'aila', self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
 
                 for it in items:
                     database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
@@ -1182,7 +1181,7 @@ def show_payment_proceed(master, info:tuple,):
 
             '''events'''
             def record_transaction():
-                record_id =  database.fetch_data(sql_commands.generate_id_transaction)[0][0]
+                record_id =  int(self.or_button._text[4:])
 
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
                     messagebox.showinfo('Invalid', 'Pay the right amount')
@@ -1192,7 +1191,7 @@ def show_payment_proceed(master, info:tuple,):
 
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0],
                             s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (s[1], self.client_name._text))[0][0],
-                            s[1], s[2], s[3], 0, 0) for s in self.services]
+                            s[1], s[2], price_format_to_float(s[3]), 0, 0) for s in self.services]
 
 
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
@@ -1200,6 +1199,7 @@ def show_payment_proceed(master, info:tuple,):
 
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in item])
                 #record the items from within the transaction
+
                 database.exec_nonquery([[sql_commands.record_services_transaction_content, s] for s in service])
                 #record the services from within the transaction
 
@@ -1252,9 +1252,6 @@ def show_payment_proceed(master, info:tuple,):
             self.time_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.time_frame.grid(row=0, column=3, padx=width*0.005, pady= height*0.007, sticky="nse")
             
-            """ self.time_label = ctk.CTkLabel(self.time_frame, fg_color=Color.White_Platinum, corner_radius=5, font=("DM Sans Medium", 14), text=datetime.now().strftime('%H : %M : %S'), width=width*0.085)
-            self.time_label.pack(side="left", padx=(width*0.005, 0)) """
-            
             self.date_label = ctk.CTkLabel(self.time_frame, fg_color=Color.White_Platinum, corner_radius=5, font=("DM Sans Medium", 14), text=date.today().strftime('%B %d, %Y'), width=width*0.1)
             self.date_label.pack(side="right", padx=(width*0.005))
             
@@ -1262,14 +1259,6 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_frame.grid(row=1, column=0, sticky="nsew",padx=width*0.005, pady=(0,height*0.01))
             self.receipt_frame.grid_rowconfigure(1, weight=1)
             self.receipt_frame.grid_columnconfigure(1,weight=1)
-            
-            """ self.or_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.15)
-            self.or_frame.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
-            self.or_frame.pack_propagate(0)
-            
-            ctk.CTkLabel(self.or_frame, text="OR#: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
-            self.or_name = ctk.CTkLabel(self.or_frame, text="0001",  font=("DM Sans Medium", 14))
-            self.or_name.pack(side="left") """
             
             self.or_button = ctk.CTkButton(self.receipt_frame,  text="OR#: ___",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
             self.or_button.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
@@ -1323,14 +1312,6 @@ def show_payment_proceed(master, info:tuple,):
             self.y_scrollbar = ttk.Scrollbar(self.receipt_table_frame, orient=tk.VERTICAL, command=self.receipt_tree.yview)
             self.receipt_tree.configure(yscroll=self.y_scrollbar.set)
             self.y_scrollbar.grid(row=0, column=1, sticky="ns")
-            
-            #Sample
-            '''for i in range(1, 10+1):
-                if (i % 2) == 0:
-                    tag = "even"
-                else:
-                    tag ="odd"
-                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(f"{i} "," Sample",1,500,500), tags=tag )'''
 
             '''END TABLE SETUP'''
             self.receipt_total_frame = ctk.CTkFrame(self.receipt_frame, height=height*0.05, width=width*0.2, fg_color=Color.White_Lotion)

@@ -274,7 +274,6 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 #item information
 
                 data = (generateId('R', 6), self.item_name_entry.get(), uid, self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None)
-                print(data)
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))

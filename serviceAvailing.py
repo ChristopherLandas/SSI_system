@@ -5,6 +5,7 @@ import datetime
 from Theme import Color
 from PIL import Image
 from customcustomtkinter import customcustomtkinter as cctk
+from tkinter import messagebox
 
 class pet_info_frame(ctk.CTkFrame):
     def __init__(self, master: any, title:str, name_select_callback: callable, name_selection:list = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -79,15 +80,15 @@ class pets(ctk.CTkFrame):
         def cancel_sequence():
             if cancel_command:
                 cancel_command()
-            #self.destroy()
             self.place_forget()
-            print("close")
 
         def proceed_sequence():
+            for fr in self.frames:
+                if fr.name.get() == "" or fr.first_date_entry._text == "Set Date":
+                    messagebox.showerror("Fail to proceed", "Fill all the required info")
+                    return
             proceed_command(self.get_data())
-            #self.destroy()
             self.place_forget()
-            print("close1")
             
         def update_frames_selection(sender: ctk.CTkOptionMenu, to_remove: str) -> None:
             for i in self.frames:
