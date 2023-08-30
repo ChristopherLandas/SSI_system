@@ -722,8 +722,9 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict):
             width = info[0]
             height = info[1]
-            super().__init__(master, corner_radius= 0, fg_color="transparent")
+            super().__init__(master, corner_radius= 0, fg_color="red")
 
+    
             '''internal data'''
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -825,18 +826,29 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 
             def filter_func(value):
                 if "All" in value:
+                    self.service_frame.grid_forget()
+                    self.item_frame.grid_forget()
                     self.service_frame.grid(row=1,column=0, columnspan=2, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
                     self.item_frame.grid(row=2, column=0, columnspan=2 ,sticky="nsew",  padx=(width*0.005),pady=(0, height*0.01))
+                    
+                    self.service_treeview.pack()
                     self.service_treeview.configure(height=height*0.4)
+                    self.item_treeview.pack()
                     self.item_treeview.configure(height=height*0.4)
                 elif "Service" in value:
                     self.service_frame.grid(row=1,column=0, columnspan=2, rowspan=2, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
+                    self.service_treeview.pack()
+                    
                     self.item_frame.grid_forget()
+                    self.item_treeview.pack_forget()
                     self.service_treeview.configure(height=height*0.75)
                     
                 elif "Item" in value:
                     self.item_frame.grid(row=1, column=0, columnspan=2 , rowspan=2 ,sticky="nsew",  padx=(width*0.005),pady=(0, height*0.01))
+                    self.item_treeview.pack()
+                    
                     self.service_frame.grid_forget()
+                    self.service_treeview.pack_forget()
                     self.item_treeview.configure(height=height*0.75)
                     
                     
@@ -857,7 +869,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
             self.content_frame.grid(row=1, column=0,columnspan=2, sticky="nsew")
-            
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_rowconfigure((1,2), weight=1)
                 
@@ -872,24 +883,24 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                             width=width*0.005)
             self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
             
-            self.filter_optionmenu = ctk.CTkOptionMenu(self.content_frame, width=width*0.1, height=height*0.05, fg_color="light grey", values=["All", "Services", "Items"], text_color="black", anchor="center")
+            self.filter_optionmenu = ctk.CTkOptionMenu(self.content_frame, width=width*0.1, height=height*0.045, fg_color=Color.Blue_Tufts, values=["All", "Services", "Items"], anchor="center")
             self.filter_optionmenu.configure(command=filter_func)
-            self.filter_optionmenu.grid(row=0, column=1, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
+            self.filter_optionmenu.grid(row=0, column=0, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
             
             self.service_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.service_frame.pack_propagate(0)
             
             self.service_treeview = cctk.cctkTreeView(self.service_frame, height=height*0.4, width=width*0.8,corner_radius=0,double_click_command=service_proceed, column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
-            self.service_treeview.pack()
-            
+
             self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.item_frame.pack_propagate(0)
             
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
             self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.8,double_click_command=item_proceed, column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:x-tr!30!30",)
-            self.item_treeview.pack()
+            #self.item_treeview.pack()
             
             filter_func("All")
+            
         def reset(self):
             self.place_forget()
 
