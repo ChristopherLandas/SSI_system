@@ -196,7 +196,7 @@ class customcustomtkinter:
             #make the root frame fixed in sizesz
             for i in range(len(self.column_titles)):
                 btn = None
-                title = ' '.join(re.findall('([A-Z]+[a-z]*)', self.column_titles[i]))
+                title = ' '.join(re.findall(r'[A-Z](?:[a-z]+|[A-Z]*(?=[A-Z]|$))', self.column_titles[i]))
                 if self.column_types[i] == 't' or self.column_types[i] == '#' or self.column_types[i] == 'q':
                     btn = customcustomtkinter.ctkButtonFrame(self, self.column_widths[i], self._header_heights, 0, fg_color= self._header_color,
                                                              hover_color= brighten_color(self._header_color, 1.75))
