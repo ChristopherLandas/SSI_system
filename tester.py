@@ -43,24 +43,14 @@ class body(ctk.CTk):
         #notif test here
         
 
-        '''inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item else bought_item[s[0]]), s[1]) for s in current_stock]
-        print(*inventory_report_data, sep = '\n')
-        print(database.fetch_data('SELECT ?', ('🠋',))[0][0])
-        ctk.CTkLabel(self, text = '🠋', text_color ='green', font=('arial', 30)).place(relx = .5, rely = .5, anchor = 'c')
-        self.mainloop()'''
+        lbl = ctk.CTkLabel(self, 120, 28, text="fejorifjireofjerfioerjfeiorfjerifjerfierfjejorfo", fg_color='red')
+        lbl.pack()
+        text_overflow_elipsis(lbl)
 
-        #d =  database.fetch_data("SELECT * FROM item_general_info")
-        #d = {s[1]: s[0] for s in d}
-        #keys = d.keys()
 
-        #for k in keys:
-        #    database.exec_nonquery([["UPDATE recieving_item set item_uid = ? WHERE NAME = ?", (d[k], k)]])
-
-        d = database.fetch_data("SELECT DISTINCT(id), p_name from pet_info")
-        d = {s[1]: s[0] for s in d}
-        keys = list(d.keys())
-
-        for k in keys:
-            database.exec_nonquery([["UPDATE invoice_service_content SET pet_uid = ? WHERE patient_name = ?", (d[k], k)]])
-        
+        treeview = cctk.cctkTreeView(self, ("j", "1"), self.screen[0] * .5, self.screen[1] * .5,
+                                     column_format="/Title2:120-tl/Title3:x-tl!30!30")
+        treeview.place(relx = .5, rely = .5, anchor = 'c')
+        self.mainloop()
 body()
+    #lbl.configure(text = ''.join(txt_dvd))

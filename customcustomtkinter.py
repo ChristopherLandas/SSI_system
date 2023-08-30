@@ -285,14 +285,15 @@ class customcustomtkinter:
                 for j in range(len(self.column_widths)):
                     #for label type column
                     if self.column_types[j][0] in ['t', '#']:
-                        temp = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] in ['t','T'] else (len(self._data)), width = self.column_widths[j],
+                        temp_lbl = ctk.CTkLabel(frm, text= d[i][tI] if self.column_types[j][0] in ['t','T'] else (len(self._data)), width = self.column_widths[j],
                                             justify = ctk.RIGHT, font= self.row_font, text_color = self._record_text_color)
-                        txt_clr = self._record_text_color if j not in self._conditional_colors else self._conditional_colors[j].get(temp._text, self._record_text_color)
-                        temp.configure(text_color = txt_clr)
-                        temp._label.grid_forget()
-                        temp._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
-                        temp._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
-                        temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
+                        txt_clr = self._record_text_color if j not in self._conditional_colors else self._conditional_colors[j].get(temp_lbl._text, self._record_text_color)
+                        temp_lbl.configure(text_color = txt_clr)
+                        temp_lbl._label.grid_forget()
+                        temp_lbl._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
+                        temp_lbl._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
+                        temp_lbl.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
+                        text_overflow_elipsis(temp_lbl, self.column_widths[j] * .92)
                     #for info tab column
                     elif self.column_types[j] == 'iT':
                         temp:customcustomtkinter.info_tab = customcustomtkinter.info_tab(frm, width= self.column_widths[j], corner_radius= 0,

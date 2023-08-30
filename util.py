@@ -9,7 +9,7 @@ from Theme import *
 from typing import *
 import datetime
 from random import randint
-
+import customtkinter as ctk
 
 
 class encrypt:
@@ -129,6 +129,52 @@ def decode_action(type_code: str):
         temp = re.findall(r'/(\w+)+', type_code)
         return f'Make the Invoice {temp[-1]}' 
 
+def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):
+    font_tool = ctk.CTkFont(lbl._font[0], lbl._font[1]) if isinstance(lbl._font, tuple) else lbl._font
+
+    ellipsis_length:int = (font_tool.measure("..."))
+    txt_dvd: list = []
+    index_holder: int = 0
+    label_text = str(lbl._text)
+
+    if font_tool.measure(label_text) < ((int(lbl._current_width) if width is None else width) - ellipsis_length - width_padding):
+        return
+
+    for i in range(lines):
+        txt: str = ""
+        if i == lines - 1:
+            for _ in range(index_holder, len(label_text)):
+                if font_tool.measure(txt + label_text[i]) < ((int(lbl._current_width) if width is None else width) - ellipsis_length - width_padding):
+                    txt += label_text[index_holder]
+                    index_holder += 1
+                else:
+                    print(f"{txt[1:] if txt.startswith(' ') else txt}...")
+                    txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}...")
+                    break
+        else:
+            for _ in range(index_holder, len(label_text)):
+                if font_tool.measure(txt + label_text[i]) < ((int(lbl._current_width) if width is None else width) - width_padding):
+                    try:    
+                        if label_text[index_holder] == " ":
+                            temp: str = re.findall(r'(\w+) ', label_text[index_holder:])[0]
+                            if(font_tool.measure(" " + txt + temp) > ((int(lbl._current_width) if width is None else width) - width_padding)):
+                                print(f"{txt[1:] if txt.startswith(' ') else txt}\n")
+                                txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
+                                break
+                        if label_text[index_holder] == "\n":
+                            print(f"{txt[1:] if txt.startswith(' ') else txt}\n")
+                            txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
+                        txt += label_text[index_holder]
+                        index_holder += 1
+                    except:
+                        print(f"{label_text[index_holder + 1:] if label_text[index_holder:].startswith(' ') else label_text[index_holder:]}\n")
+                        txt_dvd.append(f"{label_text[index_holder + 1:] if label_text[index_holder:].startswith(' ') else label_text[index_holder:]}\n")
+                        break
+                else:
+                    print(f"{txt[1:] if txt.startswith(' ') else txt}\n")
+                    txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
+                    break
+    lbl.configure(text = ''.join(txt_dvd))
 
 
 
