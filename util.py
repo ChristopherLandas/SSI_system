@@ -148,7 +148,6 @@ def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, 
                     txt += label_text[index_holder]
                     index_holder += 1
                 else:
-                    print(f"{txt[1:] if txt.startswith(' ') else txt}...")
                     txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}...")
                     break
         else:
@@ -158,20 +157,16 @@ def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, 
                         if label_text[index_holder] == " ":
                             temp: str = re.findall(r'(\w+) ', label_text[index_holder:])[0]
                             if(font_tool.measure(" " + txt + temp) > ((int(lbl._current_width) if width is None else width) - width_padding)):
-                                print(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                                 txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                                 break
                         if label_text[index_holder] == "\n":
-                            print(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                             txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                         txt += label_text[index_holder]
                         index_holder += 1
                     except:
-                        print(f"{label_text[index_holder + 1:] if label_text[index_holder:].startswith(' ') else label_text[index_holder:]}\n")
                         txt_dvd.append(f"{label_text[index_holder + 1:] if label_text[index_holder:].startswith(' ') else label_text[index_holder:]}\n")
                         break
                 else:
-                    print(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                     txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                     break
     lbl.configure(text = ''.join(txt_dvd))
