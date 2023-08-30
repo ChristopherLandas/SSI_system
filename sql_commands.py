@@ -511,6 +511,9 @@ update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
 get_service_data_test = "SELECT UID, service_name, category, price FROM service_info_test"
 get_service_category_test = "SELECT category FROM service_category_test"
 
+insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?, ?)"
+
+get_services_and_their_price_test = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"
 
 #ACCOUNTS
