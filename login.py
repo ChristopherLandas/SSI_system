@@ -51,6 +51,7 @@ class loginUI(ctk.CTk):
                 return
             count = database.fetch_data(f'SELECT COUNT(*) FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ? AND {db.acc_cred.PASSWORD} = ?',
                                         (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
+            
             if count[0][0] == 0:
                 self.password_entry.delete(0, ctk.END)
                 self.attempt += 1
@@ -59,6 +60,9 @@ class loginUI(ctk.CTk):
                     return
                 messagebox.showinfo('Error', 'Username Or Password Incorrect')
             else:
+                if database.fetch_data('SELECT state FROM acc_info WHERE usn = ?', (self.user_entry.get(), ))[0][0] == 0:
+                    messagebox.showerror("Failed to Login", "The Account you're been\nlogged has been deactivated.\nInquire to the admin")
+                    return
                 current_datetime = datetime.datetime.now();
                 data_key = encrypt.pass_encrypt(self.password_entry.get(), datetime.datetime.now())['pass']
                 database.exec_nonquery([[f"INSERT INTO {db.LOG_HIST} VALUES (?, ?, ?, ?)",
