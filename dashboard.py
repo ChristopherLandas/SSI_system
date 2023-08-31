@@ -1022,13 +1022,13 @@ class inventory_frame(ctk.CTkFrame):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.refresh_btn.after(1000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             self.data_view1.pack_forget()
-            temp = [(self.sell_rate[s[0]], ) + s for s in self.list_show]
+            self.sell_rate = {s[0]: s[1] for s in database.fetch_data(sql_commands.get_selling_rate)}
+            temp = [(self.sell_rate[s[0]], ) + s for s in self.list_show if s[0] in self.sell_rate]
             #self.data_view1.update_table(self.list_show)
             self.data_view1.update_table(temp)
             self.data_view1.pack()
 
         def get_categories():
-            
             data = database.fetch_data("SELECT categ_name FROM categories")
             category_data = ["All Items"]
             for i in range(len(data)):

@@ -12,6 +12,7 @@ import datetime
 from functools import partial
 from typing import *
 import tkinter as tk
+import re
 
 
 def add_item(master, info:tuple):
@@ -32,42 +33,32 @@ def add_item(master, info:tuple):
                 self.item_name_entry.delete(0, ctk.END)
                 self.unit_price_entry.delete(0, ctk.END)
                 self.markup_price_entry.delete(0, ctk.END)
-                #self.supplier_entry.set("Supplier Name")
-                #self.contact_person_entry.delete(0, ctk.END)
+                self.supplier_entry.delete(0, ctk.END)
                 self.contact_entry.delete(0, ctk.END)
                 self.expiration_date_entry.configure(text="Set Expiry Date")
                 self.expiry_switch.deselect()
                 self.stock_entry.set(0)
                 self.place_forget()
 
-            def add():
+            def add_item_callback():
                 if(self.item_name_entry.get() and self.unit_price_entry.get() and self.markup_price_entry.get()
                    and self.category_entry.get() and self.supplier_entry.get() and self.stock_entry.get() and
                    ((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get())
                    or self.expiry_switch_val.get() == 'disabled')):
-                    #self.warning_lbl.configure(text = '', fg_color='transparent')
-                    uid = 'I'+str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(5)
-                    #modified_dt: str = str(datetime.datetime.strptime(self.expiration_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')) if self.expiration_date_entry._text != 'Set Expiry Date' else None
-                    modified_dt = self.expiration_date_entry._text if self.expiration_date_entry._text != 'Set Expiry Date' else None
+                    uid = generateId('I', 6)
+                    #generate uid of the item
+                    _date = None if str(self.expiration_date_entry._text).startswith("Set") else self.expiration_date_entry._text
                     database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.category_entry.get())],
-                                            [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), modified_dt)],
-                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .75, .5, int(self.stock_entry.get()),5)],
-                                            [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())]])
+                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 5)],
+                                            [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())],
+                                            [sql_commands.add_item_inventory, (uid, self.stock_entry.get(), _date)],])
+
                     messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added\nin the inventory" )
                     #master.reset()
                     reset()
                 else:
                     #self.warning_lbl.configure(text = 'Enter Required Fields', text_color='red')
                     messagebox.showwarning("Missing Field Entry", "Enter Required Fields", )
-                    
-            def expiry_switch_event():
-                self.show_calendar.configure(state=self.expiry_switch_val.get())
-                if(self.expiry_switch_val.get()=="normal"):
-                    self.show_calendar.configure(fg_color=Color.Blue_Yale)
-                    self.expiration_date_entry.configure(fg_color=Color.White_Platinum, text_color="black")
-                else:
-                    self.show_calendar.configure(fg_color=Color.Grey_Bright_2)
-                    self.expiration_date_entry.configure(fg_color=Color.Grey_Bright_2, text_color="grey")
 
             def markup_callback(_ = None, *__):
                 self.selling_price_entry.configure(state = ctk.NORMAL)
@@ -78,13 +69,40 @@ def add_item(master, info:tuple):
                         self.selling_price_entry.insert(0, float(self.unit_price_entry.get()) + markup)
                 self.selling_price_entry.configure(state = 'readonly')
 
+            
             def selling_callback(_ = None, *__):
-                self.markup_price_entry.delete(0, ctk.END)
-                if (not self.markup_price_entry.get()) and self.unit_price_entry.get() and self.selling_price_entry.get():
-                    self.markup_price_entry.insert(0, round(float(self.unit_price_entry.get()) / (float(self.selling_price_entry.get()) / 100), 2))
+                
+                if re.search(r'[0-9\.]$', self.markup_price_entry.get() or "") is None and self.markup_price_entry._is_focused and self.markup_price_entry.get():
+                        l = len(self.markup_price_entry.get())
+                        self.markup_price_entry.delete(l-1, l)
+
+                if re.search(r'[0-9\.]$', self.unit_price_entry.get() or "") is None and self.unit_price_entry._is_focused and self.unit_price_entry.get():
+                        l = len(self.unit_price_entry.get())
+                        self.unit_price_entry.delete(l-1, l)
+                
+                if not self.markup_price_entry.get() or not self.unit_price_entry.get():
+                    self.selling_price_entry.configure(state = ctk.NORMAL)
+                    self.selling_price_entry.delete(0, ctk.END)
+                    self.selling_price_entry.configure(state = 'readonly')
+                    return
+
+                if  self.markup_price_entry.get() and self.unit_price_entry.get():
+                    markup = 1 + (float(self.markup_price_entry.get() or 0)/100)
+                    price = float(self.unit_price_entry.get())
+                    self.selling_price_entry.configure(state = ctk.NORMAL)
+                    self.selling_price_entry.delete(0, ctk.END)
+                    self.selling_price_entry.insert(0, round(markup * price, 2))
+                    self.selling_price_entry.configure(state = 'readonly')
+            def expiry_switch_event():
+                self.show_calendar.configure(state=self.expiry_switch_val.get())
+                if(self.expiry_switch_val.get()=="normal"):
+                    self.show_calendar.configure(fg_color=Color.Blue_Yale)
+                    self.expiration_date_entry.configure(fg_color=Color.White_Platinum, text_color="black")
+                else:
+                    self.show_calendar.configure(fg_color=Color.Grey_Bright_2)
+                    self.expiration_date_entry.configure(fg_color=Color.Grey_Bright_2, text_color="grey")
 
             def category_expiry_callback(category):
-                print(f"{self.data} | {category}")
                 for i in range(len(self.data)):
                     if category in self.data[i][0]:
                         self.expiry_switch.select() if self.data[i][1] == 1 else self.expiry_switch.deselect()
@@ -129,17 +147,16 @@ def add_item(master, info:tuple):
             ctk.CTkLabel(self.item_name_frame, text='Category: ', anchor='e', font=("DM Sans Medium", 14),  width=width*0.075,).grid(row = 1, column = 0, sticky = 'nsew',  pady = (0,height*0.01), padx = (width*0.005,0))
             self.category_entry = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=self.item_category, font=("DM Sans Medium",14), height=height*0.045,command=category_expiry_callback)
             self.category_entry.grid(row = 1, column = 1, sticky = 'nsew', pady = (0,height*0.01), padx = (0, width*0.01), columnspan=5)
-            #self.category_entry.set(self.item_category[2])
 
             ctk.CTkLabel(self.item_name_frame, text='Unit Price: ', font=("DM Sans Medium", 14),  width=width*0.075, anchor="e").grid(row = 2, column = 0, sticky="nsew",pady = (0,height*0.01), padx = (width*0.004,0))
-            self.unit_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.1, textvariable= ctk.StringVar(), height=height*0.045,  font=("DM Sans Medium",14),justify="right",corner_radius=5,)
-            #self.unit_price_entry._textvariable.trace_add('write', lambda: None)
+            self.unit_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.1, textvariable= ctk.StringVar(), height=height*0.045,  font=("DM Sans Medium",14),justify="left",corner_radius=5,)
+            self.unit_price_entry._textvariable.trace_add('write', selling_callback)
             self.unit_price_entry.grid(row = 2, column = 1, sticky = 'nsew', pady = (0,height*0.01), padx = (0, width*0.004))
             
             
             ctk.CTkLabel(self.item_name_frame, text='Mark Up: ', font=("DM Sans Medium", 14), anchor="e").grid(row = 2, column = 2, sticky="nsew",pady = (0,height*0.01), padx = (width*0.005,0))
-            self.markup_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.05, textvariable= ctk.StringVar(), height=height*0.045, justify="right",  font=("DM Sans Medium",14),corner_radius=5,)
-            self.markup_price_entry._textvariable.trace_add('write', markup_callback)
+            self.markup_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.05, textvariable= ctk.StringVar(), height=height*0.045, justify="left",  font=("DM Sans Medium",14),corner_radius=5,)
+            self.markup_price_entry._textvariable.trace_add('write', selling_callback)
             self.markup_price_entry.grid(row = 2, column = 3, sticky = 'nsew', pady = (0,height*0.01), padx = (0))
             ctk.CTkLabel(self.item_name_frame, text=' %', font=("DM Sans Medium", 14), anchor="w").grid(row = 2, column = 4, sticky="nsew",pady = (0,height*0.01), padx = (0))
             
@@ -149,7 +166,7 @@ def add_item(master, info:tuple):
             ctk.CTkLabel(self.selling_price_frame, text='₱ ', font=("DM Sans Medium", 14), anchor="e" ).pack(padx=(width*0.005,0), side="left", pady=(height*0.01))
             self.selling_price_entry = ctk.CTkEntry(self.selling_price_frame, width=width*0.1, textvariable= ctk.StringVar(), state='readonly', height=height*0.045, justify="right",  font=("DM Sans Medium",14),
                                                     border_width=0, fg_color="white")
-            self.selling_price_entry._textvariable.trace_add('write', selling_callback)
+            #self.selling_price_entry._textvariable.trace_add('write', selling_callback)
             self.selling_price_entry.pack(side="left",padx=(0,width*0.005))
 
             '''Supplier Frame'''
@@ -219,7 +236,7 @@ def add_item(master, info:tuple):
                                             font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
             
-            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add New Item', command= add)
+            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add New Item', command= add_item_callback)
             self.add_btn.pack(side="left",fill="x", expand=1,  padx = (width*0.0075), pady= height*0.01)
 
             expiry_switch_event()

@@ -186,7 +186,7 @@ show_reveiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, rec
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
-add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?)"
+add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 
 #RECORDING ANY TRANSACTION
@@ -470,7 +470,7 @@ get_selling_rate = "SELECT item_general_info.name,\
                         ON item_inventory_info.UID = item_transaction_content.Item_uid\
                     LEFT JOIN transaction_record\
                         ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
-                    GROUP BY item_transaction_content.Item_uid\
+                    GROUP BY item_general_info.UID\
                     ORDER BY item_inventory_info.UID"
 
 #LOG
