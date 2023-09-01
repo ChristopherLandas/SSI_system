@@ -30,6 +30,9 @@ class Color:
     Red_Tulip = "#FD8A8A"
     Red_Pastel = "#FF6464"
     
+    Green_Pistachio = "#83BD75"
+    Green_Aparagus = "#6E9D62"
+    
     Orange_Dandelion = "#FFD966"
     
 
@@ -43,3 +46,4 @@ class Color:
     Dark_GraniteGrey = "#626262"
     Dark_Nickel = "#727272"
     
+   

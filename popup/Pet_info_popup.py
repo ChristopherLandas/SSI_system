@@ -353,10 +353,10 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.pet_name_entry = ctk.CTkEntry(self.pet_entry_frame, border_width=0, font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5)
             self.pet_name_entry.pack(side="left", fill='x', expand=1,  padx=(width*0.0025), pady=(height*0.0025))
             
-            self.edit_info_button = ctk.CTkButton(self.pet_info_frame, image=self.add_icon, text='', width=width*0.01, fg_color="#3b8dd0", command=edit_entries)
+            self.edit_info_button = ctk.CTkButton(self.pet_info_frame, image=self.add_icon, text='Edit', font=("DM Sans Medium", 14), width=width*0.01, fg_color="#3b8dd0", command=edit_entries)
             self.edit_info_button.grid(row=0, column=3, sticky="nsw",  pady=(height*0.01))
 
-            self.save_info_button = ctk.CTkButton(self.pet_info_frame, image=self.save_icon, text='', width=width*0.01, fg_color="#83bd75", hover_color="#82bd0b", command=save_changes)
+            self.save_info_button = ctk.CTkButton(self.pet_info_frame, image=self.save_icon, text='Update Record',font=("DM Sans Medium", 14), width=width*0.01, fg_color="#83bd75", hover_color="#82bd0b", command=save_changes)
             self.cancel_edit = ctk.CTkButton(self.pet_info_frame, text="Cancel", hover_color=Color.Red_Pastel, fg_color=Color.Red_Tulip, font=("DM Sans Medium", 14), width=width*0.015, command=cancel_changes)
             
             
@@ -448,19 +448,6 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.service_record_data_view.column('Date', anchor="center", width=int(width*0.2))
             self.service_record_data_view.column('Attendant', anchor="w", width=int(width*0.285))
 
-            #add sample data
-            service_data = ["Service 1", "Service 2", "Service 3", "Service 4", "Service 5", "Service 6", "Service 7", "Service 8", "Service 9", "Service 10", "Service 11", "Service 12", "Service 13", "Service 14", "Service 15", "Service 16"]
-
-            '''data_rows = []
-            for i in range(len(service_data)):
-                if (i % 2) == 0:
-                    tag = "even"
-                else:
-                    tag ="odd"
-                data = (f"{i+1} ", service_data[i], "MM-DD-YYYY", service_data[i])
-                data_rows.append(data)
-                self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)'''
-            
             self.service_record_data_view.tag_configure("odd",background=Color.White_AntiFlash)
             self.service_record_data_view.tag_configure("even",background=Color.White_Ghost)
             

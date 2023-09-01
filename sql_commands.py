@@ -503,13 +503,13 @@ update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
 
 #TESTING - James
 
-get_service_data_test = "SELECT UID, service_name, category, price FROM service_info_test"
+get_service_data_test = "SELECT UID, service_name, category, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 get_service_category_test = "SELECT category FROM service_category_test"
 
 insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?, ?)"
 
 get_services_and_their_price_test = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
-insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"
+#insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"
 
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
@@ -535,3 +535,22 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
                                ON services_transaction_content.transaction_uid = transaction_record.transaction_uid\
                            WHERE  services_transaction_content.pet_uid = ?"
                            #    AND services_transaction_content.`status` = 0"
+
+#SALES 
+get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
+
+get_item_record = "SELECT  item_name, quantity, price, ROUND((quantity*price),2) AS total FROM item_transaction_content WHERE transaction_uid = ?"
+get_service_record = "SELECT  CONCAT(service_name,' - ',  'Pet: ',patient_name) AS service, 1 AS quantity, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
+
+
+#General Settings
+get_service_info = f"SELECT UID, service_name, price, category, date_added FROM service_info_test WHERE UID = ?"
+
+get_inventory = f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category,\
+                    CONCAT('₱' , FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)) AS price\
+                    FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID"
+
+get_inventory_info= f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category, FORMAT(item_settings.Cost_Price,2) AS unit_cost,\
+                        item_settings.Markup_Factor, FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)AS selling, item_settings.Reorder_factor,\
+                        item_settings.Crit_factor, item_settings.Safe_stock, item_settings.Average_monthly_selling_rate\
+                        FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
