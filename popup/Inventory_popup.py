@@ -12,6 +12,7 @@ import datetime
 from functools import partial
 from typing import *
 import tkinter as tk
+import re
 
 
 def add_item(master, info:tuple):
@@ -32,42 +33,32 @@ def add_item(master, info:tuple):
                 self.item_name_entry.delete(0, ctk.END)
                 self.unit_price_entry.delete(0, ctk.END)
                 self.markup_price_entry.delete(0, ctk.END)
-                #self.supplier_entry.set("Supplier Name")
-                #self.contact_person_entry.delete(0, ctk.END)
+                self.supplier_entry.delete(0, ctk.END)
                 self.contact_entry.delete(0, ctk.END)
                 self.expiration_date_entry.configure(text="Set Expiry Date")
                 self.expiry_switch.deselect()
                 self.stock_entry.set(0)
                 self.place_forget()
 
-            def add():
+            def add_item_callback():
                 if(self.item_name_entry.get() and self.unit_price_entry.get() and self.markup_price_entry.get()
                    and self.category_entry.get() and self.supplier_entry.get() and self.stock_entry.get() and
                    ((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get())
                    or self.expiry_switch_val.get() == 'disabled')):
-                    #self.warning_lbl.configure(text = '', fg_color='transparent')
-                    uid = 'I'+str(database.fetch_data('SELECT COUNT(uid) + 1 FROM item_general_info', (None, ))[0][0]).zfill(5)
-                    #modified_dt: str = str(datetime.datetime.strptime(self.expiration_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')) if self.expiration_date_entry._text != 'Set Expiry Date' else None
-                    modified_dt = self.expiration_date_entry._text if self.expiration_date_entry._text != 'Set Expiry Date' else None
+                    uid = generateId('I', 6)
+                    #generate uid of the item
+                    _date = None if str(self.expiration_date_entry._text).startswith("Set") else self.expiration_date_entry._text
                     database.exec_nonquery([[sql_commands.add_item_general, (uid, self.item_name_entry.get(), self.category_entry.get())],
-                                            [sql_commands.add_item_inventory, (uid, int(self.stock_entry.get()), modified_dt)],
-                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .75, .5, int(self.stock_entry.get()),5)],
-                                            [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())]])
+                                            [sql_commands.add_item_settings, (uid, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 5)],
+                                            [sql_commands.add_item_supplier, (uid, self.supplier_entry.get(), self.contact_entry.get())],
+                                            [sql_commands.add_item_inventory, (uid, self.stock_entry.get(), _date)],])
+
                     messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added\nin the inventory" )
                     #master.reset()
                     reset()
                 else:
                     #self.warning_lbl.configure(text = 'Enter Required Fields', text_color='red')
                     messagebox.showwarning("Missing Field Entry", "Enter Required Fields", )
-                    
-            def expiry_switch_event():
-                self.show_calendar.configure(state=self.expiry_switch_val.get())
-                if(self.expiry_switch_val.get()=="normal"):
-                    self.show_calendar.configure(fg_color=Color.Blue_Yale)
-                    self.expiration_date_entry.configure(fg_color=Color.White_Platinum, text_color="black")
-                else:
-                    self.show_calendar.configure(fg_color=Color.Grey_Bright_2)
-                    self.expiration_date_entry.configure(fg_color=Color.Grey_Bright_2, text_color="grey")
 
             def markup_callback(_ = None, *__):
                 self.selling_price_entry.configure(state = ctk.NORMAL)
@@ -78,13 +69,40 @@ def add_item(master, info:tuple):
                         self.selling_price_entry.insert(0, float(self.unit_price_entry.get()) + markup)
                 self.selling_price_entry.configure(state = 'readonly')
 
+            
             def selling_callback(_ = None, *__):
-                self.markup_price_entry.delete(0, ctk.END)
-                if (not self.markup_price_entry.get()) and self.unit_price_entry.get() and self.selling_price_entry.get():
-                    self.markup_price_entry.insert(0, round(float(self.unit_price_entry.get()) / (float(self.selling_price_entry.get()) / 100), 2))
+                
+                if re.search(r'[0-9\.]$', self.markup_price_entry.get() or "") is None and self.markup_price_entry._is_focused and self.markup_price_entry.get():
+                        l = len(self.markup_price_entry.get())
+                        self.markup_price_entry.delete(l-1, l)
+
+                if re.search(r'[0-9\.]$', self.unit_price_entry.get() or "") is None and self.unit_price_entry._is_focused and self.unit_price_entry.get():
+                        l = len(self.unit_price_entry.get())
+                        self.unit_price_entry.delete(l-1, l)
+                
+                if not self.markup_price_entry.get() or not self.unit_price_entry.get():
+                    self.selling_price_entry.configure(state = ctk.NORMAL)
+                    self.selling_price_entry.delete(0, ctk.END)
+                    self.selling_price_entry.configure(state = 'readonly')
+                    return
+
+                if  self.markup_price_entry.get() and self.unit_price_entry.get():
+                    markup = 1 + (float(self.markup_price_entry.get() or 0)/100)
+                    price = float(self.unit_price_entry.get())
+                    self.selling_price_entry.configure(state = ctk.NORMAL)
+                    self.selling_price_entry.delete(0, ctk.END)
+                    self.selling_price_entry.insert(0, round(markup * price, 2))
+                    self.selling_price_entry.configure(state = 'readonly')
+            def expiry_switch_event():
+                self.show_calendar.configure(state=self.expiry_switch_val.get())
+                if(self.expiry_switch_val.get()=="normal"):
+                    self.show_calendar.configure(fg_color=Color.Blue_Yale)
+                    self.expiration_date_entry.configure(fg_color=Color.White_Platinum, text_color="black")
+                else:
+                    self.show_calendar.configure(fg_color=Color.Grey_Bright_2)
+                    self.expiration_date_entry.configure(fg_color=Color.Grey_Bright_2, text_color="grey")
 
             def category_expiry_callback(category):
-                print(f"{self.data} | {category}")
                 for i in range(len(self.data)):
                     if category in self.data[i][0]:
                         self.expiry_switch.select() if self.data[i][1] == 1 else self.expiry_switch.deselect()
@@ -129,17 +147,16 @@ def add_item(master, info:tuple):
             ctk.CTkLabel(self.item_name_frame, text='Category: ', anchor='e', font=("DM Sans Medium", 14),  width=width*0.075,).grid(row = 1, column = 0, sticky = 'nsew',  pady = (0,height*0.01), padx = (width*0.005,0))
             self.category_entry = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=self.item_category, font=("DM Sans Medium",14), height=height*0.045,command=category_expiry_callback)
             self.category_entry.grid(row = 1, column = 1, sticky = 'nsew', pady = (0,height*0.01), padx = (0, width*0.01), columnspan=5)
-            #self.category_entry.set(self.item_category[2])
 
             ctk.CTkLabel(self.item_name_frame, text='Unit Price: ', font=("DM Sans Medium", 14),  width=width*0.075, anchor="e").grid(row = 2, column = 0, sticky="nsew",pady = (0,height*0.01), padx = (width*0.004,0))
-            self.unit_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.1, textvariable= ctk.StringVar(), height=height*0.045,  font=("DM Sans Medium",14),justify="right",corner_radius=5,)
-            #self.unit_price_entry._textvariable.trace_add('write', lambda: None)
+            self.unit_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.1, textvariable= ctk.StringVar(), height=height*0.045,  font=("DM Sans Medium",14),justify="left",corner_radius=5,)
+            self.unit_price_entry._textvariable.trace_add('write', selling_callback)
             self.unit_price_entry.grid(row = 2, column = 1, sticky = 'nsew', pady = (0,height*0.01), padx = (0, width*0.004))
             
             
             ctk.CTkLabel(self.item_name_frame, text='Mark Up: ', font=("DM Sans Medium", 14), anchor="e").grid(row = 2, column = 2, sticky="nsew",pady = (0,height*0.01), padx = (width*0.005,0))
-            self.markup_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.05, textvariable= ctk.StringVar(), height=height*0.045, justify="right",  font=("DM Sans Medium",14),corner_radius=5,)
-            self.markup_price_entry._textvariable.trace_add('write', markup_callback)
+            self.markup_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.05, textvariable= ctk.StringVar(), height=height*0.045, justify="left",  font=("DM Sans Medium",14),corner_radius=5,)
+            self.markup_price_entry._textvariable.trace_add('write', selling_callback)
             self.markup_price_entry.grid(row = 2, column = 3, sticky = 'nsew', pady = (0,height*0.01), padx = (0))
             ctk.CTkLabel(self.item_name_frame, text=' %', font=("DM Sans Medium", 14), anchor="w").grid(row = 2, column = 4, sticky="nsew",pady = (0,height*0.01), padx = (0))
             
@@ -149,7 +166,7 @@ def add_item(master, info:tuple):
             ctk.CTkLabel(self.selling_price_frame, text='₱ ', font=("DM Sans Medium", 14), anchor="e" ).pack(padx=(width*0.005,0), side="left", pady=(height*0.01))
             self.selling_price_entry = ctk.CTkEntry(self.selling_price_frame, width=width*0.1, textvariable= ctk.StringVar(), state='readonly', height=height*0.045, justify="right",  font=("DM Sans Medium",14),
                                                     border_width=0, fg_color="white")
-            self.selling_price_entry._textvariable.trace_add('write', selling_callback)
+            #self.selling_price_entry._textvariable.trace_add('write', selling_callback)
             self.selling_price_entry.pack(side="left",padx=(0,width*0.005))
 
             '''Supplier Frame'''
@@ -219,7 +236,7 @@ def add_item(master, info:tuple):
                                             font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
             
-            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add New Item', command= add)
+            self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add New Item', command= add_item_callback)
             self.add_btn.pack(side="left",fill="x", expand=1,  padx = (width*0.0075), pady= height*0.01)
 
             expiry_switch_event()
@@ -249,6 +266,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
+            self.does_expire = False
 
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             '''events'''
@@ -258,19 +276,27 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             def validate_acc(_):
                 self.item_uid = database.fetch_data("SELECT uid FROM item_general_info WHERE NAME = ?", (self.item_name_entry.get(),))
                 self.item_uid = self.item_uid[0][0] if self.item_uid else None
+                self.does_expire =  database.fetch_data(sql_commands.check_if_item_does_expire, (self.item_uid, ))[0][0] == 1
                 if self.item_uid is None:
                     return
-                if database.fetch_data('SELECT Expiry_date FROM item_inventory_info WHERE UID = ?', (self.item_uid, ))is not None:
-                    self.show_calendar.configure(state = ctk.NORMAL)
+                if self.does_expire:
+                    self.show_calendar.configure(state = ctk.NORMAL, fg_color = Color.Blue_Yale)
+                    self.expiry_date_entry.configure(text = 'Set Expiry Date')
                 else:
-                    self.show_calendar.configure(state = ctk.DISABLED)
+                    self.show_calendar.configure(state = ctk.DISABLED, fg_color = Color.Grey_Davy)
+                    self.expiry_date_entry.configure(text = 'Item doesn\'t expire')
                 self.stock_entry.configure(state = ctk.NORMAL)
+                self.stock_entry.set(1)
                 self.action_btn.configure(state = ctk.NORMAL)
 
             def recieve_stock():
+                if self.item_name_entry.get() == "_" or (self.does_expire and self.expiry_date_entry._text == 'Set Expiry Date'):
+                    messagebox.showerror("Info Missing", "Fill the required information")
+                    return
+
                 uid = database.fetch_data(sql_commands.get_uid, (self.item_name_entry.get(), ))[0][0]
                 supplier = database.fetch_data(sql_commands.get_supplier, (uid, ))[0][0]
-                expiry = None if 'Set'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
+                expiry = None if 'Set'in self.expiry_date_entry._text or 'doesn\'t'in self.expiry_date_entry._text else datetime.datetime.strptime(self.expiry_date_entry._text, '%m-%d-%Y').strftime('%Y-%m-%d')
                 #item information
 
                 data = (generateId('R', 6), self.item_name_entry.get(), uid, self.stock_entry.get(), self.stock_entry.get(), supplier, expiry, None)
@@ -301,7 +327,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
 
             self.item_name_entry = ctk.CTkOptionMenu(self.item_frame, height * .05, hover = False, command= validate_acc,
                                                            values= list(item),)
-
+            self.item_name_entry.set("_")
             self.item_name_entry.grid(row = 2, column = 0,columnspan=2, sticky = 'nsew', padx = 12, pady = (0, 12))
 
             ctk.CTkLabel(self.item_frame, text="Initial Price Change:").grid(row=3, column=0, sticky="w",pady = (height*0.01,0), padx= (width*0.01))
@@ -321,7 +347,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
             self.expiry_date_entry = ctk.CTkLabel(self.restock_frame, height * .05, fg_color="white", text="Set Expiry Date", text_color="grey", corner_radius=3)
             self.expiry_date_entry.grid(row = 2, column = 0, columnspan=3,sticky = 'nsew', padx = 12, pady = (0, 12))
 
-            self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
+            self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Grey_Davy, state = ctk.DISABLED,
                                                command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
             self.show_calendar.grid(row=2, column=3, padx = (0,width*0.01), pady = (0,height*0.015), sticky="w")
 
@@ -644,11 +670,11 @@ def disposal_history(master, info:tuple,):
             self.treeview_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
             #data = database.fetch_data(sql_commands.get_disposal_hist)
-            '''self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=data,width= width * .8, height= height * .775, corner_radius=0,
-                                             column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/Quantity:{int(width*0.07)}-tr/DateDisposed:{int(width*.2)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, width= width * .8, height= height * .775, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/InitialQuantity:{int(width*0.1)}-tr/FinalQuantity:{int(width*0.1)}-tr/FullDisposedDate:{int(width*.2)}-tc/DisposedBy:{int(width*.15)}-tc!30!30',
                                             header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent', record_text_color=Color.Blue_Maastricht,
-                                            row_font=("Arial", 16),navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
-            self.data_view1.pack()'''
+                                            row_font=("Arial", 16), navbar_font=("Arial",16), nav_text_color="white", selected_color=Color.Blue_Steel,)
+            self.data_view1.pack()
 
         def place(self, **kwargs):
             self.data_view1.update_table(database.fetch_data(sql_commands.get_disposal_hist))
@@ -815,7 +841,7 @@ def add_category(master, info:tuple, table_update_callback: callable):
             
     return add_category(master, info, table_update_callback)
 
-def restock_confirmation(master, info:tuple,):
+def restock_confirmation(master, info:tuple, ):
     class restock_confirmation(ctk.CTkFrame):
         def __init__(self, master, info:tuple, ):
             width = info[0]
@@ -829,19 +855,14 @@ def restock_confirmation(master, info:tuple,):
             self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
             
             def reset():
+                self.stock_spinner.set(0)
                 self.place_forget()
 
             def update_stock():
-                self.after(1000)
-                if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
-                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
-                    messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
-                else:
-                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, (self.stock_spinner.value, self.receiving_id.get())],
-                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
-                    messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
-
-                    
+                if(self.stock_spinner.value == 0):
+                    messagebox.showerror("Fail to proceed", "Stock must be at least 1")
+                    return
+                self.place_forget()
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
                 if recieving_info[5]:
                     if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?", (recieving_info[0], recieving_info[5]))[0][0] == 0:
@@ -850,7 +871,17 @@ def restock_confirmation(master, info:tuple,):
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  recieving_info[6])]]) 
                 else:
                     database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self.stock_spinner.value, recieving_info[2])]])
-                self.after_callback()             
+
+                if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
+                    database.exec_nonquery([[sql_commands.update_recieving_item, ('acc_name' or 'klyde', self.receiving_id.get())]])
+                    messagebox.showinfo("Restocking Sucess", "the item has been\nrestocked")
+                else:
+                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received, (self.stock_spinner.value, self.receiving_id.get())],
+                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, 'kylde')]])
+                    messagebox.showinfo("Partially Restocking Sucess", "the item has been\nrestocked")
+
+                self.after_callback()
+                reset()         
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew")

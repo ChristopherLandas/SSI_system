@@ -186,7 +186,7 @@ show_reveiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, rec
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
-add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?)"
+add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 
 #RECORDING ANY TRANSACTION
@@ -305,10 +305,10 @@ update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3,
 record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
-get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
-record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal, disposed_by) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?);"
+get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') FROM disposal_history WHERE full_dispose_date IS NULL"
+record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
-get_disposal_hist = "SELECT item_name, quan, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history"
+get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
 
 #ACCOUNT CREATION
 
@@ -470,7 +470,7 @@ get_selling_rate = "SELECT item_general_info.name,\
                         ON item_inventory_info.UID = item_transaction_content.Item_uid\
                     LEFT JOIN transaction_record\
                         ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
-                    GROUP BY item_transaction_content.Item_uid\
+                    GROUP BY item_general_info.UID\
                     ORDER BY item_inventory_info.UID"
 
 #LOG
@@ -554,3 +554,9 @@ get_inventory_info= f"SELECT item_general_info.UID, item_general_info.name, item
                         item_settings.Markup_Factor, FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)AS selling, item_settings.Reorder_factor,\
                         item_settings.Crit_factor, item_settings.Safe_stock, item_settings.Average_monthly_selling_rate\
                         FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
+
+check_if_item_does_expire = "SELECT does_expire\
+                            FROM categories\
+                            JOIN item_general_info\
+                                ON categories.categ_name = item_general_info.Category\
+                            WHERE item_general_info.UID = ?"
