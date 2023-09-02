@@ -249,20 +249,23 @@ class pets(ctk.CTkFrame):
 
             original_price = price_format_to_float(self.parent_frame_tab.winfo_children()[1]._text[1:])
             total_price_lbl = self.parent_frame_tab.winfo_children()[3]
-            temp_data = self.get_data()[0]
+            #temp_data = self.get_data()[0]
             #example change here; use it for modifications
-
-            if self._type == 1:
-                d2 = datetime.datetime.strptime(temp_data[2], '%Y-%m-%d')
-                d1 = datetime.datetime.strptime(temp_data[1], '%Y-%m-%d')
-                total_price_lbl.configure(text = f"₱{format_price(original_price * ((d2-d1).days + 1))}",
-                                          fg_color = "yellow")
-            elif self._type == 2:
-                count_intsc = temp_data[-1]
-                print(count_intsc)
-                total_price_lbl.configure(text = f"₱{format_price(original_price * float(count_intsc))}",
-                                          fg_color = "yellow")
-
+            quan_list: list = []
+            for temp_data in self.get_data():
+                if self._type == 1:
+                    d2 = datetime.datetime.strptime(temp_data[2], '%Y-%m-%d')
+                    d1 = datetime.datetime.strptime(temp_data[1], '%Y-%m-%d')
+                    quan_list.append(((d2-d1).days + 1))
+                    '''total_price_lbl.configure(text = f"₱{format_price(original_price * ((d2-d1).days + 1))}",
+                                            fg_color = "yellow")'''
+                elif self._type == 2:
+                    count_intsc = temp_data[-1]
+                    quan_list.append(count_intsc)
+                    '''total_price_lbl.configure(text = f"₱{format_price(original_price * float(count_intsc))}",
+                                            fg_color = "yellow")'''
+                    
+            total_price_lbl.configure(text = f"₱{format_price(original_price * sum(quan_list))}", fg_color = 'yellow')
             #for modifying the price of the calculated time period
             #need to fix: no effects on total price, their spinner command
             #spinner command supposed to do: does nothing when go up, but remove the last list when down
