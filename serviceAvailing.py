@@ -6,6 +6,7 @@ from Theme import Color
 from PIL import Image
 from customcustomtkinter import customcustomtkinter as cctk
 from tkinter import messagebox
+import re
 from util import database
 
 class pet_info_frame(ctk.CTkFrame):
@@ -175,12 +176,16 @@ class pet_multiple_period_info_frame(ctk.CTkFrame):
         self.second_date_btn = ctk.CTkButton(self.sub_frame, text="", image=self.calendar, height=height*0.225, width=width*0.18,
                                             command=lambda:cctk.tk_calendar(self.second_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.strptime(self.first_date_entry._text, '%m-%d-%Y') if not self.first_date_entry._text.startswith("Set") else datetime.datetime.now()))
         self.second_date_btn.grid(row=3,column=2, sticky="w", pady=(0,height*0.05))'''
-        self.period_days = ctk.CTkEntry(self.sub_frame, width=width*1.15,  height=height*0.225, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, corner_radius=5)
+        period_sv = ctk.StringVar()
+        period_sv.trace_add('write', self.period_days_callback)
+        self.period_days = ctk.CTkEntry(self.sub_frame, width=width*1.15,  height=height*0.225, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, corner_radius=5, textvariable= period_sv)
         self.period_days.grid(row=3, column=1, sticky="n", pady=(0,height*0.05))
         ctk.CTkLabel(self.sub_frame, text ="Days", font=("DM Sans Medium",12), width=width*0.35).grid(row=3,column=2, sticky="w", pady=(0,height*0.05), padx = (height*0.05, 0))
 
+        insct_sv = ctk.StringVar()
+        insct_sv.trace_add('write', self.instance_count_callback)
         ctk.CTkLabel(self.sub_frame, text ="For", font=("DM Sans Medium",12), width=width*0.35).grid(row=4, column=1,sticky="nsew")
-        self.instance_count_days = ctk.CTkEntry(self.sub_frame, width=width*1.15,  height=height*0.225, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, corner_radius=5)
+        self.instance_count_days = ctk.CTkEntry(self.sub_frame, width=width*1.15,  height=height*0.225, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, corner_radius=5, textvariable= insct_sv)
         self.instance_count_days.grid(row=5, column=1, sticky="n", pady=(0,height*0.05))
         ctk.CTkLabel(self.sub_frame, text ="Times", font=("DM Sans Medium",12), width=width*0.35).grid(row=5,column=2, sticky="w", pady=(0,height*0.05), padx = (height*0.05, 0))
 
@@ -191,7 +196,18 @@ class pet_multiple_period_info_frame(ctk.CTkFrame):
         elif data_format == 'tuple':
             d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
             prd_temp = self.period_days.get()
-            return (self.name.get(), d_temp, prd_temp)
+            ins_ct = self.instance_count_days.get()
+            return (self.name.get(), d_temp, prd_temp, ins_ct)
+        
+    def period_days_callback(self, _ = None, *__):
+        txt = self.period_days.get()
+        if (not str(txt[-1]).isnumeric()) or len(txt) > 15:
+            self.period_days.delete(len(txt)-1, ctk.END)
+
+    def instance_count_callback(self, _ = None, *__):
+        txt = self.instance_count_days.get()
+        if (not str(txt[-1]).isnumeric()) or len(txt) > 15:
+            self.instance_count_days.delete(len(txt)-1, ctk.END)
 
 class pets(ctk.CTkFrame):
     def __init__(self, master: any, length:int, title: str, pets_name: List[str], proceed_command:callable, cancel_command:callable = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -214,6 +230,16 @@ class pets(ctk.CTkFrame):
                 if fr.name.get() == "" or fr.first_date_entry._text == "Set Date":
                     messagebox.showerror("Fail to proceed", "Fill all the required info")
                     return
+                if isinstance(fr, pet_period_info_frame):
+                    temp: pet_period_info_frame = fr
+                    if temp.second_date_entry._text == "Set Date":
+                        messagebox.showerror("Fail to proceed", "Fill all the required info")
+                        return
+                elif isinstance(fr, pet_multiple_period_info_frame):
+                    temp: pet_multiple_period_info_frame = fr
+                    if temp.period_days.get() == "" or temp.instance_count_days.get() == "":
+                        messagebox.showerror("Fail to proceed", "Fill all the required info")
+                        return
             proceed_command(self.get_data())
             self.place_forget()
             
