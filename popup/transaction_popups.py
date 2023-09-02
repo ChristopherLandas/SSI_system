@@ -720,7 +720,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict):
             width = info[0]
             height = info[1]
-            super().__init__(master, corner_radius= 0, fg_color="red")
+            super().__init__(master, corner_radius= 0, fg_color="transparent")
+
             '''internal data'''
             self.total_transaction_count = 0
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
@@ -894,7 +895,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             if('client' in kwargs):
                 self.check_client(kwargs['client'])
                 kwargs.pop('client')
-
             count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
             if count_temp != self.total_transaction_count:
                 self.update_service()
@@ -1164,6 +1164,8 @@ def show_payment_proceed(master, info:tuple,):
 
             '''events'''
             def record_transaction():
+                self.complete_button.configure(state="disabled")
+                self.cancel_button.configure(state="disabled")
                 record_id =  int(self.or_button._text[4:])
 
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
@@ -1212,11 +1214,21 @@ def show_payment_proceed(master, info:tuple,):
                 #calculate and show the change
 
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
+                
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()
+                self.complete_button.configure(state="normal")
+                self.cancel_button.configure(state="normal")
                 #update the table
+                
+            #Payment Callback
+            def payment_callback(var, index, mode):
+                if self.payment_var.get().isdigit():
+                    self.payment_total.configure(text=f"{'₱{:0,.2f}'.format(int(self.payment_var.get()))}")
+                    
+            self.payment_var = ctk.StringVar()
             
             '''Transaction Info'''
             self.client_info_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Platinum)
@@ -1270,21 +1282,21 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_table_style.map("Treeview", background=[("selected",Color.Blue_Steel)])
             
             
-            self.columns = ("rec_no", "particulars","qty","unit_price", "total")
+            self.columns = ("rec_no", "particulars","qty","total")
             
             self.receipt_tree = ttk.Treeview(self.receipt_table_frame, columns=self.columns, show="headings",)
            
             self.receipt_tree.heading("rec_no", text="No")
             self.receipt_tree.heading("particulars", text="Particulars")
             self.receipt_tree.heading("qty", text="Qty")
-            self.receipt_tree.heading("unit_price", text="UnitPrice")
+            #self.receipt_tree.heading("unit_price", text="UnitPrice")
             self.receipt_tree.heading("total", text="Total")
 
-            self.receipt_tree.column("rec_no", width=int(width*0.05),anchor="e")
+            self.receipt_tree.column("rec_no", width=int(width*0.001),anchor="e")
             self.receipt_tree.column("particulars", width=int(width*0.4), anchor="w")
             self.receipt_tree.column("qty", width=int(width*0.085), anchor="e")
-            self.receipt_tree.column("unit_price", width=int(width*0.1), anchor="e")
-            self.receipt_tree.column("total", width=int(width*0.1225), anchor="e")
+            #self.receipt_tree.column("unit_price", width=int(width*0.1), anchor="e")
+            self.receipt_tree.column("total", width=int(width*0.12), anchor="e")
             
             self.receipt_tree.tag_configure("odd",background=Color.White_AntiFlash)
             self.receipt_tree.tag_configure("even",background=Color.White_Ghost)
@@ -1304,18 +1316,18 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 000,000.00",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
             
-            self.payment_frame= ctk.CTkFrame(self.content_frame, width=width*0.25, fg_color=Color.White_Platinum)
+            self.payment_frame= ctk.CTkFrame(self.content_frame, width=width*0.275, fg_color=Color.White_Platinum)
             self.payment_frame.grid(row=1, column=1, sticky="nsew", padx=(0,width*0.005), pady=(0,height*0.01))
-            self.payment_frame.grid_columnconfigure(1, weight=1)
-            self.payment_frame.grid_rowconfigure(1, weight=1)
+            self.payment_frame.grid_columnconfigure((0,1), weight=1)
+            self.payment_frame.grid_rowconfigure(0, weight=1)
             self.payment_frame.grid_propagate(0)
             
-            self.pay_frame = ctk.CTkFrame(self.payment_frame, fg_color=Color.White_Lotion, height=height*0.35)
-            self.pay_frame.grid(row=0, column=0, columnspan=2, padx=(width*0.005), pady=(height*0.007), sticky="nsew")
-            self.pay_frame.grid_propagate(0)
+            self.pay_frame = ctk.CTkFrame(self.payment_frame, fg_color=Color.White_Lotion)
+            self.pay_frame.grid(row=0, column=0, columnspan=2, padx=(width*0.005), pady=(height*0.007,0), sticky="nsew")
             self.pay_frame.grid_columnconfigure(1, weight=1)
+            self.pay_frame.grid_rowconfigure(5, weight=1)
             
-            ctk.CTkLabel(self.pay_frame, text="Services: ", font=("DM Sans Medium",16),).grid(row=0, column=0, padx=(width*0.01), pady=(height*0.025,0))
+            ctk.CTkLabel(self.pay_frame, text="Services: ", font=("DM Sans Medium",16),).grid(row=0, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
             self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
             self.services_total.grid(row=0, column=2, padx=(width*0.01), pady=(height*0.025,0), sticky = 'e')
             
@@ -1329,13 +1341,25 @@ def show_payment_proceed(master, info:tuple,):
             self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
             self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
-            ctk.CTkLabel(self.pay_frame, text="Payment: ", font=("DM Sans Medium",16),).grid(row=4, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
-            self.payment_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right")
+            ctk.CTkLabel(self.pay_frame, text="Amount Tentered: ", font=("DM Sans Medium",16),).grid(row=4, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
+            self.payment_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055, textvariable=self.payment_var)
             self.payment_entry.grid(row=4, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
             
-            ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",16))
-            self.change_total.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01), sticky = 'e')
+            self.payment_var.trace_add("write", callback=payment_callback)
+                        
+            ctk.CTkLabel(self.pay_frame, text="Payment: ", font=("DM Sans Medium",16),).grid(row=6, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
+            self.payment_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",16), anchor='e')
+            self.payment_total.grid(row=6, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
+            
+            ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=7, column=0, padx=(width*0.01), pady=(0), sticky="w")
+            self.grand_total_second = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.grand_total_second.grid(row=7, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
+            
+            ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=8, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
+            
+            ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=9, column=0, padx=(width*0.01), pady=(height*0.01,height*0.1), sticky="w")
+            self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",18))
+            self.change_total.grid(row=9, column=2, padx=(width*0.01), pady=(height*0.005, height*0.1), sticky = 'e')
             self.change_total.focus()
             
             self.complete_button = ctk.CTkButton(self.payment_frame, text="Complete",font=("DM Sans Medium",16), command= record_transaction)
@@ -1349,7 +1373,9 @@ def show_payment_proceed(master, info:tuple,):
         def reset(self):
             self.or_button.configure(text = '_')
             self.payment_entry.delete(0, ctk.END)
+            self.payment_total.configure(text = "₱ --.--")
             self.change_total.configure(text = "--.--")
+            self.or_button.configure(text= "OR#: ___")
             self.place_forget()
 
         def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, **kwargs):
@@ -1363,6 +1389,7 @@ def show_payment_proceed(master, info:tuple,):
             self.services_total.configure(text = invoice_data[2])
             self.items_total.configure(text = invoice_data[3])
             self.grand_total.configure(text = invoice_data[4])
+            self.grand_total_second.configure(text = invoice_data[4])
             self.receipt_total_amount.configure(text= invoice_data[4])
             self._treeview_callback = treeview_callback
             self._invoice_id = invoice_data[0]
@@ -1374,14 +1401,45 @@ def show_payment_proceed(master, info:tuple,):
             self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_data[0], ))
             self.items = database.fetch_data(sql_commands.get_invoice_item_content_by_id, (invoice_data[0], ))
 
-            modified_services = [(f' {s[0]}  P:{s[1]} D:%s' % s[2].strftime('%m/%d/%y'), 1,  s[3]) for s in self.services]
-
-            temp = self.items + modified_services
+            modified_services = [(f' {s[0]}  P:{s[1]} D:%s' % s[2].strftime('%m/%d/%y'), 1,  f"₱{s[3]}") for s in self.services]
+            modified_items = [(f" {s[0]}", s[1], f"₱{s[2]}") for s in self.items]
+            
+            temp = modified_items + modified_services
+            
             for i in range(len(temp)):
                 if (i % 2) == 0:
                     tag = "even"
                 else:
                     tag ="odd"
                 self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i],tags=tag)
+                
+            
             return super().place(**kwargs)
+    return instance(master, info)  
+
+
+def payment_confirm(master, info:tuple,):
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, corner_radius= 0, fg_color="transparent")
+            
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            
+            self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
+            
+            self.main_frame = ctk.CTkFrame(self, width=width*0.35, height=height*0.4 ,corner_radius=0, fg_color="red")
+            self.main_frame.grid(row=0, column=0)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            
+            self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.055)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.payment_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="TRANSACTION SUCCESSFUL", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+
+            
     return instance(master, info)  

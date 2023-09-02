@@ -4,6 +4,7 @@ import sql_commands
 import tkcalendar
 from Theme import Color
 from util import database
+from util import *
 from tkinter import messagebox
 from constants import action
 from PIL import Image
@@ -12,9 +13,9 @@ from tkinter import ttk
 
 
 
-def show_sales_record_info(master, info:tuple, sales_info: tuple = None, sales_content: list = None) -> ctk.CTkFrame:
+def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, sales_info: tuple = None, sales_content: list = None):
+        def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
             super().__init__(master, width * .835, height=height*0.925, corner_radius= 0, fg_color=Color.White_Platinum)
@@ -25,19 +26,9 @@ def show_sales_record_info(master, info:tuple, sales_info: tuple = None, sales_c
             
             self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
             
-            #basic inforamtion needed; measurement
-
-            """ lbltst = ctk.CTkLabel(self, text='OR#: %s\nCashier: %s\ndate of transaction: %s' % sales_info, text_color='white')
-            lbltst._label.configure(justify=ctk.LEFT, )
-            lbltst.pack(anchor = 'w')
-
-            self.treeview = cctk.cctkTreeView(self, width= width * .7, height= height *.7, column_format='/No:45-#l/Name:x-tl/Price:150-tr!50!30')
-            self.treeview.pack(pady =(12, 0)) """
-
-            #the actual frame, modification on the frame itself goes here
-            
             def reset():
                 self.place_forget()
+                
             
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Lotion)
             self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.0225)
@@ -100,36 +91,11 @@ def show_sales_record_info(master, info:tuple, sales_info: tuple = None, sales_c
             #TABLE
             self.receipt_table_frame = ctk.CTkFrame(self.client_info_frame)
             self.receipt_table_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=width*0.005, pady=(0,height*0.007) )
-            self.receipt_table_frame.grid_columnconfigure(0,weight=1)
-            self.receipt_table_frame.grid_rowconfigure(0, weight=1)
-            
-            '''TABLE SETUP'''
-            self.columns = ("rec_no", "particulars","qty","unit_price", "total")
-            
-            self.receipt_tree = ttk.Treeview(self.receipt_table_frame, columns=self.columns, show="headings",)
            
-            self.receipt_tree.heading("rec_no", text="No")
-            self.receipt_tree.heading("particulars", text="Particulars")
-            self.receipt_tree.heading("qty", text="Qty")
-            self.receipt_tree.heading("unit_price", text="UnitPrice")
-            self.receipt_tree.heading("total", text="Total")
-
-            self.receipt_tree.column("rec_no", width=int(width*0.001),anchor="e")
-            self.receipt_tree.column("particulars", width=int(width*0.4), anchor="w")
-            self.receipt_tree.column("qty", width=int(width*0.085), anchor="e")
-            self.receipt_tree.column("unit_price", width=int(width*0.1), anchor="e")
-            self.receipt_tree.column("total", width=int(width*0.1225), anchor="e")
+            self.receipt_treeview = cctk.cctkTreeView(self.receipt_table_frame, width= width * .795, height= height * .7, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/Particulars:x-tl/Quantity:{int(width*.1)}-tr/UnitPrice:{int(width*.125)}-tr/Total:{int(width*.125)}-tr!30!30')
             
-            self.receipt_tree.tag_configure("odd",background=Color.White_AntiFlash)
-            self.receipt_tree.tag_configure("even",background=Color.White_Ghost)
-            
-            self.receipt_tree.grid(row=0, column=0, sticky="nsew")
-            
-            self.y_scrollbar = ttk.Scrollbar(self.receipt_table_frame, orient=tk.VERTICAL, command=self.receipt_tree.yview)
-            self.receipt_tree.configure(yscroll=self.y_scrollbar.set)
-            self.y_scrollbar.grid(row=0, column=1, sticky="ns")
-            '''END TABLE SETUP'''
-            
+            self.receipt_treeview.pack()
             '''TOTAL'''
             self.bottom_frame = ctk.CTkFrame(self.client_info_frame, fg_color="transparent")
             self.bottom_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", padx=width*0.005, pady=(height*0.007))
@@ -141,4 +107,30 @@ def show_sales_record_info(master, info:tuple, sales_info: tuple = None, sales_c
             ctk.CTkLabel(self.receipt_total_frame, text="Total: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
             self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ ---,---.--",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
-    return instance(master, info, sales_info, sales_content)
+          
+
+       
+                #data = (f"{i+1} ", data[i][0], svc_data[i][1].strftime("%b %d, %Y"), svc_data[i][2])
+                #data_rows.append(data)
+                #self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)
+        
+        
+        
+        def place(self, sales_info, **kwargs):
+            
+            self.cashier_name_label.configure(text=sales_info[-1])
+            self.client_name.configure(text=sales_info[1]) 
+            self.or_label.configure(text=f"OR#{sales_info[0]}")
+            self.date_label.configure(text=sales_info[2])
+            self.receipt_total_amount.configure(text= f"{(sales_info[-2])}")
+            
+            raw_items = database.fetch_data(sql_commands.get_item_record, (sales_info[0],))
+            raw_service = database.fetch_data(sql_commands.get_service_record, (sales_info[0],))
+                      
+            temp =  raw_service + raw_items
+            
+            self.tree_data = [(data[0], data[1], f"₱ {format_price(data[2])}", f"₱ {format_price(data[3])}") for data in temp]
+            self.receipt_treeview.update_table(self.tree_data)
+            
+            return super().place(**kwargs)
+    return instance(master, info)

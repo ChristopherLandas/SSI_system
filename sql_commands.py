@@ -305,7 +305,7 @@ update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3,
 record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
-get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') FROM disposal_history WHERE full_dispose_date IS NULL"
+get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
 record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
@@ -503,7 +503,7 @@ update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
 
 #TESTING - James
 
-get_service_data_test = "SELECT UID, service_name, category, price FROM service_info_test"
+get_service_data_test = "SELECT UID, service_name, category, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 get_service_category_test = "SELECT category FROM service_category_test"
 
 insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -535,9 +535,42 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
                                ON services_transaction_content.transaction_uid = transaction_record.transaction_uid\
                            WHERE  services_transaction_content.pet_uid = ?"
                            #    AND services_transaction_content.`status` = 0"
+                           
+get_daily_sales_data_by_day = "SELECT transaction_uid, client_name, Attendant_usn, CONCAT('₱',FORMAT(Total_amount,2))AS total FROM transaction_record WHERE transaction_record.transaction_date = ?"
+
+
+get_scheduled_clients_today = f"SELECT invoice_service_content.patient_name, invoice_record.client_name, invoice_service_content.service_name\
+                                FROM invoice_record INNER JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                WHERE invoice_record.State = 0 AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                GROUP BY invoice_service_content.patient_name"
+
+#SALES 
+get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
+
+get_item_record = "SELECT  item_name, quantity, price, ROUND((quantity*price),2) AS total FROM item_transaction_content WHERE transaction_uid = ?"
+get_service_record = "SELECT  CONCAT(service_name,' - ',  'Pet: ',patient_name) AS service, 1 AS quantity, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
+
+
+#General Settings
+get_service_info = f"SELECT UID, service_name, price, category, date_added FROM service_info_test WHERE UID = ?"
+
+get_inventory = f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category,\
+                    CONCAT('₱' , FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)) AS price\
+                    FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID"
+
+get_inventory_info= f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category, FORMAT(item_settings.Cost_Price,2) AS unit_cost,\
+                        item_settings.Markup_Factor, FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)AS selling, item_settings.Reorder_factor,\
+                        item_settings.Crit_factor, item_settings.Safe_stock, item_settings.Average_monthly_selling_rate\
+                        FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
 
 check_if_item_does_expire = "SELECT does_expire\
                             FROM categories\
                             JOIN item_general_info\
                                 ON categories.categ_name = item_general_info.Category\
                             WHERE item_general_info.UID = ?"
+                            
+                            
+#FOR UPDATING RECORDS
+
+update_pet_name_and_invoice_records = "UPDATE invoice_service_content SET invoice_service_content.patient_name = (SELECT pet_info.p_name FROM pet_info WHERE invoice_service_content.pet_uid = pet_info.id)"
