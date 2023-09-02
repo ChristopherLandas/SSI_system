@@ -962,6 +962,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         '''initial process'''
 
             def save_invoice_callback():
+                print(self.service_dict)
                 if len(self.transact_treeview._data) == 0:
                     return
                 for dt in self.transact_treeview._data:
