@@ -481,7 +481,7 @@ class transaction_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         global width, height, acc_cred, acc_info, mainframes
-        
+        self.is_loaded = False
         self.grid_forget()
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -743,7 +743,6 @@ class transaction_frame(ctk.CTkFrame):
         data = self.payment_treeview.get_selected_data()
         if(data):
             self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
-                                            update_callback= self.reset,
                                             relx = .5, rely = .5, anchor = 'c')
         else:
             messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
@@ -800,7 +799,6 @@ class transaction_frame(ctk.CTkFrame):
             if isinstance(i, sales_frame):
                 temp: sales_frame = i
                 temp.update_table()
-            self.show_invoice.update_particular_pop_up()
         #check if there are certain mainframes there, then update all of those needed process and ui
 
         #self.client_name_entry.set('')

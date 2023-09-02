@@ -48,11 +48,11 @@ def add_service(master, info:tuple, update_callback: callable):
                     reset()
                     
             def radio_callback():
-                if self.radio_var == 0:
+                if self.radio_var.get() == 0:
                     self.note_label.configure(text = "Price Indicate the overall price of the service")
-                elif self.radio_var == 1:
+                elif self.radio_var.get() == 1:
                     self.note_label.configure(text = "Price Indicate the price per day of the service")
-                elif self.radio_var == 2:
+                elif self.radio_var.get() == 2:
                     self.note_label.configure(text = "Price Indicate per total periods of the service")
             
             self.service_icon = ctk.CTkImage(light_image= Image.open("image/services.png"), size=(20,20))
@@ -116,7 +116,13 @@ def add_service(master, info:tuple, update_callback: callable):
             self.more_rb_button.pack(side="left")
             self.multiple_per_rb_button = ctk.CTkRadioButton(self.duration_frame, text="Multiple Periods", variable=self.radio_var, font=("DM Sans Medium", 14), value=2, command=radio_callback)
             self.multiple_per_rb_button.pack(side="left", padx=(width*0.005,0))
-            self.note_label = ctk.CTkLabel(self.duration_frame, text= "Note here", fg_color= 'blue')
+
+
+            '''NOTE FRAME'''
+            self.note_frame = ctk.CTkFrame(self.sub_frame, fg_color= 'transparent')
+            self.note_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
+            self.note_label = ctk.CTkLabel(self.note_frame, text= "Note here", text_color= 'blue')
+            self.note_label.pack(side = 'bottom', padx = (height * .005, 0))
             radio_callback()
             
             '''BOTTOM'''
