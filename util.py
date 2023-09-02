@@ -57,12 +57,14 @@ class database:
                     db_con.commit()
                 except mariadb.IntegrityError as e:
                     print(f'command {i+1} error pushing', '\nreason: ', e)
+                    return False
         except mariadb.Error as e:
             print(cmds[0][0])
             print(e)
-            return
+            return False
         db_cur.close()
         db_con.close()
+        return True
 
 def brighten_color(hexcode: str, i: int = 1):
     c = re.findall(r'[\d\w]{2}', hexcode)
