@@ -411,7 +411,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
 
         self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.365, height=height*0.45, 
-                                               column_format=f'/No:{int(width*.03)}-#r/PetName:x-tl/ClientName:x-tl/Service:{int(width*.1)}-tl!30!30',)
+                                               column_format=f'/No:{int(width*.03)}-#r/ClientName:x-tl/Contact:{int(width*.125)}-tc!30!30',)
         self.sched_data_treeview._double_click_command = open_schedule
         self.sched_data_treeview.pack()
 
