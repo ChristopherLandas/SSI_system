@@ -790,7 +790,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                    text="  "+label_text, width = root_treeview.column_widths[1],
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c', service_dict = service_dict))
+                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c', service_dict = service_dict, master_frame=data_frames))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -963,6 +963,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             def save_invoice_callback():
                 print(self.service_dict)
+                return
                 if len(self.transact_treeview._data) == 0:
                     return
                 for dt in self.transact_treeview._data:
@@ -974,7 +975,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     elif(dt[0] not in self.service_dict and dt[0] in self.services_lists):
                         messagebox.showwarning("Cannot Proceed", "Fill the remaining Information")
                         return
-
+                
                 services = []
                 items = []
                 for st in self.transact_treeview._data:
@@ -1416,7 +1417,6 @@ def show_payment_proceed(master, info:tuple,):
             
             return super().place(**kwargs)
     return instance(master, info)  
-
 
 def payment_confirm(master, info:tuple,):
     class instance(ctk.CTkFrame):

@@ -8,6 +8,8 @@ from customcustomtkinter import customcustomtkinter as cctk
 from tkinter import messagebox
 import re
 from util import database
+from util import *
+
 
 class pet_info_frame(ctk.CTkFrame):
     def __init__(self, master: any, title:str, name_select_callback: callable, name_selection:list = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -17,6 +19,7 @@ class pet_info_frame(ctk.CTkFrame):
         self._corner_radius = 0
         self._fg_color= Color.White_Platinum
         self.grid_columnconfigure(0, weight=1)
+        self.name_select_callback = name_select_callback
         
         self.pholder = ctk.CTkImage(light_image=Image.open("image/pholder.png"), size=(100,100))
         self.calendar= ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(18,18))
@@ -75,6 +78,7 @@ class pet_period_info_frame(ctk.CTkFrame):
         self._corner_radius = 0
         self._fg_color= Color.White_Platinum
         self.grid_columnconfigure(0, weight=1)
+        self.name_select_callback = name_select_callback
         
         self.pholder = ctk.CTkImage(light_image=Image.open("image/pholder.png"), size=(100,100))
         self.calendar= ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(18,18))
@@ -134,6 +138,7 @@ class pet_multiple_period_info_frame(ctk.CTkFrame):
         self._corner_radius = 0
         self._fg_color= Color.White_Platinum
         self.grid_columnconfigure(0, weight=1)
+        self.name_select_callback = name_select_callback
         
         self.pholder = ctk.CTkImage(light_image=Image.open("image/pholder.png"), size=(100,100))
         self.calendar= ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(18,18))
@@ -217,6 +222,7 @@ class pets(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         self.grid_propagate(0)
+        self.parent_frame_tab = None
         self._title = title
         self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
         self._type = database.fetch_data("Select duration_type from service_info_test WHERE service_name = ?", (self._title, ))[0][0]
@@ -240,6 +246,27 @@ class pets(ctk.CTkFrame):
                     if temp.period_days.get() == "" or temp.instance_count_days.get() == "":
                         messagebox.showerror("Fail to proceed", "Fill all the required info")
                         return
+
+            original_price = price_format_to_float(self.parent_frame_tab.winfo_children()[1]._text[1:])
+            total_price_lbl = self.parent_frame_tab.winfo_children()[3]
+            temp_data = self.get_data()[0]
+            #example change here; use it for modifications
+
+            if self._type == 1:
+                d2 = datetime.datetime.strptime(temp_data[2], '%Y-%m-%d')
+                d1 = datetime.datetime.strptime(temp_data[1], '%Y-%m-%d')
+                total_price_lbl.configure(text = f"₱{format_price(original_price * ((d2-d1).days + 1))}",
+                                          fg_color = "yellow")
+            elif self._type == 2:
+                count_intsc = temp_data[-1]
+                print(count_intsc)
+                total_price_lbl.configure(text = f"₱{format_price(original_price * float(count_intsc))}",
+                                          fg_color = "yellow")
+
+            #for modifying the price of the calculated time period
+            #need to fix: no effects on total price, their spinner command
+            #spinner command supposed to do: does nothing when go up, but remove the last list when down
+
             proceed_command(self.get_data())
             self.place_forget()
             
@@ -296,19 +323,37 @@ class pets(ctk.CTkFrame):
             data.append(i.get_data(data_format='tuple'))
         return data
     
-    def place(self, service_dict: dict, **kwargs):
-        print(service_dict)
+    def place(self, service_dict: dict, master_frame: any, **kwargs):
+        self.parent_frame_tab = master_frame
+        frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
+        temp_cmd = frame_spinner._command
+
+        if self._type == 0:
+            def new_frame_spn_cmd():
+                if self._title in service_dict:
+                    service_dict[self._title] = [] if frame_spinner.value < 1 else service_dict[self._title][0: frame_spinner.value]
+                temp_cmd()
+            frame_spinner.configure(command = new_frame_spn_cmd)
+        #for modifying the spinnercombo of the table
+
         if(self._title in service_dict):
             for i in range(len(service_dict[self._title])):
-                if self._type == 0:
-                    self.frames[i].name.set(service_dict[self._title][i][0])
-                    d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime("%m-%d-%Y")
-                    self.frames[i].first_date_entry.configure(text =  d_temp)
-                elif self._type == 1:
-                    pass
-                elif self._type == 2:
-                    pass
+                self.frames[i].name.set(service_dict[self._title][i][0])
+                self.frames[i].name_select_callback(self.frames[i], self.frames[i].name.get())
+                d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime("%m-%d-%Y")
+                self.frames[i].first_date_entry.configure(text =  d_temp)
 
+                if self._type == 1:
+                    temp: pet_period_info_frame = self.frames[i]
+                    snd_temp = "Set Date" if service_dict[self._title][i][2] is None else datetime.datetime.strptime(service_dict[self._title][i][2], "%Y-%m-%d").strftime("%m-%d-%Y")
+                    temp.second_date_entry.configure(text = snd_temp)
+                elif self._type == 2:
+                    temp: pet_multiple_period_info_frame = self.frames[i]
+                    temp.period_days.delete(0, ctk.END)
+                    temp.period_days.insert(0, service_dict[self._title][i][2])
+                    temp.instance_count_days.delete(0, ctk.END)
+                    temp.instance_count_days.insert(0, service_dict[self._title][i][3])
+        #for reentring the elements based on the type of service
         return super().place(**kwargs)
     
 class body(ctk.CTk):

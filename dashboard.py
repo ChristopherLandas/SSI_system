@@ -121,6 +121,7 @@ class dashboard(ctk.CTkToplevel):
         self.labels = []
         self.icons = []
         self.main_frames:list = []
+        
         for i in range(len(temp_main_frames)):
             if temp_user_lvl_access[i]:
                 self.icons.append(temp_icons[i])
