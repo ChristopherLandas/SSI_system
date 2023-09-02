@@ -274,6 +274,17 @@ class dashboard_frame(ctk.CTkFrame):
     global width, height
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Chinese)
+        
+        def open_sale_history(_):
+            if self.sales_data_treeview.get_selected_data():
+                self.sales_history.place(relx=0.5, rely=0.5, anchor="c", sales_info=self.sales_data_treeview.get_selected_data())
+            
+           
+        def open_schedule(_):
+            if self.sched_data_treeview.get_selected_data():
+                self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=self.sched_data_treeview.get_selected_data())
+                
+         
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
@@ -372,20 +383,21 @@ class dashboard_frame(ctk.CTkFrame):
 
         ctk.CTkLabel(self.sales_history_frame, text=f"Sales History", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=(width*0.02,0), pady=(height*0.025, height*0.005))
         ctk.CTkLabel(self.sales_history_frame, text=f"as of {date.today().strftime('%B %Y')}", text_color="grey", font=("DM Sans Medium",14)).grid(row=0, column=1, sticky="sw", padx=(width*0.005,0), pady=(0,height*0.005))
-        self.sales_data_frame = ctk.CTkFrame(self.sales_history_frame, fg_color="transparent")
+        self.sales_data_frame = ctk.CTkFrame(self.sales_history_frame, fg_color="transparent", corner_radius=0)
         self.sales_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",pady=(0))
 
-        self.sales_data_treeview = cctk.cctkTreeView(self.sales_data_frame, width=width*0.365, height=height*0.45,
-                                               column_format=f'/No:{int(width*.03)}-#c/Day:x-tl/Total:x-tl!30!30',
-                                               header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
+        self.sales_data_treeview = cctk.cctkTreeView(self.sales_data_frame, width=width*0.375, height=height*0.45,
+                                                     column_format=f'/No:{int(width*.035)}-#r/Day:x-tc/Total:{int(width*0.125)}-tr!30!30',)
+        self.sales_data_treeview._double_click_command = open_sale_history
         self.sales_data_treeview.pack()
-
-        self.current_total = ctk.CTkLabel(self.sales_history_frame, text="Total:   0,000.00", fg_color=Color.White_Chinese, corner_radius=5,height=height*0.05, width=width*0.125, anchor="e", font=("DM Sans Medium", 14))
-        self.current_total.grid(row=2, column=1, sticky="e", padx=width*0.015, pady=(height*0.005,height*0.015))
-
-        '''self.view_more_button = ctk.CTkButton(self.sales_history_frame, text='View More',width= self.income_frame_width*0.16, height=self.income_frame_height*0.06, font=('DM Sans Medium', 12), corner_radius=4, text_color=Color.Blue_Maastricht,
-                                              fg_color=Color.White_AntiFlash,hover_color=Color.Platinum, command=lambda:print("Go To Report Section"))
-        self.view_more_button.grid(row=2, column=0, sticky="w", padx=self.income_frame_width*0.035,pady=(0,self.income_frame_height*0.035))'''
+        
+        
+        self.total_frame = ctk.CTkFrame(self.sales_history_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.15)
+        self.total_frame.grid(row=2, column=1, sticky="nse", padx=width*0.01, pady=(height*0.005,height*0.015))
+        self.total_frame.pack_propagate(0)
+        ctk.CTkLabel(self.total_frame, text=f"Total: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht).pack(side=ctk.LEFT, padx=(width*0.01))
+        self.current_total = ctk.CTkLabel(self.total_frame, text="0,000.00", font=("DM Sans Medium", 14))
+        self.current_total.pack(side=ctk.RIGHT, padx=(width*0.01))
 
         '''Schedule Appointments'''
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
@@ -399,7 +411,8 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
 
         self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.365, height=height*0.45, 
-                                               column_format=f'/No:{int(width*.03)}-#r/ClientName:x-tl/Service:x-tl/ContactNo:{int(width*.115)}-tr!30!30',)
+                                               column_format=f'/No:{int(width*.03)}-#r/PetName:x-tl/ClientName:x-tl/Service:{int(width*.1)}-tl!30!30',)
+        self.sched_data_treeview._double_click_command = open_schedule
         self.sched_data_treeview.pack()
 
         self.status_popup = Inventory_popup.show_status(self, (width, height, acc_cred, acc_info))
@@ -407,16 +420,22 @@ class dashboard_frame(ctk.CTkFrame):
         self.load_saled_data_treeview()
         self.load_scheduled_service()
         self.grid_forget()
+        
+        self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
+        self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
+        
+        
 
     def load_scheduled_service(self):
-        data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
+        #data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
+        data= database.fetch_data(sql_commands.get_scheduled_clients_today, None)
         self.sched_data_treeview.update_table(data)
 
     def load_saled_data_treeview(self):
         date = datetime.datetime.now()
         data = database.fetch_data(sql_commands.get_monthly_sales_data, (date.month, date.year))
         total = sum([price_format_to_float(s[-1][1:]) for s in data])
-        self.current_total.configure(text = 'Total:   ' + '₱' + format_price(total))
+        self.current_total.configure(text = '₱ ' + format_price(total))
         self.sales_data_treeview.update_table(data)
 
     def show_status_popup(self, name: str, data):
@@ -473,7 +492,8 @@ class dashboard_frame(ctk.CTkFrame):
             del temp
 
     def grid(self, **kwargs):
-        
+        self.load_scheduled_service()
+        self.load_saled_data_treeview()
         return super().grid(**kwargs)
 
 class transaction_frame(ctk.CTkFrame):
@@ -798,7 +818,7 @@ class transaction_frame(ctk.CTkFrame):
                 temp.update_invetory_graph()
             if isinstance(i, sales_frame):
                 temp: sales_frame = i
-                temp.update_table()
+                temp.update_table(date.today())
             self.show_invoice.update_particular_pop_up()
         #check if there are certain mainframes there, then update all of those needed process and ui
 
@@ -918,7 +938,7 @@ class sales_frame(ctk.CTkFrame):
                                         width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
-        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=lambda:self.update_table())
+        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=lambda:self.update_table(date.today()))
         self.refresh_btn.grid(row=0, column=1,padx=(0, width*0.005))
 
         self.sub_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion,corner_radius=0)
@@ -953,6 +973,7 @@ class sales_frame(ctk.CTkFrame):
         self.data_view.pack()
         
         self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height)) 
+        #print(date.today())
         self.update_table(date=date.today())
 
     def grid(self, **kwargs):
@@ -1302,11 +1323,12 @@ class inventory_frame(ctk.CTkFrame):
 
         #self.ds_data = database.fetch_data(sql_commands.get_for_disposal_items)
         self.ds_data_view1 = cctk.cctkTreeView(self.ds_treeview_frame, data = None, width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ItemName:x-tl/InitialQuantity:{int(width*.1)}-tr/CurrentQuantity:{int(width*.1)}-tr/DateOfDisposal:{int(width*.125)}-tl/DisposedBy:{int(width*.085)}-tl!30!30',)
+                                           column_format=f'/No:{int(width*.035)}-#r/ItemName:x-tl/InitialQty:{int(width*.1)}-tr/CurrentQty:{int(width*.1)}-tr/DateOfDisposal:{int(width*.175)}-tc/DisposedBy:{int(width*.15)}-tl!30!30',)
         self.ds_data_view1.pack()
 
         self.ds_disposal_history = ctk.CTkButton(self.disposal_frame, width=width*0.025, height = height*0.05, text="Disposal Record", image=self.history_icon, font=("DM Sans Medium", 14),
                                              command=lambda: self.disposal_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        
         self.ds_disposal_history.grid(row=0, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
         self.ds_refresh_btn = ctk.CTkButton(self.disposal_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
@@ -1331,6 +1353,8 @@ class inventory_frame(ctk.CTkFrame):
 
     def update_disposal_treeview(self):
         self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_for_disposal_items))
+        #print(database.fetch_data(sql_commands.get_for_disposal_items))
+        pass
 
     def update_tables(self):
         for i in mainframes:

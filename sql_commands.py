@@ -305,7 +305,7 @@ update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3,
 record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
-get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') FROM disposal_history WHERE full_dispose_date IS NULL"
+get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
 record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
@@ -508,7 +508,7 @@ get_service_category_test = "SELECT category FROM service_category_test"
 
 insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?, ?)"
 
-get_services_and_their_price_test = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
+get_services_and_their_price_test = "SELECT UID, service_name, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 #insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"
 
 #ACCOUNTS
@@ -535,6 +535,15 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
                                ON services_transaction_content.transaction_uid = transaction_record.transaction_uid\
                            WHERE  services_transaction_content.pet_uid = ?"
                            #    AND services_transaction_content.`status` = 0"
+                           
+get_daily_sales_data_by_day = "SELECT transaction_uid, client_name, Attendant_usn, CONCAT('₱',FORMAT(Total_amount,2))AS total FROM transaction_record WHERE transaction_record.transaction_date = ?"
+
+
+get_scheduled_clients_today = f"SELECT invoice_service_content.patient_name, invoice_record.client_name, invoice_service_content.service_name\
+                                FROM invoice_record INNER JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                WHERE invoice_record.State = 0 AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                GROUP BY invoice_service_content.patient_name"
 
 #SALES 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
@@ -560,3 +569,8 @@ check_if_item_does_expire = "SELECT does_expire\
                             JOIN item_general_info\
                                 ON categories.categ_name = item_general_info.Category\
                             WHERE item_general_info.UID = ?"
+                            
+                            
+#FOR UPDATING RECORDS
+
+update_pet_name_and_invoice_records = "UPDATE invoice_service_content SET invoice_service_content.patient_name = (SELECT pet_info.p_name FROM pet_info WHERE invoice_service_content.pet_uid = pet_info.id)"
