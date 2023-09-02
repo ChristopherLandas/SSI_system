@@ -462,6 +462,7 @@ def show_status(master, info:tuple,):
                                                column_format=f'/No:{int(width*.025)}-#c/ItemName:x-tl/Quantity:{int(width*0.075)}-tr/Action:{int(width*0.05)}-tc!30!30',
                                                header_color= Color.Blue_Cobalt, data_grid_color= (Color.White_Ghost, Color.Grey_Bright_2), content_color='transparent')
             self.db_inventory_treeview.pack()
+            
         def update_treeview(self, data):
             self.db_inventory_treeview.update_table(data)
 
@@ -864,7 +865,7 @@ def restock_confirmation(master, info:tuple, ):
                     return
                 self.place_forget()
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
-                if recieving_info[5]:
+                if recieving_info[6]:
                     if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?", (recieving_info[0], recieving_info[5]))[0][0] == 0:
                         database.exec_nonquery([[sql_commands.add_new_instance, (recieving_info[2], self.stock_spinner.value, recieving_info[6])]])
                     else:

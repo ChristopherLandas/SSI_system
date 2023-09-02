@@ -15,7 +15,7 @@ import threading
 from PIL import Image
 import copy
 
-def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
+'''def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
             self._master = master
@@ -24,7 +24,6 @@ def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_
             #self._treeview: cctk.cctkTreeView = info[2]
             super().__init__(master, corner_radius= 0)
 
-            '''event'''
             def proceed(_: any = None):
                 if self.item_treeview.data_grid_btn_mng.active:
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
@@ -116,7 +115,7 @@ def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_
             #self.main_frame.place_forget()
             self.place_forget()
 
-        '''def get_item(self, _: any = None):
+        def get_item(self, _: any = None):
             #if there's a selected item
             if self.item_treeview.data_grid_btn_mng.active is not None:
                 item_name =  self.item_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
@@ -164,11 +163,11 @@ def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_
                 self.item_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup """
-    return instance(master, info)'''
+    return instance(master, info
 
-    return instance(master, info, root_treeview, change_val_func)
+    return instance(master, info, root_treeview, change_val_func)'''
 
-def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
+'''def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
 
         def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
@@ -179,7 +178,6 @@ def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, cha
             #self._treeview: cctk.cctkTreeView = info[2]
             super().__init__(master, corner_radius= 0)
 
-            '''event'''
             def proceed(_: any = None):
                 if self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
@@ -296,7 +294,7 @@ def show_services_list(master, info:tuple, root_treeview: cctk.cctkTreeView, cha
                 self.service_treeview.data_grid_btn_mng.deactivate_active()
                 self.reset()
                 #reset the state of this popup
-    return instance(master, info, root_treeview, change_val_func)
+    return instance(master, info, root_treeview, change_val_func)'''
 
 def show_transaction_proceed(master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
@@ -724,8 +722,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-    
             '''internal data'''
+            self.total_transaction_count = 0
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
             self._service_dict = service_dict
@@ -788,8 +786,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         def proceed_command(data):
                             self._service_dict[label_text] = data
                         
-                        new_button = ctk.CTkButton(data_frames, corner_radius= 0,
-                                                   text=label_text, width = root_treeview.column_widths[1],
+                        new_button = ctk.CTkButton(data_frames, corner_radius= 0, anchor= 'w', font=self.service_treeview.row_font,
+                                                   text="  "+label_text, width = root_treeview.column_widths[1],
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
                                                                                          self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c', service_dict = service_dict))
@@ -872,17 +870,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_rowconfigure((1,2), weight=1)
                 
-            """ self.search_frame = ctk.CTkFrame(self.content_frame, width=width*0.35, height = height*0.05, fg_color="light grey")
-            self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.005), pady=(height*0.01))
-            self.search_frame.pack_propagate(0)
-
-            ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
-            self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
-            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-            self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color=Color.Blue_Yale,
-                                            width=width*0.005)
-            self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
-            
             self.filter_optionmenu = ctk.CTkOptionMenu(self.content_frame, width=width*0.1, height=height*0.045, fg_color=Color.Blue_Tufts, values=["All", "Services", "Items"], anchor="center")
             self.filter_optionmenu.configure(command=filter_func)
             self.filter_optionmenu.grid(row=0, column=0, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
@@ -908,38 +895,30 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             if('client' in kwargs):
                 self.check_client(kwargs['client'])
                 kwargs.pop('client')
-            '''TESTING JAMES'''
-            raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test, None)
-            self.main_frame.pack()
-            self.data = [(s[1], s[2]) for s in raw_data]
-            self.service_treeview.update_table(self.data)
-            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
+            if count_temp != self.total_transaction_count:
+                self.update_service()
+                self.update_items_stocks()
+                self.total_transaction_count = count_temp
+
+            #update the particulars if it's not been updated yet
+            #update could be triggered by every invoice saved
             return super().place(**kwargs)
-    
+        
+        def update_service(self):
+            raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test)
+            self.service_treeview.update_table([(s[1], s[2]) for s in raw_data])
+
         def update_items_stocks(self):
-            self.item_treeview.update_table(database.fetch_data(sql_commands.get_item_and_their_total_stock, None))
+            data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            self.item_treeview.update_table(data)
         
         def check_client(self, client_name: str):
             self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
+
+        def update(self) -> None:
+            return super().update()
             
-        def get_service(self, _: any = None):
-            #if there's a selected item
-            if self.service_treeview.data_grid_btn_mng.active is not None:
-                service_name =  self.service_treeview.data_grid_btn_mng.active.winfo_children()[0]._text
-                #getting the needed information for the item list
-                transaction_data = database.fetch_data(sql_commands.get_services_data_for_transaction, (service_name, ))[0]
-                self._treeview.add_data(transaction_data+(0, transaction_data[2]))
-                return
-                info_tab:cctk.info_tab = self._treeview.data_frames[-1].winfo_children()[3]
-                info_tab._tab = customer_info(self._treeview.master.master, (info[0] * .8, info[1] * .8), info_tab)
-                info_tab.button.configure(command = lambda: info_tab._tab.place(relx = .5, rely = .5, anchor = 'c'))
-                self._data_reciever.append(info_tab)
-                info_tab._tab.place(relx = .5, rely = .5, anchor = 'c')
-
-
-                master.change_total_value_service(transaction_data[2])
-                self.service_treeview.data_grid_btn_mng.deactivate_active()
-                self.reset()
     return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict)
 
 def add_invoice(master, info:tuple, treeview_content_update_callback: callable, attendant: str):
@@ -983,6 +962,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         '''initial process'''
 
             def save_invoice_callback():
+                print(self.service_dict)
                 if len(self.transact_treeview._data) == 0:
                     return
                 for dt in self.transact_treeview._data:
@@ -1006,7 +986,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 formatted_svc_data = []
                 
                 uid = self.invoice_id_label._text
-                #uid = generateId('P', 6)
+
                 for svc in services:
                     for i in range(svc[2]):
                         svc_inf = self.service_dict[svc[0]][i]
@@ -1025,6 +1005,8 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 #database insertion of services
 
                 self._treeview_content_update_callback()
+                self.save_invoice_btn.configure(state = ctk.DISABLED)
+                self.cancel_invoice_btn.configure(state = ctk.DISABLED)
                 messagebox.showinfo('Success', 'Invoice Saved')
                 self.reset(True)
 
@@ -1047,7 +1029,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             ctk.CTkLabel(self.top_frame, text='ADD INVOICE', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
 
-            self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="INV0001",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
+            self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="__",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
             self.invoice_id_label.grid(row=1, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
             self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color="light grey", width=width*0.35, height=height*0.05)
@@ -1063,7 +1045,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.client_name_entry.configure(values = self.client_names)
             self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
             
-            self.add_particulars = ctk.CTkButton(self.main_frame,text="Add Particulars", width=width*0.125, height=height*0.05, image=self.add_icon, font=("DM Sans Medium", 14),
+            self.add_particulars: add_particulars = ctk.CTkButton(self.main_frame,text="Add Particulars", width=width*0.125, height=height*0.05, image=self.add_icon, font=("DM Sans Medium", 14),
                                                command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
             self.add_particulars.grid(row=1, column=2, sticky="w")
 
@@ -1106,12 +1088,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.price_total_frame.pack(side="left")
             self.price_total_frame.pack_propagate(0)
  
-            """ self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",   
-                                                command=lambda:transaction_popups.show_transaction_proceed(self, (width, height, acc_cred), self.services_total_amount._text,
-                                                                self.item_total_amount._text, self.price_total_amount._text, self.transact_treeview._data,
-                                                                self.client_name_entry.get() or 'N/A', self.transact_treeview, self.service_dict).place(relx = .5, rely = .5, anchor = 'c'))
-            self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025),padx=(0, width*0.005), sticky="e")  """
-            
             self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Invoice",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command= save_invoice_callback)
             self.save_invoice_btn.pack(side="right")
             
@@ -1134,31 +1110,25 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
         def reset(self, bypass_warning: bool = False):
             if self.client_name_entry.get() != "" or len(self.transact_treeview._data) > 0:
-                if bypass_warning:
+                if bypass_warning or messagebox.askyesno("Cancel Invoice", "Are you sure you want to discard the invoice"):
+                    self.save_invoice_btn.configure(state = ctk.NORMAL)
+                    self.cancel_invoice_btn.configure(state = ctk.NORMAL)
                     self.client_name_entry.set("")
                     self.transact_treeview.delete_all_data()
                     self.services_total_amount.configure(text = format_price(0))
                     self.item_total_amount.configure(text = format_price(0))
                     self.price_total_amount.configure(text = format_price(0))
                     self.service_dict.clear()
-                elif messagebox.askyesno("Cancel Invoice", "Are you sure you want to discard the invoice") or bypass_warning:
-                    self.client_name_entry.set("")
-                    self.transact_treeview.delete_all_data()
-                    self.services_total_amount.configure(text = format_price(0))
-                    self.item_total_amount.configure(text = format_price(0))
-                    self.price_total_amount.configure(text = format_price(0))
-                    self.service_dict.clear()
+                    self.invoice_id_label.configure(text = "__")
                 else:
                     return
             self.place_forget()  
         
         def place(self, **kwargs):
-            count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%m%d%y'), '%')")[0][0]
-            self.invoice_id_label.configure(text = '%s%s' % (datetime.now().strftime('%m%d%y'), str(count).zfill(2)))
+            if self.invoice_id_label._text.endswith("_"):
+                count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%m%d%y'), '%')")[0][0]
+                self.invoice_id_label.configure(text = '%s%s' % (datetime.now().strftime('%m%d%y'), str(count).zfill(2)))
             return super().place(**kwargs)
-
-        def update_particular_pop_up(self):
-            self.show_particulars.update_items_stocks()
         
     return instance(master, info, treeview_content_update_callback)
 
@@ -1246,7 +1216,6 @@ def show_payment_proceed(master, info:tuple,):
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
-                self._update_callback()
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()
@@ -1402,13 +1371,14 @@ def show_payment_proceed(master, info:tuple,):
             self.cancel_button.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(height*0.007))
             
         def reset(self):
+            self.or_button.configure(text = '_')
             self.payment_entry.delete(0, ctk.END)
             self.payment_total.configure(text = "₱ --.--")
             self.change_total.configure(text = "--.--")
             self.or_button.configure(text= "OR#: ___")
             self.place_forget()
 
-        def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, update_callback: callable, **kwargs):
+        def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, **kwargs):
             if self.or_button._text.endswith("_"):
                 count = database.fetch_data("SELECT transaction_uid FROM transaction_record ORDER BY CAST(transaction_uid AS INT) desc")[0][0]
                 self.or_button.configure(text = f"OR#: {str(int(count)+1).zfill(3)}")
@@ -1422,7 +1392,6 @@ def show_payment_proceed(master, info:tuple,):
             self.grand_total_second.configure(text = invoice_data[4])
             self.receipt_total_amount.configure(text= invoice_data[4])
             self._treeview_callback = treeview_callback
-            self._update_callback = update_callback
             self._invoice_id = invoice_data[0]
 
             for i in self.receipt_tree.get_children():

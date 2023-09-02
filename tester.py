@@ -41,17 +41,11 @@ class body(ctk.CTk):
         ctk.CTkLabel(self, text = '🠋', text_color ='green', font=('arial', 30)).place(relx = .5, rely = .5, anchor = 'c')
         self.mainloop()'''
         #notif test here
+
+        entry = ctk.CTkEntry(self, width= 100)
+        print(entry._textvariable)
         
 
-        lbl = ctk.CTkLabel(self, 120, 28, text="fejorifjireofjerfioerjfeiorfjerifjerfierfjejorfo", fg_color='red')
-        lbl.pack()
-        text_overflow_elipsis(lbl)
-
-
-        treeview = cctk.cctkTreeView(self, ("wejfioejdfvnerhiwoejdowedwnv", "1"), self.screen[0] * .5, self.screen[1] * .5,
-                                     column_format="/Title2:120-tl/Title3:x-tl!30!30")
-        treeview.place(relx = .5, rely = .5, anchor = 'c')
-        print(treeview._data)
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))
