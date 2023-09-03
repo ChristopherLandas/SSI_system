@@ -223,9 +223,11 @@ class pets(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_propagate(0)
         self.parent_frame_tab = None
+        self.parent_service_dict: dict = {}
         self._title = title
         self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
         self._type = database.fetch_data("Select duration_type from service_info_test WHERE service_name = ?", (self._title, ))[0][0]
+        self.change_total_val_serv_callback = None
         def cancel_sequence():
             if cancel_command:
                 cancel_command()
@@ -249,8 +251,7 @@ class pets(ctk.CTkFrame):
 
             original_price = price_format_to_float(self.parent_frame_tab.winfo_children()[1]._text[1:])
             total_price_lbl = self.parent_frame_tab.winfo_children()[3]
-            #temp_data = self.get_data()[0]
-            #example change here; use it for modifications
+            
             quan_list: list = []
             for temp_data in self.get_data():
                 if self._type == 1:
@@ -266,9 +267,23 @@ class pets(ctk.CTkFrame):
                                             fg_color = "yellow")'''
                     
             total_price_lbl.configure(text = f"₱{format_price(original_price * sum(quan_list))}", fg_color = 'yellow')
+            frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
+
+
+            if self._type == 1:
+                def new_frame_spn_cmd():
+                    if self._title in self.parent_service_dict:
+                        self.parent_service_dict[self._title] = [] if frame_spinner.value < 1 else self.parent_service_dict[self._title][0: frame_spinner.value]
+                def decrease_callback():
+                    self.change_total_val_serv_callback(quan_list[-1] * original_price)
+                    quan_list.pop()
+                    total_price_lbl.configure(text = f"₱{format_price(original_price * sum(quan_list))}", fg_color = 'yellow')
+                frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback= decrease_callback)
+                self.change_total_val_serv_callback(-original_price * frame_spinner.value)
+                self.change_total_val_serv_callback(original_price * sum(quan_list))
+
             #for modifying the price of the calculated time period
-            #need to fix: no effects on total price, their spinner command
-            #spinner command supposed to do: does nothing when go up, but remove the last list when down
+            #need to fix: no effects on total price, their spinner command, partially bugged
 
             proceed_command(self.get_data())
             self.place_forget()
@@ -326,8 +341,10 @@ class pets(ctk.CTkFrame):
             data.append(i.get_data(data_format='tuple'))
         return data
     
-    def place(self, service_dict: dict, master_frame: any, **kwargs):
+    def place(self, service_dict: dict, master_frame: any, change_total_val_serv_callback: callable, **kwargs):
         self.parent_frame_tab = master_frame
+        self.parent_service_dict = service_dict
+        self.change_total_val_serv_callback = change_total_val_serv_callback
         frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
         temp_cmd = frame_spinner._command
 

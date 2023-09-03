@@ -715,9 +715,9 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
 
     return instance(master, info, parent)
 
-def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict) -> ctk.CTkFrame:
+def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict, change_total_val_serv_callback: callable) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict, change_total_val_serv_callback: callable):
             width = info[0]
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
@@ -727,6 +727,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
             self._service_dict = service_dict
+            self.change_total_val_serv_callback = change_total_val_serv_callback
 
             def hide():
                 self.place_forget()
@@ -790,7 +791,9 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                    text="  "+label_text, width = root_treeview.column_widths[1],
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c', service_dict = service_dict, master_frame=data_frames))
+                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c',
+                                                                                                                                                        service_dict = service_dict, master_frame=data_frames,
+                                                                                                                                                        change_total_val_serv_callback = change_total_val_serv_callback))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -919,7 +922,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         def update(self) -> None:
             return super().update()
             
-    return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict)
+    return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict, change_total_val_serv_callback)
 
 def add_invoice(master, info:tuple, treeview_content_update_callback: callable, attendant: str):
     class instance(ctk.CTkFrame):
@@ -1096,7 +1099,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.cancel_invoice_btn.configure(command=self.reset)
             self.cancel_invoice_btn.pack(side="right", padx=(width*0.005))
             
-            self.show_particulars:add_particulars = add_particulars(self, (width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
+            self.show_particulars:add_particulars = add_particulars(self, (width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict, self.change_total_value_service)
             
         def change_total_value_item(self, value: float):
             value = float(value)
