@@ -933,7 +933,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.services_lists = [s[0] for s in database.fetch_data("SELECT service_name FROM service_info GROUP BY UID")]
             self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
             self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-            self._attentdant = attendant
+            self._attentdant: str = attendant
             self.customer_infos = []
             self.service_dict: dict = {}
 
@@ -966,7 +966,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             def save_invoice_callback():
                 print(self.service_dict)
-                return
                 if len(self.transact_treeview._data) == 0:
                     return
                 for dt in self.transact_treeview._data:
@@ -1011,6 +1010,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 self._treeview_content_update_callback()
                 self.save_invoice_btn.configure(state = ctk.DISABLED)
                 self.cancel_invoice_btn.configure(state = ctk.DISABLED)
+                record_action(self._attentdant, action.MAKE_INVOICE, (self._attentdant, uid))
                 messagebox.showinfo('Success', 'Invoice Saved')
                 self.reset(True)
 
@@ -1220,6 +1220,7 @@ def show_payment_proceed(master, info:tuple,):
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
+                record_action(self.cashier_name._text, action.MAKE_TRANSACTION, (self.cashier_name._text, self.or_button._text[4:]))
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()
