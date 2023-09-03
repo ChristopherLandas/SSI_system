@@ -181,7 +181,15 @@ update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHER
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
 add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 show_all_items = "SELECT NAME FROM item_general_info"
-show_reveiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
+
+show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
+
+show_receiving_hist_by_date = f"SELECT NAME, initial_stock, supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item\
+                                WHERE state = 2\
+                                AND DATE_FORMAT(date_recieved, '%M') = ?\
+                                AND DATE_FORMAT(date_recieved, '%Y') = ?\
+                                ORDER BY CAST(date_recieved AS DATE) DESC"
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"

@@ -1300,7 +1300,7 @@ class inventory_frame(ctk.CTkFrame):
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/Remaining:{int(width*.08)}-tl/SupplierName:{int(width*.15)}-tl/Action:{int(width*.075)}-bD!30!30',
+                                           column_format=f'/No:{int(width*.03)}-#r/ReceivingID:{int(width *.09)}-tc/ItemName:x-tl/OrderQty:{int(width*.085)}-tr/Remaining:{int(width*.085)}-tr/SupplierName:{int(width*.175)}-tl/Action:{int(width*.065)}-bD!30!30',
                                             double_click_command= _restock, bd_commands= disposal_callback)
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
@@ -1539,6 +1539,7 @@ class reports_frame(ctk.CTkFrame):
                 self.daily_data_view.pack_forget()
                 self.yearly_graph.grid_forget()
                 self.yearly_data_view.pack_forget()
+                self.year_option.pack_forget()
                 self.monthly_data_view.pack()
                 self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.month_option.pack(side="left", padx=(0, width*0.005))
@@ -2506,4 +2507,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-dashboard(None, 'Jrizal', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
