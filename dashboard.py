@@ -392,10 +392,10 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_data_treeview.pack()
         
         
-        self.total_frame = ctk.CTkFrame(self.sales_history_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.15)
+        self.total_frame = ctk.CTkFrame(self.sales_history_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.215)
         self.total_frame.grid(row=2, column=1, sticky="nse", padx=width*0.01, pady=(height*0.005,height*0.015))
         self.total_frame.pack_propagate(0)
-        ctk.CTkLabel(self.total_frame, text=f"Total: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht).pack(side=ctk.LEFT, padx=(width*0.01))
+        ctk.CTkLabel(self.total_frame, text=f"Monthly Total: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht).pack(side=ctk.LEFT, padx=(width*0.01))
         self.current_total = ctk.CTkLabel(self.total_frame, text="0,000.00", font=("DM Sans Medium", 14))
         self.current_total.pack(side=ctk.RIGHT, padx=(width*0.01))
 
@@ -423,8 +423,8 @@ class dashboard_frame(ctk.CTkFrame):
         
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
-        
-        
+        #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
+        #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))
 
     def load_scheduled_service(self):
         #data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
@@ -494,6 +494,7 @@ class dashboard_frame(ctk.CTkFrame):
     def grid(self, **kwargs):
         self.load_scheduled_service()
         self.load_saled_data_treeview()
+        self.generate_DISumarry()
         return super().grid(**kwargs)
 
 class transaction_frame(ctk.CTkFrame):
@@ -695,7 +696,7 @@ class transaction_frame(ctk.CTkFrame):
         self.invoice_treeview_frame.grid(row=1, column=0, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30')
+                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30')
         self.update_invoice_treeview()
         self.invoice_treeview.pack()
 
@@ -2505,4 +2506,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'Jrizal', datetime.datetime.now)
