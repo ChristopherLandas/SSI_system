@@ -1350,21 +1350,25 @@ def show_payment_proceed(master, info:tuple,):
             self.payment_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055, textvariable=self.payment_var)
             self.payment_entry.grid(row=4, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
             
+            ctk.CTkLabel(self.pay_frame, text="Discount: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
+            self.discount_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055)
+            self.discount_entry.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
+
             self.payment_var.trace_add("write", callback=payment_callback)
                         
             ctk.CTkLabel(self.pay_frame, text="Payment: ", font=("DM Sans Medium",16),).grid(row=6, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
             self.payment_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",16), anchor='e')
             self.payment_total.grid(row=6, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
-            ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=7, column=0, padx=(width*0.01), pady=(0), sticky="w")
+            ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=8, column=0, padx=(width*0.01), pady=(0), sticky="w")
             self.grand_total_second = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
-            self.grand_total_second.grid(row=7, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
+            self.grand_total_second.grid(row=8, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
-            ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=8, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
+            ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=9, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
             
-            ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=9, column=0, padx=(width*0.01), pady=(height*0.01,height*0.1), sticky="w")
+            ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=10, column=0, padx=(width*0.01), pady=(height*0.01,height*0.1), sticky="w")
             self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",18))
-            self.change_total.grid(row=9, column=2, padx=(width*0.01), pady=(height*0.005, height*0.1), sticky = 'e')
+            self.change_total.grid(row=10, column=2, padx=(width*0.01), pady=(height*0.005, height*0.1), sticky = 'e')
             self.change_total.focus()
             
             self.complete_button = ctk.CTkButton(self.payment_frame, text="Complete",font=("DM Sans Medium",16), command= record_transaction)

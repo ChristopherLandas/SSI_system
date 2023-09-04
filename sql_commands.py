@@ -181,7 +181,15 @@ update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHER
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
 add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
 show_all_items = "SELECT NAME FROM item_general_info"
-show_reveiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
+
+show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
+
+show_receiving_hist_by_date = f"SELECT NAME, initial_stock, supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item\
+                                WHERE state = 2\
+                                AND DATE_FORMAT(date_recieved, '%M') = ?\
+                                AND DATE_FORMAT(date_recieved, '%Y') = ?\
+                                ORDER BY CAST(date_recieved AS DATE) DESC"
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
@@ -305,7 +313,7 @@ update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3,
 record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
 #DISPOSAL
-get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') FROM disposal_history WHERE full_dispose_date IS NULL"
+get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
 record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
@@ -539,6 +547,40 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
 get_daily_sales_data_by_day = "SELECT transaction_uid, client_name, Attendant_usn, CONCAT('₱',FORMAT(Total_amount,2))AS total FROM transaction_record WHERE transaction_record.transaction_date = ?"
 
 
+get_scheduled_clients_today = f"SELECT invoice_record.client_name, pet_info.contact\
+                                FROM invoice_record\
+                                INNER JOIN invoice_service_content ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                INNER JOIN pet_info ON invoice_service_content.pet_uid = pet_info.id\
+                                WHERE invoice_record.State = 0\
+                                AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                GROUP BY invoice_record.client_name"
+
+get_pet_client_scheduled_today = f"SELECT invoice_service_content.invoice_uid, invoice_service_content.patient_name, invoice_service_content.service_name,\
+                                CONCAT('₱', FORMAT(invoice_service_content.price,2)) AS price\
+                                FROM invoice_record\
+                                INNER JOIN invoice_service_content ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                WHERE invoice_record.State = 0\
+                                AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                AND invoice_record.client_name = ?"
+
+get_pet_services_scheduled_today = f"SELECT invoice_service_content.invoice_uid, invoice_service_content.service_name, invoice_record.Total_amount,\
+                                invoice_service_content.scheduled_date, invoice_service_content.price\
+                                FROM invoice_record\
+                                INNER JOIN invoice_service_content ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                WHERE invoice_record.State = 0\
+                                AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                AND invoice_record.client_name = ?\
+                                AND invoice_service_content.patient_name = ?"
+
+get_pet_service_date_sched = f"SELECT invoice_record.transaction_date, invoice_service_content.scheduled_date\
+                                FROM invoice_record\
+                                INNER JOIN invoice_service_content ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                WHERE invoice_record.State = 0\
+                                AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                AND invoice_record.client_name = ?\
+                                AND invoice_service_content.patient_name = ?\
+                                AND invoice_record.invoice_uid = ?\
+                                AND invoice_service_content.service_name = ?"
 get_scheduled_clients_today = f"SELECT invoice_service_content.patient_name, invoice_record.client_name, invoice_service_content.service_name\
                                 FROM invoice_record INNER JOIN invoice_service_content\
                                 ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\

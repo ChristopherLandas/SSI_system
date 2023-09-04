@@ -393,6 +393,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_data_treeview.pack()
         
         
+
         self.total_frame = ctk.CTkFrame(self.sales_history_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.15)
         self.total_frame.grid(row=2, column=1, sticky="nse", padx=width*0.01, pady=(height*0.005,height*0.015))
         self.total_frame.pack_propagate(0)
@@ -412,7 +413,8 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
 
         self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.365, height=height*0.45, 
-                                               column_format=f'/No:{int(width*.03)}-#r/PetName:x-tl/ClientName:x-tl/Service:{int(width*.1)}-tl!30!30',)
+                                               column_format=f'/No:{int(width*.03)}-#r/ClientName:x-tl/Contact:{int(width*.125)}-tc!30!30',)
+
         self.sched_data_treeview._double_click_command = open_schedule
         self.sched_data_treeview.pack()
 
@@ -424,8 +426,8 @@ class dashboard_frame(ctk.CTkFrame):
         
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
-        
-        
+        #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
+        #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))
 
     def load_scheduled_service(self):
         #data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
@@ -495,6 +497,8 @@ class dashboard_frame(ctk.CTkFrame):
     def grid(self, **kwargs):
         self.load_scheduled_service()
         self.load_saled_data_treeview()
+        self.generate_DISumarry()
+
         return super().grid(**kwargs)
 
 class transaction_frame(ctk.CTkFrame):
@@ -696,7 +700,7 @@ class transaction_frame(ctk.CTkFrame):
         self.invoice_treeview_frame.grid(row=1, column=0, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30')
+                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30')
         self.update_invoice_treeview()
         self.invoice_treeview.pack()
 
@@ -1302,7 +1306,7 @@ class inventory_frame(ctk.CTkFrame):
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceivingID:{int(width *.08)}-tc/ItemName:x-tl/Quantity:{int(width*.08)}-tr/Remaining:{int(width*.08)}-tl/SupplierName:{int(width*.15)}-tl/Action:{int(width*.075)}-bD!30!30',
+                                           column_format=f'/No:{int(width*.03)}-#r/ReceivingID:{int(width *.09)}-tc/ItemName:x-tl/OrderQty:{int(width*.085)}-tr/Remaining:{int(width*.085)}-tr/SupplierName:{int(width*.175)}-tl/Action:{int(width*.065)}-bD!30!30',
                                             double_click_command= _restock, bd_commands= disposal_callback)
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
@@ -1544,6 +1548,7 @@ class reports_frame(ctk.CTkFrame):
                 self.daily_data_view.pack_forget()
                 self.yearly_graph.grid_forget()
                 self.yearly_data_view.pack_forget()
+                self.year_option.pack_forget()
                 self.monthly_data_view.pack()
                 self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.month_option.pack(side="left", padx=(0, width*0.005))
