@@ -458,12 +458,15 @@ class customcustomtkinter:
                     entry_font: Optional[Tuple[str, int, str]] = None, entry_text_color: Union[str, Tuple[str, str]] = 'black',
                     entry_fg_color:Optional[Tuple[str, int, str]] = None,
                     step_count: int = 1, val_range: Optional[Tuple[int, int]] = None, command:Callable = None,
+                    increase_callback: callable = None, decrease_callback: callable = None,
                     base_val:int = 0, initial_val: int = 0, state: str = ctk.NORMAL, mode: Literal['num_only', 'click_only'] = 'num_only' ,**kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
 
             self._btn_font = button_font
             self._step_count = step_count
             self._command  = command
+            self._increase_callback = increase_callback
+            self._decrease_callback = decrease_callback
             self._fg_color = fg_color
             self._btn_color = (button_color, button_color) if isinstance(button_color, str) else button_color
             self._btn_hover_color = (button_hover_color, button_hover_color) if isinstance(button_hover_color, str) else button_hover_color
@@ -513,6 +516,10 @@ class customcustomtkinter:
 
         def change_value(self, mul: int = 1):
             self.num_entry.configure(state = 'normal')
+            if mul == 1 and self._increase_callback is not None and self.value > self._val_range[1]:
+                self._increase_callback()
+            if mul == -1 and self._decrease_callback is not None and self.value > self._val_range[0]:
+                self._decrease_callback()
             try:
                 val = self.value + (self._step_count * mul)
                 val = self._val_range[0] if val < self._val_range[0] else self._val_range[1] if val > self._val_range[1] else val
@@ -564,6 +571,12 @@ class customcustomtkinter:
             if "command" in kwargs:
                 self._command = kwargs["command"]
                 kwargs.pop("command")
+            if "increase_callback" in kwargs:
+                self._increase_callback = kwargs["increase_callback"]
+                kwargs.pop("increase_callback")
+            if "decrease_callback" in kwargs:
+                self._decrease_callback = kwargs["decrease_callback"]
+                kwargs.pop("decrease_callback")
             if "val_range" in kwargs:
                 if isinstance(kwargs['val_range'], tuple):
                     self._val_range = kwargs['val_range']

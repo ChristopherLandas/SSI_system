@@ -4,6 +4,7 @@ import sql_commands
 import tkcalendar
 from Theme import Color
 from util import database, generateId
+from util import *
 from tkinter import messagebox
 from constants import action
 import datetime
@@ -287,6 +288,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 self.stock_entry.configure(state = ctk.NORMAL)
                 self.stock_entry.set(1)
                 self.action_btn.configure(state = ctk.NORMAL)
+                
 
             def recieve_stock():
                 if self.item_name_entry.get() == "_" or (self.does_expire and self.expiry_date_entry._text == 'Set Expiry Date'):
@@ -303,6 +305,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None):
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items))
                 messagebox.showinfo("Sucess", "Order process success\nCheck the recieving tab")
+                record_action(acc_cred[0][0], action.ADD_ITEM_TYPE, action.ADD_ITEM % (acc_cred[0][0], uid))
                 self.place_forget()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.45, height=height*0.8)
