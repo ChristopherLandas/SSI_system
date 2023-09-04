@@ -184,12 +184,16 @@ show_all_items = "SELECT NAME FROM item_general_info"
 
 show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
 
-show_receiving_hist_by_date = f"SELECT NAME, initial_stock, supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
+show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state = 3 then '●'\
+                                WHEN (state = -1  AND initial_stock != current_stock) then '✔' END AS stats, id, NAME,\
+                                CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
+                                WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock\
+                                END AS received_stock,\
+                                supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
                                 FROM recieving_item\
-                                WHERE state = 2\
-                                AND DATE_FORMAT(date_recieved, '%M') = ?\
-                                AND DATE_FORMAT(date_recieved, '%Y') = ?\
-                                ORDER BY CAST(date_recieved AS DATE) DESC"
+                                WHERE (state = 2 OR state = 3 OR state = -1)\
+                                AND DATE_FORMAT(date_recieved, '%M %Y') = ?\
+                                ORDER BY date_recieved DESC"
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
@@ -312,11 +316,22 @@ update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date
 update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3, current_stock = current_stock - ? WHERE id = ?"
 record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
 
+update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving_item SET state = 3, current_stock = current_stock - ?, date_recieved = CURRENT_TIMESTAMP,\
+                                                                reciever = ?\
+                                                                WHERE id = ?"
+
 #DISPOSAL
 get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
-record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);"
+record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal, reason, disposed_by) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?);"
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
+
+
+get_disposal_items = "SELECT item_name, current_quantity AS disposed_qty, reason,\
+                    DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i') AS disposal_time,\
+                    disposed_by\
+                    FROM disposal_history WHERE full_dispose_date IS NULL\
+                    ORDER BY date_of_disposal Desc"
 
 #ACCOUNT CREATION
 
