@@ -761,7 +761,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                             change_val_func_item(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
 
                         spinner.configure(command = spinner_command)
-
                     self.place_forget()
 
                 
@@ -919,8 +918,12 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         def check_client(self, client_name: str):
             self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
 
-        def update(self) -> None:
-            return super().update()
+        def place_forget(self):
+            if self.item_treeview.data_grid_btn_mng.active:
+                self.item_treeview.data_frames[self.item_treeview._data.index(self.item_treeview.get_selected_data())].response()
+            if self.service_treeview.data_grid_btn_mng.active:
+                self.service_treeview.data_frames[self.service_treeview._data.index(self.service_treeview.get_selected_data())].response()
+            return super().place_forget()
             
     return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict, change_total_val_serv_callback)
 
