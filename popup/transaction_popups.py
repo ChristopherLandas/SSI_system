@@ -956,15 +956,18 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     self.change_total_value_item(-price_format_to_float(self.transact_treeview._data[i][3][1:]))
 
             def change_customer_callback(_:any):
-                if len(self.service_dict) > 0:
-                    if messagebox.askyesno('Change Customer', 'All of the service and its\npatient info will be reset'):
+                if len(self.transact_treeview._data) != 0:
+                    if messagebox.askyesno('Change Customer', 'Changing customer will reset the content of treeview'):
                         client = self.client_name_entry.get()
-                        
-                        self.service_dict = {}
-                        self.transact_treeview.delete_all_data()
-                        self.reset()
-
                         self.client_name_entry.set(client)
+
+                        self.save_invoicex_btn.configure(state = ctk.NORMAL)
+                        self.cancel_invoice_btn.configure(state = ctk.NORMAL)
+                        self.transact_treeview.delete_all_data()
+                        self.services_total_amount.configure(text = format_price(0))
+                        self.item_total_amount.configure(text = format_price(0))
+                        self.price_total_amount.configure(text = format_price(0))
+                        self.service_dict.clear()
                         del client
 
                         '''initial process'''
