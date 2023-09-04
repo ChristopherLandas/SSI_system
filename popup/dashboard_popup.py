@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
 from customcustomtkinter import customcustomtkinterutil as cctku
+
 import sql_commands
 import tkcalendar
 from Theme import Color
@@ -14,6 +15,7 @@ from functools import partial
 from typing import *
 import tkinter as tk
 from util import *
+import util
 from datetime import date
 
 def status_bar(master, info:tuple, text: str, icon_color: str, count: int, window: callable, data: dict):
@@ -128,8 +130,6 @@ def sched_info_popup(master, info:tuple):
             self.sched_icon = ctk.CTkImage(light_image=Image.open("image/schedule.png"), size=(25,25))
             self.height = height
             self.width = width
-
-            
                 
             def open_record(_):
                 if self.scheduled_pet_treeview.get_selected_data():
@@ -138,6 +138,9 @@ def sched_info_popup(master, info:tuple):
                     sched_service_info_popup(master,(width, height)).place(relx=0.5, rely=0.525, anchor='c', sched_info=temp)
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.65, height=height*0.675, fg_color=Color.White_Color[3], corner_radius= 0)
+            def reset():
+                self.place_forget()
+
             self.main_frame.grid(row=0, column=0)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
@@ -254,6 +257,7 @@ def sched_service_info_popup(master, info:tuple):
             ctk.CTkLabel(self.top_frame, text='SERVICE SCHEDULE', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+
             self.close_btn.pack(side="right", padx=width*0.005)
             
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)

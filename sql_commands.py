@@ -596,6 +596,11 @@ get_pet_service_date_sched = f"SELECT invoice_record.transaction_date, invoice_s
                                 AND invoice_service_content.patient_name = ?\
                                 AND invoice_record.invoice_uid = ?\
                                 AND invoice_service_content.service_name = ?"
+get_scheduled_clients_today = f"SELECT invoice_service_content.patient_name, invoice_record.client_name, invoice_service_content.service_name\
+                                FROM invoice_record INNER JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                WHERE invoice_record.State = 0 AND invoice_service_content.scheduled_date = CURRENT_DATE\
+                                GROUP BY invoice_service_content.patient_name"
 
 #SALES 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"

@@ -121,6 +121,7 @@ class dashboard(ctk.CTkToplevel):
         self.labels = []
         self.icons = []
         self.main_frames:list = []
+        
         for i in range(len(temp_main_frames)):
             if temp_user_lvl_access[i]:
                 self.icons.append(temp_icons[i])
@@ -393,10 +394,11 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_data_treeview.pack()
         
         
-        self.total_frame = ctk.CTkFrame(self.sales_history_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.215)
+
+        self.total_frame = ctk.CTkFrame(self.sales_history_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.15)
         self.total_frame.grid(row=2, column=1, sticky="nse", padx=width*0.01, pady=(height*0.005,height*0.015))
         self.total_frame.pack_propagate(0)
-        ctk.CTkLabel(self.total_frame, text=f"Monthly Total: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht).pack(side=ctk.LEFT, padx=(width*0.01))
+        ctk.CTkLabel(self.total_frame, text=f"Total: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht).pack(side=ctk.LEFT, padx=(width*0.01))
         self.current_total = ctk.CTkLabel(self.total_frame, text="0,000.00", font=("DM Sans Medium", 14))
         self.current_total.pack(side=ctk.RIGHT, padx=(width*0.01))
 
@@ -413,6 +415,7 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.365, height=height*0.45, 
                                                column_format=f'/No:{int(width*.03)}-#r/ClientName:x-tl/Contact:{int(width*.125)}-tc!30!30',)
+
         self.sched_data_treeview._double_click_command = open_schedule
         self.sched_data_treeview.pack()
 
@@ -496,6 +499,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.load_scheduled_service()
         self.load_saled_data_treeview()
         self.generate_DISumarry()
+
         return super().grid(**kwargs)
 
 class transaction_frame(ctk.CTkFrame):
@@ -1313,6 +1317,8 @@ class inventory_frame(ctk.CTkFrame):
         '''ITEM DISPOSAL: START'''
         def full_dispose_item(i: int):
             database.exec_nonquery([["UPDATE disposal_history SET disposed_by = ?, full_dispose_date = CURRENT_TIMESTAMP WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (acc_cred[0][0], self.ds_data_view1._data[i][3])]])
+            uid = database.fetch_data("Select item_uid from disposal_history WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (self.ds_data_view1._data[i][3], ))[0][0]
+            record_action(acc_cred[0][0], action.DISPOSAL_TYPE, action.OFFICIALLY_DISPOSE % (acc_cred[0][0], uid))
             messagebox.showinfo("Succeed", "Item has been fully disposed")
 
         

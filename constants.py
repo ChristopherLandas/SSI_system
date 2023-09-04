@@ -25,9 +25,18 @@ class db:
         EMINEM = 'without me'
 
 class action:
+    RESTOCK_TYPE = 'Restock'
+    RECIEVING_STOCk_TYPE = 'Recieving stock'
+    ADD_ITEM_TYPE = 'Item Encoding'
     INVOICE_TYPE = 'invoice'
+    TRANSACTION_TYPE = 'Transaction Record'
+    DISPOSAL_TYPE = 'Disposal'
 
 
     RESTOCKED_ITEM = f'RST/%s/%s/%s' #item stocked, stocked_change, success?
+    CONFIRM_RECIEVE_ITEM = f'CRI/%s/%s/%s' #item recieve and move to inventory, user, item_uid, stock
     ADD_ITEM = f'ADD/%s/%s' #UID of the item, success?
     MAKE_INVOICE = f'INVM/%s/%s' # Invoice maked, user, uid
+    MAKE_TRANSACTION = 'TRNM/%s/%s' # Transaction made, user, uid
+    MOVE_TO_DISPOSAL = 'DPSM/%s/%s' #Move item to disposal, user, item_uid
+    OFFICIALLY_DISPOSE = 'DPSO/%s/%s' #Completely disposal of item, user, item_uid
