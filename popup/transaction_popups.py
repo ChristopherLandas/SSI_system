@@ -792,7 +792,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
                                                                                          self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c',
                                                                                                                                                         service_dict = service_dict, master_frame=data_frames,
-                                                                                                                                                        change_total_val_serv_callback = change_total_val_serv_callback))
+                                                                                                                                                        change_total_val_serv_callback = change_total_val_serv_callback,
+                                                                                                                                                        root_treeview=root_treeview))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -947,9 +948,10 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             '''events'''
             def bd_commands(i):
+                print(self.transact_treeview._data[i])
                 if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
                     #self.patient_info.value = None
-                    self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][1][1:]))
+                    self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][-1][1:]))
                 else:
                     self.change_total_value_item(-price_format_to_float(self.transact_treeview._data[i][3][1:]))
 
