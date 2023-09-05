@@ -195,6 +195,7 @@ show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state
                                 AND DATE_FORMAT(date_recieved, '%M %Y') = ?\
                                 ORDER BY date_recieved DESC"
 
+
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"

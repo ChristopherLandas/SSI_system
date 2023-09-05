@@ -223,6 +223,7 @@ class pets(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_propagate(0)
         self.parent_frame_tab = None
+        self._root_treeview: cctk.cctkTreeView = None
         self.parent_service_dict: dict = {}
         self._title = title
         self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
@@ -258,29 +259,27 @@ class pets(ctk.CTkFrame):
                     d2 = datetime.datetime.strptime(temp_data[2], '%Y-%m-%d')
                     d1 = datetime.datetime.strptime(temp_data[1], '%Y-%m-%d')
                     quan_list.append(((d2-d1).days + 1))
-                    '''total_price_lbl.configure(text = f"₱{format_price(original_price * ((d2-d1).days + 1))}",
-                                            fg_color = "yellow")'''
                 elif self._type == 2:
                     count_intsc = temp_data[-1]
                     quan_list.append(count_intsc)
-                    '''total_price_lbl.configure(text = f"₱{format_price(original_price * float(count_intsc))}",
-                                            fg_color = "yellow")'''
-                    
-            total_price_lbl.configure(text = f"₱{format_price(original_price * sum(quan_list))}", fg_color = 'yellow')
-            frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
 
-
-            if self._type == 1:
+            if self._type != 0:
+                frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
+                modified_price = sum([int(s) for s in quan_list])
+                total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
                 def new_frame_spn_cmd():
                     if self._title in self.parent_service_dict:
                         self.parent_service_dict[self._title] = [] if frame_spinner.value < 1 else self.parent_service_dict[self._title][0: frame_spinner.value]
                 def decrease_callback():
                     self.change_total_val_serv_callback(quan_list[-1] * original_price)
                     quan_list.pop()
-                    total_price_lbl.configure(text = f"₱{format_price(original_price * sum(quan_list))}", fg_color = 'yellow')
                 frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback= decrease_callback)
+                #self._root_treeview = (self._frame_data[0], self._frame_data[1], self._frame_data[2], modified_price)
+                data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
+                self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
+                print(self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)])
                 self.change_total_val_serv_callback(-original_price * frame_spinner.value)
-                self.change_total_val_serv_callback(original_price * sum(quan_list))
+                self.change_total_val_serv_callback(price_format_to_float(total_price_lbl._text[1:]))
 
             #for modifying the price of the calculated time period
             #need to fix: no effects on total price, their spinner command, partially bugged
@@ -341,8 +340,9 @@ class pets(ctk.CTkFrame):
             data.append(i.get_data(data_format='tuple'))
         return data
     
-    def place(self, service_dict: dict, master_frame: any, change_total_val_serv_callback: callable, **kwargs):
+    def place(self, service_dict: dict, master_frame: any, root_treeview: tuple, change_total_val_serv_callback: callable, **kwargs):
         self.parent_frame_tab = master_frame
+        self._root_treeview = root_treeview
         self.parent_service_dict = service_dict
         self.change_total_val_serv_callback = change_total_val_serv_callback
         frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]

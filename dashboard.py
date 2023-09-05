@@ -1105,6 +1105,15 @@ class inventory_frame(ctk.CTkFrame):
                     self.list_show = database.fetch_data(sql_commands.get_category_specific_inventory, (self.sort_status_option.get(), ))
             update_tables()
 
+        def dispose_expired(_: any = None):
+            if self.data_view1.data_grid_btn_mng.active:
+                if self.data_view1.get_selected_data()[-1] == 'Expired':
+                    if messagebox.askyesno("Dispose Item", "Are you sure you want to dispose\nthe item?"):
+                        data = self.data_view1.get_selected_data()
+                        database.exec_nonquery([["Update state = -1 WHERE stock = ? AND Expiry_Date = ?", (data[2], data[4])]])
+                        self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
+                        update_tables()
+
         def search(_: any = None):
             if self.search_entry.get():
                 temp = [s for s in self.list_show if self.search_entry.get().lower() in s[0].lower()]
@@ -1116,6 +1125,7 @@ class inventory_frame(ctk.CTkFrame):
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
             self.data_view1.update_table(self.data1)
+
 
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
@@ -1224,7 +1234,7 @@ class inventory_frame(ctk.CTkFrame):
         self.data_view1 = cctk.cctkTreeView(self.tree_view_frame, None, width= width * .805, height= height * .7, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/Rate:{int(width*.045)}-tc/ItemName:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.08)}-tc!30!30',
                                            conditional_colors= {6: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'},
-                                                                1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}})
+                                                                1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}}, double_click_command= dispose_expired)
         self.data_view1.pack()
 
         self.refresh_btn.configure(command = refresh)
@@ -1307,7 +1317,8 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items)
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data= self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
                                            column_format=f'/No:{int(width*.03)}-#r/OrderID:{int(width *.09)}-tc/ItemName:x-tl/OrderQty:{int(width*.085)}-tr/Remaining:{int(width*.085)}-tr/SupplierName:{int(width*.175)}-tl/Action:{int(width*.065)}-bD!30!30',
-                                            double_click_command= _restock, bd_commands= disposal_callback)
+        #                                  column_format=f'/No:{int(width*.03)}-#r/ReceivingID:{int(width *.09)}-tc/ItemName:x-tl/OrderQty:{int(width*.085)}-tr/Remaining:{int(width*.085)}-tr/SupplierName:{int(width*.175)}-tl/Action:{int(width*.065)}-bD!30!30',
+                                           double_click_command= _restock, bd_commands= disposal_callback)
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
         

@@ -761,7 +761,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                             change_val_func_item(price_format_to_float(temp_frame.winfo_children()[4]._text[1:]))
 
                         spinner.configure(command = spinner_command)
-
                     self.place_forget()
 
                 
@@ -793,7 +792,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
                                                                                          self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c',
                                                                                                                                                         service_dict = service_dict, master_frame=data_frames,
-                                                                                                                                                        change_total_val_serv_callback = change_total_val_serv_callback))
+                                                                                                                                                        change_total_val_serv_callback = change_total_val_serv_callback,
+                                                                                                                                                        root_treeview=root_treeview))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -919,8 +919,12 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         def check_client(self, client_name: str):
             self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
 
-        def update(self) -> None:
-            return super().update()
+        def place_forget(self):
+            if self.item_treeview.data_grid_btn_mng.active:
+                self.item_treeview.data_frames[self.item_treeview._data.index(self.item_treeview.get_selected_data())].response()
+            if self.service_treeview.data_grid_btn_mng.active:
+                self.service_treeview.data_frames[self.service_treeview._data.index(self.service_treeview.get_selected_data())].response()
+            return super().place_forget()
             
     return instance(master, info, root_treeview, change_val_func_item, change_val_func_service, service_dict, change_total_val_serv_callback)
 
@@ -944,22 +948,26 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             '''events'''
             def bd_commands(i):
+                print(self.transact_treeview._data[i])
                 if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
                     #self.patient_info.value = None
-                    self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][1][1:]))
+                    self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][-1][1:]))
                 else:
                     self.change_total_value_item(-price_format_to_float(self.transact_treeview._data[i][3][1:]))
 
             def change_customer_callback(_:any):
-                if len(self.service_dict) > 0:
-                    if messagebox.askyesno('Change Customer', 'All of the service and its\npatient info will be reset'):
+                if len(self.transact_treeview._data) != 0:
+                    if messagebox.askyesno('Change Customer', 'Changing customer will reset the content of treeview'):
                         client = self.client_name_entry.get()
-                        
-                        self.service_dict = {}
-                        self.transact_treeview.delete_all_data()
-                        self.reset()
-
                         self.client_name_entry.set(client)
+
+                        self.save_invoicex_btn.configure(state = ctk.NORMAL)
+                        self.cancel_invoice_btn.configure(state = ctk.NORMAL)
+                        self.transact_treeview.delete_all_data()
+                        self.services_total_amount.configure(text = format_price(0))
+                        self.item_total_amount.configure(text = format_price(0))
+                        self.price_total_amount.configure(text = format_price(0))
+                        self.service_dict.clear()
                         del client
 
                         '''initial process'''

@@ -603,7 +603,8 @@ def receive_history(master, info:tuple,):
                 self.place_forget()
                 
             def get_history(_):
-                data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (f'{str(self.month_option.get())} {str(self.year_option.get())}',))
+                #data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (f'{str(self.month_option.get())} {str(self.year_option.get())}',))
+                data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (str(self.month_option.get()), str(self.year_option.get())))
                 self.data_view1.update_table(data)
                 
             self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.datetime.now().year)]
@@ -624,7 +625,7 @@ def receive_history(master, info:tuple,):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
-            self.date_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            '''self.date_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
             self.date_frame.grid(row=1, column=0, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
             
             self.month_option = ctk.CTkOptionMenu(self.date_frame, values= self.months, anchor="center", height=height*0.05, width=width*0.125, font=("DM Sans Medium",14), 
@@ -650,8 +651,20 @@ def receive_history(master, info:tuple,):
             self.orange_frame = ctk.CTkFrame(self.legend_frame, fg_color=Color.White_Lotion)
             self.orange_frame.grid(row=0, column=1, sticky="nsew",  padx=(width*0.0025), pady=(height*0.005))
             ctk.CTkLabel(self.orange_frame, text='●', text_color='orange').pack(side="left", fill="both", expand=1, padx=(width*0.005), pady=(height*0.005))
-            ctk.CTkLabel(self.orange_frame, text='Partially Received', font=("DM Sans Medium", 14) ).pack(side="left", fill="both", expand=1, padx=(width*0.005), pady=(height*0.005))
-            #ctk.CTkLabel(self.legend_frame, corner_radius=5, fg_color=Color.White_Lotion, text='')
+            ctk.CTkLabel(self.orange_frame, text='Partially Received', font=("DM Sans Medium", 14) ).pack(side="left", fill="both", expand=1, padx=(width*0.005), pady=(height*0.005))'''
+            self.date_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum, height=height*0.045, width=width*0.25)
+            self.date_frame.grid(row=1, column=0, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
+            self.date_frame.propagate(0)
+            
+            self.month_option = ctk.CTkOptionMenu(self.date_frame, values= self.months, anchor="center", width=width*0.1, font=("DM Sans Medium",14), 
+                                                  height=height*0.045, command=get_history)
+            self.month_option.pack(side="left", fill="both", expand=1,  padx=(width*0.0025), pady=(height*0.005))
+            self.month_option.set(f"{date.today().strftime('%B')}")
+            
+            self.year_option = ctk.CTkOptionMenu(self.date_frame, values=self.operational_year, width=width*0.075, font=("DM Sans Medium",14), 
+                                                 height=height*0.045, anchor="center",command=get_history)
+            self.year_option.pack(side="left", fill="both", expand=1,  padx=(0, width*0.0025), pady=(height*0.005))
+            self.year_option.set(f"{date.today().strftime('%Y')}")
 
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
@@ -664,6 +677,7 @@ def receive_history(master, info:tuple,):
             month_year = date.today().strftime('%B %Y')
             print(month_year)
             data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (f'{month_year}',))
+
             self.data_view1.update_table(data)
             return super().place(**kwargs)
 
