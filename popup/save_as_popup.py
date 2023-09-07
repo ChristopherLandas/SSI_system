@@ -13,13 +13,14 @@ import calendar
 from constants import *
 from customcustomtkinter import customcustomtkinter as cctk
 
-def show_popup(master, info:tuple) -> ctk.CTkFrame:
+def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
     class add_item(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, user: str):
             self.DEFAULT_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
             self.DEFAULT_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August","September","October", "November", "December"]
             self.CURRENT_DAY = datetime.datetime.now()
             self.DEFAULT_YEAR = [str(self.CURRENT_DAY.year)]
+            self.user = user
             width = info[0]
             height = info[1]
             #basic inforamtion needed; measurement
@@ -45,7 +46,7 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
                         change_name_entry(self.file_name_entry.get()+' (1)')
                     elif question == None:
                         return
-                generate_report(self.report_type_option.get(), 'aila', self.CURRENT_DAY.strftime('%B %d, %Y'),
+                generate_report(self.report_type_option.get(), self.user, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 self.mothly_month_option.get(), self.mothly_year_option.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 self.path_entry.get(), self.yearly_option.get())
                 reset()
@@ -198,15 +199,16 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
                 kwargs.pop('default_config')
             return super().place(**kwargs)
 
-    return add_item(master, info)
+    return add_item(master, info, user)
 
-def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
+def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
     class add_item(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, user: str):
             self.DEFAULT_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
             self.DEFAULT_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August","September","October", "November", "December"]
             self.CURRENT_DAY = datetime.datetime.now()
             self.DEFAULT_YEAR = [str(self.CURRENT_DAY.year)]
+            self.user = user
             width = info[0]
             height = info[1]
             #basic inforamtion needed; measurement
@@ -233,7 +235,7 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
                     elif question == None:
                         return
                 daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
-                generate_inventory_report('aila', self.file_name_entry.get(), daily_date_select_temp.strftime('%Y-%m-%d'),
+                generate_inventory_report(self.user, self.file_name_entry.get(), daily_date_select_temp.strftime('%Y-%m-%d'),
                                           self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
                                           self.path_entry.get())
                 reset()
@@ -377,7 +379,7 @@ def show_popup_inventory(master, info:tuple) -> ctk.CTkFrame:
                 kwargs.pop('default_config')
             return super().place(**kwargs)
 
-    return add_item(master, info)
+    return add_item(master, info, user)
 
 
 def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int):

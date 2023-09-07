@@ -249,9 +249,12 @@ class pets(ctk.CTkFrame):
                     if temp.period_days.get() == "" or temp.instance_count_days.get() == "":
                         messagebox.showerror("Fail to proceed", "Fill all the required info")
                         return
+            #for checking the missing informattion like patient, date, etc.
 
             original_price = price_format_to_float(self.parent_frame_tab.winfo_children()[1]._text[1:])
+            previous_price = price_format_to_float(self.parent_frame_tab.winfo_children()[3]._text[1:])
             total_price_lbl = self.parent_frame_tab.winfo_children()[3]
+            #referring to the intialprice of the system
             
             quan_list: list = []
             for temp_data in self.get_data():
@@ -266,23 +269,30 @@ class pets(ctk.CTkFrame):
             if self._type != 0:
                 frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
                 modified_price = sum([int(s) for s in quan_list])
-                total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
+
                 def new_frame_spn_cmd():
                     if self._title in self.parent_service_dict:
-                        self.parent_service_dict[self._title] = [] if frame_spinner.value < 1 else self.parent_service_dict[self._title][0: frame_spinner.value]
+                        self.parent_service_dict[self._title] = self.parent_service_dict[self._title][0: frame_spinner.value]
+                
                 def decrease_callback():
-                    self.change_total_val_serv_callback(quan_list[-1] * original_price)
+                    self.change_total_val_serv_callback(-(float(quan_list[-1]) * original_price))
                     quan_list.pop()
-                frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback= decrease_callback)
-                #self._root_treeview = (self._frame_data[0], self._frame_data[1], self._frame_data[2], modified_price)
+                    total_price_lbl.configure(text = f"₱{format_price(float(original_price) * sum([float(s) for s in quan_list]))}")
+                    data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
+                    self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
+
+
+                def increase_callback():
+                    quan_list.append(0)
+
+                frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback = decrease_callback, increase_callback = increase_callback)
+                        
+                #frame_spinner.configure(command = new_frame_spn_cmd)
+                total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
-                print(self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)])
-                self.change_total_val_serv_callback(-original_price * frame_spinner.value)
+                self.change_total_val_serv_callback(-previous_price)
                 self.change_total_val_serv_callback(price_format_to_float(total_price_lbl._text[1:]))
-
-            #for modifying the price of the calculated time period
-            #need to fix: no effects on total price, their spinner command, partially bugged
 
             proceed_command(self.get_data())
             self.place_forget()

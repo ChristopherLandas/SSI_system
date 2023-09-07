@@ -206,7 +206,7 @@ add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, CURRENT_DATE)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?)"
-record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
@@ -434,7 +434,7 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
 
 #invoices
 insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
-insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
 cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
 get_invoice_info = "SELECT invoice_record.invoice_uid,\
@@ -468,7 +468,8 @@ get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
 set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1 WHERE invoice_uid = ?"
 set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
 
-get_invoice_service_content_by_id = "SELECT service_name, patient_name, scheduled_date, FORMAT(price, 2) AS total FROM invoice_service_content WHERE invoice_uid = ?;"
+get_invoice_by_id = "SELECT * FROM invoice_record WHERE invoice_uid = ?"
+get_invoice_service_content_by_id = "SELECT service_name, patient_name, scheduled_date, END_schedule, multiple_sched_quan, instance_of_mul_sched, FORMAT(price, 2) AS total FROM invoice_service_content WHERE invoice_uid = ?;"
 get_invoice_item_content_by_id = "SELECT item_name, quantity, FORMAT((price * quantity), 2) AS total FROM invoice_item_content WHERE invoice_uid = ?;"
 
 get_current_invoice_count = "SELECT COUNT(*) FROM recieving_item where id like '?%'"
@@ -632,3 +633,5 @@ check_if_item_does_expire = "SELECT does_expire\
 #FOR UPDATING RECORDS
 
 update_pet_name_and_invoice_records = "UPDATE invoice_service_content SET invoice_service_content.patient_name = (SELECT pet_info.p_name FROM pet_info WHERE invoice_service_content.pet_uid = pet_info.id)"
+
+get_invoice_item_content_by_id

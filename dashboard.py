@@ -701,7 +701,8 @@ class transaction_frame(ctk.CTkFrame):
         self.invoice_treeview_frame.grid(row=1, column=0, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30')
+                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
+                                           double_click_command= self.load_invoice_content)
         self.update_invoice_treeview()
         self.invoice_treeview.pack()
 
@@ -740,7 +741,7 @@ class transaction_frame(ctk.CTkFrame):
         self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30')
+                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',)
         self.update_payment_treeview()
         self.payment_treeview.pack()
         
@@ -751,6 +752,10 @@ class transaction_frame(ctk.CTkFrame):
         #self.show_proceed:ctk.CTkFrame =transaction_popups.show_transaction_proceed_demo(self,(width, height))
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
         load_main_frame(0)
+
+    def load_invoice_content(self, _:any = None):
+        if self.invoice_treeview.get_selected_data() is not None:
+            transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.invoice_treeview.get_selected_data()[0])
 
     def cancel_invoice(self, bypass_confirmation: bool = False):
         if self.invoice_treeview.get_selected_data() is None:
@@ -1750,8 +1755,8 @@ class reports_frame(ctk.CTkFrame):
         self.update_invetory_graph()
         #endregion
 
-        self.save_as_popup = save_as_popup.show_popup(self, (width , height))
-        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height))
+        self.save_as_popup = save_as_popup.show_popup(self, (width , height), acc_cred[0][0])
+        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height), acc_cred[0][0])
         load_main_frame(0)
 
     def update_invetory_graph(self):
@@ -2314,7 +2319,7 @@ class histlog_frame(ctk.CTkFrame):
         for i in self.action_tree.get_children():
             self.action_tree.delete(i)
         temp = database.fetch_data(sql_commands.get_raw_action_history, (datetime.datetime.strptime(self.date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'), self.sort_role_option.get()))
-        modified_data = [(temp.index(s) + 1, s[0], s[1].capitalize(), decode_action(s[2]), s[3].strftime("%m/%d/%Y at %I:%M %p")) for s in temp]
+        modified_data = [(temp.index(s) + 1, s[1], s[1].capitalize(), decode_action(s[3]), s[4].strftime("%m/%d/%Y at %I:%M %p")) for s in temp]
         for i in range(len(modified_data)):
             if (i % 2) == 0:
                 tag = "even"

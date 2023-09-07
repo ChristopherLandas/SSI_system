@@ -516,7 +516,7 @@ class customcustomtkinter:
 
         def change_value(self, mul: int = 1):
             self.num_entry.configure(state = 'normal')
-            if mul == 1 and self._increase_callback is not None and self.value > self._val_range[1]:
+            if mul == 1 and self._increase_callback is not None and self.value < self._val_range[1]:
                 self._increase_callback()
             if mul == -1 and self._decrease_callback is not None and self.value > self._val_range[0]:
                 self._decrease_callback()
