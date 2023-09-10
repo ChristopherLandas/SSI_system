@@ -47,8 +47,8 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
                     elif question == None:
                         return
                 generate_report(self.report_type_option.get(), self.user, self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                self.mothly_month_option.get(), self.mothly_year_option.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                self.path_entry.get(), self.yearly_option.get())
+                                monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
+                                self.path_entry.get(), annual_date_text_var.get(), 0)
                 reset()
 
             def change_name_entry(name: str = None):
@@ -59,10 +59,10 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
                 change_name_entry('_'.join(re.findall(r'(\w+)', daily_date_text_var_split))+'_report.pdf')
 
             def monthly_callback(e: any = None):
-                change_name_entry(f'{self.mothly_month_option.get()}_{self.mothly_year_option.get()}_mothly_report.pdf')
+                change_name_entry(f'{monthly_date_text_var.get()}_{annual_date_text_var.get()}_monthly_report.pdf')
 
             def yearly_callback(e: any = None):
-                change_name_entry(f'{self.yearly_option.get()}_yearly_report.pdf')
+                change_name_entry(f'{annual_date_text_var.get()}_annual_report.pdf')
 
             def change_date_entry(date: str = None):
                 #self.daily_date_entry.configure(state = ctk.NORMAL)
@@ -120,6 +120,26 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
                 daily_callback()
             #add trace for whenever string var is changed
             daily_date_text_var.trace_add('write', callback=write_callback)
+
+            #create global variable for monthly date text
+            global monthly_date_text_var
+            monthly_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B"))
+            #callback for changing file name to current selected daily date
+            def change_month_name_callback(var, index, mode):
+                #change file name
+                monthly_callback()
+            #add trace for whenever string var is changed
+            monthly_date_text_var.trace_add('write', callback=change_month_name_callback)
+
+            #create global variable for daily date text
+            global annual_date_text_var
+            annual_date_text_var = StringVar(value=datetime.datetime.now().strftime("%Y"))
+            #callback for changing file name to current selected daily date
+            def change_year_name_callback(var, index, mode):
+                #change file name
+                yearly_callback()
+            #add trace for whenever string var is changed
+            annual_date_text_var.trace_add('write', callback=change_year_name_callback)
 
             def reset():
                 self.place_forget()
@@ -192,12 +212,12 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,#changed label value to global StringVar
                                                        command=lambda:cctk.tk_calendar(daily_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
             #monthly
-            self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback, anchor="center")
-            self.mothly_month_option.set(self.CURRENT_DAY.strftime('%B'))
-            self.mothly_year_option = ctk.CTkOptionMenu(self.setting_frame, width * .1, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_YEAR, command= monthly_callback, anchor="center")
+            self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback, anchor="center", variable = monthly_date_text_var)
+            monthly_date_text_var.set(self.CURRENT_DAY.strftime('%B'))
+            self.mothly_year_option = ctk.CTkOptionMenu(self.setting_frame, width * .1, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_YEAR, command= monthly_callback, anchor="center", variable = annual_date_text_var)
 
             #yearly
-            self.yearly_option = ctk.CTkOptionMenu(self.setting_frame, width * 25, height * .05, font=("DM Sans Medium", (height*0.023)), values= ["2023", "2024"], command= yearly_callback, anchor="center")
+            self.yearly_option = ctk.CTkOptionMenu(self.setting_frame, width * 25, height * .05, font=("DM Sans Medium", (height*0.023)), values= ["2023", "2024"], command= yearly_callback, anchor="center", variable = annual_date_text_var)
             show_report_fill()
 
             #Generate button
@@ -210,14 +230,21 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback,font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
 
-        def place(self, current_selected_date, **kwargs):
+        def place(self, month_selected_date, year_selected_date, daily_selected_date, **kwargs):
             if 'default_config' in kwargs:
                 txt = 'Daily' if 'Daily' in kwargs['default_config'] else 'Monthly' if 'Monthly' in kwargs['default_config'] else 'Yearly'
                 self.report_type_option.set(txt)
                 self.report_type_option._command()
+                if 'Daily' in kwargs['default_config']:
+                    daily_date_text_var.set(daily_selected_date)
+                elif 'Monthly' in kwargs['default_config']:
+                    monthly_date_text_var.set(month_selected_date)
+                else:
+                    annual_date_text_var.set(year_selected_date)
                 kwargs.pop('default_config')
                 #change daily date value in save as popup to current selected
-                daily_date_text_var.set(current_selected_date)
+                
+                
             return super().place(**kwargs)
 
     return add_item(master, info, user)
@@ -403,7 +430,7 @@ def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
     return add_item(master, info, user)
 
 
-def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int):
+def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -439,6 +466,41 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         count = round(i/len_count)
         len_div = len(str(count)[1:])
         return math.ceil(count/10 ** len_div) * 10 ** len_div
+    #generate footer based on number of pages
+    def footer_generator(page_count: int):
+        #footer
+        filename = f'image/footer.pdf'
+        pdf = SimpleDocTemplate(
+            filename=filename,
+            pagesize=letter,
+        )
+        pdf.bottomMargin = 20
+        pdf.leftMargin = 20
+        pdf.rightMargin = 20
+
+        tbl_footer_style = TableStyle(
+            [
+            #text alignment, starting axis, -1 = end
+            ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
+            #font style
+            ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
+            ('FONTSIZE', (0, 0), (0, -1), 14),
+            ('FONTSIZE', (0, 0), (0, 0), 10),
+            #space at the bottom
+            ('TOPPADDING', (0, 0), (0, -1), 670),
+            ('RIGHTPADDING', (0, 0), (0, 0), 300),
+            ]
+        )
+        elems = []
+        footer_content = []
+        for page in range(page_count):
+            footer_content.append([["Dr. Joseph Z. Angeles Veterinary Clinic", f"Page {page+1} of {page_count}"]])
+        for footer_page in range(len(footer_content)):
+            table_footer = Table(footer_content[footer_page])
+            table_footer.setStyle(tbl_footer_style)
+            elems.append(table_footer)
+
+        pdf.build(elems)
     #yearly
 
     if 'Yearly' == report_type:
@@ -490,8 +552,8 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         bc.categoryAxis.labels.angle = 30
         bc.categoryAxis.categoryNames = months_Text
         #legends
-        d.add(String(225,700, f'Yearly Sales Graph as of {y_temp}', fontName = 'Times-New-Roman', fontSize=16))
-        d.add(String(265,280, 'Yearly Sales', fontName = 'Times-New-Roman', fontSize=16))
+        d.add(String(225,700, f'Annual Sales Graph as of {y_temp}', fontName = 'Times-New-Roman', fontSize=16))
+        d.add(String(265,280, 'Annual Sales', fontName = 'Times-New-Roman', fontSize=16))
         d.add(Rect(120, 75, 380, 240, fillColor=colors.transparent, strokeColor=colors.gray))
         d.add(Rect(350, 350, 15, 15, fillColor=colors.pink))
         d.add(Rect(250, 350, 15, 15, fillColor=colors.lightgreen))
@@ -529,39 +591,6 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         #create pdf
         renderPDF.drawToFile(d, my_path, '')
 
-        #footer
-        filename = f'image/footer.pdf'
-        pdf = SimpleDocTemplate(
-            filename=filename,
-            pagesize=letter,
-        )
-        pdf.bottomMargin = 20
-        pdf.leftMargin = 20
-        pdf.rightMargin = 20
-        footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 2']]
-        footer_content2 = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 2 of 2']]
-        table_footer = Table(footer_content)
-        table_footer2 = Table(footer_content2)
-        tbl_footer_style = TableStyle(
-            [
-            #text alignment, starting axis, -1 = end
-            ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-            #font style
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-            ('FONTSIZE', (0, 0), (0, -1), 14),
-            ('FONTSIZE', (0, 0), (0, 0), 10),
-            #space at the bottom
-            ('TOPPADDING', (0, 0), (0, -1), 670),
-            ('RIGHTPADDING', (0, 0), (0, 0), 300),
-            ]
-        )
-        table_footer.setStyle(tbl_footer_style)
-        table_footer2.setStyle(tbl_footer_style)
-        elems = []
-        elems.append(table_footer)
-        elems.append(table_footer2)
-        pdf.build(elems)
-
         #content
         filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
         pdf = SimpleDocTemplate(
@@ -598,7 +627,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
             total_service_income_temp += income
         total_income_temp = total_item_income_temp + total_service_income_temp
         #header for table columns
-        yearly_report_content_temp = [[f'Yearly Sales Report as of {y_temp}'], [f'Prepared by: {acc_name_preparator}', '', f'Date: {date_creation}', ''], ['Month', 'Items', 'Services', 'Total Income']]
+        yearly_report_content_temp = [[f'Annual Sales Report as of {y_temp}'], [f'Prepared by: {acc_name_preparator}', '', f'Date: {date_creation}', ''], ['Month', 'Items', 'Services', 'Total Income']]
         #add data for table
         yearly_report_total_items_temp = 0
         yearly_report_total_services_temp = 0
@@ -670,7 +699,8 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         # add the first 3 pages of input1 document to output
 
         merger.append(input2)
-        merger.append(input1)
+        if not include_graphs:
+            merger.append(input1)
         # Write to an output PDF document
         output = open(f"{desktop}\{y_temp}_yearly_report.pdf", "wb")
         merger.write(output)
@@ -679,7 +709,9 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         output.close()
         #add footer
         from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
+        
         p1 = pdfrw1(f"{desktop}\{y_temp}_yearly_report.pdf")
+        footer_generator(len(p1.pages))
         p2 = pdfrw1("image/footer.pdf")
 
         for page in range(len(p1.pages)):

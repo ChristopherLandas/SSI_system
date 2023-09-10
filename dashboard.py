@@ -1667,7 +1667,7 @@ class reports_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0)) """
         
         self.show_gen_report = ctk.CTkButton(self.top_con_frame, image=self.generate_report_icon, width=width*0.125,  text="Generate Report", height=height*0.0575, font=("DM Sans Medium", 14),
-                                             command = lambda: self.save_as_popup.place(current_selected_date = self.date_selected_label._text, relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
+                                             command = lambda: self.save_as_popup.place(daily_selected_date = self.date_selected_label._text, month_selected_date = self.month_option.get(),year_selected_date = self.year_option.get(), relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
         self.show_gen_report.pack(side="right")
         #generating reports end
 
