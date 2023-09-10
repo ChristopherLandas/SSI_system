@@ -417,7 +417,11 @@ class customcustomtkinter:
                 else:
                     date_text = "Invalid Format"
 
-                label.configure(text=date_text)
+                if str(type(label)) == "<class 'tkinter.StringVar'>":
+                    label.set(date_text)
+                else:
+                    label.configure(text=date_text)
+                
                 if set_date_callback:
                     set_date_callback()
                 self.withdraw()

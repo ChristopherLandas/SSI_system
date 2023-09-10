@@ -22,24 +22,22 @@ def new_record(master, info:tuple, table_update_callback: callable):
             height = info[1]
             acc_cred = info[2]
             acc_info = info[3]
-            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
+            super().__init__(master,corner_radius= 0, fg_color="transparent")
 
             self._callback=table_update_callback
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
-            self.grid_propagate(0)
 
             '''EVENTS'''
             def automate_fields(_: any = None):
                 if  self.owner_name_entry._values.index(self.owner_name_entry.get()) != len(self.owner_name_entry._values) - 1:
-                    data = database.fetch_data(sql_commands.get_pet_info, (self.owner_name_entry.get(), ))[0]
-                    print(data)
+                    data = database.fetch_data(f"SELECT owner_name, address, contact_number FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'")[0]
                     self.owner_name_entry.configure(ctk.DISABLED)
                     self.address_entry.delete(0, ctk.END)
-                    self.address_entry.insert(0, data[8])
+                    self.address_entry.insert(0, data[1])
                     self.address_entry.configure(state = ctk.DISABLED)
                     self.contact_entry.delete(0, ctk.END)
-                    self.contact_entry.insert(0, data[-1])
+                    self.contact_entry.insert(0, data[2])
                     self.contact_entry.configure(state = ctk.DISABLED)
                 else:
                     self.owner_name_entry.configure(state = ctk.NORMAL)
@@ -60,7 +58,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
                 self.breed_option.set("")
                 self.type_option.set("")
                 self.sex_option.set("")
-                self.birthday_entry._text = "Set Birthday"
+                self.birthday_entry.configure(text = "Set Birthday")
                 self.weight_entry.delete(0, ctk.END)
                 self.address_entry.delete(0, ctk.END)
                 self.contact_entry.delete(0, ctk.END)
@@ -73,22 +71,27 @@ def new_record(master, info:tuple, table_update_callback: callable):
                     messagebox.showwarning('Missing Fields', 'Complete all fields')
                     return
                 else:
-                    """ ids = [s[0] for s in database.fetch_data(sql_commands.get_ids_pi)]
-                    name= generateId('P', 6)
-                    bday = str(self.birthday_entry._text)
+                    ids = [s[0] for s in database.fetch_data(sql_commands.get_ids_pi)]
+                    
+                    uid=generateId('P', 6)
                     while(uid in ids):
-                        uid = generateId('P', 6) """
+                        uid = generateId('P', 6)
+                    
+                    print(uid)
                     bday = str(self.birthday_entry._text)
-                    uid = str(datetime.datetime.now().strftime("%H%M%S"))# temporary fix
-                    database.exec_nonquery([[sql_commands.record_patient, (uid, self.owner_name_entry.get(), self.patient_name_entry.get(),
-                                                                           self.breed_option.get(), self.type_option.get(), self.sex_option.get(),
-                                                                           self.weight_entry.get(), bday, self.address_entry.get(), self.contact_entry.get())]])
-                    messagebox.showinfo('Sucess', 'Patient Registered')
+                    
+                    if self.owner_name_entry.get() not in self.data:
+                        database.exec_nonquery([[sql_commands.insert_new_pet_owner, (f'{self.owner_name_entry.get()}',f'{self.address_entry.get()}',f'{self.contact_entry.get()}')]])
+                        
+                    owner_id = (database.fetch_data(f"SELECT owner_id FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'"))[0][0]
+                    database.exec_nonquery([[sql_commands.insert_new_pet_info, (uid, self.patient_name_entry.get(), owner_id, self.breed_option.get(),
+                                                                                    self.type_option.get(), self.sex_option.get(), self.weight_entry.get(), bday)]])
+                       
                     reset()
                     self.place_forget()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.5, height=height*0.65)
-            self.main_frame.grid(row=0, column=0, padx=width*0.01, pady=height*0.025)
+            self.main_frame.grid(row=0, column=0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
             self.main_frame.grid_propagate(0)
@@ -219,7 +222,9 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.sex_option.set("") 
 
         def place(self, **kwargs):
-            self.owner_name_entry.configure(values = [s[0] for s in database.fetch_data(sql_commands.get_owners)])
+            self.owner_data= database.fetch_data(sql_commands.get_owners)
+            self.data=[s[0] for s in self.owner_data] 
+            #self.owner_name_entry.configure(values = [s[0] for s in database.fetch_data(sql_commands.get_owners)])
             return super().place(**kwargs)
     return instance(master, info, table_update_callback)
 
@@ -312,11 +317,15 @@ def view_record(master, info:tuple, table_update_callback: callable):
                 self.type_entry_option.pack_forget()
                 self.cancel_edit.grid_forget()
                 
-                database.exec_nonquery([[sql_commands.update_pet_record, (self.owner_name_entry.get(), self.pet_name_entry.get(), self.breed_entry.get(),
+                """ database.exec_nonquery([[sql_commands.update_pet_record, (self.owner_name_entry.get(), self.pet_name_entry.get(), self.breed_entry.get(),
                                                                           self.type_entry.get(), self.sex_entry.get(), self.weight_entry.get(),
                                                                           self.birthday_entry.get(), self.address_entry.get(),self.contact_no_entry.get(),
                                                                           self.pet_id.get())]])
-                
+                 """
+                 
+                database.exec_nonquery([[sql_commands.update_pet_record_pet_info, (self.pet_name_entry.get(), self.breed_entry.get(), self.type_entry.get(), self.sex_entry.get(), self.weight_entry.get(), self.birthday_entry.get(), self.pet_id.get())],
+                                        [sql_commands.update_pet_record_pet_owner, (self.owner_name_entry.get(), self.address_entry.get(), self.contact_no_entry.get(), self.pet_id.get())]])
+            
                 messagebox.showinfo(title=None, message="Info Successfully Changed!")
             
             self.header_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0)
@@ -459,8 +468,9 @@ def view_record(master, info:tuple, table_update_callback: callable):
             '''GENERRAL INFO FRAME:END'''
     
             #self.set_entries()
-            self.entries = (self.pet_id,self.owner_name_entry, self.pet_name_entry,self.breed_entry,self.type_entry, self.sex_entry, self.weight_entry,self.birthday_entry, 
-                            self.address_entry,self.contact_no_entry)
+            self.entries = (self.pet_id, self.pet_name_entry, self.type_entry, self.breed_entry, 
+                            self.sex_entry, self.weight_entry, self.birthday_entry, 
+                            self.owner_name_entry, self.address_entry,self.contact_no_entry)
             
             '''Replace entries with option mene when editing'''
             self.sex_entry_option = ctk.CTkOptionMenu(self.sex_frame, values=["Male","Female"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum,)
@@ -476,13 +486,15 @@ def view_record(master, info:tuple, table_update_callback: callable):
             for i in range(len(self.entries)):
                 self.entries[i].delete(0, tk.END) 
 
-        def entries_set_state(self,state : str = "normal", color_normal :str = Color.White_Platinum, color_disabled :str = Color.White_Lotion):
+        def entries_set_state(self,state : str = "normal", color_normal :str = Color.White_Lotion, color_disabled :str = Color.White_Lotion):
             for i in range(len(self.entries)):
                 if "normal" in state:
                     set_color = color_normal
+                    bd = 2
                 elif "disabled" in state:
                     set_color = color_disabled
-                self.entries[i].configure(state=state, fg_color=set_color)
+                    bd = 0
+                self.entries[i].configure(state=state, fg_color=set_color, border_width = bd)
             
         def set_entries(self, pet_values):
             self.reset_entries()
@@ -494,7 +506,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.entries_set_state("disabled")
             
         def place(self, pet_data, **kwargs):
-            self.data=database.fetch_data(f"SELECT * FROM pet_info WHERE id='{pet_data[0]}'")
+            self.data = database.fetch_data(sql_commands.get_pet_view_record, (f'{pet_data[0]}',))
             self.set_entries(self.data)
             self.load_history()
             return super().place(**kwargs)

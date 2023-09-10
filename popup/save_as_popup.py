@@ -55,7 +55,7 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
                 self.file_name_entry.insert(0, name)
 
             def daily_callback(e: any = None):
-                change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry._text))+'_report.pdf')
+                change_name_entry('_'.join(re.findall(r'(\w+)',  daily_date_text_var_split))+'_report.pdf')
 
             def monthly_callback(e: any = None):
                 change_name_entry(f'{self.mothly_month_option.get()}_{self.mothly_year_option.get()}_mothly_report.pdf')
@@ -103,6 +103,18 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
                     self.yearly_option.pack(side = ctk.LEFT,fill="x", expand=1, padx = (width * .005))
                     yearly_callback()
 
+            global daily_date_text_var
+            daily_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B %d, %Y"))
+            global daily_date_text_var_split
+            r=re.split("[^a-zA-Z\d]+",daily_date_text_var.get())
+            daily_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+            def write_callback2(var, index, mode):
+                r=re.split("[^a-zA-Z\d]+",daily_date_text_var.get())
+                global daily_date_text_var_split
+                daily_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+                daily_callback()
+            daily_date_text_var.trace_add('write', callback=write_callback2)
+            
             def reset():
                 self.place_forget()
             '''code goes here'''
@@ -166,11 +178,14 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
             self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
             self.setting_frame.pack_propagate(0)
             self.setting_frame.grid(row=4, column=0, sticky = 'nsew', padx=(width*0.005))
+            
             #daily
-            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5)
-            change_date_entry()
+            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5, textvariable=daily_date_text_var
+                                                 )
+                                   
             self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
-                                                       command=lambda:cctk.tk_calendar(self.daily_date_entry, "%s", date_format="word", max_date=datetime.datetime.now()) )
+                                                       command=lambda:cctk.tk_calendar(daily_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
+            
             #monthly
             self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback, anchor="center")
             self.mothly_month_option.set(self.CURRENT_DAY.strftime('%B'))
@@ -190,7 +205,8 @@ def show_popup(master, info:tuple) -> ctk.CTkFrame:
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback,font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
 
-        def place(self, **kwargs):
+        def place(self, date_entered,  **kwargs):
+            print(date_entered)
             if 'default_config' in kwargs:
                 txt = 'Daily' if 'Daily' in kwargs['default_config'] else 'Monthly' if 'Monthly' in kwargs['default_config'] else 'Yearly'
                 self.report_type_option.set(txt)
@@ -946,14 +962,20 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
             date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%Y-%m-%d')
         else:
             date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')'''
-        date_temp = datetime.datetime.strptime(daily_full_date, '%B %d, %Y').strftime('%Y-%m-%d')
+        #date_temp = datetime.datetime.strptime(daily_full_date, '%B %d, %Y').strftime('%Y-%m-%d')
+        
+        date_temp = datetime.datetime.strptime(daily_date_text_var.get(), '%B %d, %Y').strftime('%Y-%m-%d')
+        #print(daily_date_text_var)
+        asd = daily_date_text_var.get()
+        #print(asd)
 
         '''full_date_temp = 1
         if self.date_selected_label._text.startswith(self.year_option.get()):
             full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%B %d, %Y')
         else:
             full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%B %d, %Y')'''
-        full_date_temp = daily_full_date
+        #full_date_temp = daily_full_date
+        full_date_temp = daily_date_text_var.get()
 
         day_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%d')
         month_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%B')
@@ -1058,7 +1080,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
 
         report_header.setStyle(tbl_header_style)
 
-        yearly_report_content_temp = [[f'Daily Sales Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {acc_name_preparator}', f'Date: {date_creation}'], ['Items', f'P{format_price(data_temp[0])}'], 
+        yearly_report_content_temp = [[f'Daily Sales Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {acc_name_preparator}', f'Date: {full_date_temp}'], ['Items', f'P{format_price(data_temp[0])}'], 
                                         ['Services', f'P{format_price(data_temp[1])}'],
                                         ['Total Income', f'P{format_price(data_temp[0] + data_temp[1])}']]
         

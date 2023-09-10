@@ -1405,7 +1405,7 @@ class patient_info_frame(ctk.CTkFrame):
 
         def update_table():
             self.refresh_btn.configure(state = "disabled")
-            self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
+            self.data = database.fetch_data(sql_commands.get_pet_record)
             self.pet_data_view.update_table(self.data)
             self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
         
@@ -1455,7 +1455,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.treeview_frame.grid(row=1, column=0, columnspan=5,sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
         self.treeview_frame.grid_columnconfigure(0, weight=1)
 
-        self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
+        self.data = database.fetch_data(sql_commands.get_pet_record)
         
         self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .775, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!30',)
@@ -1465,7 +1465,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.record_view = Pet_info_popup.view_record(self, (width, height, acc_cred, acc_info), self.update)
 
     def update(self) -> None:
-        self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
+        self.data = database.fetch_data(sql_commands.get_pet_record)
         self.pet_data_view.update_table(self.data)
         return super().update()
     
@@ -1477,7 +1477,7 @@ class patient_info_frame(ctk.CTkFrame):
             messagebox.showwarning('Warning','No Record is selected')
 
 class reports_frame(ctk.CTkFrame):
-    global width, height
+    global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         '''constants'''
@@ -1662,7 +1662,7 @@ class reports_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0)) """
         
         self.show_gen_report = ctk.CTkButton(self.top_con_frame, image=self.generate_report_icon, width=width*0.125,  text="Generate Report", height=height*0.0575, font=("DM Sans Medium", 14),
-                                             command = lambda: self.save_as_popup.place(relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
+                                             command = lambda: self.save_as_popup.place(relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get(), date_entered=self.date_selected_label._text))
         self.show_gen_report.pack(side="right")
         #generating reports end
 
@@ -1750,7 +1750,7 @@ class reports_frame(ctk.CTkFrame):
         self.update_invetory_graph()
         #endregion
 
-        self.save_as_popup = save_as_popup.show_popup(self, (width , height))
+        self.save_as_popup = save_as_popup.show_popup(self, (width , height, ))
         self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height))
         load_main_frame(0)
 

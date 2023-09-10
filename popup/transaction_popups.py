@@ -557,9 +557,10 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
 
             def automate_fill(_: any= None):
                 data = database.fetch_data(sql_commands.get_pet_info_for_cust_info, (self.pet_name.get(), ))[0]
-                self.animal_breed_entry.delete(0, ctk.END)
+                print(data)
+                """ self.animal_breed_entry.delete(0, ctk.END)
                 self.animal_breed_entry.insert(0, data[0])
-                self.animal_breed_entry.configure(state = ctk.DISABLED)
+                self.animal_breed_entry.configure(state = ctk.DISABLED) """
 
             def hide():
                 self.place_forget()
@@ -788,7 +789,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0, anchor= 'w', font=self.service_treeview.row_font,
                                                    text="  "+label_text, width = root_treeview.column_widths[1],
-                                                   command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[2] for s in self.client],
+                                                   command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[1] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
                                                                                          self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c',
                                                                                                                                                         service_dict = service_dict, master_frame=data_frames,
@@ -918,6 +919,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
         
         def check_client(self, client_name: str):
             self.client = database.fetch_data(sql_commands.get_pet_info, (client_name, ))
+            
 
         def place_forget(self):
             if self.item_treeview.data_grid_btn_mng.active:
@@ -948,7 +950,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             '''events'''
             def bd_commands(i):
-                print(self.transact_treeview._data[i])
                 if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
                     #self.patient_info.value = None
                     self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][-1][1:]))
@@ -973,7 +974,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         '''initial process'''
 
             def save_invoice_callback():
-                print(self.service_dict)
                 if len(self.transact_treeview._data) == 0:
                     return
                 for dt in self.transact_treeview._data:
@@ -1001,7 +1001,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 for svc in services:
                     for i in range(svc[2]):
                         svc_inf = self.service_dict[svc[0]][i]
-                        pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (svc_inf[0], self.client_name_entry.get()))[0][0]
+                        pet_uid = database.fetch_data(sql_commands.get_pet_id_by_name_owner, (svc_inf[0], self.client_name_entry.get()))[0][0]
                         formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], pet_uid, svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
                 #formatting the services into its service invoice content
 
@@ -1187,7 +1187,7 @@ def show_payment_proceed(master, info:tuple,):
                 item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
 
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0],
-                            s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (s[1], self.client_name._text))[0][0],
+                            s[0], database.fetch_data(sql_commands.get_pet_id_by_name_owner, (s[1], self.client_name._text))[0][0],
                             s[1], s[2], price_format_to_float(s[3]), 0, 0) for s in self.services]
 
 
