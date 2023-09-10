@@ -56,7 +56,7 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
                 self.file_name_entry.insert(0, name)
 
             def daily_callback(e: any = None):
-                change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry._text))+'_report.pdf')
+                change_name_entry('_'.join(re.findall(r'(\w+)', daily_date_text_var_split))+'_report.pdf')
 
             def monthly_callback(e: any = None):
                 change_name_entry(f'{self.mothly_month_option.get()}_{self.mothly_year_option.get()}_mothly_report.pdf')
@@ -103,6 +103,23 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
                     self.mothly_year_option.pack_forget()
                     self.yearly_option.pack(side = ctk.LEFT,fill="x", expand=1, padx = (width * .005))
                     yearly_callback()
+            #j
+            #create global variable for daily date text
+            global daily_date_text_var
+            daily_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B %d, %Y"))
+            #create global variable for a better formate of daily date text
+            global daily_date_text_var_split
+            r=re.split("[^a-zA-Z\d]+",daily_date_text_var.get())
+            daily_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+            #callback for changing file name to current selected daily date
+            def write_callback(var, index, mode):
+                r=re.split("[^a-zA-Z\d]+",daily_date_text_var.get())
+                global daily_date_text_var_split
+                daily_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+                #change file name
+                daily_callback()
+            #add trace for whenever string var is changed
+            daily_date_text_var.trace_add('write', callback=write_callback)
 
             def reset():
                 self.place_forget()
@@ -168,10 +185,12 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.setting_frame.pack_propagate(0)
             self.setting_frame.grid(row=4, column=0, sticky = 'nsew', padx=(width*0.005))
             #daily
-            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5)
+            #j
+            #added textvariable for self.daily_date_entry
+            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5, textvariable=daily_date_text_var)
             change_date_entry()
-            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
-                                                       command=lambda:cctk.tk_calendar(self.daily_date_entry, "%s", date_format="word", max_date=datetime.datetime.now()) )
+            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,#changed label value to global StringVar
+                                                       command=lambda:cctk.tk_calendar(daily_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
             #monthly
             self.mothly_month_option = ctk.CTkOptionMenu(self.setting_frame, width * .15, height * .05, font=("DM Sans Medium", (height*0.023)), values = self.DEFAULT_MONTHS, command= monthly_callback, anchor="center")
             self.mothly_month_option.set(self.CURRENT_DAY.strftime('%B'))
@@ -191,12 +210,14 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback,font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
 
-        def place(self, **kwargs):
+        def place(self, current_selected_date, **kwargs):
             if 'default_config' in kwargs:
                 txt = 'Daily' if 'Daily' in kwargs['default_config'] else 'Monthly' if 'Monthly' in kwargs['default_config'] else 'Yearly'
                 self.report_type_option.set(txt)
                 self.report_type_option._command()
                 kwargs.pop('default_config')
+                #change daily date value in save as popup to current selected
+                daily_date_text_var.set(current_selected_date)
             return super().place(**kwargs)
 
     return add_item(master, info, user)
@@ -948,14 +969,17 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
             date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%Y-%m-%d')
         else:
             date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%Y-%m-%d')'''
-        date_temp = datetime.datetime.strptime(daily_full_date, '%B %d, %Y').strftime('%Y-%m-%d')
+        #date_temp = datetime.datetime.strptime(daily_full_date, '%B %d, %Y').strftime('%Y-%m-%d')
+        #j
+        #get the current date on global daily date variable
+        date_temp = datetime.datetime.strptime(daily_date_text_var.get(), '%B %d, %Y').strftime('%Y-%m-%d')
 
         '''full_date_temp = 1
         if self.date_selected_label._text.startswith(self.year_option.get()):
             full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%B %d, %Y')
         else:
             full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%B %d, %Y')'''
-        full_date_temp = daily_full_date
+        full_date_temp = daily_date_text_var.get() #j get the global string variable value
 
         day_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%d')
         month_date_temp = datetime.datetime.strptime(full_date_temp, '%B %d, %Y').strftime('%B')

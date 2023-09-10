@@ -416,8 +416,13 @@ class customcustomtkinter:
                     date_text = str(date_to_words(str(self.cal.get_date())))
                 else:
                     date_text = "Invalid Format"
-
-                label.configure(text=date_text)
+                #j
+                #checking if label is a CTkLabel or a StringVar
+                if str(type(label)) == '<class \'customtkinter.windows.widgets.ctk_label.CTkLabel\'>':
+                    label.configure(text=date_text)
+                else:
+                    label.set(date_text)
+                
                 if set_date_callback:
                     set_date_callback()
                 self.withdraw()
