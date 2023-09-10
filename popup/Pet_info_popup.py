@@ -52,6 +52,8 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.new_record = ctk.CTkImage(light_image=Image.open("image/new_record.png"),size=(22,22))
 
             def reset():
+                self.address_entry.configure(state=ctk.NORMAL)
+                self.contact_entry.configure(state=ctk.NORMAL)
                 self.place_forget()
                 self.owner_name_entry.set('')
                 self.patient_name_entry.delete(0, ctk.END)
@@ -62,8 +64,8 @@ def new_record(master, info:tuple, table_update_callback: callable):
                 self.weight_entry.delete(0, ctk.END)
                 self.address_entry.delete(0, ctk.END)
                 self.contact_entry.delete(0, ctk.END)
-                self._callback()
-                
+                if self._callback:
+                    self._callback()
             def proceed():
                 if (self.owner_name_entry.get() == '' and self.patient_name_entry.get() == '' and self.breed_option.get() == ''
                     and self.type_option.get() == '' and self.sex_option.get() == '' and self.address_entry.get() == ''
