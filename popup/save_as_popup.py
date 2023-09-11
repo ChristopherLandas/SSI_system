@@ -13,7 +13,7 @@ import calendar
 from constants import *
 from customcustomtkinter import customcustomtkinter as cctk
 
-def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
+def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> ctk.CTkFrame:
     class add_item(ctk.CTkFrame):
         def __init__(self, master, info:tuple, user: str):
             self.DEFAULT_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
@@ -21,6 +21,8 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.CURRENT_DAY = datetime.datetime.now()
             self.DEFAULT_YEAR = [str(self.CURRENT_DAY.year)]
             self.user = user
+            self.full_name = full_name
+            self.position = position
             width = info[0]
             height = info[1]
             #basic inforamtion needed; measurement
@@ -46,9 +48,9 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
                         change_name_entry(self.file_name_entry.get()+' (1)')
                     elif question == None:
                         return
-                generate_report(self.report_type_option.get(), self.user, self.CURRENT_DAY.strftime('%B %d, %Y'),
+                generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                self.path_entry.get(), annual_date_text_var.get(), 0)
+                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get())
                 reset()
 
             def change_name_entry(name: str = None):
@@ -183,6 +185,7 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             ctk.CTkLabel(self.path_frame, text='File Path:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht,height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
             self.path_entry = ctk.CTkEntry(self.path_frame, font=("DM Sans Medium", 14),height=height*0.055)
             self.path_entry.insert(0, self.DEFAULT_PATH)
+            #j
             self.path_entry.pack(side="left", fill='x', expand=1)
             ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
             #self.file_type_entry = ctk.CTkEntry(self.main_frame, height=height*0.03, corner_radius=20, font=("DM Sans Medium", (height*0.023)), show='*')
@@ -195,15 +198,19 @@ def show_popup(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.report_type_option = ctk.CTkOptionMenu(self.file_type_frame,values=["Daily", "Monthly", "Yearly"], height=height*0.055,  width=width*0.25, font=("DM Sans Medium", 14), dropdown_font=("DM Sans Medium", 12), command=show_report_fill)
             self.report_type_option.pack(side="left", fill='x', expand=1)
 
+            #checkbox if include graphs
+            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs?')
+            self.include_graphs_checkbox.grid(row=3, column=0, sticky="nsew", padx=(width*0.085))
+
             '''TITLE SETTING'''
             self.title_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.title_frame.grid(row=3, column=0, sticky="nsew", padx=(width*0.005))
+            self.title_frame.grid(row=4, column=0, sticky="nsew", padx=(width*0.005))
             self.title_setting = ctk.CTkLabel(self.title_frame, text= 'Select Date:', font=("DM Sans Medium", 14))
             self.title_setting.grid(row = 0, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.02, 0))
             
             self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
             self.setting_frame.pack_propagate(0)
-            self.setting_frame.grid(row=4, column=0, sticky = 'nsew', padx=(width*0.005))
+            self.setting_frame.grid(row=5, column=0, sticky = 'nsew', padx=(width*0.005))
             #daily
             #j
             #added textvariable for self.daily_date_entry
@@ -360,7 +367,7 @@ def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
             
             self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
             self.setting_frame.pack_propagate(0)
-            self.setting_frame.grid(row=4, column=0, sticky = 'nsew', padx=(width*0.005))
+            self.setting_frame.grid(row=5, column=0, sticky = 'nsew', padx=(width*0.005))
             #daily
             self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5)
             self.daily_date_entry.pack(side = ctk.LEFT, fill="x", expand=1, padx = (width * .005), pady=(height*0.005))
@@ -430,7 +437,7 @@ def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
     return add_item(master, info, user)
 
 
-def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int):
+def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -466,6 +473,12 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         count = round(i/len_count)
         len_div = len(str(count)[1:])
         return math.ceil(count/10 ** len_div) * 10 ** len_div
+    #get percentage on pie chart
+    def percentage(part, whole):
+        print(part)
+        print(whole)
+        Percentage = 100 * float(part)/float(whole)
+        return str(round(Percentage, 2)) + '%'
     #generate footer based on number of pages
     def footer_generator(page_count: int):
         #footer
@@ -486,6 +499,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
             ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
             ('FONTSIZE', (0, 0), (0, -1), 14),
             ('FONTSIZE', (0, 0), (0, 0), 10),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.lightgrey),
             #space at the bottom
             ('TOPPADDING', (0, 0), (0, -1), 670),
             ('RIGHTPADDING', (0, 0), (0, 0), 300),
@@ -501,6 +515,39 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
             elems.append(table_footer)
 
         pdf.build(elems)
+
+    def footer_gen2():
+        filename = f'image/footer2.pdf'
+        pdf = SimpleDocTemplate(
+            filename=filename,
+            pagesize=letter,
+        )
+        footer_content = [['', '', '', ''],['Prepared by:', f'{acc_full_name}', '', f'Date Prepared: {date_creation}'],['', f'{acc_pos}', '', '']]
+        table_footer = Table(footer_content)
+        tbl_footer_style = TableStyle(
+            [
+            #text alignment, starting axis, -1 = end
+            #grid goes like this (x, y) x goes from left to right
+            ('ALIGN', (3, 1), (3, 1), 'RIGHT'),
+            ('ALIGN', (1, 1), (1, 2), 'CENTER'),
+            #font style
+            ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
+            ('FONTSIZE', (0, 1), (-1, 1), 12),
+            ('FONTSIZE', (1, 2), (1, 2), 8),
+            #space at the bottom
+            ('TOPPADDING', (0, 0), (-1, 0), 570),#670
+            ('TOPPADDING', (1, 2), (1, 2), 0),#670
+            ('RIGHTPADDING', (2, 1), (2, 1), 150),
+            #Signature line
+            ('LINEABOVE', (1,1), (1,1), 0.1, colors.black),
+           #('BOX', (0,0), (-1,-1), 0.5, colors.red)
+            ]
+        )
+        table_footer.setStyle(tbl_footer_style)
+        elems = []
+        elems.append(table_footer)
+        pdf.build(elems)
+
     #yearly
 
     if 'Yearly' == report_type:
@@ -530,10 +577,15 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
 
         #create bar chart
         bc = VerticalBarChart()
-        bc.x = 86
-        bc.y = 405
-        bc.height = 270
-        bc.width = 480
+        bc.x = 111
+        bc.y = 500
+        #bc.x = 86
+        #bc.y = 405
+        #original
+        #bc.height = 270
+        #bc.width = 480
+        bc.height = 220
+        bc.width = 430
         bc.data = [monthly_data_items_temp , monthly_data_service_temp]
         bc.strokeColor = colors.black
         bc.groupSpacing = 10
@@ -552,13 +604,13 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         bc.categoryAxis.labels.angle = 30
         bc.categoryAxis.categoryNames = months_Text
         #legends
-        d.add(String(225,700, f'Annual Sales Graph as of {y_temp}', fontName = 'Times-New-Roman', fontSize=16))
-        d.add(String(265,280, 'Annual Sales', fontName = 'Times-New-Roman', fontSize=16))
-        d.add(Rect(120, 75, 380, 240, fillColor=colors.transparent, strokeColor=colors.gray))
-        d.add(Rect(350, 350, 15, 15, fillColor=colors.pink))
-        d.add(Rect(250, 350, 15, 15, fillColor=colors.lightgreen))
-        d.add(String(370,350, 'Services', fontName = 'Times-New-Roman', fontSize=12))
-        d.add(String(270,350, 'Items', fontName = 'Times-New-Roman', fontSize=12))
+        d.add(String(225,750, f'Annual Sales Graph as of {y_temp}', fontName = 'Times-New-Roman', fontSize=16))
+        d.add(String(260,375, 'Annual Sales', fontName = 'Times-New-Roman', fontSize=16))
+        d.add(Rect(90, 200, 430, 200, fillColor=colors.transparent, strokeColor=colors.gray))
+        d.add(Rect(350, 425, 15, 15, fillColor=colors.pink))
+        d.add(Rect(250, 425, 15, 15, fillColor=colors.lightgreen))
+        d.add(String(370,425, 'Services', fontName = 'Times-New-Roman', fontSize=12))
+        d.add(String(270,425, 'Items', fontName = 'Times-New-Roman', fontSize=12))
         #add barchart to drawing
         d.add(bc, '')
         #get total amount for service and items income
@@ -572,17 +624,21 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         
         #create piechart
         pc = Pie()
-        pc.x = 231
-        pc.y = 100
-        pc.height = 150
-        pc.width = 150
+        #original 
+        #pc.x = 231
+        #pc.y = 100
+        pc.x = 256
+        pc.y = 225
+        #original - 150
+        pc.height = 100
+        pc.width = 100
         pc.slices.strokeWidth=0
         pc.slices.fontSize = 16
         pc.slices.fontName = 'Times-New-Roman'
         pc.simpleLabels = 0
         pc.slices.label_simple_pointer = 1
         pc.data = [total_item_income_temp, total_service_income_temp]
-        pc.labels = ['Items', 'Services']
+        pc.labels = [f'Items ({percentage(total_item_income_temp, total_income_temp)})', f'Services ({percentage(total_service_income_temp, total_income_temp)})']
         pc.slices[0].fillColor = colors.lightgreen
         pc.slices[1].fillColor = colors.pink
         pc.slices[1].popout = 10
@@ -693,30 +749,35 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         elems.append(table_content)
         pdf.build(elems)
         #pdf compilation
-        merger = PdfWriter()
-        input1 = open(f"image/charts.pdf", "rb")
-        input2 = open(f"{desktop}\{y_temp}_yearly_report.pdf", "rb")
-        # add the first 3 pages of input1 document to output
-
-        merger.append(input2)
-        if not include_graphs:
+        
+        #check if include_graphs is checked
+        if include_graphs:
+            merger = PdfWriter()
+            input1 = open(f"image/charts.pdf", "rb")
+            input2 = open(f"{desktop}\{y_temp}_yearly_report.pdf", "rb")
+            # add the first 3 pages of input1 document to output
+            merger.append(input2)
             merger.append(input1)
-        # Write to an output PDF document
-        output = open(f"{desktop}\{y_temp}_yearly_report.pdf", "wb")
-        merger.write(output)
-        # Close File Descriptors
-        merger.close()
-        output.close()
+            # Write to an output PDF document
+            output = open(f"{desktop}\{y_temp}_yearly_report.pdf", "wb")
+            merger.write(output)
+            # Close File Descriptors
+            merger.close()
+            output.close()
         #add footer
         from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
         
         p1 = pdfrw1(f"{desktop}\{y_temp}_yearly_report.pdf")
         footer_generator(len(p1.pages))
         p2 = pdfrw1("image/footer.pdf")
+        footer_gen2()
+        p3 = pdfrw1("image/footer2.pdf")
 
         for page in range(len(p1.pages)):
             merger = pdfrw(p1.pages[page])
             merger.add(p2.pages[page]).render()
+            if page == (len(p1.pages)-1):
+                merger.add(p3.pages[0]).render()
 
         writer = pdfrw2()
         writer.write(f"{desktop}\{y_temp}_yearly_report.pdf", p1)
@@ -776,6 +837,76 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         #calculate the step value, and the max y-axis of graph
 
         data5 = [monthly_data_items_temp , monthly_data_service_temp]
+
+        #create bar chart
+        bc = VerticalBarChart()
+        bc.x = 111
+        bc.y = 500
+        bc.height = 220
+        bc.width = 430
+        bc.data = data5
+        bc.strokeColor = colors.black
+        bc.groupSpacing = 10
+        bc.barSpacing = 1
+        #change bar color
+        bc.bars[0].fillColor = colors.lightgreen
+        bc.bars[1].fillColor = colors.pink
+        bc.valueAxis.valueMin = 0
+        bc.valueAxis.valueMax = data_max_val
+        bc.valueAxis.valueStep = step_val or 1
+        bc.categoryAxis.labels.fontSize = 12
+        bc.categoryAxis.labels.fontName = 'Times-New-Roman'
+        bc.categoryAxis.labels.boxAnchor = 'ne'
+        bc.categoryAxis.labels.dx = 5
+        bc.categoryAxis.labels.dy = -2
+        bc.categoryAxis.labels.angle = 0
+        bc.categoryAxis.categoryNames = monthly_label_temp2
+        #legends
+        d.add(String(195,750, f'Monthly Sales Graph as of {full_date_temp} {y_temp}',  fontName = 'Times-New-Roman', fontSize=16))
+        d.add(String(260,375, 'Monthly Sales', fontName = 'Times-New-Roman', fontSize=16))
+        d.add(Rect(90, 200, 430, 200, fillColor=colors.transparent, strokeColor=colors.gray))
+        d.add(Rect(350, 425, 15, 15, fillColor=colors.pink))
+        d.add(Rect(250, 425, 15, 15, fillColor=colors.lightgreen))
+        d.add(String(370,425, 'Services', fontName = 'Times-New-Roman', fontSize=12))
+        d.add(String(270,425, 'Items', fontName = 'Times-New-Roman', fontSize=12))
+        #add barchart to drawing
+        d.add(bc, '')
+        #get total amount for service and items income
+        total_item_income_temp = 0
+        for income in monthly_data_items_temp:
+            total_item_income_temp += income
+        total_service_income_temp = 0
+        for income in monthly_data_service_temp:
+            total_service_income_temp += income
+        total_income_temp = total_item_income_temp + total_service_income_temp
+        
+        #create piechart
+        pc = Pie()
+        #original 
+        #pc.x = 231
+        #pc.y = 100
+        pc.x = 256
+        pc.y = 225
+        #original - 150
+        pc.height = 100
+        pc.width = 100
+        pc.slices.strokeWidth=0
+        pc.slices.fontSize = 16
+        pc.slices.fontName = 'Times-New-Roman'
+        pc.simpleLabels = 0
+        pc.slices.label_simple_pointer = 1
+        pc.data = [total_item_income_temp, total_service_income_temp]
+        pc.labels = [f'Items ({percentage(total_item_income_temp, total_income_temp)})', f'Services ({percentage(total_service_income_temp, total_income_temp)})']
+        pc.slices[0].fillColor = colors.lightgreen
+        pc.slices[1].fillColor = colors.pink
+        pc.slices[1].popout = 10
+
+        #add piechart on drawing
+        d.add(pc, '')
+        #create pdf
+        renderPDF.drawToFile(d, my_path, '')
+        #make new function that takes chart.data
+        '''
         bc = VerticalBarChart()
         bc.x = 86
         bc.y = 405
@@ -829,50 +960,13 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         pc.simpleLabels = 0
         pc.slices.label_simple_pointer = 1
         pc.data = [total_item_income_temp, total_service_income_temp]
-        pc.labels = ['Items', 'Services']
+        pc.labels = [f'Items ({percentage(total_item_income_temp, total_income_temp)})', f'Services ({percentage(total_service_income_temp, total_income_temp)})']
         pc.slices[0].fillColor = colors.lightgreen
         pc.slices[1].fillColor = colors.pink
         pc.slices[1].popout = 10
         d.add(pc, '')
         renderPDF.drawToFile(d, my_path, '')
-
-        #footer
-        filename = f'image/footer.pdf'
-        pdf = SimpleDocTemplate(
-            filename=filename,
-            pagesize=letter,
-        )
-        pdf.bottomMargin = 20
-        pdf.leftMargin = 20
-        pdf.rightMargin = 20
-        footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 3']]
-        table_footer = Table(footer_content)
-        footer_content2 = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 2 of 3']]
-        table_footer2 = Table(footer_content2)
-        footer_content3 = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 3 of 3']]
-        table_footer3 = Table(footer_content3)
-        tbl_footer_style = TableStyle(
-            [
-            #text alignment, starting axis, -1 = end
-            ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-            #font style
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-            ('FONTSIZE', (0, 0), (0, -1), 14),
-            ('FONTSIZE', (0, 0), (0, 0), 10),
-            #space at the bottom
-            ('TOPPADDING', (0, 0), (0, -1), 670),
-            ('RIGHTPADDING', (0, 0), (0, 0), 300),
-            ]
-        )
-        table_footer.setStyle(tbl_footer_style)
-        table_footer2.setStyle(tbl_footer_style)
-        table_footer3.setStyle(tbl_footer_style)
-        elems = []
-        elems.append(table_footer)
-        elems.append(table_footer2)
-        elems.append(table_footer3)
-        pdf.build(elems)
-
+        '''
         #content
         filename = f'{desktop}\\{full_date_temp}_{y_temp}_monthly_report.pdf'
         pdf = SimpleDocTemplate(
@@ -967,27 +1061,34 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         elems.append(report_header)
         elems.append(table_content)
         pdf.build(elems)
-        #pdf compilation
-        merger = PdfWriter()
-        input1 = open(f"image/charts.pdf", "rb")
-        input2 = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "rb")
-        # add the first 3 pages of input1 document to output
-        merger.append(input2)
-        merger.append(input1)
-        # Write to an output PDF document
-        output = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "wb")
-        merger.write(output)
-        # Close File Descriptors
-        merger.close()
-        output.close()
+        #check if include_graphs is checked
+        if include_graphs:
+            #pdf compilation
+            merger = PdfWriter()
+            input1 = open(f"image/charts.pdf", "rb")
+            input2 = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "rb")
+            # add the first 3 pages of input1 document to output
+            merger.append(input2)
+            merger.append(input1)
+            # Write to an output PDF document
+            output = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "wb")
+            merger.write(output)
+            # Close File Descriptors
+            merger.close()
+            output.close()
         #add footer
         from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
         p1 = pdfrw1(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf")
+        footer_generator(len(p1.pages))
         p2 = pdfrw1("image/footer.pdf")
+        footer_gen2()
+        p3 = pdfrw1("image/footer2.pdf")
 
         for page in range(len(p1.pages)):
             merger = pdfrw(p1.pages[page])
             merger.add(p2.pages[page]).render()
+            if page == (len(p1.pages)-1):
+                merger.add(p3.pages[0]).render()
 
         writer = pdfrw2()
         writer.write(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", p1)
@@ -1051,7 +1152,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         pc.simpleLabels = 0
         pc.slices.label_simple_pointer = 1
         pc.data = data_temp
-        pc.labels = ['Items', 'Services']
+        pc.labels = [f'Items ({data_temp[0]})', f'Services ({data_temp[1]})']
         pc.slices[0].fillColor = colors.lightgreen
         pc.slices[1].fillColor = colors.pink
         pc.slices[1].popout = 10
@@ -1059,6 +1160,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         renderPDF.drawToFile(d, my_path, '')
 
         #footer
+        '''
         filename = f'image/footer.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
@@ -1086,7 +1188,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         elems = []
         elems.append(table_footer)
         pdf.build(elems)
-
+        '''
         #content
         filename = f'{desktop}\\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
         #filename = f'{desktop}\\report_Test.pdf'
@@ -1230,15 +1332,20 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
         #add footer
         #p1 = pdfrw1(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_monthly_report.pdf")
         p1 = pdfrw1(filename)
+        footer_generator(len(p1.pages))
         p2 = pdfrw1("image/footer.pdf")
         p3 = pdfrw1("image/charts.pdf")
+        footer_gen2()
+        p4 = pdfrw1("image/footer2.pdf")
 
         for page in range(len(p1.pages)):
             merger = pdfrw(p1.pages[page])
             merger.add(p2.pages[page]).render()
-
-        merger = pdfrw(p1.pages[0])
-        merger.add(p3.pages[0]).render()
+            if page == (len(p1.pages)-1):
+                merger.add(p4.pages[0]).render()
+        if include_graphs:
+            merger = pdfrw(p1.pages[0])
+            merger.add(p3.pages[0]).render()
 
         writer = pdfrw2()
         #writer.write(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", p1)
