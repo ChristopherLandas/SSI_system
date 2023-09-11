@@ -40,9 +40,7 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
         self._master = master
-        '''
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
-
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -55,13 +53,14 @@ class dashboard(ctk.CTkToplevel):
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey 
         #for preventing security breach through python code; enable it to test it """
-        '''
 
+        '''
         global acc_info, acc_cred, date_logged, mainframes
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        '''
 
         '''Fonts'''
         try:
@@ -2436,15 +2435,14 @@ class admin_settings_frame(ctk.CTkFrame):
             
         def open_service_record():
             if self.service_data_view.get_selected_data():
-                self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data())
+                self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data(), service_reload_callback = refresh_service)
                 
             else:
                 messagebox.showerror("Missing Selection", "Select a record first")
                 
         def open_item_record():
             if self.inventory_data_view.get_selected_data():
-                self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", item_info=self.inventory_data_view.get_selected_data())
-                
+                self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", item_info=self.inventory_data_view.get_selected_data(), item_reload_callback = refresh_item)
             else:
                 messagebox.showerror("Missing Selection", "Select a record first")
                 
@@ -2537,4 +2535,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-dashboard(None, 'admin', datetime.datetime.now)
+#dashboard(None, 'admin', datetime.datetime.now)

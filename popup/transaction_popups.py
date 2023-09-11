@@ -948,7 +948,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             '''events'''
             def bd_commands(i):
-                print(self.transact_treeview._data[i])
                 if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
                     #self.patient_info.value = None
                     self.change_total_value_service(-price_format_to_float(self.transact_treeview._data[i][-1][1:]))
@@ -959,7 +958,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 if len(self.transact_treeview._data) != 0:
                     if messagebox.askyesno('Change Customer', 'Changing customer will reset the content of treeview'):
                         client = self.client_name_entry.get()
-                        print(self.client_name_entry.get())
                         self.client_name_entry.set(client)
 
                         self.save_invoice_btn.configure(state = ctk.NORMAL)
@@ -974,7 +972,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         '''initial process'''
 
             def save_invoice_callback():
-                print(self.service_dict)
                 if len(self.transact_treeview._data) == 0:
                     return
                 for dt in self.transact_treeview._data:
@@ -995,9 +992,12 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     else:
                         items.append(st)
                 formatted_svc_data = []
-                svc_prices = {s[0]: price_format_to_float(s[-1][1:]) for s in services}
+                non_modifiable_svc = database.fetch_data("SELECT service_name FROM service_info_test WHERE duration_type = 0")
+                svc_prices = {s[0]: price_format_to_float(s[1][1:] if s[0] in non_modifiable_svc else s[-1][1:]) for s in services}
                 
                 uid = self.invoice_id_label._text
+                uid_base = uid[0:-2]
+                uid_count = uid[-2:]
 
                 '''for svc in services:
                     for i in range(svc[2]):
@@ -1005,29 +1005,45 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (svc_inf[0], self.client_name_entry.get()))[0][0]
                         formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], pet_uid, svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
                 #formatting the services into its service invoice content'''
-                
+
+                prev_date = None
+                cur_index = -1
                 for svc_k in self.service_dict.keys():
                     for inf in self.service_dict[svc_k]:
                         pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (inf[0], self.client_name_entry.get()))[0][0]
+                        if prev_date != inf[1]:
+                            prev_date = inf[1]
+                            cur_index += 1
+                            formatted_svc_data.append([])
                         if len(inf) == 2:
-                            formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
+                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
                             #scheduled service
                         if len(inf) == 3:
-                            formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, inf[2], None, None))
+                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, inf[2], None, None))
                             #periodic service
                         if len(inf) == 4:
-                            formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, int(inf[2]), int(inf[3])))
+                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, int(inf[2]), int(inf[3])))
                             #multiple instance periodic service
 
-                database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                #database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                print(formatted_svc_data)
+                database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
 
                 for it in items:
                     database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
                 #database insertion of items
-
-                for li in formatted_svc_data:
-                    database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
+                print(len(formatted_svc_data))
+                if len(formatted_svc_data) > 0:
+                    for li in formatted_svc_data[0]:
+                        database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
                 #database insertion of services
+                if len(formatted_svc_data) > 1:
+                    for i in range(1, len(formatted_svc_data), 1):
+                        price_per_date = sum([s[6] for s in formatted_svc_data[i]])
+                        for li in formatted_svc_data[i]:
+                            database.exec_nonquery([[sql_commands.insert_invoice_data, (li[0], self._attentdant, self.client_name_entry.get() or 'N/A', price_per_date, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                            database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
+                #for other services data with different_date, the invoice would split up
 
                 self._treeview_content_update_callback()
                 self.save_invoice_btn.configure(state = ctk.DISABLED)
@@ -1098,13 +1114,13 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
 
             ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("Arial", 14))
+            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="₱0,000.00", font=("Arial", 14))
             self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
 
             self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
         
             ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="0,000.00", font=("Arial", 14))
+            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="₱0,000.00", font=("Arial", 14))
             self.services_total_amount.pack(side="right",  padx=(0,width*0.0075)) 
             
             self.services_total_frame.pack(side="left", padx=(0,width*0.0075))
@@ -1152,7 +1168,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
         
         def place(self, **kwargs):
             if self.invoice_id_label._text.endswith("_"):
-                count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%m%d%y'), '%')")[0][0]
+                count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%y%m%d'), '%')")[0][0]
                 self.invoice_id_label.configure(text = '%s%s' % (datetime.now().strftime('%y%m%d'), str(count).zfill(2)))
             return super().place(**kwargs)
         
@@ -1760,7 +1776,7 @@ def show_invoice_content(master, info:tuple,):
             item_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price * quantity), 2)) FROM invoice_item_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
             self.or_lbl.configure(text = f"Invoice Id#: {invoice_id}")
             self.client_name.configure(text = general_invoice_data[2])
-            self.date_label.configure(datetime.datetime.strptime(general_invoice_data[4], '%Y-%m-%d').strftime('%B %d, %Y'))
+            self.date_label.configure(general_invoice_data[4].strftime('%B %d, %Y'))
             self.services_total.configure(text = service_total)
             self.items_total.configure(text = item_total)
             self.grand_total.configure(text = general_invoice_data[3])
