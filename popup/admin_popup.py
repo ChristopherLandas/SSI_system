@@ -49,6 +49,13 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
                 self.save_button.pack_forget()
                 self.cancel_button.pack_forget()
 
+                if database.exec_nonquery([["UPDATE service_info_test SET service_name =?, category =?, price =? WHERE UID =?", (self.service_name_entry.get(), self.service_category_entry.get(), float(self.service_price_entry.get()), self.service_id_label._text)]]):
+                    messagebox.showinfo("Success", "Service Updated\nRestart the system to apply changes")
+                    self.reload_service()
+                else:
+                    messagebox.showerror("Error", "An error occured\nfailed to change")
+
+                self.place_forget()
                 self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
             
@@ -162,9 +169,8 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
             
             #self.service_item_txtbox.insert("0.0", f"{raw_data[0][2]}")
             self.set_entries(state='disabled')
-        def place(self, service_info, **kwargs):
-            
-            #print(service_info)
+        def place(self, service_info, service_reload_callback, **kwargs):
+            self.reload_service = service_reload_callback
             self.raw_data = database.fetch_data(sql_commands.get_service_info, (f'{service_info[0]}',))
             self.load_data(self.raw_data)
             return super().place(**kwargs)
@@ -214,6 +220,14 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
 
                 #self.item_category_option.pack_forget()
                 #self.item_category_entry.pack(side=ctk.LEFT, fill="x", expand=1, padx=(0,width*0.0025), pady=(height*0.005))
+
+                if database.exec_nonquery([["UPDATE item_general_info SET name =?, Category =? WHERE UID =?", (self.item_name_entry.get(), self.item_category_entry.get(), self.item_id_label._text)],
+                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, Average_monthly_selling_rate = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry.get()), self.item_id_label._text)]]):
+                    messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes")
+                    self.reload_item()
+                    self.place_forget()
+                else:
+                    messagebox.showerror("Failed to Update", "An error occured")
                 
                 self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
@@ -374,8 +388,8 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 self.entries[i].insert(0, raw_data[i+1])
             self.set_entries('disabled')
             
-        def place(self, item_info, **kwargs):
-            
+        def place(self, item_info, item_reload_callback, **kwargs):
+            self.reload_item = item_reload_callback
             #print(item_info)
             self.raw_data = database.fetch_data(sql_commands.get_inventory_info, (f'{item_info[0]}',))
             self.load_data(raw_data=self.raw_data[0])

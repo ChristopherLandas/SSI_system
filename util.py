@@ -129,7 +129,22 @@ def record_action(usn: str, _type: str, action_code: str):
 def decode_action(type_code: str):
     if type_code.startswith('INVM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Make the Invoice {temp[-1]}' 
+        return f'Make the Invoice {temp[-1]}'
+    if type_code.startswith('CRI'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Recieved the item {temp[-1]} from recieving'
+    if type_code.startswith('TRNM'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Make the Invoice {temp[-1]}'
+    if type_code.startswith('DPSM'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Make the Invoice {temp[-1]}'
+    if type_code.startswith('DPSO'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Make the Invoice {temp[-1]}'
+
+
+    
 
 def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):
     font_tool = ctk.CTkFont(lbl._font[0], lbl._font[1]) if isinstance(lbl._font, tuple) else lbl._font
