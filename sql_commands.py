@@ -198,7 +198,7 @@ show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
-add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
+add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
 
@@ -337,13 +337,26 @@ get_disposal_items = "SELECT item_name, current_quantity AS disposed_qty, reason
 #ACCOUNT CREATION
 
 #PET INFO
-get_owners = "SELECT DISTINCT o_name FROM pet_info"
+get_owners = "SELECT owner_name, address, contact_number FROM pet_owner_info"
+
 get_pet_name = "SELECT id, p_name FROM pet_info"
 
 get_ids_pi = "SELECT id FROM pet_info"
-get_pet_info = "SELECT * FROM pet_info WHERE o_name = ?"
+
+get_pet_info = f"SELECT id, p_name FROM  pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id WHERE pet_owner_info.owner_name = ?"
+                
+get_pet_id_by_name_owner = f"SELECT pet_info.id FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
+                            WHERE p_name = ? AND pet_owner_info.owner_name = ?"  
+                
+get_pet_record=f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number\
+                FROM pet_info INNER JOIN pet_owner_info\
+                ON pet_info.owner_id = pet_owner_info.owner_id\
+                ORDER BY pet_owner_info.owner_name ASC"
+
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
-record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?)"
+insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+
+insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (? , ?, ?)"
 
 #HIST LOG
 get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
@@ -476,11 +489,11 @@ get_current_invoice_count = "SELECT COUNT(*) FROM recieving_item where id like '
 
 #fast or slow moving item
 get_selling_rate = "SELECT item_general_info.name,\
-                            case when SUM(case when MONTH(transaction_record.transaction_date) = 8\
+                            case when SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
                                                         then item_transaction_content.quantity\
                                                         ELSE 0 END) > item_settings.Average_monthly_selling_rate\
                                         then '🠉'\
-                                    when SUM(case when MONTH(transaction_record.transaction_date) = 8\
+                                    when SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
                                                         then item_transaction_content.quantity\
                                                         ELSE 0 END) < item_settings.Average_monthly_selling_rate\
                                         then '🠋'\
@@ -519,8 +532,14 @@ check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity <= SUM(ite
                                  GROUP BY invoice_item_content.Item_uid"
                     
 
-get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
-update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
+#get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
+update_pet_record_pet_info = "UPDATE pet_info SET p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ? WHERE id = ?"
+update_pet_record_pet_owner = f"UPDATE pet_owner_info\
+                                INNER JOIN pet_info ON pet_owner_info.owner_id = pet_info.owner_id\
+                                SET owner_name = ? ,\
+                                address = ? ,\
+                                contact_number = ?\
+                                WHERE pet_info.id = ? "
 
 insert_new_category = "INSERT INTO categories VALUES (?, ?)"
 
@@ -564,10 +583,11 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
 get_daily_sales_data_by_day = "SELECT transaction_uid, client_name, Attendant_usn, CONCAT('₱',FORMAT(Total_amount,2))AS total FROM transaction_record WHERE transaction_record.transaction_date = ?"
 
 
-get_scheduled_clients_today = f"SELECT invoice_record.client_name, pet_info.contact\
+get_scheduled_clients_today = f"SELECT invoice_record.client_name, pet_owner_info.contact_number\
                                 FROM invoice_record\
                                 INNER JOIN invoice_service_content ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
                                 INNER JOIN pet_info ON invoice_service_content.pet_uid = pet_info.id\
+                                INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
                                 WHERE invoice_record.State = 0\
                                 AND invoice_service_content.scheduled_date = CURRENT_DATE\
                                 GROUP BY invoice_record.client_name"
@@ -598,11 +618,17 @@ get_pet_service_date_sched = f"SELECT invoice_record.transaction_date, invoice_s
                                 AND invoice_service_content.patient_name = ?\
                                 AND invoice_record.invoice_uid = ?\
                                 AND invoice_service_content.service_name = ?"
-get_scheduled_clients_today = f"SELECT invoice_service_content.patient_name, invoice_record.client_name, invoice_service_content.service_name\
+get_scheduled_clients_today_service = f"SELECT invoice_service_content.patient_name, invoice_record.client_name, invoice_service_content.service_name\
                                 FROM invoice_record INNER JOIN invoice_service_content\
                                 ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
                                 WHERE invoice_record.State = 0 AND invoice_service_content.scheduled_date = CURRENT_DATE\
                                 GROUP BY invoice_service_content.patient_name"
+
+get_pet_view_record = f"SELECT pet_info.id, pet_info.p_name, pet_info.`type`, pet_info.sex, pet_info.breed, pet_info.weight, pet_info.bday,\
+                        pet_owner_info.owner_name, pet_owner_info.address, pet_owner_info.contact_number\
+                        FROM pet_info\
+                        INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
+                        WHERE id = ?"
 
 #SALES 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"

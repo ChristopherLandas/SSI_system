@@ -1406,17 +1406,26 @@ class patient_info_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         #self.label = ctk.CTkLabel(self, text='6').pack(anchor='w')
-
+        
         def update_table():
             self.refresh_btn.configure(state = "disabled")
-            self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
+            self.refresh_btn.after(1000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.pet_data_view.pack_forget()
+            
+            self.data = database.fetch_data(sql_commands.get_pet_record)
             self.pet_data_view.update_table(self.data)
-            self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+            self.pet_data_view.pack()
         
+        self.search_quary = "SELECT id, p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
+                                   WHERE p_name LIKE '%?%' OR pet_owner_info.owner_name LIKE '%?%' ORDER BY p_name ASC"
+
         self.grid_forget()
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
+        
+        self.search_var = ctk.StringVar()
 
+        self.close = ctk.CTkImage(light_image=Image.open("image/close.png"),size=(16,16))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
         self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
@@ -1425,51 +1434,69 @@ class patient_info_frame(ctk.CTkFrame):
         self.trash_icon = ctk.CTkImage(light_image= Image.open("image/trash.png"), size=(22,25))
         self.gen_icon = ctk.CTkImage(light_image=Image.open("image/patient_icon.png"),size=(18,20))
 
+        def search_callback(var, index, mode):
+            if self.search_var.get() != '':
+                result = database.fetch_data(self.search_quary.replace("?", self.search_var.get()))
+                self.pet_data_view.update_table(result)
+                self.search_btn.configure(state='normal', fg_color = Color.Red_Tulip, hover_color = Color.Red_Pastel, image=self.close)
+            else:
+                self.search_btn.configure(state='disabled', fg_color = Color.White_Lotion, hover_color = "light grey", image=self.search)
+                update_table()
+
+
         self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=1, padx=(width*0.005), pady=(height*0.01))
 
-        self.top_frame =ctk.CTkFrame(self, fg_color=Color.White_Lotion, height = height*0.055, corner_radius=0)
+        self.top_frame =ctk.CTkFrame(self, fg_color=Color.White_Lotion, height = height*0.06, corner_radius=0)
         self.top_frame.grid(row=0, column=0, sticky="nsw", padx=(width*0.005,0), pady=(height*0.01,0))
         
-        
         self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side="left", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack(side='left', padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
-                                        width=width*0.005)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", text_color='black', border_color = 'light grey',
+                                         border_width=1, corner_radius=5, fg_color=Color.White_Lotion, placeholder_text_color="light grey",
+                                         font=("DM Sans Medium", 14), textvariable=self.search_var)
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", state="disabled",
+                                        width=width*0.005, command=lambda:self.search_var.set(""))
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+    
         self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=update_table)
         self.refresh_btn.pack(side="left")
         
         self.add_record_btn = ctk.CTkButton(self.top_frame, width=width*0.08, height = height*0.05, text="Add Record",image=self.add_icon, font=("DM Sans Medium", 14),
                                             command=lambda:self.new_record.place(relx = .5, rely = .5, anchor = 'c'))
         self.add_record_btn.pack(side="left",padx=(width*0.005), pady=(height*0.01))
-
+    
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.gen_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
                                               command=self.view_record)
         self.view_record_btn.pack(side="left",padx=(0,width*0.005), pady=(height*0.01))
-
-        self.treeview_frame =ctk.CTkFrame(self,fg_color=Color.White_Color[3],corner_radius=0)
-        self.treeview_frame.grid(row=1, column=0, columnspan=5,sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
-        self.treeview_frame.grid_columnconfigure(0, weight=1)
-
-        self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
         
-        self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!30',)
-        self.pet_data_view.grid(row=0, column=0, columnspan=3, pady=(height*0.01))
+        self.content_frame =ctk.CTkFrame(self,fg_color=Color.White_Lotion,corner_radius=0)
+        self.content_frame.grid(row=1, column=0, columnspan=5,sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
+        self.content_frame.grid_columnconfigure(0, weight=1)
+        self.content_frame.grid_rowconfigure(0, weight=1)
+        
+        self.treeview_frame =ctk.CTkFrame(self.content_frame,fg_color="transparent",corner_radius=0)
+        self.treeview_frame.grid(row=0, column=0, columnspan=5,sticky="nsew",padx=(width*0.005), pady=(height*0.01))
 
-        self.new_record = Pet_info_popup.new_record(self, (width, height, acc_cred, acc_info), self.update)
-        self.record_view = Pet_info_popup.view_record(self, (width, height, acc_cred, acc_info), self.update)
+        self.data = database.fetch_data(sql_commands.get_pet_record)
+        
+        self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .79, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/OwnerName:{int(width*.225)}-tl/ContactNo:{int(width*.165)}-tr/Action:{int(width*.075)}-bD!30!33',)
+        self.pet_data_view.pack()
 
+        self.search_var.trace_add('write', search_callback)
+        
+        self.new_record = Pet_info_popup.new_record(self, (width, height, acc_cred, acc_info), update_table)
+        self.record_view = Pet_info_popup.view_record(self, (width, height, acc_cred, acc_info), update_table)
+        
     def update(self) -> None:
-        self.data = database.fetch_data('SELECT id, p_name, o_name, contact from pet_info')
+        self.data = database.fetch_data(sql_commands.get_pet_record)
         self.pet_data_view.update_table(self.data)
         return super().update()
     
@@ -1481,7 +1508,7 @@ class patient_info_frame(ctk.CTkFrame):
             messagebox.showwarning('Warning','No Record is selected')
 
 class reports_frame(ctk.CTkFrame):
-    global width, height
+    global width, height, acc_cred, acc_info
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         '''constants'''
@@ -1666,7 +1693,7 @@ class reports_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0)) """
         
         self.show_gen_report = ctk.CTkButton(self.top_con_frame, image=self.generate_report_icon, width=width*0.125,  text="Generate Report", height=height*0.0575, font=("DM Sans Medium", 14),
-                                             command = lambda: self.save_as_popup.place(relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
+                                             command = lambda: self.save_as_popup.place(relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get(), date_entered=self.date_selected_label._text))
         self.show_gen_report.pack(side="right")
         #generating reports end
 
@@ -1753,6 +1780,7 @@ class reports_frame(ctk.CTkFrame):
         self.update_invetory_graph()
         self.update_invetory_graph()
         #endregion
+
 
         self.save_as_popup = save_as_popup.show_popup(self, (width , height), acc_cred[0][0])
         self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height), acc_cred[0][0])
