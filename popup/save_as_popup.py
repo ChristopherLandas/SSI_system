@@ -184,8 +184,9 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.path_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
             ctk.CTkLabel(self.path_frame, text='File Path:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht,height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
             self.path_entry = ctk.CTkEntry(self.path_frame, font=("DM Sans Medium", 14),height=height*0.055)
-            self.path_entry.insert(0, self.DEFAULT_PATH)
+            #self.path_entry.insert(0, self.DEFAULT_PATH)
             #j
+            self.path_entry.insert(0, 'G:/thesis-reports')
             self.path_entry.pack(side="left", fill='x', expand=1)
             ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
             #self.file_type_entry = ctk.CTkEntry(self.main_frame, height=height*0.03, corner_radius=20, font=("DM Sans Medium", (height*0.023)), show='*')
@@ -1134,6 +1135,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             service_max = data_temp[0]
         if data_temp[1] > service_max:
             service_max = data_temp[1]
+        total_data_temp = float(data_temp[0]) + float(data_temp[1])
 
         service_max = round_up_to_nearest_100000(service_max)
         step_val = service_max * 0.1
@@ -1152,43 +1154,13 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         pc.simpleLabels = 0
         pc.slices.label_simple_pointer = 1
         pc.data = data_temp
-        pc.labels = [f'Items ({data_temp[0]})', f'Services ({data_temp[1]})']
+        pc.labels = [f'Items ({percentage(data_temp[0], total_data_temp)})', f'Services ({percentage(data_temp[1], total_data_temp)})']
         pc.slices[0].fillColor = colors.lightgreen
         pc.slices[1].fillColor = colors.pink
         pc.slices[1].popout = 10
         d.add(pc, '')
         renderPDF.drawToFile(d, my_path, '')
-
-        #footer
-        '''
-        filename = f'image/footer.pdf'
-        pdf = SimpleDocTemplate(
-            filename=filename,
-            pagesize=letter,
-        )
-        pdf.bottomMargin = 20
-        pdf.leftMargin = 20
-        pdf.rightMargin = 20
-        footer_content = [['Dr. Joseph Z. Angeles Veterinary Clinic', 'Page 1 of 1']]
-        table_footer = Table(footer_content)
-        tbl_footer_style = TableStyle(
-            [
-            #text alignment, starting axis, -1 = end
-            ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
-            #font style
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
-            ('FONTSIZE', (0, 0), (0, -1), 14),
-            ('FONTSIZE', (0, 0), (0, 0), 10),
-            #space at the bottom
-            ('TOPPADDING', (0, 0), (0, -1), 670),
-            ('RIGHTPADDING', (0, 0), (0, 0), 300),
-            ]
-        )
-        table_footer.setStyle(tbl_footer_style)
-        elems = []
-        elems.append(table_footer)
-        pdf.build(elems)
-        '''
+        
         #content
         filename = f'{desktop}\\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
         #filename = f'{desktop}\\report_Test.pdf'
@@ -1617,7 +1589,7 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num
 
     report_header.setStyle(tbl_header_style)
 
-    inventory_report_data_temp = [[f'Inventory Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {acc_name_preparator}', f'Date: {current_date}'], ['Item', 'Stock', 'Status']]
+    inventory_report_data_temp = [[f'Inventory Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {acc_name_preparator}', f'Date: {current_date}'], ['Item Code', 'Item Description', 'Quantity']]
     #add data for table
     current_stock = database.fetch_data(sql_commands.get_current_stock_group_by_name)
     bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)

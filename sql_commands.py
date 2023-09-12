@@ -337,11 +337,11 @@ get_disposal_items = "SELECT item_name, current_quantity AS disposed_qty, reason
 #ACCOUNT CREATION
 
 #PET INFO
-get_owners = "SELECT DISTINCT o_name FROM pet_info"
+get_owners = "SELECT DISTINCT owner_name FROM pet_owner_info"
 get_pet_name = "SELECT id, p_name FROM pet_info"
 
 get_ids_pi = "SELECT id FROM pet_info"
-get_pet_info = "SELECT * FROM pet_info WHERE o_name = ?"
+get_pet_info = "SELECT * FROM pet_owner_info WHERE owner_name = ?"
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
 record_patient = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?,?,?)"
 
@@ -520,7 +520,7 @@ check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity <= SUM(ite
                     
 
 get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
-update_pet_record = "UPDATE pet_info SET o_name = ?, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
+update_pet_record = "UPDATE pet_info SET pet_owner_info.owner_name = ? from pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id, p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, address = ?, contact =? WHERE id = ?"
 
 insert_new_category = "INSERT INTO categories VALUES (?, ?)"
 
