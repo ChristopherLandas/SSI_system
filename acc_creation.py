@@ -402,7 +402,7 @@ class creation_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log']
+        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
@@ -462,6 +462,7 @@ class creation_frame(ctk.CTkFrame):
             return
         pss = encrypt.pass_encrypt(self.password_entry.get())
         val = (self.username_entry.get(), )+ tuple(self.values[k] for k in self.values.keys())
+        print(val)
         database.exec_nonquery([[sql_commands.create_acc_cred, (self.username_entry.get(), pss['pass'], pss['salt'])],
                                 [sql_commands.create_acc_info, (self.username_entry.get(), self.fullname_entry.get(), self.position_selection.get())],
                                 [sql_commands.create_acc_access_level, val]])
@@ -543,7 +544,7 @@ class roles_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log']
+        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General_Settings']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));

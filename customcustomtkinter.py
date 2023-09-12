@@ -12,6 +12,7 @@ from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
 from tkcalendar import Calendar
 import Theme
 import datetime
+from PIL import Image
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -416,12 +417,11 @@ class customcustomtkinter:
                     date_text = str(date_to_words(str(self.cal.get_date())))
                 else:
                     date_text = "Invalid Format"
-                #j
-                #checking if label is a CTkLabel or a StringVar
-                if str(type(label)) == '<class \'customtkinter.windows.widgets.ctk_label.CTkLabel\'>':
-                    label.configure(text=date_text)
-                else:
+
+                if str(type(label)) == "<class 'tkinter.StringVar'>":
                     label.set(date_text)
+                else:
+                    label.configure(text=date_text)
                 
                 if set_date_callback:
                     set_date_callback()
@@ -635,6 +635,115 @@ class customcustomtkinter:
             self._button_text  = button_text
             self.button = ctk.CTkButton(self, width * .8, height * .7, 12, text = self._button_text, command= lambda: self._tab.place(relx = .5, rely=  .5, anchor = 'c'))
             self.button.place(relx = .5, rely = .5, anchor = 'c')
+    
+    #ON HOLD
+    class cctkSearchBar(ctk.CTkFrame):
+        def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, 
+                    bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, 
+                    background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, 
+                    
+                    #Additional Arguments
+                    font: Tuple[str, int] = ("Arial", 14),
+                    m_width: int = 0, m_height: int = 0,
+                    place_width: int = 0, place_height: int = 0,
+                    dp_width:int = 200,
+                    quary_command: str = None,
+                    command_callback:callable = None,
+                    placeholder: str = None,
+                    
+                    **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
+            
+            self._font = font
+            self.pack_propagate(0)
+            self.m_height = m_height
+            self.m_width = m_width
+            self.command_callback = command_callback
+            #temp for storing previous restult
+            self.content = []
+            self.answer = None
+            
+            
+
+            def command_call(i = None):
+                if i != None:
+                    self.answer = [(tuple(self.content[i]._text.strip().split(" - ")))]
+                else:
+                    self.answer = [(tuple(i.strip().split(" - "))) for i in self.current_data]
+                    
+                if command_callback:
+                    self.command_callback()
+        
+            def add_results(results):
+                if results:
+                    for i in range(len(results)):
+                        self.content.append(ctk.CTkButton(self.results, text=results[i], font=self._font, corner_radius=0, width=dp_width,
+                                                        height=self._current_height*0.85,fg_color=Color.White_Ghost,
+                                                        border_width=1,border_color=Color.White_Platinum, hover_color=Color.White_SilverSand,
+                                                        text_color=Color.Blue_Maastricht, anchor='w'))
+                        self.content[i].configure(command=partial(command_call, i))
+                        self.content[i].pack()
+                        
+            def clear_results():
+                [s.pack_forget() for s in self.content]
+                
+            def close_search():
+                self.search_var.set("")
+
+            def search_callback(var, index, mode):
+                self.current_data =[]
+                
+                if self.search_var.get() != "" and quary_command != None:
+                    raw_data = database.fetch_data(quary_command.replace("?", self.search_var.get()))
+                    
+                    data = [(f"  {' - '.join(s)}") for s in raw_data]
+                    self.current_data=data
+                    
+                    clear_results()
+                    self.content.clear()
+                    
+                else:
+                    clear_results()
+                    self.content.clear()
+                    
+                if self.current_data:
+                    self.results.place(relx=0,rely=0, y=self._current_height+place_height, x=self.search_label._current_width*1.5 + place_width)
+                    self.results.place(relx=0,rely=0, y=self._current_height+place_height, x=self.search_label._current_width*1.5 + place_width)
+                    self.search_btn.configure(state = 'normal')
+                    
+                    self.close_btn.pack(side="left", padx=(0, self.m_width*0.0025), pady=(self.m_height*0.0055),fill="y", expand=0)
+                    add_results(self.current_data)
+                else:
+                    self.search_btn.configure(state = 'disabled')
+                    self.close_btn.pack_forget()
+                    self.results.place_forget()
+                
+        
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+            self.close = ctk.CTkImage(light_image=Image.open("image/close.png"),size=(16,16))
+
+            self.search_label = ctk.CTkLabel(self, text="Search", font=self._font, text_color="grey", fg_color="transparent")
+            self.search_label.pack(side="left", padx=(self.m_width*0.0075,self.m_width*0.005))
+            self.search_var = ctk.StringVar()
+
+            self.search_entry = ctk.CTkEntry(self, placeholder_text=placeholder, textvariable=self.search_var, text_color='black', border_color = 'light grey',
+                                            border_width=1, corner_radius=5, fg_color=Color.White_Lotion,placeholder_text_color="light grey", font=self._font,)
+            self.search_entry.pack(side="left", padx=(0, self.m_width*0.0025), pady=(self.m_height*0.0055),  fill="both", expand=1)
+            
+            self.search_btn = ctk.CTkButton(self, text="", image=self.search, fg_color=Color.White_Lotion, hover_color="light grey", 
+                                            width=self.m_width*0.005, state='disabled', command=command_call)
+            self.search_btn.pack(side="left", padx=(0, self.m_width*0.0025), pady=(self.m_height*0.0055),fill="y", expand=0)
+
+            self.close_btn = ctk.CTkButton(self, text="", image=self.close, fg_color = Color.Red_Pastel, command=close_search,
+                                        hover_color = Color.Red_Tulip, state = 'normal', width=self.m_width*0.005)
+            
+            self.search_var.trace_add('write', search_callback)
+    
+            self.results = ctk.CTkFrame(self.master.master, fg_color=fg_color, corner_radius=0, border_width=2, border_color="light grey")
+            
+            
+        def get(self):
+            return self.answer
 
 class customcustomtkinterutil:
     class button_manager:
