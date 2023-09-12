@@ -106,17 +106,43 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                     self.yearly_option.pack(side = ctk.LEFT,fill="x", expand=1, padx = (width * .005))
                     yearly_callback()
 
+            #j
+            #create global variable for daily date text
             global daily_date_text_var
             daily_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B %d, %Y"))
+            #create global variable for a better formate of daily date text
             global daily_date_text_var_split
             r=re.split("[^a-zA-Z\d]+",daily_date_text_var.get())
             daily_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
-            def write_callback2(var, index, mode):
+            #callback for changing file name to current selected daily date
+            def write_callback(var, index, mode):
                 r=re.split("[^a-zA-Z\d]+",daily_date_text_var.get())
                 global daily_date_text_var_split
                 daily_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+                #change file name
                 daily_callback()
-            daily_date_text_var.trace_add('write', callback=write_callback2)
+            #add trace for whenever string var is changed
+            daily_date_text_var.trace_add('write', callback=write_callback)
+
+            #create global variable for monthly date text
+            global monthly_date_text_var
+            monthly_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B"))
+            #callback for changing file name to current selected daily date
+            def change_month_name_callback(var, index, mode):
+                #change file name
+                monthly_callback()
+            #add trace for whenever string var is changed
+            monthly_date_text_var.trace_add('write', callback=change_month_name_callback)
+
+            #create global variable for daily date text
+            global annual_date_text_var
+            annual_date_text_var = StringVar(value=datetime.datetime.now().strftime("%Y"))
+            #callback for changing file name to current selected daily date
+            def change_year_name_callback(var, index, mode):
+                #change file name
+                yearly_callback()
+            #add trace for whenever string var is changed
+            annual_date_text_var.trace_add('write', callback=change_year_name_callback)
             
             def reset():
                 self.place_forget()
