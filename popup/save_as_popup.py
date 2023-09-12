@@ -143,6 +143,7 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                 yearly_callback()
             #add trace for whenever string var is changed
             annual_date_text_var.trace_add('write', callback=change_year_name_callback)
+
             
             def reset():
                 self.place_forget()
@@ -185,9 +186,7 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.path_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
             ctk.CTkLabel(self.path_frame, text='File Path:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht,height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
             self.path_entry = ctk.CTkEntry(self.path_frame, font=("DM Sans Medium", 14),height=height*0.055)
-            #self.path_entry.insert(0, self.DEFAULT_PATH)
-            #j
-            self.path_entry.insert(0, 'G:/thesis-reports')
+            self.path_entry.insert(0, self.DEFAULT_PATH)
             self.path_entry.pack(side="left", fill='x', expand=1)
             ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
             #self.file_type_entry = ctk.CTkEntry(self.main_frame, height=height*0.03, corner_radius=20, font=("DM Sans Medium", (height*0.023)), show='*')
@@ -298,7 +297,25 @@ def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
                                           self.path_entry.get())
                 reset()
 
+            
+            #create global variable for inventory date text
+            global inventory_date_text_var
+            inventory_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B %d, %Y"))
+            #create global variable for a better formate of inventory date text
+            global inventory_date_text_var_split
+            r=re.split("[^a-zA-Z\d]+",inventory_date_text_var.get())
+            inventory_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+            #callback for changing file name to current selected inventory date
+            def write_inventory_callback(var, index, mode):
+                r=re.split("[^a-zA-Z\d]+",inventory_date_text_var.get())
+                global inventory_date_text_var_split
+                inventory_date_text_var_split='_'.join([ i for i in r if len(i) > 0 ])
+                #change file name
+                inventory_date_callback()
+            #add trace for whenever string var is changed
+            inventory_date_text_var.trace_add('write', callback=write_inventory_callback)
 
+            
             def change_name_entry(name: str = None):
                 self.file_name_entry.delete(0, ctk.END)
                 self.file_name_entry.insert(0, name)
@@ -309,6 +326,9 @@ def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
                 #self.daily_date_entry.insert(0, date or self.CURRENT_DAY.strftime('%B %d, %Y'))
                 #self.daily_date_entry.configure(state = 'readonly')
                 self.daily_date_entry.configure(text=f"{date or self.CURRENT_DAY.strftime('%B %d, %Y')}")
+
+            def inventory_date_callback(e: any = None):
+                change_name_entry('_'.join(re.findall(r'(\w+)',  inventory_date_text_var_split))+'_inventory_report.pdf')
 
             def path_save_cmd():
                 save_path = filedialog.askdirectory(title= 'Save')
@@ -372,12 +392,12 @@ def show_popup_inventory(master, info:tuple, user: str) -> ctk.CTkFrame:
             self.setting_frame.pack_propagate(0)
             self.setting_frame.grid(row=5, column=0, sticky = 'nsew', padx=(width*0.005))
             #daily
-            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5)
+            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5, textvariable=inventory_date_text_var)
             self.daily_date_entry.pack(side = ctk.LEFT, fill="x", expand=1, padx = (width * .005), pady=(height*0.005))
             change_date_entry()
-            change_name_entry('_'.join(re.findall(r'(\w+)', self.daily_date_entry._text))+'_report.pdf')
+            change_name_entry('_'.join(re.findall(r'(\w+)', daily_date_text_var_split))+'_report.pdf')
             self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
-                                                       command=lambda:cctk.tk_calendar(self.daily_date_entry, "%s", date_format="word", max_date=datetime.datetime.now()) )
+                                                       command=lambda:cctk.tk_calendar(inventory_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
             self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .005), pady=(height*0.005))
             
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
@@ -478,8 +498,6 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         return math.ceil(count/10 ** len_div) * 10 ** len_div
     #get percentage on pie chart
     def percentage(part, whole):
-        print(part)
-        print(whole)
         Percentage = 100 * float(part)/float(whole)
         return str(round(Percentage, 2)) + '%'
     #generate footer based on number of pages
@@ -1516,6 +1534,7 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num
     ttfFile = os.path.join('C:\Windows\Fonts', 'Timesbd.ttf')
     pdfmetrics.registerFont(TTFont("Times-New-Roman-Bold", ttfFile))
     
+    
     '''date_temp = 1
     if self.date_selected_label._text.startswith(self.year_option.get()):
         date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%Y-%m-%d').strftime('%Y-%m-%d')
@@ -1564,7 +1583,7 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num
     pdf.build(elems)
 
     #content
-    filename = f'{path}\\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
+    filename = f'{path}\\{file_name}'
     pdf = SimpleDocTemplate(
         filename=filename,
         pagesize=letter
@@ -1591,16 +1610,18 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num
 
     report_header.setStyle(tbl_header_style)
 
-    inventory_report_data_temp = [[f'Inventory Report as of {month_date_temp} {day_date_temp}, {y_temp}'], [f'Prepared by: {acc_name_preparator}', f'Date: {current_date}'], ['Item Code', 'Item Description', 'Quantity']]
+    inventory_report_data_temp = [[f'Inventory Report as of {month_date_temp} {day_date_temp}, {y_temp}'], ['Item Code', 'Item Description', 'Quantity']]
     #add data for table
-    current_stock = database.fetch_data(sql_commands.get_current_stock_group_by_name)
+    current_stock = database.fetch_data(sql_commands.get_inventory_info_with_uid)
     bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)
     bought_item_dict = {s[0]: s[1] for s in bought_item}
-    inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item_dict else bought_item_dict[s[0]]), s[1]) for s in current_stock]
+    inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item_dict else bought_item_dict[s[0]]), s[1], s[2]) for s in current_stock]
+    ctr = 0
     for x in inventory_report_data:
         temp_data = []
+        temp_data.append(x[3])
+        #temp_data.append(x[0])
         temp_data.append(x[0])
-        temp_data.append(x[1])
         temp_data.append(x[2])
         inventory_report_data_temp.append(temp_data)
     table_content = Table(inventory_report_data_temp)
@@ -1610,10 +1631,9 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num
         [
         #text alignment, starting axis, -1 = end
         ('SPAN', (0, 0), (-1, 0)),
-        ('SPAN', (1, 1), (2, 1)),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('ALIGN', (0, 1), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
+        ('ALIGN', (1, 1), (1, -1), 'LEFT'),
         ('ALIGN', (2, 1), (2, -1), 'RIGHT'),
         #font style
         ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
@@ -1669,10 +1689,13 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, date_num
     #add footer
     p1 = pdfrw1(filename)
     p2 = pdfrw1("image/footer.pdf")
-
+    p3 = pdfrw1("image/footer2.pdf")
+            
     for page in range(len(p1.pages)):
         merger = pdfrw(p1.pages[page])
         merger.add(p2.pages[page]).render()
+        if page == (len(p1.pages)-1):
+                merger.add(p3.pages[0]).render()
 
     writer = pdfrw2()
     writer.write(filename, p1)
