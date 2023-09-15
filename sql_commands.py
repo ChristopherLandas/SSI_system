@@ -380,6 +380,15 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
 
+get_inventory_info_with_uid = "SELECT item_general_info.name,\
+                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
+                                    item_general_info.UID FROM item_general_info\
+                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                   GROUP BY item_general_info.name\
+                                   ORDER BY item_general_info.UID;"
+
 get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
                                       		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
                                       FROM item_transaction_content\
