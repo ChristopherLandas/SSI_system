@@ -398,6 +398,17 @@ class customcustomtkinter:
             if(self.data_grid_btn_mng.active is None):
                 return None
             return self._data[self.data_frames.index(self.data_grid_btn_mng.active)]
+        
+        def remove_selected_data(self):
+            index = self.get_active_index()
+            self.data_grid_btn_mng._og_color.pop(index)
+            frame = self.data_frames[index]
+            frame.destroy()
+            self.data_frames.pop(index)
+            self.data_grid_btn_mng.active = None
+
+        def get_active_index(self):
+            return self.data_frames.index(self.data_grid_btn_mng.active)
 
     class tk_calendar(ctk.CTkToplevel):
         def __init__(self, label,format, *args, fg_color: str or Tuple[str, str] or None = None, date_format: str ="numerical",
