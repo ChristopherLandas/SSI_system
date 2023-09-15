@@ -23,6 +23,7 @@ from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_po
 import copy
 import calendar
 import acc_creation
+import network_socket_util as nsu
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -41,6 +42,7 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         self._master = master
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        '''
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -60,7 +62,6 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        '''
 
         '''Fonts'''
         try:
@@ -743,13 +744,23 @@ class transaction_frame(ctk.CTkFrame):
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',)
         self.update_payment_treeview()
         self.payment_treeview.pack()
+
+        '''def received_callback(m: str):
+            data = database.fetch_data(sql_commands.get_selected_payment_invoice_info, (m, ))[0]
+            self.payment_treeview.add_data(data)
+
+        self.receiving_entity = nsu.network_receiver('127.0.0.1', 3312, received_callback)
+        self.receiving_entity.start_receiving()
         
         self.proceeed_button = ctk.CTkButton(self.payment_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
         self.proceeed_button.configure(command= self.proceed_to_pay)
-        self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
+        self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")''' 
         
         #self.show_proceed:ctk.CTkFrame =transaction_popups.show_transaction_proceed_demo(self,(width, height))
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
+
+        #self.sender = nsu.network_sender('127.0.0.1', 3312, '127.0.0.1', 3345)
+        #initial network message sender
         load_main_frame(0)
 
     def load_invoice_content(self, _:any = None):
@@ -789,7 +800,29 @@ class transaction_frame(ctk.CTkFrame):
             else:
                 messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
         else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+        #partially disabled for networking
+
+        '''data = self.invoice_treeview.get_selected_data()
+        if(data):
+            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+            if 0 not in stock_quan:
+                def response_callback(i: int):
+                    if i == 1:
+                        database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
+                        self.invoice_treeview.remove_selected_data()
+                        messagebox.showinfo("Success", "Data has been sent to the payment")
+                    else:
+                        messagebox.showerror("Error", "Failed sent data to the cashier")
+                if self.sender._receiving_callback is None:
+                    self.sender._receiving_callback = response_callback
+                self.sender.send(data[0])
+            else:
+                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")'''
+        #initial test for network communication
+        
     
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
@@ -2563,4 +2596,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-#dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'aila', datetime.datetime.now)
