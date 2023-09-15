@@ -478,6 +478,20 @@ get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                             WHERE invoice_record.State = 1\
                             GROUP BY invoice_record.invoice_uid"
 
+get_selected_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
+                                        invoice_record.client_name,\
+                                        CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                                        CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                                        CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                        DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                    FROM invoice_record\
+                                    LEFT JOIN invoice_service_content\
+                                        ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                    LEFT JOIN invoice_item_content\
+                                        ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                                    WHERE invoice_record.invoice_uid = ?\
+                                    GROUP BY invoice_record.invoice_uid"
+
 set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1 WHERE invoice_uid = ?"
 set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
 
