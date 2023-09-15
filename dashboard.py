@@ -1065,11 +1065,13 @@ class payment_frame(ctk.CTkFrame):
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
         self.receiving_entity = nsu.network_receiver('127.0.0.1', 250, self.received_callback)
+        self.receiving_entity.start_receiving()
 
         self.grid_forget()
 
-    def received_callback(m):
-        print(m)
+    def received_callback(self, m):
+        database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (m, )]])
+        self.update_payment_treeview()
 
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
@@ -2784,4 +2786,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-dashboard(None, 'aila', datetime.datetime.now)
+dashboard(None, 'Jrizal', datetime.datetime.now)
