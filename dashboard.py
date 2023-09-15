@@ -874,6 +874,8 @@ class reception_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         global width, height, acc_cred, acc_info, mainframes
 
+        self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 251, self.post_sent_callback)
+
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
         self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
@@ -942,6 +944,12 @@ class reception_frame(ctk.CTkFrame):
 
         self.grid_forget()
 
+    def post_sent_callback(self, i):
+        if i == 1:
+            self.update_invoice_treeview()
+        else:
+            messagebox.showerror("Error", "An error occured")
+
     def update_invoice_treeview(self):
         self.invoice_treeview.update_table(database.fetch_data(sql_commands.get_invoice_info))
 
@@ -960,12 +968,23 @@ class reception_frame(ctk.CTkFrame):
             transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.invoice_treeview.get_selected_data()[0])
 
     def proceed_to_payment(self):
-        data = self.invoice_treeview.get_selected_data()
+        '''data = self.invoice_treeview.get_selected_data()
         if(data):
             stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
             if 0 not in stock_quan: 
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
                 self.update_invoice_treeview()
+            else:
+                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+        self.update_invoice_treeview()'''
+
+        data = self.invoice_treeview.get_selected_data()
+        if(data):
+            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+            if 0 not in stock_quan: 
+                self.sender_entity.send(data[0])
             else:
                 messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
         else:
@@ -1045,7 +1064,12 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
+        self.receiving_entity = nsu.network_receiver('127.0.0.1', 250, self.received_callback)
+
         self.grid_forget()
+
+    def received_callback(m):
+        print(m)
 
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
