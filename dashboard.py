@@ -874,7 +874,7 @@ class reception_frame(ctk.CTkFrame):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         global width, height, acc_cred, acc_info, mainframes
 
-        self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 251, self.post_sent_callback)
+        self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252, self.post_sent_callback)
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
