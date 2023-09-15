@@ -402,7 +402,7 @@ class creation_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
+        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
@@ -544,7 +544,7 @@ class roles_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General_Settings']
+        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
