@@ -564,7 +564,7 @@ class dashboard_frame(ctk.CTkFrame):
 
         return super().grid(**kwargs)
 
-class reception_frame(ctk.CTkFrame):
+class transaction_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         global width, height, acc_cred, acc_info, mainframes
@@ -585,6 +585,88 @@ class reception_frame(ctk.CTkFrame):
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
         self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
         
+        """ self.grid_columnconfigure((1), weight=1)
+        self.grid_rowconfigure((1), weight=1)
+
+        self.or_num_label = ctk.CTkLabel(self, fg_color=Color.White_Ghost, corner_radius=5, width=width*0.125, height = height*0.05,
+                                         text="OR#: 0001", font=("DM Sans Medium", 15))
+        self.or_num_label.grid(row=0, column=0, padx=(width*0.005,0), pady=(height*0.01), sticky="w")
+
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Ghost, width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=2, padx=(width*0.005),  pady=(height*0.01))
+
+        self.top_frame = ctk.CTkFrame(self, fg_color="transparent", )
+        self.top_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
+
+
+        self.client_name_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, width=width*0.4, height=height*0.05)
+        self.client_name_frame.grid(row=0, column=1, sticky="w", padx=(width*0.005))
+        self.client_name_frame.pack_propagate(0)
+
+        self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
+        self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
+
+        self.client_name_entry = ctk.CTkOptionMenu(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color='black', command= change_customer_callback)
+        self.client_name_entry.set('')
+        self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
+        self.client_name_entry.configure(values = self.client_names)
+        self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
+
+        self.transact_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3])
+        self.transact_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+
+        self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.675,
+                                                   column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30')
+        self.transact_treeview.pack(pady=(height*0.01,0))
+        self.transact_treeview.bd_commands = bd_commands
+
+        self.bottom_frame = ctk.CTkFrame(self.transact_frame, fg_color="transparent", height=height*0.05)
+        self.bottom_frame.pack(pady=(height*0.01), fill="x", padx=(width*0.005))
+        #self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+
+        self.add_particulars = ctk.CTkButton(self.bottom_frame, width=width*0.125, height=height*0.05, text='Add Particulars',
+                                             image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
+        self.add_particulars.pack(side="left",  padx=(width*0.005, 0))
+
+        self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        self.price_total_frame.pack(side="right")
+        self.price_total_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.price_total_frame, text="Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+        self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text="0,000.00", font=("Arial", 14))
+        self.price_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+        self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        self.item_total_frame.pack(side="right", padx=(0,width*0.0075))
+        self.item_total_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+        self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("Arial", 14))
+        self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+        self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        self.services_total_frame.pack(side="right", padx=(0,width*0.0075))
+        self.services_total_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+        self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="0,000.00", font=("Arial", 14))
+        self.services_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.1,font=("Arial", 14), compound="right",   
+                                             command=lambda:transaction_popups.show_transaction_proceed(self, (width, height, acc_cred), self.services_total_amount._text,
+                                                            self.item_total_amount._text, self.price_total_amount._text, self.transact_treeview._data,
+                                                            self.client_name_entry.get() or 'N/A', self.transact_treeview, self.service_dict).place(relx = .5, rely = .5, anchor = 'c'))
+        self.proceeed_button.grid(row=3, column=2, pady=(0,height*0.025),padx=(0, width*0.005), sticky="e") 
+
+        self.show_list_item: ctk.CTkFrame = transaction_popups.show_item_list(self, (width, height), self.transact_treeview, self.change_total_value_item)
+        self.show_services_list: ctk.CTkFrame = transaction_popups.show_services_list(self, (width, height), self.transact_treeview, self.change_total_value_service)
+        #self.show_proceed_transact: ctk.CTkFrame =
+        self.show_customer_info:ctk.CTkFrame = transaction_popups.customer_info(self, (width, height))
+        self.show_sched_service:ctk.CTkFrame = transaction_popups.scheduled_services(self,(width, height))
+        self.show_particulars:ctk.CTkFrame = transaction_popups.add_particulars(self,(width, height), self.transact_treeview, self.change_total_value_item, self.change_total_value_service, self.service_dict)
+        """
+        
         selected_color = Color.Blue_Yale
         
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -602,7 +684,7 @@ class reception_frame(ctk.CTkFrame):
         self.invoice_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
         self.payment_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
         
-        self.transact_frames=[self.invoice_frame]
+        self.transact_frames=[self.invoice_frame, self.payment_frame]
         self.active_transact_frames = None
         
         def load_main_frame(cur_frame: int):
@@ -627,7 +709,19 @@ class reception_frame(ctk.CTkFrame):
         self.invoice_button.grid()
         self.invoice_button.update_children()
         
-        self.button_manager = cctku.button_manager([self.invoice_button], selected_color, False, 0)
+        self.payment_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+
+        self.payment_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.payment_button.configure(command=partial(load_main_frame, 1))
+        self.payment_icon = ctk.CTkLabel(self.payment_button, text="",image=self.payment_icon)
+        self.payment_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.payment_label = ctk.CTkLabel(self.payment_button, text="PAYMENT", text_color="white",  font=("DM Sans Medium",14))
+        self.payment_label.pack(side="left")
+        self.payment_button.grid()
+        self.payment_button.update_children()
+        
+        self.button_manager = cctku.button_manager([self.invoice_button, self.payment_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
@@ -658,6 +752,8 @@ class reception_frame(ctk.CTkFrame):
         self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
         self.refresh_btn.pack(side="left", padx=(0,width*0.005))
         
+        #self.edit_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        #self.edit_btn.pack(side="right")
         
         self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
         self.cancel_invoice_btn.pack(side="right")
@@ -680,158 +776,6 @@ class reception_frame(ctk.CTkFrame):
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview, acc_cred[0][0])
         
         '''INVOICE FRAME: END'''
-        load_main_frame(0)
-
-    def load_invoice_content(self, _:any = None):
-        if self.invoice_treeview.get_selected_data() is not None:
-            transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.invoice_treeview.get_selected_data()[0])
-
-    def cancel_invoice(self, bypass_confirmation: bool = False):
-        if self.invoice_treeview.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel")
-            return
-        if bypass_confirmation:
-            database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
-        else:
-            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")):
-                database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
-
-        self.update_invoice_treeview()
-
-    def proceed_to_pay(self):
-        data = self.payment_treeview.get_selected_data()
-        if(data):
-            self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
-                                            relx = .5, rely = .5, anchor = 'c')
-        else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
-
-    def proceed_to_payment(self):
-        data = self.invoice_treeview.get_selected_data()
-        if(data):
-            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
-            if 0 not in stock_quan: 
-                database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
-                self.update_payment_treeview()
-                self.payment_treeview.data_frames[self.payment_treeview._data.index(data)].response()
-                self.payment_button.response()
-                self.update_invoice_treeview()
-            else:
-                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
-        else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
-    
-    def update_payment_treeview(self):
-        self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
-
-    def update_invoice_treeview(self):
-        self.invoice_treeview.update_table(database.fetch_data(sql_commands.get_invoice_info))
-        
-    def change_total_value_item(self, value: float):
-            value = float(value)
-            self.item_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.item_total_amount._text[1:])) + value))
-            self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
-
-    def change_total_value_service(self, value: float):
-            value = float(value)
-            self.services_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.services_total_amount._text[1:])) + value))
-            self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
-
-    def clear_all_item(self):
-           verification = messagebox.askyesno('Clear All', 'Are you sure you want to delete\nall trasaction record?')
-           if verification:
-                self.reset()
-
-    def reset(self):
-        for i in mainframes:
-            if isinstance(i, dashboard_frame):
-                temp: dashboard_frame = i
-                temp.show_pie()
-                temp.generate_stat_tabs()
-                temp.generate_DISumarry()
-                temp.load_saled_data_treeview()
-                temp.load_scheduled_service()
-            if isinstance(i, reports_frame):
-                temp: reports_frame = i
-                temp.graphs_need_upgrade()
-                temp.update_invetory_graph()
-            if isinstance(i, sales_frame):
-                temp: sales_frame = i
-                temp.update_table()
-        #check if there are certain mainframes there, then update all of those needed process and ui
-
-        #self.client_name_entry.set('')
-        #self.transact_treeview.delete_all_data()
-        #self.price_total_amount.configure(text = '0.00')
-        #self.services_total_amount.configure(text = '0.00')
-        #self.item_total_amount.configure(text = '0.00')
-class payment_frame(ctk.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        global width, height, acc_cred, acc_info, mainframes
-        self.is_loaded = False
-        self.grid_forget()
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
-
-        self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
-        self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-        self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
-        self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
-        self.cal_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(20,20))
-        self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
-        self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
-        self.payment_icon = ctk.CTkImage(light_image=Image.open("image/sales.png"),size=(22,16))
-        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
-        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
-        self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
-        
-        selected_color = Color.Blue_Yale
-        
-        self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
-        self.top_frame.grid_columnconfigure(2, weight=1)
-
-        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
-        
-        self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
-        self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
-        self.base_frame.grid_propagate(0)
-        self.base_frame.grid_columnconfigure(0, weight=1)
-        self.base_frame.grid_rowconfigure(1, weight=1)
-        
-        self.invoice_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
-        self.payment_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
-        
-        self.transact_frames=[self.payment_frame]
-        self.active_transact_frames = None
-        
-        def load_main_frame(cur_frame: int):
-            if self.active_transact_frames is not None:
-                self.active_transact_frames.pack_forget()
-            self.active_transact_frames = self.transact_frames[cur_frame]
-            self.active_transact_frames.pack(fill="both", expand=1)
-        
-        self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
-                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=3, sticky="n")
-      
-        self.payment_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
-                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
-
-        self.payment_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.payment_button.configure(command=partial(load_main_frame, 0))
-        self.payment_icon = ctk.CTkLabel(self.payment_button, text="",image=self.payment_icon)
-        self.payment_icon.pack(side="left", padx=(width*0.01,width*0.005))
-        self.payment_label = ctk.CTkLabel(self.payment_button, text="PAYMENT", text_color="white",  font=("DM Sans Medium",14))
-        self.payment_label.pack(side="left")
-        self.payment_button.grid()
-        self.payment_button.update_children()
-        
-        self.button_manager = cctku.button_manager([self.payment_button], selected_color, False, 0)
-        self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
-                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
-        self.button_manager.click(self.button_manager._default_active, None)
         
         '''PAYMENT FRAME: START'''
         
@@ -989,8 +933,10 @@ class payment_frame(ctk.CTkFrame):
 
 class reception_frame(ctk.CTkFrame):
     def __init__(self, master):
-        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        super().__init__(master,corner_radius=0, fg_color=Color.White_Platinum)
         global width, height, acc_cred, acc_info, mainframes
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252, self.post_sent_callback)
 
@@ -1007,13 +953,13 @@ class reception_frame(ctk.CTkFrame):
         self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
 
         '''INVOICE FRAME: START'''
-        #self.invoice_frame = ctk.CTkFrame(self, fg_color="transparent")
-        #self.invoice_frame.grid_rowconfigure(1, weight=1)
-        #self.invoice_frame.grid_columnconfigure(0, weight=1)
+        self.invoice_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion)
+        self.invoice_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.invoice_frame.grid_rowconfigure(0, weight=1)
+        self.invoice_frame.grid_columnconfigure(0, weight=1)
         
         '''TOP FRAME'''
-        #self.top_con_frame = ctk.CTkFrame(self.invoice_frame,fg_color="transparent")
-        self.top_con_frame = ctk.CTkFrame(self,fg_color="transparent")
+        self.top_con_frame = ctk.CTkFrame(self.invoice_frame,fg_color="transparent")
         self.top_con_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         #invoice search button
         self.search_frame = ctk.CTkFrame(self.top_con_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
@@ -1032,30 +978,23 @@ class reception_frame(ctk.CTkFrame):
 
         self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
         self.refresh_btn.pack(side="left", padx=(0,width*0.005))
-        
-        #self.edit_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
-        #self.edit_btn.pack(side="right")
-        
+    
         self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
         self.cancel_invoice_btn.pack(side="right")
         
         '''INVOICE FRAME'''
-        self.invoice_treeview_frame = ctk.CTkFrame(self)
-        #self.invoice_treeview_frame = ctk.CTkFrame(self.invoice_frame)
+        self.invoice_treeview_frame = ctk.CTkFrame(self.invoice_frame)
         self.invoice_treeview_frame.grid(row=1, column=0, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
-        self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
+        self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .735, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
                                            double_click_command= self.load_invoice_content)
         self.update_invoice_treeview()
         self.invoice_treeview.pack()
-
-        #self.proceeed_button = ctk.CTkButton(self.invoice_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
-        self.proceeed_button = ctk.CTkButton(self, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
+        
+        self.proceeed_button = ctk.CTkButton(self.invoice_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
                                              compound="right", command = self.proceed_to_payment)
         self.proceeed_button.grid(row=2, column=0, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
-        
-        
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview, acc_cred[0][0])
         
         '''INVOICE FRAME: END'''
@@ -1132,9 +1071,6 @@ class payment_frame(ctk.CTkFrame):
         global width, height, acc_cred, acc_info, mainframes
 
         '''PAYMENT FRAME: START'''
-        
-        #self.payment_frame.grid_rowconfigure(1, weight=1)
-        #self.payment_frame.grid_columnconfigure(2, weight=1)
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
@@ -1148,8 +1084,13 @@ class payment_frame(ctk.CTkFrame):
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
         self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
         
-        #self.search_frame = ctk.CTkFrame(self.payment_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.content_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion)
+        self.content_frame.grid(row=0, column=0, sticky='nsew',  padx=(width*0.005), pady=(height*0.01))
+        self.content_frame.grid_rowconfigure(0, weight=1)
+        self.content_frame.grid_columnconfigure(0, weight=1)
+        
+        
+        self.search_frame = ctk.CTkFrame(self.content_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
@@ -1163,21 +1104,19 @@ class payment_frame(ctk.CTkFrame):
         """ self.view_btn = ctk.CTkButton(self.payment_frame,text="View Record", width=width*0.05, height = height*0.05, font=("DM Sans Medium",16))
         self.view_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025)) """
         
-        #self.refresh_btn = ctk.CTkButton(self.payment_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
-        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
+        self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
         self.refresh_btn.grid(row=0, column=2, sticky="w")
         
-        #self.payment_treeview_frame = ctk.CTkFrame(self.payment_frame)
-        self.payment_treeview_frame = ctk.CTkFrame(self)
+       
+        self.payment_treeview_frame = ctk.CTkFrame(self.content_frame)
         self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
-        self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
+        self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * 0.805, height= height *.745, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',)
         self.update_payment_treeview()
         self.payment_treeview.pack()
 
-        #self.proceeed_button = ctk.CTkButton(self.payment_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
-        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
+        self.proceeed_button = ctk.CTkButton(self.content_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
         self.proceeed_button.configure(command= self.proceed_to_pay)
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
