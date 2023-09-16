@@ -51,6 +51,8 @@ class body(ctk.CTk):
 
         self.btn = ctk.CTkButton(self, 140, 28, text="remove", command = self.treeview.remove_selected_data)
         self.btn.pack()
+        self.add_btn = ctk.CTkButton(self, 140, 28, text="ADD", command = lambda: self.treeview.add_data((1,2,3), True))
+        self.add_btn.pack()
 
 
         #nsu.server_listener('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self', )

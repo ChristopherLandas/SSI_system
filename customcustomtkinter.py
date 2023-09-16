@@ -271,7 +271,7 @@ class customcustomtkinter:
                     #update the number order of the frames
                 #update the fg color of each of the frames, maintaining the alternating pattern
 
-        def add_data(self, data: Union[tuple, list]):
+        def add_data(self, data: Union[tuple, list], update_button_manager: bool = False):
             d = [data] if isinstance(data, tuple) else data
             for i in range(len(d)):
                 tI = 0;
@@ -351,6 +351,9 @@ class customcustomtkinter:
                 frm.update_children()
                 frm.pack(fill = 'x', pady = (1,0))
                 self.contents.update()
+                
+            if update_button_manager:
+                self.data_grid_btn_mng.update_buttons()
 
         def update_table(self, data: Union[tuple, list]):
             for i in self.data_frames:
