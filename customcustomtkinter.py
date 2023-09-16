@@ -669,6 +669,7 @@ class customcustomtkinter:
                     **kwargs):
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
             
+            self._fg_color = fg_color
             self._font = font
             self.pack_propagate(0)
             self.m_height = m_height
@@ -685,7 +686,9 @@ class customcustomtkinter:
                     self.answer = [(tuple(self.content[i]._text.strip().split(" - ")))]
                 else:
                     self.answer = [(tuple(i.strip().split(" - "))) for i in self.current_data]
-                    
+                
+                self.results.place_forget()
+                
                 if command_callback:
                     self.command_callback()
         
