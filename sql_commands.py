@@ -394,6 +394,15 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
 
+get_inventory_info_with_uid = "SELECT item_general_info.name,\
+                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
+                                    item_general_info.UID FROM item_general_info\
+                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                   GROUP BY item_general_info.name\
+                                   ORDER BY item_general_info.UID;"
+
 get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
                                       		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
                                       FROM item_transaction_content\
@@ -492,6 +501,20 @@ get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                             WHERE invoice_record.State = 1\
                             GROUP BY invoice_record.invoice_uid"
 
+get_selected_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
+                                        invoice_record.client_name,\
+                                        CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                                        CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                                        CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                        DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                    FROM invoice_record\
+                                    LEFT JOIN invoice_service_content\
+                                        ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                    LEFT JOIN invoice_item_content\
+                                        ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                                    WHERE invoice_record.invoice_uid = ?\
+                                    GROUP BY invoice_record.invoice_uid"
+
 set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1 WHERE invoice_uid = ?"
 set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
 
@@ -572,7 +595,7 @@ insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
 create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
-create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
                                                            WHERE usn = ?"
