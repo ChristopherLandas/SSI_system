@@ -23,6 +23,7 @@ from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_po
 import copy
 import calendar
 import acc_creation
+import network_socket_util as nsu
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -41,6 +42,7 @@ class dashboard(ctk.CTkToplevel):
         self.attributes("-fullscreen", True)
         self._master = master
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        '''
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -60,7 +62,6 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        '''
 
         '''Fonts'''
         try:
@@ -113,9 +114,9 @@ class dashboard(ctk.CTkToplevel):
         selected_btn_color = Color.Blue_Steel
 
         #self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
-        temp_labels = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Info', 'Reports', 'User Settings', 'General Settings', 'History']
-        temp_icons = [self.dashboard_icon, self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
-        temp_main_frames = [dashboard_frame, transaction_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
+        temp_labels = ['Dashboard', 'Transaction', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Info', 'Reports', 'User Settings', 'General Settings', 'History']
+        temp_icons = [self.dashboard_icon, self.transact_icon, self.transact_icon, self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
+        temp_main_frames = [dashboard_frame, transaction_frame, reception_frame, payment_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
         self.labels = []
         self.icons = []
@@ -746,10 +747,20 @@ class transaction_frame(ctk.CTkFrame):
         
         self.proceeed_button = ctk.CTkButton(self.payment_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
         self.proceeed_button.configure(command= self.proceed_to_pay)
-        self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
-        
-        #self.show_proceed:ctk.CTkFrame =transaction_popups.show_transaction_proceed_demo(self,(width, height))
+        self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
+        
+        '''def received_callback(m: str):
+            data = database.fetch_data(sql_commands.get_selected_payment_invoice_info, (m, ))[0]
+            self.payment_treeview.add_data(data)
+
+        self.receiving_entity = nsu.network_receiver('127.0.0.1', 3312, received_callback)
+        self.receiving_entity.start_receiving()''' 
+
+        #self.show_proceed:ctk.CTkFrame =transaction_popups.show_transaction_proceed_demo(self,(width, height))
+
+        #self.sender = nsu.network_sender('127.0.0.1', 3312, '127.0.0.1', 3345)
+        #initial network message sender
         load_main_frame(0)
 
     def load_invoice_content(self, _:any = None):
@@ -789,7 +800,29 @@ class transaction_frame(ctk.CTkFrame):
             else:
                 messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
         else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")            
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+        #partially disabled for networking
+
+        '''data = self.invoice_treeview.get_selected_data()
+        if(data):
+            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+            if 0 not in stock_quan:
+                def response_callback(i: int):
+                    if i == 1:
+                        database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
+                        self.invoice_treeview.remove_selected_data()
+                        messagebox.showinfo("Success", "Data has been sent to the payment")
+                    else:
+                        messagebox.showerror("Error", "Failed sent data to the cashier")
+                if self.sender._receiving_callback is None:
+                    self.sender._receiving_callback = response_callback
+                self.sender.send(data[0])
+            else:
+                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")'''
+        #initial test for network communication
+        
     
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
@@ -835,6 +868,238 @@ class transaction_frame(ctk.CTkFrame):
         #self.price_total_amount.configure(text = '0.00')
         #self.services_total_amount.configure(text = '0.00')
         #self.item_total_amount.configure(text = '0.00')
+
+class reception_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        global width, height, acc_cred, acc_info, mainframes
+
+        self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252, self.post_sent_callback)
+
+        self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
+        self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
+        self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
+        self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
+        self.cal_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(20,20))
+        self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
+        self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
+        self.payment_icon = ctk.CTkImage(light_image=Image.open("image/sales.png"),size=(22,16))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
+
+        '''INVOICE FRAME: START'''
+        #self.invoice_frame = ctk.CTkFrame(self, fg_color="transparent")
+        #self.invoice_frame.grid_rowconfigure(1, weight=1)
+        #self.invoice_frame.grid_columnconfigure(0, weight=1)
+        
+        '''TOP FRAME'''
+        #self.top_con_frame = ctk.CTkFrame(self.invoice_frame,fg_color="transparent")
+        self.top_con_frame = ctk.CTkFrame(self,fg_color="transparent")
+        self.top_con_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        #invoice search button
+        self.search_frame = ctk.CTkFrame(self.top_con_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame.pack(side="left")
+        self.search_frame.pack_propagate(0)
+        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
+                                        width=width*0.005,)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        
+        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.05, text="Add Invoice",image=self.add_icon, font=("DM Sans Medium", 14))
+        self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_item_btn.pack(side="left", padx=(width*0.005))
+
+        self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
+        self.refresh_btn.pack(side="left", padx=(0,width*0.005))
+        
+        #self.edit_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        #self.edit_btn.pack(side="right")
+        
+        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        self.cancel_invoice_btn.pack(side="right")
+        
+        '''INVOICE FRAME'''
+        self.invoice_treeview_frame = ctk.CTkFrame(self)
+        #self.invoice_treeview_frame = ctk.CTkFrame(self.invoice_frame)
+        self.invoice_treeview_frame.grid(row=1, column=0, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
+
+        self.invoice_treeview = cctk.cctkTreeView(self.invoice_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.125)}-tr/Items:{int(width*.125)}-tr/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
+                                           double_click_command= self.load_invoice_content)
+        self.update_invoice_treeview()
+        self.invoice_treeview.pack()
+
+        #self.proceeed_button = ctk.CTkButton(self.invoice_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
+        self.proceeed_button = ctk.CTkButton(self, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
+                                             compound="right", command = self.proceed_to_payment)
+        self.proceeed_button.grid(row=2, column=0, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e") 
+        
+        
+        self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), self.update_invoice_treeview, acc_cred[0][0])
+        
+        '''INVOICE FRAME: END'''
+
+        self.grid_forget()
+
+    def post_sent_callback(self, i):
+        if i == 1:
+            self.update_invoice_treeview()
+        else:
+            messagebox.showerror("Error", "An error occured")
+
+    def update_invoice_treeview(self):
+        self.invoice_treeview.update_table(database.fetch_data(sql_commands.get_invoice_info))
+
+    def cancel_invoice(self, bypass_confirmation: bool = False):
+        if self.invoice_treeview.get_selected_data() is None:
+            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel")
+            return
+        if bypass_confirmation:
+            database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
+        else:
+            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")):
+                database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
+
+    def load_invoice_content(self, _:any = None):
+        if self.invoice_treeview.get_selected_data() is not None:
+            transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.invoice_treeview.get_selected_data()[0])
+
+    def proceed_to_payment(self):
+        '''data = self.invoice_treeview.get_selected_data()
+        if(data):
+            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+            if 0 not in stock_quan: 
+                database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (data[0], )]])
+                self.update_invoice_treeview()
+            else:
+                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+        self.update_invoice_treeview()'''
+
+        data = self.invoice_treeview.get_selected_data()
+        if(data):
+            stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+            if 0 not in stock_quan: 
+                self.sender_entity.send(data[0])
+            else:
+                messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+        self.update_invoice_treeview()
+
+    def reset(self):
+        for i in mainframes:
+            if isinstance(i, dashboard_frame):
+                temp: dashboard_frame = i
+                temp.show_pie()
+                temp.generate_stat_tabs()
+                temp.generate_DISumarry()
+                temp.load_saled_data_treeview()
+                temp.load_scheduled_service()
+            if isinstance(i, reports_frame):
+                temp: reports_frame = i
+                temp.graphs_need_upgrade()
+                temp.update_invetory_graph()
+            if isinstance(i, sales_frame):
+                temp: sales_frame = i
+                temp.update_table()
+
+class payment_frame(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        global width, height, acc_cred, acc_info, mainframes
+
+        '''PAYMENT FRAME: START'''
+        
+        #self.payment_frame.grid_rowconfigure(1, weight=1)
+        #self.payment_frame.grid_columnconfigure(2, weight=1)
+
+        self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
+        self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
+        self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
+        self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
+        self.cal_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(20,20))
+        self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
+        self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
+        self.payment_icon = ctk.CTkImage(light_image=Image.open("image/sales.png"),size=(22,16))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
+        
+        #self.search_frame = ctk.CTkFrame(self.payment_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame = ctk.CTkFrame(self,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack_propagate(0)
+
+        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
+                                        width=width*0.005)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        
+        """ self.view_btn = ctk.CTkButton(self.payment_frame,text="View Record", width=width*0.05, height = height*0.05, font=("DM Sans Medium",16))
+        self.view_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025)) """
+        
+        #self.refresh_btn = ctk.CTkButton(self.payment_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
+        self.refresh_btn = ctk.CTkButton(self,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
+        self.refresh_btn.grid(row=0, column=2, sticky="w")
+        
+        #self.payment_treeview_frame = ctk.CTkFrame(self.payment_frame)
+        self.payment_treeview_frame = ctk.CTkFrame(self)
+        self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
+
+        self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * .805, height= height * .7, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',)
+        self.update_payment_treeview()
+        self.payment_treeview.pack()
+
+        #self.proceeed_button = ctk.CTkButton(self.payment_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
+        self.proceeed_button = ctk.CTkButton(self, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14), compound="right")
+        self.proceeed_button.configure(command= self.proceed_to_pay)
+        self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
+        self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
+
+        self.receiving_entity = nsu.network_receiver('127.0.0.1', 250, self.received_callback)
+        self.receiving_entity.start_receiving()
+
+        self.grid_forget()
+
+    def received_callback(self, m):
+        database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (m, )]])
+        self.update_payment_treeview()
+
+    def update_payment_treeview(self):
+        self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
+
+    def proceed_to_pay(self):
+        data = self.payment_treeview.get_selected_data()
+        if(data):
+            self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
+                                            relx = .5, rely = .5, anchor = 'c')
+        else:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+
+    def reset(self):
+        for i in mainframes:
+            if isinstance(i, dashboard_frame):
+                temp: dashboard_frame = i
+                temp.show_pie()
+                temp.generate_stat_tabs()
+                temp.generate_DISumarry()
+                temp.load_saled_data_treeview()
+                temp.load_scheduled_service()
+            if isinstance(i, reports_frame):
+                temp: reports_frame = i
+                temp.graphs_need_upgrade()
+                temp.update_invetory_graph()
+            if isinstance(i, sales_frame):
+                temp: sales_frame = i
+                temp.update_table()
 
 class services_frame(ctk.CTkFrame):
     global width, height
@@ -2019,49 +2284,7 @@ class user_setting_frame(ctk.CTkFrame):
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
 
-        def update_staff_acc():
-            role_values = []
-            for i in range(len(self.changeFrame.access_lvls)):
-                role_values.append(self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].get())
-            role_values = tuple(role_values) + (self.changeFrame.usn_option.get(),)
-            database.exec_nonquery([['UPDATE account_access_level SET Dashboard = ?, Transaction = ?,\
-                                      Services = ?, Sales = ?, Inventory = ?, Pet_Info = ?, Report = ?,\
-                                      User = ?, Action = ? Where usn = ?', role_values]])
-            #implement the job pos change here
-
-        '''def set_checkBox_accessess(data:list, e:any = None):
-            for i in range(len(self.changeFrame.access_lvls)):
-                if data[i+2] == 1:
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)
-                    if(active_access[i+1] == 1):
-                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
-                    else:
-                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
-                else:
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)'''
-        #TBA: proceed command config needed
-
-        def set_checkBox(e:any = None):
-            self.changeFrame.accept_button.configure(state = ctk.NORMAL)
-            self.changeFrame.selected_role_option.configure(state = ctk.NORMAL, values = [s[0] for s in database.fetch_data(sql_commands.get_all_position_titles)])
-            job_pos = database.fetch_data('SELECT job_position FROM acc_info WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0][0]
-            data = database.fetch_data('SELECT * FROM user_level_access WHERE title = ?', (job_pos,))[0]
-            active_access = database.fetch_data('Select * FROM account_access_level WHERE usn = ?', (self.changeFrame.usn_option.get(),))[0]
-            self.changeFrame.selected_role_option.set(job_pos)
-            for i in range(len(self.changeFrame.access_lvls)):
-                if data[i+2] == 1:
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.NORMAL)
-                    if(active_access[i+1] == 1):
-                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].select(False)
-                    else:
-                        self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
-                else:
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].deselect(False)
-                    self.changeFrame.check_boxes[self.changeFrame.access_lvls[i]].configure(state = ctk.DISABLED)
-
         """
-
         self.creationFrame = acc_creation.creation_frame(self.acc_creation_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
         self.creationFrame.grid(row=1, column=1, sticky="w")
 
@@ -2563,4 +2786,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-#dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'Jrizal', datetime.datetime.now)

@@ -11,6 +11,7 @@ from decimal import Decimal
 import datetime
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 import threading
 from PIL import Image
 import copy
@@ -994,8 +995,6 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     else:
                         items.append(st)
                 formatted_svc_data = []
-                non_modifiable_svc = database.fetch_data("SELECT service_name FROM service_info_test WHERE duration_type = 0")
-                svc_prices = {s[0]: price_format_to_float(s[1][1:] if s[0] in non_modifiable_svc else s[-1][1:]) for s in services}
                 
                 uid = self.invoice_id_label._text
                 uid_base = uid[0:-2]
@@ -1012,29 +1011,36 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 cur_index = -1
                 for svc_k in self.service_dict.keys():
                     for inf in self.service_dict[svc_k]:
-                        pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (inf[0], self.client_name_entry.get()))[0][0]
+                        owner = database.fetch_data("SELECT owner_id from pet_owner_info WHERE owner_name = ?", (self.client_name_entry.get(), ))[0][0]
+                        pet_uid = database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND owner_id = ?", (inf[0], owner))[0][0]
                         if prev_date != inf[1]:
                             prev_date = inf[1]
                             cur_index += 1
                             formatted_svc_data.append([])
+
+                        modifiable_svc = database.fetch_data("SELECT service_name, price FROM service_info_test WHERE duration_type != 0")
+                        svc_prices = {s[0]: s[1] for s in modifiable_svc}
+                        
                         if len(inf) == 2:
                             formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
                             #scheduled service
                         if len(inf) == 3:
-                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, inf[2], None, None))
+                            prevtime = datetime.strptime(inf[2], '%Y-%m-%d') - datetime.strptime(inf[1], '%Y-%m-%d')
+                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
                             #periodic service
                         if len(inf) == 4:
-                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, int(inf[2]), int(inf[3])))
+                            price = svc_prices[svc_k] * int(inf[3])
+                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
                             #multiple instance periodic service
-
                 #database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
-                print(formatted_svc_data)
-                database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                if len(formatted_svc_data) > 0:
+                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                else:
+                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:])), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
 
                 for it in items:
                     database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
                 #database insertion of items
-                print(len(formatted_svc_data))
                 if len(formatted_svc_data) > 0:
                     for li in formatted_svc_data[0]:
                         database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
@@ -1446,7 +1452,7 @@ def show_payment_proceed(master, info:tuple,):
                 self.receipt_tree.delete(i)
             #emptied out the treeview
 
-            self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_data[0], ))
+            self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_data[0], )) or []
             self.items = database.fetch_data(sql_commands.get_invoice_item_content_by_id, (invoice_data[0], ))
 
             #modified_services = [(f' {s[0]}  P:{s[1]} D:%s %s%s' % (s[2].strftime('%m/%d/%y'), ), 1,  f"₱{s[3]}") for s in self.services]
@@ -1462,6 +1468,7 @@ def show_payment_proceed(master, info:tuple,):
             modified_items = [(f" {s[0]}", s[1], f"₱{s[2]}") for s in self.items]
             
             temp = modified_items + modified_services
+            print(temp)
             
             for i in range(len(temp)):
                 if (i % 2) == 0:
