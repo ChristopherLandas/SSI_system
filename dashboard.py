@@ -2122,7 +2122,7 @@ class reports_frame(ctk.CTkFrame):
 
 
         self.save_as_popup = save_as_popup.show_popup(self, (width , height), acc_cred[0][0], acc_info[0][1], acc_info[0][2])
-        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height), acc_cred[0][0])
+        self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height), acc_cred[0][0], acc_info[0][1], acc_info[0][2])
         load_main_frame(0)
 
     def update_invetory_graph(self):
