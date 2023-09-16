@@ -184,13 +184,11 @@ show_all_items = "SELECT NAME FROM item_general_info"
 
 show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
 
-show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state = 3 then '●'\
-                                WHEN (state = -1  AND initial_stock != current_stock) then '✔' END AS stats, id, NAME,\
-                                CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
+show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
                                 WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock\
                                 END AS received_stock,\
-                                supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
-                                FROM recieving_item\
+                                supplier_info.supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
                                 WHERE (state = 2 OR state = 3 OR state = -1)\
                                 AND DATE_FORMAT(date_recieved, '%M %Y') = ?\
                                 ORDER BY date_recieved DESC"
@@ -200,7 +198,7 @@ show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
-add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
+add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?)"
 
 #RECORDING ANY TRANSACTION
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
@@ -297,7 +295,7 @@ get_services_monthly_sales_sp = "SELECT CAST(SUM(services_transaction_content.pr
                                  FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                                  WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
 
-#OR
+#ORACCESS
 get_or = 'SELECT COUNT(*)+1 FROM transaction_record'
 
 #LOGIN REPORT
@@ -310,8 +308,14 @@ get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ? ,?, ?, 1, CURRENT_TIMESTAMP, Null)"
-get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_name from recieving_item where state = 1 or state = 3"
-get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
+get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
+
+get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
+                                NAME, current_stock, supplier_info.supp_name\
+                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+                                WHERE state = 1 OR state = 3 ORDER BY state asc"
+
+get_supplier = "SELECT * from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3, current_stock = current_stock - ? WHERE id = ?"
@@ -320,6 +324,8 @@ record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?
 update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving_item SET state = 3, current_stock = current_stock - ?, date_recieved = CURRENT_TIMESTAMP,\
                                                                 reciever = ?\
                                                                 WHERE id = ?"
+
+get_pending_items = f"SELECT id, recieving_item.NAME, current_stock, CAST(date_set AS DATE) AS date_set, supp_name FROM recieving_item where state = 3 AND DATE_FORMAT(date_set, '%M %Y') = ?"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
@@ -357,6 +363,14 @@ get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
 insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
 
 insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (? , ?, ?)"
+
+insert_new_pet_breed = f"INSERT INTO pet_breed VALUES(?,?)"
+#PET INFO SORT
+get_pet_info_sort_by_pet_name = f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
+                            ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY p_name asc"
+
+get_pet_info_sort_by_id = f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
+                            ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY id asc"
 
 #HIST LOG
 get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
@@ -661,3 +675,24 @@ check_if_item_does_expire = "SELECT does_expire\
 update_pet_name_and_invoice_records = "UPDATE invoice_service_content SET invoice_service_content.patient_name = (SELECT pet_info.p_name FROM pet_info WHERE invoice_service_content.pet_uid = pet_info.id)"
 
 get_invoice_item_content_by_id
+
+
+'''SUPPLIER INFO SQL'''
+#SET
+insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL)"
+
+#GET
+get_last_supplier_id = "SELECT supp_id FROM supplier_info ORDER BY supp_id DESC LIMIT 1"
+get_supplier_info = "SELECT supp_id, supp_name, contact_person, contact_number, address FROM supplier_info ORDER BY supp_id ASC"
+get_supplier_record = f"SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address, created_by, CAST(date_added AS DATE), CAST(date_modified AS DATE)\
+                        FROM supplier_info WHERE supp_id = ?"
+                        
+get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp_name\
+                            FROM item_supplier_info INNER JOIN supplier_info ON item_supplier_info.supp_id = supplier_info.supp_id\
+                            WHERE item_supplier_info.UID = ?"
+                        
+#UPDATES
+
+update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, contact_person = ?, contact_number = ?,\
+                        contact_email = ?, address = ?, date_modified = CURRENT_TIMESTAMP WHERE supp_id = ?"
+
