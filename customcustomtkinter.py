@@ -342,7 +342,6 @@ class customcustomtkinter:
                         self._data[i] = tuple(modified_data)
                         if temp_spinner_command:
                             temp_spinner_command()
-                        print(self._data)
                     #initial calling to modify the reciever
 
                     temp_spinner.configure(command = modified_spinner_command)
@@ -406,6 +405,8 @@ class customcustomtkinter:
             frame.destroy()
             self.data_frames.pop(index)
             self.data_grid_btn_mng.active = None
+            self.data_grid_btn_mng.update_buttons()
+            #self.data_grid_btn_mng = customcustomtkinterutil.button_manager(self.data_frames, self._selected_color, True)
 
         def get_active_index(self):
             return self.data_frames.index(self.data_grid_btn_mng.active)
@@ -815,3 +816,14 @@ class customcustomtkinterutil:
             self.active.configure(fg_color = self._og_color[self._buttons.index(self.active)])
             self._state[0]()
             self.active = None
+
+        def update_buttons(self):
+            for i in range(len(self._buttons)):
+                if isinstance(self._buttons[i], customcustomtkinter.ctkButtonFrame):
+                    self._buttons[i]._command.pop()
+                    self._buttons[i]._command.append(partial(self.click, i))
+                '''elif isinstance(self.buttons[i], ctk.CTkButton):
+                    cmd = self.buttons[i]._command
+                    self.buttons[i].configure(command = partial(self.click, i, cmd))
+                self._og_color.append(self.buttons[i]._fg_color)'''
+            #note: not yet applicable in buttons
