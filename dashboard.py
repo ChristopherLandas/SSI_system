@@ -1129,7 +1129,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
-        self.receiving_entity = nsu.network_receiver('192.168.1.2', 250, self.received_callback)
+        self.receiving_entity = nsu.network_receiver('127.0.0.1', 250, self.received_callback)
         self.receiving_entity.start_receiving()
 
         self.grid_forget()
