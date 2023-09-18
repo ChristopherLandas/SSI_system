@@ -768,6 +768,75 @@ class customcustomtkinter:
             
         def get(self):
             return self.answer
+        
+        
+        
+    class cctkPageNavigator(ctk.CTkFrame):
+        def __init__(self, master: any, width: int = 190, height: int = 40, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", 
+                 fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, 
+                 overwrite_preferred_drawing_method: str | None = None,
+                 
+                 #Custom Argument
+                 
+                page_limit: int = 1,
+                command: callable = None,
+                font: Tuple[str, int] = None,
+                page_fg_color: str = None, 
+                
+                 
+                 **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
+            self.propagate(0)
+            self.page_count = 1
+            self.command = command
+            self._font = font
+            self.page_limit = page_limit
+            
+                    
+            def navigate(direction: int):
+                if direction:
+                    self.page_count = min(self.page_count+1, self.page_limit)
+                else:
+                    self.page_count = max(self.page_count-1, 1)
+                    
+                self.page_counter.configure(text=f"{self.page_count}")
+                self.checker()
+                if self.command:self.command()
+            
+            self.prev_button = ctk.CTkButton(self, text="<", font=self._font, height=self._current_height, width=self._current_height-width*0.05,
+                                            image=None, command=partial(navigate, 0),)
+            self.prev_button.pack(side="left", padx=(width*0.025, 0), pady=(width*0.025))
+            
+            self.page_counter = ctk.CTkLabel(self, text="1", font=self._font, corner_radius=5, fg_color= page_fg_color)
+            self.page_counter.pack(side="left", fill="both", expand=1, padx=(width*0.025), pady=(width*0.025))
+            
+            self.next_button = ctk.CTkButton(self, text=">", font=self._font, height=self._current_height, width=self._current_height-width*0.05
+                                            , image=None, command=partial(navigate, 1))
+            self.next_button.pack(side="right", padx=(0, width*0.025), pady=(width*0.025))
+            self.checker()
+
+        def checker(self):
+            if self.page_count == 1:
+                self.prev_button.configure(state="disabled")
+            else:
+                self.prev_button.configure(state="normal")  
+            
+            if self.page_count == self.page_limit:
+                self.next_button.configure(state="disabled")
+            else:
+                self.next_button.configure(state="normal")
+
+        def get(self):
+            return self.page_count
+        
+        def update_page_limit(self, page):
+            if page == 0: page = 1
+            if self.page_count > page: self.page_count = 1; self.page_counter.configure(text=self.page_count)
+            self.page_limit = page
+            self.checker()
+            
+            
+        
 
 class customcustomtkinterutil:
     class button_manager:
