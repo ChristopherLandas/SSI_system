@@ -59,6 +59,19 @@ get_critical_inventory = "SELECT item_general_info.name,\
                           GROUP BY item_general_info.name\
                           HAVING STATUS = 'Critical'\
                           ORDER BY item_general_info.UID"
+                          
+get_out_of_stock_inventory = f"SELECT item_general_info.name,\
+                                CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                case when item_inventory_info.Stock = 0 then 'Out of Stock' END AS status\
+                                FROM item_general_info\
+                                JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                                GROUP BY item_general_info.name\
+                                HAVING STATUS = 'Out of Stock'\
+                                ORDER BY item_general_info.UID"
 
 get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                                   item_inventory_info.Stock,\
@@ -667,6 +680,9 @@ get_pet_view_record = f"SELECT pet_info.id, pet_info.p_name, pet_info.`type`, pe
                         INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
                         WHERE id = ?"
 
+get_pet_record_search_query=f"SELECT id, p_name, pet_owner_info.owner_name FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
+                                   WHERE p_name LIKE '%?%' OR pet_owner_info.owner_name LIKE '%?%' ORDER BY p_name ASC"
+
 #SALES 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
 
@@ -719,3 +735,16 @@ get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp
 update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, contact_person = ?, contact_number = ?,\
                         contact_email = ?, address = ?, date_modified = CURRENT_TIMESTAMP WHERE supp_id = ?"
 
+
+'''SALES'''
+
+get_sales_record = f"SELECT transaction_uid, client_name, transaction_date, CONCAT('₱', FORMAT(Total_amount,2)) AS price, Attendant_usn\
+                    FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
+                    ORDER BY transaction_uid LIMIT ? OFFSET ?"
+
+get_sales_record_count ="SELECT COUNT(*) FROM	transaction_record WHERE transaction_date BETWEEN ? AND ?"
+
+get_sales_search_query = f"SELECT transaction_uid, client_name, transaction_date, CONCAT('₱', FORMAT(Total_amount,2)) AS price, Attendant_usn\
+                            FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
+                            AND client_name LIKE '%?%' OR transaction_uid LIKE '%?%'\
+                            ORDER BY transaction_date LIMIT ? OFFSET ?"
