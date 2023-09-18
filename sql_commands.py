@@ -59,6 +59,19 @@ get_critical_inventory = "SELECT item_general_info.name,\
                           GROUP BY item_general_info.name\
                           HAVING STATUS = 'Critical'\
                           ORDER BY item_general_info.UID"
+                          
+get_out_of_stock_inventory = f"SELECT item_general_info.name,\
+                                CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
+                                DATE_FORMAT(item_inventory_info.Expiry_Date, '%Y-%m-%d') AS expiry,\
+                                case when item_inventory_info.Stock = 0 then 'Out of Stock' END AS status\
+                                FROM item_general_info\
+                                JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                                GROUP BY item_general_info.name\
+                                HAVING STATUS = 'Out of Stock'\
+                                ORDER BY item_general_info.UID"
 
 get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.name,\
                                   item_inventory_info.Stock,\
@@ -184,13 +197,11 @@ show_all_items = "SELECT NAME FROM item_general_info"
 
 show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
 
-show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state = 3 then '●'\
-                                WHEN (state = -1  AND initial_stock != current_stock) then '✔' END AS stats, id, NAME,\
-                                CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
+show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
                                 WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock\
                                 END AS received_stock,\
-                                supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
-                                FROM recieving_item\
+                                supplier_info.supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
                                 WHERE (state = 2 OR state = 3 OR state = -1)\
                                 AND DATE_FORMAT(date_recieved, '%M %Y') = ?\
                                 ORDER BY date_recieved DESC"
@@ -200,7 +211,7 @@ show_receiving_hist_by_date = f"SELECT CASE WHEN state = 2 then '✔' WHEN state
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
 add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
-add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?, ?)"
+add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?)"
 
 #RECORDING ANY TRANSACTION
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
@@ -297,7 +308,7 @@ get_services_monthly_sales_sp = "SELECT CAST(SUM(services_transaction_content.pr
                                  FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                                  WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
 
-#OR
+#ORACCESS
 get_or = 'SELECT COUNT(*)+1 FROM transaction_record'
 
 #LOGIN REPORT
@@ -310,8 +321,14 @@ get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ? ,?, ?, 1, CURRENT_TIMESTAMP, Null)"
-get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_name from recieving_item where state = 1 or state = 3"
-get_supplier = "SELECT Supplier from item_supplier_info where UID = ?"
+get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
+
+get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
+                                NAME, current_stock, supplier_info.supp_name\
+                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+                                WHERE state = 1 OR state = 3 ORDER BY state asc"
+
+get_supplier = "SELECT * from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3, current_stock = current_stock - ? WHERE id = ?"
@@ -320,6 +337,8 @@ record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?
 update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving_item SET state = 3, current_stock = current_stock - ?, date_recieved = CURRENT_TIMESTAMP,\
                                                                 reciever = ?\
                                                                 WHERE id = ?"
+
+get_pending_items = f"SELECT id, recieving_item.NAME, current_stock, CAST(date_set AS DATE) AS date_set, supp_name FROM recieving_item where state = 3 AND DATE_FORMAT(date_set, '%M %Y') = ?"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
@@ -357,6 +376,14 @@ get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
 insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
 
 insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (? , ?, ?)"
+
+insert_new_pet_breed = f"INSERT INTO pet_breed VALUES(?,?)"
+#PET INFO SORT
+get_pet_info_sort_by_pet_name = f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
+                            ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY p_name asc"
+
+get_pet_info_sort_by_id = f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
+                            ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY id asc"
 
 #HIST LOG
 get_hist_log = "SELECT CONCAT(acc_info.usn, ' (', acc_info.full_name, ')'),\
@@ -455,7 +482,7 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
                                ORDER BY transaction_record.transaction_date;"
 
 #invoices
-insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
 cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
@@ -473,6 +500,7 @@ get_invoice_info = "SELECT invoice_record.invoice_uid,\
                     WHERE invoice_record.State = 0\
                     GROUP BY invoice_record.invoice_uid"
 
+
 get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                    invoice_record.client_name,\
                                    CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
@@ -485,7 +513,23 @@ get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                             LEFT JOIN invoice_item_content\
                                 ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
                             WHERE invoice_record.State = 1\
-                            GROUP BY invoice_record.invoice_uid"
+                            GROUP BY invoice_record.invoice_uid\
+                            ORDER BY payment_date"
+
+get_specific_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
+                                        invoice_record.client_name,\
+                                        CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                                        CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                                        CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                        DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                    FROM invoice_record\
+                                    LEFT JOIN invoice_service_content\
+                                        ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                    LEFT JOIN invoice_item_content\
+                                        ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                                    WHERE invoice_record.State = 1\
+                                        AND invoice_record.invoice_uid = ?\
+                                    GROUP BY invoice_record.invoice_uid"
 
 get_selected_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                         invoice_record.client_name,\
@@ -501,7 +545,7 @@ get_selected_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                     WHERE invoice_record.invoice_uid = ?\
                                     GROUP BY invoice_record.invoice_uid"
 
-set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1 WHERE invoice_uid = ?"
+set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1, payment_date = CURRENT_TIMESTAMP  WHERE invoice_uid = ?"
 set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
 
 get_invoice_by_id = "SELECT * FROM invoice_record WHERE invoice_uid = ?"
@@ -581,7 +625,7 @@ insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
 create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
-create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
                                                            WHERE usn = ?"
@@ -653,6 +697,9 @@ get_pet_view_record = f"SELECT pet_info.id, pet_info.p_name, pet_info.`type`, pe
                         INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
                         WHERE id = ?"
 
+get_pet_record_search_query=f"SELECT id, p_name, pet_owner_info.owner_name FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
+                                   WHERE p_name LIKE '%?%' OR pet_owner_info.owner_name LIKE '%?%' ORDER BY p_name ASC"
+
 #SALES 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
 
@@ -684,3 +731,37 @@ check_if_item_does_expire = "SELECT does_expire\
 update_pet_name_and_invoice_records = "UPDATE invoice_service_content SET invoice_service_content.patient_name = (SELECT pet_info.p_name FROM pet_info WHERE invoice_service_content.pet_uid = pet_info.id)"
 
 get_invoice_item_content_by_id
+
+
+'''SUPPLIER INFO SQL'''
+#SET
+insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL)"
+
+#GET
+get_last_supplier_id = "SELECT supp_id FROM supplier_info ORDER BY supp_id DESC LIMIT 1"
+get_supplier_info = "SELECT supp_id, supp_name, contact_person, contact_number, address FROM supplier_info ORDER BY supp_id ASC"
+get_supplier_record = f"SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address, created_by, CAST(date_added AS DATE), CAST(date_modified AS DATE)\
+                        FROM supplier_info WHERE supp_id = ?"
+                        
+get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp_name\
+                            FROM item_supplier_info INNER JOIN supplier_info ON item_supplier_info.supp_id = supplier_info.supp_id\
+                            WHERE item_supplier_info.UID = ?"
+                        
+#UPDATES
+
+update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, contact_person = ?, contact_number = ?,\
+                        contact_email = ?, address = ?, date_modified = CURRENT_TIMESTAMP WHERE supp_id = ?"
+
+
+'''SALES'''
+
+get_sales_record = f"SELECT transaction_uid, client_name, transaction_date, CONCAT('₱', FORMAT(Total_amount,2)) AS price, Attendant_usn\
+                    FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
+                    ORDER BY transaction_uid LIMIT ? OFFSET ?"
+
+get_sales_record_count ="SELECT COUNT(*) FROM	transaction_record WHERE transaction_date BETWEEN ? AND ?"
+
+get_sales_search_query = f"SELECT transaction_uid, client_name, transaction_date, CONCAT('₱', FORMAT(Total_amount,2)) AS price, Attendant_usn\
+                            FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
+                            AND client_name LIKE '%?%' OR transaction_uid LIKE '%?%'\
+                            ORDER BY transaction_date LIMIT ? OFFSET ?"

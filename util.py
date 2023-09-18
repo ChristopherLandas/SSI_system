@@ -57,7 +57,7 @@ class database:
                     db_con.commit()
                 except mariadb.IntegrityError as e:
                     print(f'command {i+1} error pushing', '\nreason: ', e)
-                    return False
+                    return False , e
         except mariadb.Error as e:
             print(cmds[0][0])
             print(e)
@@ -115,6 +115,18 @@ def generateId(initial: Optional[str] = None, length: Union[int, None] = 12) -> 
     elif len(initial or '' + hex_str) < length:
         return f'%s%s' % (initial, hex_str.zfill(length - 1))
     #return f'%s%s' % (initial or '', hexStr if len(hexStr) == (length - 1) else hexStr.zfill(length - 1))
+    
+def generate_word_num_id(reference: Optional[str] = None):
+    pattern = re.findall(r"([a-zA-Z]+)(\d+)",reference)[0]
+    res = pattern[0] + str(int(pattern[1])+1).zfill(len(pattern[1]))
+    
+    return res
+
+def validate_email(email:str = None):
+    return True if re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email) else False
+
+def validate_contact_num(number:str = None):
+    return True if re.match(r"^[0-9+\s-]+$",number) else False
 
 def convert_date(date: str | datetime.datetime | datetime.date, date_format: str, convertion_format: str, value: Literal['str', 'datetime'] = 'str') -> str | datetime.datetime:
     d = datetime.datetime.strptime(date, date_format) if isinstance(date, datetime.datetime | datetime.date) else date
@@ -129,19 +141,19 @@ def record_action(usn: str, _type: str, action_code: str):
 def decode_action(type_code: str):
     if type_code.startswith('INVM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Make the Invoice {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
     if type_code.startswith('CRI'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Recieved the item {temp[-1]} from recieving'
+        return f'Receive item {temp[-1]}'
     if type_code.startswith('TRNM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Make the Invoice {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
     if type_code.startswith('DPSM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Make the Invoice {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
     if type_code.startswith('DPSO'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Make the Invoice {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
 
 
     

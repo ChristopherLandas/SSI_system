@@ -1034,9 +1034,9 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                             #multiple instance periodic service
                 #database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
                 if len(formatted_svc_data) > 0:
-                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
                 else:
-                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:])), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
 
                 for it in items:
                     database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
@@ -1049,7 +1049,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     for i in range(1, len(formatted_svc_data), 1):
                         price_per_date = sum([s[6] for s in formatted_svc_data[i]])
                         for li in formatted_svc_data[i]:
-                            database.exec_nonquery([[sql_commands.insert_invoice_data, (li[0], self._attentdant, self.client_name_entry.get() or 'N/A', price_per_date, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                            database.exec_nonquery([[sql_commands.insert_invoice_data, (li[0], self._attentdant, self.client_name_entry.get() or 'N/A', price_per_date, None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
                             database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
                 #for other services data with different_date, the invoice would split up
 
@@ -1188,6 +1188,9 @@ def show_payment_proceed(master, info:tuple,):
             width = info[0]
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
+
+            import network_socket_util as nsu
+            self.sender_entity = nsu.network_sender('192.168.1.2', 222, '192.168.1.1', 200)
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
@@ -1266,6 +1269,7 @@ def show_payment_proceed(master, info:tuple,):
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
+                self.sender_entity.send("Trigger")
                 record_action(self.cashier_name._text, action.TRANSACTION_TYPE,  action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
                 self._treeview_callback()
                 self.reset()

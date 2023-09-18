@@ -9,7 +9,7 @@ from util import *
 from os import walk
 import sql_commands
 import datetime
-
+import _tkinter
 
 class loginUI(ctk.CTk):
 
@@ -18,16 +18,24 @@ class loginUI(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.attempt = 0
+        
+        #Viewport setup 
+        vw = self.winfo_screenwidth()
+        vh = self.winfo_screenheight()
+        
+        try:
+            #Transitioning to new font style
+            Font(file="Font/DMSans-Bold.ttf")
+            Font(file="Font/DMSans-Medium.ttf")
+            Font(file='Font/DMSans-Regular.ttf')
 
-        '''Import Font
-        Font(file="Font/Poppins-Medium.ttf")
-        Font(file="Font/Poppins-Regular.ttf")
-        '''
+            #Use DM Mono for numbers
+            Font(file="Font/DMMono-Light.ttf")
+            Font(file="Font/DMMono-Medium.ttf")
+            Font(file="Font/DMMono-Regular.ttf")
 
-        '''load all fonts'''
-        '''for i in next(walk('font'))[2]:
-            Font(file= f'Font/{i}')'''
-
+        except _tkinter.TclError:
+            pass
 
         '''functions and processes'''
         def report_exceed_attempt():
@@ -80,7 +88,7 @@ class loginUI(ctk.CTk):
         self.show_icon = ctk.CTkImage(light_image=Image.open("image/view.png"),size=(28,28))
         self.hide_icon = ctk.CTkImage(light_image=Image.open("image/hide.png"),size=(28,28))
 
-        print(self.bg_img)
+        #print(self.bg_img)
 
 
         '''Setting values of the root window'''
@@ -93,17 +101,18 @@ class loginUI(ctk.CTk):
         pos_x = width/2
         pos_y = heigth/2 - root_h/2
 
+        #self.attributes("-fullscreen", True)
         self.title(title_name)
         self.geometry('%dx%d+%d+%d' % (root_w,root_h,pos_x,pos_y))
         self.minsize(root_w,root_h)
         self.configure(fg_color=Color.Blue_Oxford)
-
+        
         '''Background Image'''
-        #self.main_bg = ctk.CTkLabel(self, text='', image=self.bg_img)
-        #self.main_bg.place(x=0, y=0, relwidth=1, relheight=1)
+        self.main_bg = ctk.CTkLabel(self, text='', image=self.bg_img)
+        self.main_bg.place(x=0, y=0, relwidth=1, relheight=1)
 
         '''Main frame'''
-        self.main_frame =  ctk.CTkFrame(self, width=360, height=550,corner_radius=5,
+        self.main_frame =  ctk.CTkFrame(self, width=vw*0.295, height=vh*0.8,corner_radius=5,
                                         fg_color=Color.White_Lotion, bg_color=Color.Blue_LapisLazuli)
         self.main_frame.place(relx=0.5, rely=0.5, anchor='c')
         self.main_frame.grid_propagate(False)
@@ -117,16 +126,15 @@ class loginUI(ctk.CTk):
 
         self.logo_label = ctk.CTkLabel(self.title_cont, text="", image=self.logo_img)
         self.logo_label.pack(side='left',padx=(10,5), pady=10)
-
-        self.name_label = ctk.CTkLabel(self.title_cont, text=title_name, font=('Poppins Medium',23),
+        self.name_label = ctk.CTkLabel(self.title_cont, text=title_name, font=('DM Sans Medium',23),
                                        wraplength=200, justify='left', text_color=Color.Blue_Maastricht)
         self.name_label.pack(side='right',padx=(5,10), pady=10)
 
-        self.login_label = ctk.CTkLabel(self.main_frame, text='Login', font=('Poppins Medium',22),
+        self.login_label = ctk.CTkLabel(self.main_frame, text='Login', font=('DM Sans Medium',22),
                                         text_color=Color.Blue_Maastricht)
         self.login_label.grid(row=1,column=0,sticky="w",padx=(42,10),pady=(10,5))
 
-        self.user_label = ctk.CTkLabel(self.main_frame, text='Username', font=('Poppins',17),
+        self.user_label = ctk.CTkLabel(self.main_frame, text='Username', font=('DM Sans Medium',17),
                                        text_color=Color.Grey_Davy)
         self.user_label.grid(row=2, column=0,sticky='sw',padx=(42,10),pady=(0,0))
 
@@ -137,11 +145,11 @@ class loginUI(ctk.CTk):
 
         self.user_icon_label = ctk.CTkLabel(self.user_frame, text='', image=self.user_icon)
         self.user_icon_label.pack(side='left', padx=(5,0),pady=(5))
-        self.user_entry = ctk.CTkEntry(self.user_frame, height=round(heigth * 0.03),font=('Poppins',16),border_width=0,
+        self.user_entry = ctk.CTkEntry(self.user_frame, height=round(heigth * 0.03),font=('DM Sans Medium',16),border_width=0,
                                        fg_color=Color.White_Milk, text_color=Color.Blue_Maastricht)
         self.user_entry.pack(side='right', fill='x', expand=True,padx=(5,10),pady=(5))
 
-        self.password_label = ctk.CTkLabel(self.main_frame, text='Password', font=('Poppins',17),
+        self.password_label = ctk.CTkLabel(self.main_frame, text='Password', font=('DM Sans Medium',17),
                                        text_color=Color.Grey_Davy)
         self.password_label.grid(row=4, column=0,sticky='sw',padx=(42,10),pady=(20,0))
 
@@ -153,7 +161,7 @@ class loginUI(ctk.CTk):
         self.pass_icon_label = ctk.CTkLabel(self.pass_frame, text='',image=self.pass_icon)
         self.pass_icon_label.pack(side='left', padx=(5,0),pady=(5))
 
-        self.password_entry = ctk.CTkEntry(self.pass_frame,height=round(heigth * 0.03),font=('Poppins',16),border_width=0,
+        self.password_entry = ctk.CTkEntry(self.pass_frame,height=round(heigth * 0.03),font=('DM Sans Medium',16),border_width=0,
                                        fg_color=Color.White_Milk, show='*')
         self.password_entry.pack(side='left', fill='x', expand=True,padx=(3),pady=(5))
         self.show_pass_btn =ctk.CTkButton(self.pass_frame,width=28,height=28,
@@ -163,11 +171,11 @@ class loginUI(ctk.CTk):
         self.show_pass_btn.pack(side='right', padx=(0,5))
         '''Error message'''
         self.error_label = ctk.CTkLabel(self.main_frame, text='', text_color='red',
-                                        font=('Poppins',17))
+                                        font=('DM Sans Medium',17))
         self.error_label.grid(row=6, column=0,sticky='nsew')
         '''login button'''
         self.login_button = ctk.CTkButton(self.main_frame, text="LOGIN", height=50,
-                                          font=('Poppins Medium',20),text_color='#FFFFFF',
+                                          font=('DM Sans Medium',20),text_color='#FFFFFF',
                                           fg_color=Color.Blue_Cobalt,corner_radius=5,
                                           command= partial(login, None)
                                           )
