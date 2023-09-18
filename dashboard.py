@@ -174,8 +174,9 @@ class dashboard(ctk.CTkToplevel):
 
         #self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
         temp_labels = ['Dashboard', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Info', 'Reports', 'User Settings', 'General Settings', 'History']
-        temp_icons = [self.dashboard_icon, self.transact_icon, self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
+        temp_icons = [self.dashboard_icon,  self.transact_icon, self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
         temp_main_frames = [dashboard_frame, reception_frame, payment_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
+
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
         self.labels = []
         self.icons = []
@@ -1129,7 +1130,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
-        self.receiving_entity = nsu.network_receiver('127.168.1.2', 250, self.received_callback)
+        self.receiving_entity = nsu.network_receiver('192.168.1.2', 250, self.received_callback)
         self.receiving_entity.start_receiving()
 
         self.grid_forget()
@@ -1299,7 +1300,6 @@ class sales_frame(ctk.CTkFrame):
         
         self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=datetime.datetime(2023, 7, 1).strftime("%Y-%m-%d"), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(height*0.005))
-        
         self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=self.cal_icon, height=height*0.05,width=width*0.025, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.from_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), set_date_callback=set_date))
         self.from_show_calendar.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
@@ -1396,7 +1396,6 @@ class sales_frame(ctk.CTkFrame):
         self.page_counter.update_page_limit(page=ceil(self.data_count/self.page_row_count))
         
         #print(self.data_count, ceil(self.data_count/self.page_row_count))
-        
         self.data_view.pack()
         
 class inventory_frame(ctk.CTkFrame):
