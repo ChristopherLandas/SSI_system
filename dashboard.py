@@ -357,7 +357,7 @@ class dashboard_frame(ctk.CTkFrame):
             if self.sched_data_treeview.get_selected_data():
                 self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=self.sched_data_treeview.get_selected_data())
                 
-         
+        self.receiving_entity = nsu.network_receiver('192.168.1.2', 222, self.receiving_entity)
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
@@ -572,6 +572,13 @@ class dashboard_frame(ctk.CTkFrame):
         self.generate_DISumarry()
 
         return super().grid(**kwargs)
+
+    def update_receiver(self, m):
+        self.show_pie()
+        self.generate_stat_tabs()
+        self.generate_DISumarry()
+        self.load_saled_data_treeview()
+        self.load_scheduled_service()
 
 class transaction_frame(ctk.CTkFrame):
     def __init__(self, master):
@@ -1130,7 +1137,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
-        self.receiving_entity = nsu.network_receiver('192.168.1.2', 250, self.received_callback)
+        self.receiving_entity = nsu.network_receiver('192.168.1.1', 250, self.received_callback)
         self.receiving_entity.start_receiving()
 
         self.grid_forget()
@@ -2952,4 +2959,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_data_view.update_table(self.raw_service_data)
         
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'Jrizal', datetime.datetime.now)
