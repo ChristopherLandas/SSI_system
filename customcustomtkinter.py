@@ -404,12 +404,18 @@ class customcustomtkinter:
         def remove_selected_data(self):
             index = self.get_active_index()
             self.data_grid_btn_mng._og_color.pop(index)
-            frame = self.data_frames[index]
+            frame: ctk.CTkFrame = self.data_frames[index]
+
+            frame.pack_forget()
+            for fr in frame.winfo_children():
+                fr.pack_forget()
+                fr.destroy()
             frame.destroy()
+            #sequence needed to delete the data_frames to the table; to prevent multiple exceptions
+
             self.data_frames.pop(index)
             self.data_grid_btn_mng.active = None
             self.data_grid_btn_mng.update_buttons()
-            #self.data_grid_btn_mng = customcustomtkinterutil.button_manager(self.data_frames, self._selected_color, True)
 
         def get_active_index(self):
             return self.data_frames.index(self.data_grid_btn_mng.active)

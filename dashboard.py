@@ -175,7 +175,8 @@ class dashboard(ctk.CTkToplevel):
         #self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
         temp_labels = ['Dashboard', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Info', 'Reports', 'User Settings', 'General Settings', 'History']
         temp_icons = [self.dashboard_icon,  self.transact_icon, self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
-        temp_main_frames = [dashboard_frame,  reception_frame, payment_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
+        temp_main_frames = [dashboard_frame, reception_frame, payment_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
+
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
         self.labels = []
         self.icons = []
@@ -946,7 +947,7 @@ class reception_frame(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252, self.post_sent_callback)
+        self.sender_entity = nsu.network_sender('192.168.1.2', 250, '192.168.1.1', 252, self.post_sent_callback)
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
@@ -1011,7 +1012,7 @@ class reception_frame(ctk.CTkFrame):
 
     def post_sent_callback(self, i):
         if i == 1:
-            self.update_invoice_treeview()
+            self.invoice_treeview.remove_selected_data()
         else:
             messagebox.showerror("Error", "An error occured")
 
@@ -1054,7 +1055,7 @@ class reception_frame(ctk.CTkFrame):
                 messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
         else:
             messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
-        self.update_invoice_treeview()
+        #self.update_invoice_treeview()
 
     def reset(self):
         for i in mainframes:
@@ -1136,7 +1137,10 @@ class payment_frame(ctk.CTkFrame):
 
     def received_callback(self, m):
         database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (m, )]])
-        self.update_payment_treeview()
+        data = database.fetch_data(sql_commands.get_specific_payment_invoice_info, (m, ))[0]
+        self.payment_treeview.add_data(data)
+        #print(data)
+        #self.update_payment_treeview()
 
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
@@ -1296,7 +1300,6 @@ class sales_frame(ctk.CTkFrame):
         
         self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=datetime.datetime(2023, 7, 1).strftime("%Y-%m-%d"), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(height*0.005))
-        
         self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=self.cal_icon, height=height*0.05,width=width*0.025, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.from_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), set_date_callback=set_date))
         self.from_show_calendar.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
@@ -1393,7 +1396,6 @@ class sales_frame(ctk.CTkFrame):
         self.page_counter.update_page_limit(page=ceil(self.data_count/self.page_row_count))
         
         #print(self.data_count, ceil(self.data_count/self.page_row_count))
-        
         self.data_view.pack()
         
 class inventory_frame(ctk.CTkFrame):
