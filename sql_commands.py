@@ -487,6 +487,7 @@ get_invoice_info = "SELECT invoice_record.invoice_uid,\
                     WHERE invoice_record.State = 0\
                     GROUP BY invoice_record.invoice_uid"
 
+
 get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                    invoice_record.client_name,\
                                    CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
@@ -500,6 +501,21 @@ get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                 ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
                             WHERE invoice_record.State = 1\
                             GROUP BY invoice_record.invoice_uid"
+
+get_specific_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
+                                        invoice_record.client_name,\
+                                        CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                                        CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                                        CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                        DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                    FROM invoice_record\
+                                    LEFT JOIN invoice_service_content\
+                                        ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                    LEFT JOIN invoice_item_content\
+                                        ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                                    WHERE invoice_record.State = 1\
+                                        AND invoice_record.invoice_uid = ?\
+                                    GROUP BY invoice_record.invoice_uid"
 
 get_selected_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                         invoice_record.client_name,\
@@ -595,7 +611,7 @@ insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
 create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
-create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
                                                            WHERE usn = ?"
