@@ -946,7 +946,7 @@ class reception_frame(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.sender_entity = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252, self.post_sent_callback)
+        self.sender_entity = nsu.network_sender('192.168.1.2', 250, '192.168.1.1', 252, self.post_sent_callback)
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
@@ -1129,7 +1129,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
-        self.receiving_entity = nsu.network_receiver('127.0.0.1', 250, self.received_callback)
+        self.receiving_entity = nsu.network_receiver('127.168.1.2', 250, self.received_callback)
         self.receiving_entity.start_receiving()
 
         self.grid_forget()
