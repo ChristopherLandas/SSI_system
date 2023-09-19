@@ -582,6 +582,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.generate_DISumarry()
         self.load_saled_data_treeview()
         self.load_scheduled_service()
+        #minor issue: makes a lot of exception due to conflict between ui drawing engine and destroy
             
         for i in mainframes:
             if isinstance(i, reports_frame):
