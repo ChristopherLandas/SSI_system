@@ -719,7 +719,6 @@ class customcustomtkinter:
                 
                 if self.search_var.get() != "" and quary_command != None:
                     raw_data = database.fetch_data(quary_command.replace("?", self.search_var.get()))
-                    
                     data = [(f"  {' - '.join(s)}") for s in raw_data]
                     self.current_data=data
                     
@@ -731,7 +730,6 @@ class customcustomtkinter:
                     self.content.clear()
                     
                 if self.current_data:
-                    self.results.place(relx=0,rely=0, y=self._current_height+place_height, x=self.search_label._current_width*1.5 + place_width)
                     self.results.place(relx=0,rely=0, y=self._current_height+place_height, x=self.search_label._current_width*1.5 + place_width)
                     self.search_btn.configure(state = 'normal')
                     
@@ -763,7 +761,7 @@ class customcustomtkinter:
             
             self.search_var.trace_add('write', search_callback)
     
-            self.results = ctk.CTkFrame(self.master.master, fg_color=fg_color, corner_radius=0, border_width=2, border_color="light grey")
+            self.results = ctk.CTkFrame(self.master.master, fg_color=fg_color, height=m_height*0.5, corner_radius=0, border_width=2, border_color="light grey")
             
             
         def get(self):

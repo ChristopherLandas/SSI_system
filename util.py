@@ -128,6 +128,13 @@ def validate_email(email:str = None):
 def validate_contact_num(number:str = None):
     return True if re.match(r"^[0-9+\s-]+$",number) else False
 
+def list_to_parted_list(given_list:list, row_count:int, provide_table_count: Optional[bool] = 0 ):
+    divided_list = [given_list[i:i + row_count] for i in range(0, len(given_list), row_count)]
+    return ((divided_list),(len(divided_list))) if provide_table_count else divided_list
+
+def list_comparator(source: list, reference: list):
+    return [data for res in source for data in reference if set(res).issubset(data)]
+
 def convert_date(date: str | datetime.datetime | datetime.date, date_format: str, convertion_format: str, value: Literal['str', 'datetime'] = 'str') -> str | datetime.datetime:
     d = datetime.datetime.strptime(date, date_format) if isinstance(date, datetime.datetime | datetime.date) else date
     val = datetime.datetime.strptime(d, date_format).strftime(convertion_format)

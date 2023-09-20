@@ -755,13 +755,14 @@ update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, contact_person 
 
 '''SALES'''
 
-get_sales_record = f"SELECT transaction_uid, client_name, transaction_date, CONCAT('₱', FORMAT(Total_amount,2)) AS price, Attendant_usn\
-                    FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
-                    ORDER BY transaction_uid LIMIT ? OFFSET ?"
+get_sales_record_by_date = f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
+                                FROM transaction_record WHERE transaction_date BETWEEN ? AND ? ORDER BY transaction_date"
 
-get_sales_record_count ="SELECT COUNT(*) FROM	transaction_record WHERE transaction_date BETWEEN ? AND ?"
+get_sales_record_all =f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn FROM transaction_record"
 
-get_sales_search_query = f"SELECT transaction_uid, client_name, transaction_date, CONCAT('₱', FORMAT(Total_amount,2)) AS price, Attendant_usn\
-                            FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
-                            AND client_name LIKE '%?%' OR transaction_uid LIKE '%?%'\
-                            ORDER BY transaction_date LIMIT ? OFFSET ?"
+get_sales_search_query = f"SELECT transaction_uid, client_name FROM transaction_record WHERE client_name LIKE '%?%' OR transaction_uid LIKE '%?%' ORDER BY client_name"
+
+get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
+                            FROM transaction_record WHERE transaction_uid = ?"
+                            
+get_sales_attendant = f"SELECT Attendant_usn FROM transaction_record GROUP BY attendant_usn"
