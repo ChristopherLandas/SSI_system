@@ -766,3 +766,7 @@ get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FOR
                             FROM transaction_record WHERE transaction_uid = ?"
                             
 get_sales_attendant = f"SELECT Attendant_usn FROM transaction_record GROUP BY attendant_usn"
+
+get_sales_by_attendant = f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
+                        FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
+                            AND Attendant_usn = ?"

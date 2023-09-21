@@ -1043,11 +1043,11 @@ class sales_frame(ctk.CTkFrame):
         #endregion
     
     def view_record(self):
-        item = self.sales_tree.selection()[0]
-        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_tree.item(item, "values")[1]) if item else messagebox.showerror("Warning", "Select a record first")
+        item = self.sales_tree.selection()
+        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_tree.item(item, "values")[0]) if item else messagebox.showerror("Warning", "Select a record first")
     
     def refresh(self):
-        self.data = database.fetch_data(sql_commands.get_sales_record_all)
+        self.raw_data = database.fetch_data(sql_commands.get_sales_record_all)
         self.set_table()
         
     def clear_table(self):
@@ -1055,12 +1055,13 @@ class sales_frame(ctk.CTkFrame):
     
     def set_table(self, given:Optional[list] = None):
         raw_list = given if given else self.raw_data
-        self.pages = list_to_parted_list(raw_list, self.page_row_count, 1)
-        self.page_counter.update_page_limit(self.pages[1])
+        self.pages, self.page_count = list_to_parted_list(raw_list, self.page_row_count, 1)
+        self.page_counter.update_page_limit(self.page_count)
         self.update_table()
         
     def update_table(self):
-        self.temp = self.pages[0][self.page_counter.get()-1]
+        self.temp = self.pages[self.page_counter.get()-1] if self.pages else []
+        print(self.pages[self.page_counter.get()-1] if self.pages else [])
         self.clear_table()
         for i in range(len(self.temp)):
             self.sales_tree.insert(parent='', index='end', iid=i, text="", values= (i+1,) + self.temp[i], tags= "even" if (i%2)==0 else "odd" )
@@ -2633,4 +2634,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_service_data()
         
 
-dashboard(None, 'Jrizal', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
