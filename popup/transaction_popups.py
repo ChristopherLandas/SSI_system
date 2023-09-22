@@ -15,6 +15,8 @@ from datetime import timedelta
 import threading
 from PIL import Image
 import copy
+import network_socket_util as nsu
+import json
 
 '''def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
@@ -297,6 +299,8 @@ import copy
                 #reset the state of this popup
     return instance(master, info, root_treeview, change_val_func)'''
 
+IP_Address = json.load(open("Resources\\network_settings.json"))
+
 def show_transaction_proceed(master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict):
@@ -310,6 +314,8 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self._customer_info = customer_info
             self.service_dict = service_dict
             #encapsulation
+
+            global IP_Address
 
             super().__init__(master, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
@@ -547,6 +553,8 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             height = info[1]
             #basic inforamtion needed; measurement
 
+            global IP_Address
+
             super().__init__(master, corner_radius= 0, fg_color="transparent")
             #the actual frame, modification on the frame itself goes here
 
@@ -558,7 +566,6 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
 
             def automate_fill(_: any= None):
                 data = database.fetch_data(sql_commands.get_pet_info_for_cust_info, (self.pet_name.get(), ))[0]
-                print(data)
                 """ self.animal_breed_entry.delete(0, ctk.END)
                 self.animal_breed_entry.insert(0, data[0])
                 self.animal_breed_entry.configure(state = ctk.DISABLED) """
@@ -670,6 +677,8 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
+            global IP_Address
+
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
 
@@ -723,6 +732,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             width = info[0]
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
+
+            global IP_Address
 
             '''internal data'''
             self.total_transaction_count = 0
@@ -792,10 +803,11 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                    text="  "+label_text, width = root_treeview.column_widths[1],
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[1] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5,anchor = 'c',
-                                                                                                                                                        service_dict = service_dict, master_frame=data_frames,
-                                                                                                                                                        change_total_val_serv_callback = change_total_val_serv_callback,
-                                                                                                                                                        root_treeview=root_treeview))
+                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
+                                                                                                                                                        service_dict= self._service_dict,
+                                                                                                                                                        root_treeview=root_treeview,
+                                                                                                                                                        change_total_val_serv_callback= self.change_total_val_serv_callback,
+                                                                                                                                                        master_frame= data_frames))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -949,6 +961,8 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             '''constants'''
             self.services = [s[0] for s in database.fetch_data(sql_commands.get_service_data)]
 
+            global IP_Address
+
             '''events'''
             def bd_commands(i):
                 if self.transact_treeview._data[i][0] in [s[0] for s in database.fetch_data(sql_commands.get_services_names)]:
@@ -1018,40 +1032,55 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                             cur_index += 1
                             formatted_svc_data.append([])
 
-                        modifiable_svc = database.fetch_data("SELECT service_name, price FROM service_info_test WHERE duration_type != 0")
+                        modifiable_svc = database.fetch_data("SELECT service_name, price FROM service_info_test")
                         svc_prices = {s[0]: s[1] for s in modifiable_svc}
                         
                         if len(inf) == 2:
-                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
+                            #formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
+                            formatted_svc_data[cur_index].append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
                             #scheduled service
                         if len(inf) == 3:
                             prevtime = datetime.strptime(inf[2], '%Y-%m-%d') - datetime.strptime(inf[1], '%Y-%m-%d')
-                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
+                            #formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
+                            formatted_svc_data[cur_index].append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
                             #periodic service
                         if len(inf) == 4:
                             price = svc_prices[svc_k] * int(inf[3])
-                            formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
+                            #formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
+                            formatted_svc_data[cur_index].append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
                             #multiple instance periodic service
-                #database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', price_format_to_float(self.price_total_amount._text[1:]), datetime.now().strftime('%Y-%m-%d'), 0, None)]])
-                if len(formatted_svc_data) > 0:
+
+                
+                """RECORDING THE INVOICE"""
+                """if len(formatted_svc_data) > 0:
                     database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
                 else:
-                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
+                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])"""
+                #temporarily disabled; recording of invoice splitting
+
+                services_price = sum([sum([s[6] for s in li]) for li in formatted_svc_data])
+                if not database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', services_price, None, datetime.now().strftime('%Y-%m-%d'), 0, None)]]):
+                    return
+                #recording the invoice
 
                 for it in items:
                     database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
-                #database insertion of items
+                #recording of item based on the invoice_id
+
                 if len(formatted_svc_data) > 0:
-                    for li in formatted_svc_data[0]:
-                        database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
-                #database insertion of services
-                if len(formatted_svc_data) > 1:
+                    for svcs in formatted_svc_data:
+                        for li in svcs:
+                            database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
+                #recording of service based on the invoice_id
+
+                '''if len(formatted_svc_data) > 1:
                     for i in range(1, len(formatted_svc_data), 1):
                         price_per_date = sum([s[6] for s in formatted_svc_data[i]])
                         for li in formatted_svc_data[i]:
                             database.exec_nonquery([[sql_commands.insert_invoice_data, (li[0], self._attentdant, self.client_name_entry.get() or 'N/A', price_per_date, None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
                             database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
-                #for other services data with different_date, the invoice would split up
+                #for other services data with different_date, the invoice would split up'''
+                #temporarily in halt of splitting the invoice
 
                 self._treeview_content_update_callback()
                 self.save_invoice_btn.configure(state = ctk.DISABLED)
@@ -1189,8 +1218,9 @@ def show_payment_proceed(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
 
-            import network_socket_util as nsu
-            self.sender_entity = nsu.network_sender('192.168.1.2', 222, '192.168.1.1', 200)
+            global IP_Address
+
+            self.sender_entity = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], 222, IP_Address["MY_NETWORK_IP"], 200)
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
@@ -1217,19 +1247,22 @@ def show_payment_proceed(master, info:tuple,):
 
             '''events'''
             def record_transaction():
-                self.complete_button.configure(state="disabled")
-                self.cancel_button.configure(state="disabled")
-                record_id =  int(self.or_button._text[5:])
-
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
+
+                record_id =  int(self.or_button._text[5:])
+                owner_id = 0
+                if len(self.services) > 0:
+                    owner_id = database.fetch_data("SELECT owner_id FROM pet_owner_info WHERE owner_name = ?", (self.client_name._text,))[0][0]
+                
+                self.complete_button.configure(state="disabled")
+                self.cancel_button.configure(state="disabled")
                 
                 item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
 
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0],
-
-                            s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND o_name = ?", (s[1], self.client_name._text))[0][0],
+                            s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND owner_id = ?", (s[1], owner_id))[0][0],
                             s[1], s[2], price_format_to_float(s[-1 ]), 0, 0, s[3], s[4], s[5]) for s in self.services]
 
                 database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
@@ -1269,13 +1302,13 @@ def show_payment_proceed(master, info:tuple,):
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
-                self.sender_entity.send("Trigger")
-                record_action(self.cashier_name._text, action.TRANSACTION_TYPE,  action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
+                self.sender_entity.send("_")
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()
                 self.complete_button.configure(state="normal")
                 self.cancel_button.configure(state="normal")
+                record_action(self.cashier_name._text, action.TRANSACTION_TYPE,  action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
                 #update the table
                 
             #Payment Callback
@@ -1472,7 +1505,6 @@ def show_payment_proceed(master, info:tuple,):
             modified_items = [(f" {s[0]}", s[1], f"₱{s[2]}") for s in self.items]
             
             temp = modified_items + modified_services
-            print(temp)
             
             for i in range(len(temp)):
                 if (i % 2) == 0:
@@ -1492,6 +1524,8 @@ def payment_confirm(master, info:tuple,):
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
             
+            global IP_Address
+
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             
@@ -1511,7 +1545,6 @@ def payment_confirm(master, info:tuple,):
             
     return instance(master, info)  
 
-
 def show_invoice_record(master, info:tuple,):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple):
@@ -1519,6 +1552,8 @@ def show_invoice_record(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
             
+            global IP_Address
+
             self.cat_icon = ctk.CTkImage(light_image=Image.open("image/cat.png"), size=(28,28))
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
@@ -1643,6 +1678,8 @@ def show_invoice_content(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
             
+            global IP_Address
+
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
