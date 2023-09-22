@@ -895,19 +895,26 @@ class sales_frame(ctk.CTkFrame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_forget()
         
-        
         self.page_row_count = 15
+        self.attendant_values = ['All']
         
         def set_date():
-            self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date,(f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
+            self.source = self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date,(f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
+            self.attendant_sort_option.set("All")
             self.set_table()
-            
         def page_callback():
             self.update_table()
             
         def search_callback():
-            self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.search_bar.get()[0][0]) if len(self.search_bar.get()) == 1 else self.set_table(list_comparator(self.search_bar.get(), self.data))
-            
+            self.source = temp = list_filterer(self.search_bar.get(), self.raw_data)
+            self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.search_bar.get()[0][0]) if len(self.search_bar.get()) == 1 else self.set_table(temp)
+            self.attendant_sort_option.set("All")
+        def option_callback(var):
+            if 'All' in var:
+                self.set_table()
+            else:
+                temp = list_filterer([((var,))], self.source)
+                self.set_table(temp)
         #region Top Frame
         self.view_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(25,25))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -937,8 +944,6 @@ class sales_frame(ctk.CTkFrame):
         #region Date Selection
         self.date_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
         self.date_frame.pack(fill='x', expand=0,  padx=(width*0.005), pady=(height*0.01,height*0.0075))
-        
-        
         
         '''FROM'''
         self.from_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.05, width=width*0.17)
@@ -972,9 +977,9 @@ class sales_frame(ctk.CTkFrame):
         self.sort_frame.pack(side="right")
         
         ctk.CTkLabel(self.sort_frame, text="Cashier: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.0225).pack(side="left", padx=(width*0.01,width*0.0025))
-        self.sort_type_option= ctk.CTkOptionMenu(self.sort_frame, anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts)
-        self.sort_type_option.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
+        self.attendant_sort_option= ctk.CTkOptionMenu(self.sort_frame, values=self.attendant_values, anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=option_callback)
+        self.attendant_sort_option.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
         
         #endregion
        
@@ -1037,7 +1042,7 @@ class sales_frame(ctk.CTkFrame):
         self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date, (f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
         self.set_table()
         self.refresh()
-    
+        self.source = self.raw_list
         #region Popups
         self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height)) 
         #endregion
@@ -1048,20 +1053,22 @@ class sales_frame(ctk.CTkFrame):
     
     def refresh(self):
         self.raw_data = database.fetch_data(sql_commands.get_sales_record_all)
+        self.source = self.raw_list
+        self.attendant_sort_option.configure(values = self.attendant_values + [s[0] for s in database.fetch_data(sql_commands.get_sales_attendant)])
+        self.attendant_sort_option.set("All")
         self.set_table()
         
     def clear_table(self):
         for item in self.sales_tree.get_children():self.sales_tree.delete(item)
     
     def set_table(self, given:Optional[list] = None):
-        raw_list = given if given else self.raw_data
-        self.pages, self.page_count = list_to_parted_list(raw_list, self.page_row_count, 1)
+        self.raw_list = given if given else self.raw_data
+        self.pages, self.page_count = list_to_parted_list(self.raw_list, self.page_row_count, 1)
         self.page_counter.update_page_limit(self.page_count)
         self.update_table()
         
     def update_table(self):
         self.temp = self.pages[self.page_counter.get()-1] if self.pages else []
-        print(self.pages[self.page_counter.get()-1] if self.pages else [])
         self.clear_table()
         for i in range(len(self.temp)):
             self.sales_tree.insert(parent='', index='end', iid=i, text="", values= (i+1,) + self.temp[i], tags= "even" if (i%2)==0 else "odd" )
@@ -1071,6 +1078,7 @@ class sales_frame(ctk.CTkFrame):
         self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_tree.item(item, "values")[1])
     
     def grid(self, **kwargs):
+        self.refresh()
         return super().grid(**kwargs)
         
 class inventory_frame(ctk.CTkFrame):

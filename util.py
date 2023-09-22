@@ -132,7 +132,7 @@ def list_to_parted_list(given_list:list, row_count:int, provide_table_count: Opt
     divided_list = [given_list[i:i + row_count] for i in range(0, len(given_list), row_count)]
     return ((divided_list),(len(divided_list))) if provide_table_count else divided_list
 
-def list_comparator(source: list, reference: list):
+def list_filterer(source: list, reference: list):
     return [data for res in source for data in reference if set(res).issubset(data)]
 
 def convert_date(date: str | datetime.datetime | datetime.date, date_format: str, convertion_format: str, value: Literal['str', 'datetime'] = 'str') -> str | datetime.datetime:
