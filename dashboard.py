@@ -928,7 +928,7 @@ class sales_frame(ctk.CTkFrame):
         self.top_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion, height = height*0.055, corner_radius=0, bg_color=Color.White_Lotion,)
         self.top_frame.grid(row=0, column=0 , sticky="nw",padx=width*0.005,pady=(height*0.01,0))
 
-        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=self.refresh)
+        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=self.refresh)
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
@@ -968,16 +968,17 @@ class sales_frame(ctk.CTkFrame):
         self.to_date_select_entry = ctk.CTkLabel(self.to_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.to_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(height*0.005))
         
-        self.to_show_calendar = ctk.CTkButton(self.to_date_frame, text="",image=self.cal_icon, height=height*0.05,width=width*0.025, fg_color=Color.Blue_Yale,
+        self.to_show_calendar = ctk.CTkButton(self.to_date_frame, text="",image=self.cal_icon, height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.to_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), 
                                                                                min_date= datetime.datetime.strptime(self.from_date_select_entry._text, '%Y-%m-%d').date(), set_date_callback=set_date))
         self.to_show_calendar.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
         
-        self.sort_frame = ctk.CTkFrame(self.date_frame,  height = height*0.05, fg_color=Color.Platinum)
-        self.sort_frame.pack(side="right")
+        self.sort_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.Platinum, height=height*0.05, width=width*0.15)
+        self.sort_frame.pack(side="right", pady=(height*0.0025) )
+        self.sort_frame.propagate(0)
         
         ctk.CTkLabel(self.sort_frame, text="Cashier: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.0225).pack(side="left", padx=(width*0.01,width*0.0025))
-        self.attendant_sort_option= ctk.CTkOptionMenu(self.sort_frame, values=self.attendant_values, anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+        self.attendant_sort_option= ctk.CTkOptionMenu(self.sort_frame, values=self.attendant_values, anchor="center", font=("DM Sans Medium", 12), width=width*0.125, height = height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=option_callback)
         self.attendant_sort_option.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
         
@@ -1006,7 +1007,7 @@ class sales_frame(ctk.CTkFrame):
         for i in range(len(self.columns)):
             self.sales_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
 
-        self.sales_tree.column("rec_no", width=int(width*0.01),anchor="e")
+        self.sales_tree.column("rec_no", width=int(width*0.02),anchor="e")
         self.sales_tree.column("or_num", width=int(width*0.15), anchor="c")
         self.sales_tree.column("client", width=int(width*0.35), anchor="w")
         self.sales_tree.column("total", width=int(width*0.15), anchor="e")
@@ -1122,7 +1123,7 @@ class inventory_frame(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
-        self.sorting_order = {'Out Of Stock': 0, 'Critical': 1, 'Reorder': 2, 'Normal': 3}
+        self.sorting_order = {'Out Of Stock': 0, 'Critical': 1, 'Reorder': 2, 'Normal': 3, 'N/A':4}
         
         '''data'''
         selected_color = Color.Blue_Yale
@@ -1307,15 +1308,20 @@ class inventory_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=3, sticky="w")
 
         self.sort_frame = ctk.CTkFrame(self.inventory_sub_frame,  height = height*0.05, fg_color=Color.Platinum)
-        self.sort_frame.grid(row=0, column=5, padx=(width*0.005), pady=(height*0.007), sticky="e")
+        self.sort_frame.grid(row=0, column=5, padx=(width*0.005), pady=(height*0.01), sticky="nse")
+        self.sort_frame.grid_rowconfigure(0, weight=1)
+        self.sort_frame.grid_columnconfigure((1,2), weight=1)
 
-        self.sort_type_option= ctk.CTkOptionMenu(self.sort_frame, values=self.sort_status_var, anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+        self.rate_btn = ctk.CTkButton(self.sort_frame,text="B", width=self.sort_frame._current_height-height*0.0065,)
+        #self.rate_btn.grid(row=0, column=0, padx=(width*0.0045,0), pady=(height*0.0065), sticky="nsw")
+          
+        self.sort_type_option= ctk.CTkOptionMenu(self.sort_frame, values=self.sort_status_var, anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=partial(sort_status_callback))
-        self.sort_type_option.grid(row=0, column=0, padx=(width*0.0045,0), pady=(height*0.0065), sticky="e")
+        self.sort_type_option.grid(row=0, column=1, padx=(width*0.0045,0), pady=(height*0.0065), sticky="nsew")
 
         self.sort_status_option= ctk.CTkOptionMenu(self.sort_frame, values=self.sort_type_var, anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=sort_status_configuration_callback)
-        self.sort_status_option.grid(row=0, column=1, padx=(width*0.005), pady=(height*0.0065), sticky="e")
+        self.sort_status_option.grid(row=0, column=2, padx=(width*0.005), pady=(height*0.0065), sticky="nsew")
 
         self.restock_btn = ctk.CTkButton(self.inventory_sub_frame, width=width*0.1, height = height*0.05, text="Stock Order", image=self.restock_icon, font=("DM Sans Medium", 14),
                                         command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, update_cmds=self.update_tables, relx = .5, rely = .5, anchor = 'c'))
@@ -1325,7 +1331,7 @@ class inventory_frame(ctk.CTkFrame):
 
         #self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
         self.data_view1 = cctk.cctkTreeView(self.tree_view_frame, None, width= width * .805, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/Rate:{int(width*.045)}-tc/ItemName:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.08)}-tc!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/Rate:{int(width*.045)}-tc/ItemName:x-tl/Stock:{int(width*.07)}-tr/Price:{int(width*.07)}-tr/NearestExpire:{int(width*.1)}-tc/Status:{int(width*.115)}-tc!30!30',
                                            conditional_colors= {6: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'},
                                                                 1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}}, double_click_command= dispose_expired)
         self.data_view1.pack()
@@ -1415,7 +1421,7 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
                                            column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.09)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/SupplierName:{int(width*.175)}-tl/Action:{int(width*.05)}-bD!30!35',
                                            double_click_command= _restock, bd_commands= disposal_callback,
-                                           conditional_colors={2:{'Waiting':'green', 'Pending':'orange'}})
+                                           conditional_colors={2:{'Waiting':'orange', 'Pending':'red'}})
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
         
