@@ -4,6 +4,7 @@ from typing import Callable, Optional, Tuple, Union
 from customcustomtkinter import customcustomtkinter as cctk
 import customtkinter as ctk
 import re
+from PIL import Image
 
 from util import Callable, Optional, Tuple, Union
 def create_entity(master: any,
@@ -48,27 +49,32 @@ class notif_entity(cctk.ctkButtonFrame):
         self._notif_desc = notif_desc
         self._notif_date = notif_date
         self._font_sizes = font_sizes or (24, 16, 13)
-        self._fonts: ctk.CTkFont = fonts or (('Arial', self._font_sizes[0]), ('Arial', self._font_sizes[1]), ('Arial', self._font_sizes[2]))
+        self._fonts: ctk.CTkFont = fonts or (('DM Sans', self._font_sizes[0]), ('DM Sans', self._font_sizes[1]), ('DM Sans', self._font_sizes[2]))
         self._text_colors = text_colors or ('black', 'black', '#777777')
 
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
+        #image
+        self.green_circle = ctk.CTkImage(light_image=Image.open("image/green_circle.png"), size=(12,12))
+        
 
         #region: appearance
+        self.Notif_circle = ctk.CTkLabel(self, text='', image=self.green_circle)
+        self.Notif_circle.grid(row = 0, column = 0, sticky = 'news', padx = ((width*0.05), 0), pady = ((height*0.05), 0))
         self.Notif_title = ctk.CTkLabel(self, text= notif_title, fg_color='transparent', anchor='w',
                                         text_color= self._text_colors[0], font = self._fonts[0])
-        self.Notif_title.grid(row = 0, column = 0, sticky = 'we', padx = (3, 0), pady = (2, 0))
+        self.Notif_title.grid(row = 0, column = 1, sticky = 'we', padx = ((width*0.015), 0), pady = ((height*0.05), 0))
         
         self.Notif_description = ctk.CTkLabel(self, text= notif_desc, fg_color='transparent', anchor='nw',
-                                              text_color= self._text_colors[1], font= self._fonts[1],)
+                                              text_color= self._text_colors[1], font= self._fonts[1])
         self.Notif_description._label.configure(justify= 'left')
-        self.Notif_description.grid(row = 1, column = 0, sticky = 'nsew', padx = 3, pady = 2)
+        self.Notif_description.grid(row = 1, column = 1, sticky = 'nsew', padx = ((width*0.015),(width*0.05)), pady = (height*0.05))
         
         
         self.Notif_date_diff = ctk.CTkLabel(self, text= calculate_day(notif_date), fg_color='transparent', anchor= 'w',
                                             text_color= self._text_colors[2], font= self._fonts[2])
-        self.Notif_date_diff.grid(row = 2, column = 0, sticky = 'news', padx = (3, 0))
+        self.Notif_date_diff.grid(row = 2, column = 1, sticky = 'news', padx = (((width*0.015)), 0))
         #endregion
     
     def pack(self, **kwargs):
