@@ -60,7 +60,6 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                             change_name_entry(self.file_name_entry.get()+f'({ctr})')
                             temp_f_path = temp_f_path.removesuffix(f'({ctr-1}).pdf')
                             temp_f_path += f'({ctr}).pdf'
-                            print(temp_f_path)
                     elif question == None:
                         return
                 generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
@@ -215,7 +214,7 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.report_type_option.pack(side="left", fill='x', expand=1)
 
             #checkbox if include graphs
-            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs?')
+            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs')
             self.include_graphs_checkbox.grid(row=3, column=0, sticky="nsew", padx=(width*0.085))
 
             '''TITLE SETTING'''
@@ -296,16 +295,30 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
             
             '''events'''
             def generate_callback():
+                temp_f_path = 'file'
+                if self.file_name_entry.get().endswith('.pdf'):
+                    temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}'
+                else:
+                    temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}.pdf'
                 if self.file_name_entry.get() == "":
                     messagebox.showwarning('Invalid', 'Fill the name of the report')
                     return
                 elif not os.path.isdir(self.path_entry.get()):
                     messagebox.showwarning('Invalid', 'Invalid File Path')
                     return
-                elif os.path.isfile(f'{self.path_entry.get()}\{self.file_name_entry.get()}'):
+                elif os.path.isfile(temp_f_path):
                     question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?')
                     if question == False:
-                        change_name_entry(self.file_name_entry.get()+' (1)')
+                        ctr = 1
+                        change_name_entry(self.file_name_entry.get()+f'({ctr})')
+                        temp_f_path = temp_f_path.removesuffix('.pdf')
+                        temp_f_path += f'({ctr}).pdf'
+                        while os.path.isfile(temp_f_path):
+                            ctr += 1
+                            change_name_entry(self.file_name_entry.get().removesuffix(f'({ctr-1})'))
+                            change_name_entry(self.file_name_entry.get()+f'({ctr})')
+                            temp_f_path = temp_f_path.removesuffix(f'({ctr-1}).pdf')
+                            temp_f_path += f'({ctr}).pdf'
                     elif question == None:
                         return
                 daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
@@ -708,7 +721,6 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             filename = f'{desktop}\\{file_name}'
         else:
             filename = f'{desktop}\\{file_name}.pdf'
-        print(filename)
         #filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
@@ -1292,7 +1304,11 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     pdf.build(elems)
 
     #content
-    filename = f'{path}\\{file_name}'
+    if file_name.endswith('.pdf'):
+        filename = f'{path}\\{file_name}'
+    else:
+        filename = f'{path}\\{file_name}.pdf'
+    #filename = f'{path}\\{file_name}'
     pdf = SimpleDocTemplate(
         filename=filename,
         pagesize=letter
