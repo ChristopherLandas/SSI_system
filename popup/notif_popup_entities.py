@@ -9,13 +9,14 @@ from util import Callable, Optional, Tuple, Union
 def create_entity(master: any,
                  notif_title: str,
                  notif_desc: str,
-                 notif_date: datetime.datetime,
+                 notif_date: datetime.datetime, 
+                 circle_color: str,
                  width: int = 200,
                  height: int = 200,
                  fg_color: str| tuple[str, str]= None,
                  font_sizes: Optional[Tuple[float, float, float]] = None):
     "Creates the Notif and automatically place it to the master"
-    instance: notif_entity = notif_entity(master, notif_title, notif_desc, notif_date, 100, height, fg_color, font_sizes= font_sizes)
+    instance: notif_entity = notif_entity(master, notif_title, notif_desc, notif_date, circle_color, 100, height, fg_color, font_sizes= font_sizes)
     instance.pack(fill = 'x')
     instance.update()
     text_overflow_elipsis(instance.Notif_description, width, 2)
@@ -29,7 +30,8 @@ class notif_entity(cctk.ctkButtonFrame):
                  master: any,
                  notif_title: str,
                  notif_desc: str,
-                 notif_date: datetime.datetime,
+                 notif_date: datetime.datetime, 
+                 circle_color: str,
                  width: int = 100,
                  height: int = 200,
                  fg_color: str| tuple[str, str]= None,
@@ -47,28 +49,30 @@ class notif_entity(cctk.ctkButtonFrame):
         self._notif_title = notif_title
         self._notif_desc = notif_desc
         self._notif_date = notif_date
+        self.circle_color = circle_color
         self._font_sizes = font_sizes or (24, 16, 13)
-        self._fonts: ctk.CTkFont = fonts or (('Arial', self._font_sizes[0]), ('Arial', self._font_sizes[1]), ('Arial', self._font_sizes[2]))
+        self._fonts: ctk.CTkFont = fonts or (('DM Sans', self._font_sizes[0]), ('DM Sans', self._font_sizes[1]), ('DM Sans', self._font_sizes[2]))
         self._text_colors = text_colors or ('black', 'black', '#777777')
 
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
-
         #region: appearance
+        self.Notif_circle = ctk.CTkLabel(self, text="", height=height*0.14, width=width*0.14, corner_radius=12, fg_color=circle_color)
+        self.Notif_circle.grid(row = 0, column = 0, sticky = 'w', padx = ((width*0.05), 0), pady = ((height*0.05), 0))
         self.Notif_title = ctk.CTkLabel(self, text= notif_title, fg_color='transparent', anchor='w',
                                         text_color= self._text_colors[0], font = self._fonts[0])
-        self.Notif_title.grid(row = 0, column = 0, sticky = 'we', padx = (3, 0), pady = (2, 0))
+        self.Notif_title.grid(row = 0, column = 1, sticky = 'we', padx = ((width*0.015), 0), pady = ((height*0.05), 0))
         
         self.Notif_description = ctk.CTkLabel(self, text= notif_desc, fg_color='transparent', anchor='nw',
-                                              text_color= self._text_colors[1], font= self._fonts[1],)
+                                              text_color= self._text_colors[1], font= self._fonts[1])
         self.Notif_description._label.configure(justify= 'left')
-        self.Notif_description.grid(row = 1, column = 0, sticky = 'nsew', padx = 3, pady = 2)
+        self.Notif_description.grid(row = 1, column = 1, sticky = 'nsew', padx = ((width*0.015),(width*0.05)), pady = (height*0.05))
         
         
         self.Notif_date_diff = ctk.CTkLabel(self, text= calculate_day(notif_date), fg_color='transparent', anchor= 'w',
                                             text_color= self._text_colors[2], font= self._fonts[2])
-        self.Notif_date_diff.grid(row = 2, column = 0, sticky = 'news', padx = (3, 0))
+        self.Notif_date_diff.grid(row = 2, column = 1, sticky = 'news', padx = (((width*0.015)), 0))
         #endregion
     
     def pack(self, **kwargs):

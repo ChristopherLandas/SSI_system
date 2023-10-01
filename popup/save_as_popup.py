@@ -36,21 +36,35 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                         
             '''events'''
             def generate_callback():
+                temp_f_path = 'file'
+                if self.file_name_entry.get().endswith('.pdf'):
+                    temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}'
+                else:
+                    temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}.pdf'
                 if self.file_name_entry.get() == "":
                     messagebox.showwarning('Invalid', 'Fill the name of the report')
                     return
                 elif not os.path.isdir(self.path_entry.get()):
                     messagebox.showwarning('Invalid', 'Invalid File Path')
                     return
-                elif os.path.isfile(f'{self.path_entry.get()}\{self.file_name_entry.get()}'):
+                elif os.path.isfile(temp_f_path):
                     question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?')
                     if question == False:
-                        change_name_entry(self.file_name_entry.get()+' (1)')
+                        ctr = 1
+                        change_name_entry(self.file_name_entry.get()+f'({ctr})')
+                        temp_f_path = temp_f_path.removesuffix('.pdf')
+                        temp_f_path += f'({ctr}).pdf'
+                        while os.path.isfile(temp_f_path):
+                            ctr += 1
+                            change_name_entry(self.file_name_entry.get().removesuffix(f'({ctr-1})'))
+                            change_name_entry(self.file_name_entry.get()+f'({ctr})')
+                            temp_f_path = temp_f_path.removesuffix(f'({ctr-1}).pdf')
+                            temp_f_path += f'({ctr}).pdf'
                     elif question == None:
                         return
                 generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get())
+                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get(), self.file_name_entry.get())
                 reset()
 
             def change_name_entry(name: str = None):
@@ -200,7 +214,7 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.report_type_option.pack(side="left", fill='x', expand=1)
 
             #checkbox if include graphs
-            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs?')
+            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs')
             self.include_graphs_checkbox.grid(row=3, column=0, sticky="nsew", padx=(width*0.085))
 
             '''TITLE SETTING'''
@@ -281,16 +295,30 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
             
             '''events'''
             def generate_callback():
+                temp_f_path = 'file'
+                if self.file_name_entry.get().endswith('.pdf'):
+                    temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}'
+                else:
+                    temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}.pdf'
                 if self.file_name_entry.get() == "":
                     messagebox.showwarning('Invalid', 'Fill the name of the report')
                     return
                 elif not os.path.isdir(self.path_entry.get()):
                     messagebox.showwarning('Invalid', 'Invalid File Path')
                     return
-                elif os.path.isfile(f'{self.path_entry.get()}\{self.file_name_entry.get()}'):
+                elif os.path.isfile(temp_f_path):
                     question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?')
                     if question == False:
-                        change_name_entry(self.file_name_entry.get()+' (1)')
+                        ctr = 1
+                        change_name_entry(self.file_name_entry.get()+f'({ctr})')
+                        temp_f_path = temp_f_path.removesuffix('.pdf')
+                        temp_f_path += f'({ctr}).pdf'
+                        while os.path.isfile(temp_f_path):
+                            ctr += 1
+                            change_name_entry(self.file_name_entry.get().removesuffix(f'({ctr-1})'))
+                            change_name_entry(self.file_name_entry.get()+f'({ctr})')
+                            temp_f_path = temp_f_path.removesuffix(f'({ctr-1}).pdf')
+                            temp_f_path += f'({ctr}).pdf'
                     elif question == None:
                         return
                 daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
@@ -462,7 +490,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
     return add_item(master, info, user)
 
 
-def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int):
+def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int, file_name: str):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -504,6 +532,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             return
         Percentage = 100 * float(part)/float(whole)
         return str(round(Percentage, 2)) + '%'
+    
     #generate footer based on number of pages
     def footer_generator(page_count: int):
         #footer
@@ -547,7 +576,10 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             filename=filename,
             pagesize=letter,
         )
-        footer_content = [['', ''],['Prepared by:', 'Prepared Date/Time:'],['____________________', f'{datetime.datetime.now().strftime("%x     %I:%M:%S %p")}'],[f'{acc_full_name}', ''],[f'{acc_pos}', ''],]
+        footer_content = [['', '', ''],
+                          ['Prepared by:', '', 'Prepared Date/Time:'],
+                          [f'{acc_full_name}', '', f'{datetime.datetime.now().strftime("%x     %I:%M:%S %p")}'],
+                          [f'{acc_pos}', '', ''],]
         table_footer = Table(footer_content)
         tbl_footer_style = TableStyle(
             [
@@ -558,15 +590,16 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             #font style
             ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
             ('FONTSIZE', (0, -1), (-1, -1), 14),
-            ('FONTSIZE', (0, 4), (0, 4), 8),
+            ('FONTSIZE', (0, 3), (0, 3), 8),
             #('FONTSIZE', (1, 2), (1, 2), 8),
             #space at the bottom
             ('TOPPADDING', (0, 0), (-1, 0), 540),#670
-            ('BOTTOMPADDING', (0, 2), (0, -1), -20),#670
-            ('TOPPADDING', (0, 3), (0, 4), -40),#670
-            ('RIGHTPADDING', (0, 1), (0, -1), 200),
+            #('BOTTOMPADDING', (0, 2), (0, -1), -20),
+            ('TOPPADDING', (0, 3), (0, 3), -40),
+            ('TOPPADDING', (0, 2), (0, 2), 20),
+            ('RIGHTPADDING', (1, 1), (1, -1), 200),
             #Signature line
-            ('LINEABOVE', (0,1), (1,1), 0.5, colors.black),
+            ('LINEBELOW', (0,2), (0,2), 0.5, colors.black),
            #('BOX', (0,0), (-1,-1), 0.5, colors.red)
             ]
         )
@@ -684,7 +717,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         monthly_data_service_temp = [database.fetch_data(sql_commands.get_services_monthly_sales_sp_temp, (s, y_temp))[0][0] or 0 for s in months_temp]
         #end of data collection
         #content
-        filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
+        if file_name.endswith('.pdf'):
+            filename = f'{desktop}\\{file_name}'
+        else:
+            filename = f'{desktop}\\{file_name}.pdf'
+        #filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
             pagesize=letter
@@ -817,7 +854,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
                 merger.add(p3.pages[0]).render()
 
         writer = pdfrw2()
-        writer.write(f"{desktop}\{y_temp}_yearly_report.pdf", p1)
+        writer.write(f"{desktop}\{file_name}.pdf", p1)
         messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
     
     #monthly
@@ -852,7 +889,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         full_date_temp = months_Text[m_temp-1]
 
         #content
-        filename = f'{desktop}\\{full_date_temp}_{y_temp}_monthly_report.pdf'
+        if file_name.endswith('.pdf'):
+            filename = f'{desktop}\\{file_name}'
+        else:
+            filename = f'{desktop}\\{file_name}.pdf'
+        #filename = f'{desktop}\\{full_date_temp}_{y_temp}_monthly_report.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
             pagesize=letter
@@ -996,7 +1037,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         #end
         
         #content
-        filename = f'{desktop}\\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
+        if file_name.endswith('.pdf'):
+            filename = f'{desktop}\\{file_name}'
+        else:
+            filename = f'{desktop}\\{file_name}.pdf'
+        #filename = f'{desktop}\\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
             pagesize=letter
@@ -1259,7 +1304,11 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     pdf.build(elems)
 
     #content
-    filename = f'{path}\\{file_name}'
+    if file_name.endswith('.pdf'):
+        filename = f'{path}\\{file_name}'
+    else:
+        filename = f'{path}\\{file_name}.pdf'
+    #filename = f'{path}\\{file_name}'
     pdf = SimpleDocTemplate(
         filename=filename,
         pagesize=letter
