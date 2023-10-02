@@ -233,11 +233,19 @@ get_services_names = "SELECT DISTINCT service_name FROM service_info"
 get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT_DATE"
 
 #FOR INVENTORY STATE
+
+get_safe_state = "SELECT item_general_info.name,\
+                            case when sum(item_inventory_info.stock) > item_settings.Reorder_factor * item_settings.Safe_stock\
+                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock\
+                    FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                        INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                    GROUP BY item_inventory_info.uid\
+                    HAVING stock"
+
 get_reorder_state= "SELECT item_general_info.name,\
                             case when sum(item_inventory_info.stock) <= item_settings.Reorder_factor * item_settings.Safe_stock\
                                     AND sum(item_inventory_info.stock) > item_settings.Crit_factor * item_settings.Safe_stock\
-                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock,\
-                            'Stock' AS _type\
+                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                         INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
                     GROUP BY item_inventory_info.uid\
@@ -245,8 +253,7 @@ get_reorder_state= "SELECT item_general_info.name,\
 
 get_critical_state = "SELECT item_general_info.name,\
                             case when sum(item_inventory_info.stock) <= item_settings.Crit_factor * item_settings.Safe_stock\
-                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock,\
-                            'Stock' AS _type\
+                                        then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                         INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
                     GROUP BY item_inventory_info.uid\
@@ -254,8 +261,7 @@ get_critical_state = "SELECT item_general_info.name,\
 
 get_out_of_stock_state = "SELECT item_general_info.name,\
                                  case when sum(item_inventory_info.stock) = 0\
-                                           then sum(item_inventory_info.stock) ELSE -1 END AS stock,\
-                                 'Stock' AS _type\
+                                           then sum(item_inventory_info.stock) ELSE -1 END AS stock\
                           FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                               INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
                           GROUP BY item_inventory_info.uid\
@@ -266,8 +272,7 @@ get_near_expire_state = "SELECT item_general_info.name,\
                                  case when item_inventory_info.Expiry_Date <= DATE_ADD(CURRENT_DATE, INTERVAL 15 DAY)\
                                              AND item_inventory_info.Expiry_Date > CURRENT_DATE\
                                              AND item_inventory_info.Expiry_Date IS NOT NULL \
-                                             then item_inventory_info.Expiry_Date ELSE 0 END AS EXP,\
-                                 'Expiry' AS _type\
+                                             then item_inventory_info.Expiry_Date ELSE 0 END AS EXP\
                          FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                          HAVING exp;"
 
@@ -276,8 +281,7 @@ get_expired_state = "SELECT item_general_info.name,\
                              item_inventory_info.Stock,\
                              case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
                                          AND item_inventory_info.Expiry_Date IS NOT NULL \
-                                         then item_inventory_info.Expiry_Date ELSE NULL END AS EXP,\
-                             'Expiry' AS _type\
+                                         then item_inventory_info.Expiry_Date ELSE NULL END AS EXP\
                      FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                      HAVING exp;"
 

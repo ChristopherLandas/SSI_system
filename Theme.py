@@ -39,12 +39,19 @@ class Color:
     White_Color = ("#FCFCFC","#FFFDF6","#E5E5E5","#F9F9F9","#EFEFEF","#E0E0E0","#F1F1F1","#C5C5C5",)
     Red_Color = ("#FD8A8A","#FF6464","#EB455F","#E6556B" )
     
-   
-    Reorder_Color = ""
-    Critical_Color = ""
-    Out_Stock = ""
-    Near_Expire = ""
-    Expire = ""
+    Safe_color =  "#97DC86" #"green"
+    Reorder_Color = "#FFE569"  #"yellow"
+    Critical_Color = "#FFBB5C" #"#FFA559"
+    Out_Stock_Color = "#A8A196"  #"#413F42"
+    Near_Expire_Color = "#FFA559" #"#FF9B50"
+    Expire_Color = "#FD8A8A" #"#E74646"
+    
+    Hover_Safe_color =  "#85D671" #"green"
+    Hover_Reorder_Color = "#FFE047"  #"yellow"
+    Hover_Critical_Color = "#FFAA33" #"#FFA559"
+    Hover_Out_Stock_Color = "#999185"  #"#413F42"
+    Hover_Near_Expire_Color = "#FF8F33" #"#FF9B50"
+    Hover_Expire_Color = "#FD7272" #"#E74646"
     
    
     
