@@ -461,8 +461,9 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",pady=(0))
 
         self.sales_data_treeview = cctk.cctkTreeView(self.sales_data_frame, width=width*0.375, height=height*0.45,
-                                                     column_format=f'/No:{int(width*.035)}-#r/Day:x-tc/Total:{int(width*0.125)}-tr!30!30',)
-        self.sales_data_treeview._double_click_command = open_sale_history
+                                                     column_format=f'/No:{int(width*.035)}-#r/Day:x-tc/Total:{int(width*0.125)}-tr!30!30',
+                                                     double_click_command= open_sale_history)
+        #self.sales_data_treeview._double_click_command = open_sale_history
         self.sales_data_treeview.pack()
         
         
@@ -670,6 +671,7 @@ class reception_frame(ctk.CTkFrame):
     def post_sent_callback(self, i):
         if i == 1:
             self.invoice_treeview.remove_selected_data()
+            messagebox.showinfo("Succeed", 'Invoice preceeded to payment')
         else:
             messagebox.showerror("Error", "An error occured")
 
@@ -682,9 +684,11 @@ class reception_frame(ctk.CTkFrame):
             return
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
+            self.update_invoice_treeview()
         else:
             if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")):
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
+                self.update_invoice_treeview()
 
     def load_invoice_content(self, _:any = None):
         if self.invoice_treeview.get_selected_data() is not None:

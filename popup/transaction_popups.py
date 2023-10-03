@@ -1059,7 +1059,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 #temporarily disabled; recording of invoice splitting
 
                 services_price = sum([sum([s[6] for s in li]) for li in formatted_svc_data])
-                if not database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', services_price, None, datetime.now().strftime('%Y-%m-%d'), 0, None)]]):
+                if not database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', services_price + price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]]):
                     return
                 #recording the invoice
 
