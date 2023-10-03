@@ -222,7 +222,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 #self.item_category_entry.pack(side=ctk.LEFT, fill="x", expand=1, padx=(0,width*0.0025), pady=(height*0.005))
 
                 if database.exec_nonquery([["UPDATE item_general_info SET name =?, Category =? WHERE UID =?", (self.item_name_entry.get(), self.item_category_entry.get(), self.item_id_label._text)],
-                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, Average_monthly_selling_rate = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry.get()), self.item_id_label._text)]]):
+                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, Average_monthly_selling_rate = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._text), self.item_id_label._text)]]):
                     messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes")
                     self.reload_item()
                     self.place_forget()
@@ -232,7 +232,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
             
-            self.main_frame = ctk.CTkFrame(self, width * 0.45, height=height*0.775, corner_radius= 0, fg_color=Color.White_Lotion)
+            self.main_frame = ctk.CTkFrame(self, width * 0.45, height=height*0.85, corner_radius= 0, fg_color=Color.White_Lotion)
             self.main_frame.grid(row=0, column=0, sticky="nsew",)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
@@ -282,10 +282,18 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             ctk.CTkLabel(self.item_name_frame, text="Item Name: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.065, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_name_entry = ctk.CTkEntry(self.item_name_frame, font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.item_name_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005)) 
+            
+            '''ITEM UNIT'''
+            self.item_unit_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
+            self.item_unit_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            self.item_unit_frame.pack_propagate(0)
+            ctk.CTkLabel(self.item_unit_frame, text="Item Unit: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.065, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
+            self.item_unit_entry = ctk.CTkEntry(self.item_unit_frame, font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
+            self.item_unit_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005)) 
         
             '''ITEM CATEGORY'''
             self.item_category_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.item_category_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            self.item_category_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
             ctk.CTkLabel(self.item_category_frame, text="Category: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.065, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_category_entry = ctk.CTkEntry(self.item_category_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.item_category_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
@@ -293,44 +301,44 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             #self.service_category_option = ctk.CTkOptionMenu(self.service_category_frame, values=["Male","Female"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum,)
             
             '''ITEM PRICE'''
-            ctk.CTkLabel(self.content_frame, text="Item Price", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w").grid(row=3, column=0, columnspan=1, sticky="nsew", padx=(width*0.01), pady=(0, height*0.01))
+            ctk.CTkLabel(self.content_frame, text="Item Price", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w").grid(row=4, column=0, columnspan=1, sticky="nsew", padx=(width*0.01), pady=(0, height*0.01))
             
             #UNIT PRICE
             self.item_unit_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.item_unit_frame.grid(row=4, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
-            ctk.CTkLabel(self.item_unit_frame, text="Unit Price:  ₱", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.075, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
+            self.item_unit_frame.grid(row=5, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            ctk.CTkLabel(self.item_unit_frame, text="Unit Price:  ₱  ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.075, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_unit_price_entry = ctk.CTkEntry(self.item_unit_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.item_unit_price_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
             
             #MARKUP FACTOR
             self.item_markup_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06,width=width*0.15)
-            self.item_markup_frame.grid(row=4, column=1, columnspan=1, sticky="nsw", padx=(0,width*0.005), pady=(0, height*0.01))
+            self.item_markup_frame.grid(row=5, column=1, columnspan=1, sticky="nsw", padx=(0,width*0.005), pady=(0, height*0.01))
             self.item_markup_frame.pack_propagate(0)
             ctk.CTkLabel(self.item_markup_frame, text="Markup Factor: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.08, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_markup_entry = ctk.CTkEntry(self.item_markup_frame,  font=("DM Sans Medium",14), width=width*0.04, fg_color=Color.White_Lotion, state='disable', justify='right')
             self.item_markup_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
-            ctk.CTkLabel(self.item_markup_frame, text="%", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.015, anchor="w").pack(side=ctk.RIGHT, padx=(0,width*0.005),pady=(height*0.01))
+            ctk.CTkLabel(self.item_markup_frame, text="  %", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.015, anchor="w").pack(side=ctk.RIGHT, padx=(0,width*0.005),pady=(height*0.01))
             
             #SELLING PRICE
             self.item_selling_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.item_selling_frame.grid(row=5, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
-            ctk.CTkLabel(self.item_selling_frame, text="Selling Price:  ₱", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.075, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
+            self.item_selling_frame.grid(row=6, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            ctk.CTkLabel(self.item_selling_frame, text="Selling Price:  ₱  ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.075, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_selling_price_entry = ctk.CTkEntry(self.item_selling_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.item_selling_price_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
             
             '''ITEM INVENTORY'''
-            ctk.CTkLabel(self.content_frame, text="Item Inventory", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w").grid(row=6, column=0, columnspan=1, sticky="nsew", padx=(width*0.01), pady=(0, height*0.01))
+            ctk.CTkLabel(self.content_frame, text="Item Inventory", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w").grid(row=7, column=0, columnspan=1, sticky="nsew", padx=(width*0.01), pady=(0, height*0.01))
             
             #REORDER FACTOR
             self.item_reorder_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.item_reorder_frame.grid(row=7, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            self.item_reorder_frame.grid(row=8, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
             ctk.CTkLabel(self.item_reorder_frame, text="Reorder Factor: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.0825, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_reorder_entry = ctk.CTkEntry(self.item_reorder_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.item_reorder_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
             
             #CRIT FACTOR
             self.item_crit_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06, width=width*0.15)
-            self.item_crit_frame.grid(row=7, column=1, columnspan=1, sticky="nsw", padx=(0,width*0.005), pady=(0, height*0.01))
+            self.item_crit_frame.grid(row=8, column=1, columnspan=1, sticky="nsw", padx=(0,width*0.005), pady=(0, height*0.01))
             self.item_crit_frame.pack_propagate(0)
             ctk.CTkLabel(self.item_crit_frame, text="Critical Factor: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.0775, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_crit_entry = ctk.CTkEntry(self.item_crit_frame,  font=("DM Sans Medium",14), width=width*0.05, fg_color=Color.White_Lotion, state='disable')
@@ -338,7 +346,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
              
             #SAFE STOCK
             self.item_safe_stock_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.item_safe_stock_frame.grid(row=8, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            self.item_safe_stock_frame.grid(row=10, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
             ctk.CTkLabel(self.item_safe_stock_frame, text="Safe Stock: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.0825, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_safe_stock_entry = ctk.CTkEntry(self.item_safe_stock_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.item_safe_stock_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
@@ -346,15 +354,15 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             '''ITEM RATE'''
             
             self.item_rate_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.item_rate_frame.grid(row=9, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-            ctk.CTkLabel(self.item_rate_frame, text="Selling Rate: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.0825, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
-            self.item_rate_entry = ctk.CTkEntry(self.item_rate_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
+            self.item_rate_frame.grid(row=11, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+            ctk.CTkLabel(self.item_rate_frame, text="Selling Rate:  ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.0825, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
+            self.item_rate_entry = ctk.CTkLabel(self.item_rate_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, anchor='w')
             self.item_rate_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
             
             #self.item_category_option = ctk.CTkOptionMenu(self.item_category_frame, values=["Male","Female"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum,)
             
-            self.entries = [self.item_name_entry, self.item_category_entry, self.item_unit_price_entry, self.item_markup_entry, self.item_selling_price_entry,
-                            self.item_reorder_entry, self.item_crit_entry, self.item_safe_stock_entry, self.item_rate_entry]
+            self.entries = [self.item_name_entry, self.item_unit_entry, self.item_category_entry, self.item_unit_price_entry, self.item_markup_entry, self.item_selling_price_entry,
+                            self.item_reorder_entry, self.item_crit_entry, self.item_safe_stock_entry]
             
         
         def reset(self):
@@ -368,7 +376,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                     b_width= 2
                 elif 'disabled' in state:
                     b_width = 0
-                self.entries[i].configure(state=state,border_width=b_width )
+                self.entries[i].configure(state=state,border_width=b_width)
             
         def reset_entries(self):
             for i in range(len(self.entries)):
@@ -379,9 +387,9 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.set_entries('normal')
 
             self.item_id_label.configure(text=raw_data[0])
-            
+            self.item_rate_entry.configure(text = raw_data[-1])
             for i in range(len(self.entries)):
-                if i == 3:
+                if i == 4:
                     self.entries[i].insert(0, f"{raw_data[i+1]*100}" )
                     continue
                 
@@ -390,9 +398,16 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             
         def place(self, item_info, item_reload_callback, **kwargs):
             self.reload_item = item_reload_callback
-            #print(item_info)
-            self.raw_data = database.fetch_data(sql_commands.get_inventory_info, (f'{item_info[0]}',))
-            self.load_data(raw_data=self.raw_data[0])
+            self.raw_data = database.fetch_data(sql_commands.get_inventory_info, (f'{item_info[0]}',))[0]
+            #For testing
+            temp=[]
+            for i in range(len(self.raw_data)):
+                temp.append(self.raw_data[i])
+                if i == 1 : 
+                    temp.append('Unit') 
+                    continue
+            self.load_data(raw_data=temp)
+            del temp
             
             return super().place(**kwargs)
     return instance(master, info)

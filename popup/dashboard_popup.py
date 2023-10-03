@@ -18,31 +18,47 @@ from util import *
 import util
 from datetime import date
 
-def status_bar(master, info:tuple, text: str, icon_color: str, count: int, window: callable, data: dict):
+def status_bar(master, info: tuple, height, width, text: str, icon_color: str, count: int, window: callable, data: dict, 
+               fg_color:str = Color.White_AntiFlash, hover_color:str = Color.Platinum):
     class instance(cctk.ctkButtonFrame):
-        def __init__(self, master, info:tuple, text: str, icon_color: str, count: int, window: callable, data: dict):
-            self.width = info[0]
-            self.height = info[1]
+        def __init__(self, master, info:tuple,  height, width, text: str, icon_color: str, count: int, window: callable, data: list,
+                     fg_color:str, hover_color:str):
+            self.info =info
+            self.width = width
+            self.height = height
             self._window = window
             self._data = data
 
-            super().__init__(master, height=self.height * .2, fg_color=Color.White_AntiFlash ,hover_color=Color.Platinum,corner_radius=5,cursor="hand2")
-
-            self.status_label = ctk.CTkLabel(self, text=text, font=("DM Sans Medium", 14))
-            self.status_label.pack(side="left", padx=(self.width*0.04,0))
-            self.status_light = ctk.CTkLabel(self, text="", height=self.height*0.04, width=self.width*0.03, corner_radius=8, fg_color=icon_color)
-            self.status_light.pack(side="right", padx=(self.width*0.025,self.width*0.05))
-            self.status_count = ctk.CTkLabel(self, text=count, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
-            self.status_count.pack(side="right")
+            super().__init__(master, height=self.height, width=self.width, fg_color=fg_color ,hover_color=hover_color,corner_radius=5,cursor="hand2")
+            
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            
+            self.status_label = ctk.CTkLabel(self, text=text, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
+            self.status_label.grid(row = 0, column = 0, padx=(self.height*0.15, 0), stick='w')
+            self.status_light = ctk.CTkFrame(self, height=self.height*0.15, width=self.height*0.15, corner_radius=8, border_width=1,
+                                             border_color=Color.White_Ghost,fg_color=icon_color)
+            self.status_count = ctk.CTkLabel(self, text=count, font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+            
+            
+            self.status_light.grid(row = 0, column = 2, padx=(0,self.height*0.15))    
+            self.status_count.grid(row = 0, column = 1, padx=(0, self.height*0.15))
+            
+            if self.status_count._text == 0 or self.status_label._text == 'Safe/Normal': 
+                self.status_light.configure(fg_color='transparent',border_width=0)
+                
             self.update_children()
 
         def response(self, _):
-            self._window(self.status_label._text, self._data[self.status_label._text])
-            print(self._data[self.status_label._text])
+            self._window(self.status_label._text, self._data )
             return super().response(_)
+        
+        def update_data(self, count, data):
+            self.status_count.configure(text=count)
+            self._data = data
 
 
-    return instance(master, info, text, icon_color, count, window, data)
+    return instance(master, info, height, width, text, icon_color, count, window, data, fg_color, hover_color)
 
 
 def sales_history_popup(master, info:tuple):
