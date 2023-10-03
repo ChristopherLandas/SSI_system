@@ -45,7 +45,6 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
-            
             '''INFO PART'''
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
             self.content_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
@@ -108,29 +107,22 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ ---,---.--",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
           
-
-       
-                #data = (f"{i+1} ", data[i][0], svc_data[i][1].strftime("%b %d, %Y"), svc_data[i][2])
-                #data_rows.append(data)
-                #self.service_record_data_view.insert(parent = '', index = "end", values = data, tags=tag)
+            self.labels = [self.or_label, self.client_name, self.receipt_total_amount, self.date_label, self.cashier_name_label]
         
+        def set_values(self):
+            [self.labels[i].configure(text=f"{self.transact_info[i]}") for i in range(len(self.labels))]     
         
         
         def place(self, sales_info, **kwargs):
-            
-            self.cashier_name_label.configure(text=sales_info[-1])
-            self.client_name.configure(text=sales_info[1]) 
-            self.or_label.configure(text=f"OR#{sales_info[0]}")
-            self.date_label.configure(text=sales_info[2])
-            self.receipt_total_amount.configure(text= f"{(sales_info[-2])}")
-            
-            raw_items = database.fetch_data(sql_commands.get_item_record, (sales_info[0],))
-            raw_service = database.fetch_data(sql_commands.get_service_record, (sales_info[0],))
-                      
+            raw_items = database.fetch_data(sql_commands.get_item_record, (sales_info,))
+            raw_service = database.fetch_data(sql_commands.get_service_record, (sales_info,))
+            self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info,))[0]         
+            self.set_values()
+             
             temp =  raw_service + raw_items
-            
             self.tree_data = [(data[0], data[1], f"₱ {format_price(data[2])}", f"₱ {format_price(data[3])}") for data in temp]
-            self.receipt_treeview.update_table(self.tree_data)
+            
+            self.receipt_treeview.update_table(self.tree_data) 
             
             return super().place(**kwargs)
     return instance(master, info)
