@@ -612,7 +612,9 @@ update_pet_record_pet_owner = f"UPDATE pet_owner_info\
                                 contact_number = ?\
                                 WHERE pet_info.id = ? "
 
-insert_new_category = "INSERT INTO categories VALUES (?, ?)"
+insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, NULL, NULL)"
+update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
+update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
 update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
 

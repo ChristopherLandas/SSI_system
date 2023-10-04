@@ -291,7 +291,7 @@ def add_item(master, info:tuple):
             for entries in self.supplier_entries: entries.configure(fg_color = color, border_width = width ,state = state)
             
         def set_categories(self):
-            self.data = database.fetch_data("SELECT * FROM categories")
+            self.data = database.fetch_data("SELECT * FROM categories where state = 1")
             self.supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info")
             
             self.supplier_option = [data[1] for data in self.supplier_data]
@@ -1187,8 +1187,9 @@ def show_category(master, info:tuple):
         def __init__(self, master, info:tuple, ):
             width = info[0]
             height = info[1]
+            user = info[3]
             super().__init__(master, corner_radius= 0, fg_color='transparent')
-            
+           
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
 
@@ -1203,8 +1204,12 @@ def show_category(master, info:tuple):
             
             def reset():
                 self.place_forget()
+                
+            def deactivate_category(i:int):
+                database.exec_nonquery([[sql_commands.update_category_deac, (user[0][0], self.data_view1._data[i][0],)]])
+                
 
-            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.635)
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.7 )
             self.main_frame.grid(row=0, column=0)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(3, weight=1)
@@ -1219,33 +1224,38 @@ def show_category(master, info:tuple):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
-            """ self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+            self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
             self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.0075,width*0.005), pady=(height*0.01))
             self.search_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
 
-            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
 
-            self.add_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Category",image=self.add_icon, font=("DM Sans Medium", 14),)
-            self.add_category_btn.configure(command=lambda:add_category(self,(width, height), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
-            self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(width*0.005), pady=(height*0.01))
+            self.add_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Category",image=self.add_icon, font=("DM Sans Medium", 14),
+                                                  command=lambda:add_category(self,(width, height, user[0][0]), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
+            self.add_category_btn.grid(row=1, column=1, sticky="e", padx=(width*0.0025,width*0.005), pady=(height*0.01))
 
             self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=self.refresh_table)
             self.refresh_btn.grid(row=1, column=2, sticky="w")
+            
+            self.dis_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Disabled Categories", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,  font=("DM Sans Medium", 14),
+                                                  command=lambda:show_disabled_category(self,(width, height, user[0][0]), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
+            self.dis_category_btn.grid(row=3, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
-            self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
+            self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.005))
 
             #self.category_data = self.conv_data()
             
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, width= width*0.635, height= height*0.5, corner_radius=0,
-                                            column_format=f'/No:{int(width*.025)}-#r/Category:x-tl/HasExpiry:{int(width*.095)}-tc!30!30')
+                                            column_format=f'/No:{int(width*.025)}-#r/Category:x-tl/HasExpiry:{int(width*.095)}-tc/Action:{int(width*.055)}-bD!30!30',
+                                            bd_commands=deactivate_category)
             self.data_view1.pack()
 
         def conv_data(self):
-            self.data = database.fetch_data("SELECT * FROM categories")
+            self.data = database.fetch_data("SELECT categ_name, does_expire FROM categories WHERE state = 1")
             self.ret = []
             for i in range(len(self.data)):
                 temp = list(self.data[i])
@@ -1263,15 +1273,101 @@ def show_category(master, info:tuple):
             
         def place(self, **kwargs):
             self.conv_data()
-    
+            
             return super().place(**kwargs)
     return show_category(master, info)
+
+def show_disabled_category(master, info:tuple, table_update_callback: callable):
+    class show_disabled_category(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, table_update_callback: callable):
+            width = info[0]
+            height = info[1]
+            user = info[2]
+            super().__init__(master, corner_radius= 0, fg_color='transparent')
+           
+            self._table_update_callback = table_update_callback 
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+
+            self.add_item = ctk.CTkImage(light_image=Image.open("image/add_item.png"), size=(20,20))
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+            self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
+            self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
+            self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
+            self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+            self.trash_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
+            
+            def reset():
+                self.place_forget()
+                
+            def reactivate_category():
+                if self.data_view1.get_selected_data()[0]:
+                    database.exec_nonquery([[sql_commands.update_category_reac, (self.data_view1.get_selected_data()[0],)]])
+                    self.refresh_table()
+                    self._table_update_callback()
+                else:
+                    messagebox.showerror("Warning", "Select a record first")
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.7)
+            self.main_frame.grid(row=0, column=0)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(3, weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='', image=self.add_item, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
+            ctk.CTkLabel(self.top_frame, text='DISABLED CATEGORY', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+            self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.0075,width*0.005), pady=(height*0.01))
+            self.search_frame.pack_propagate(0)
+            
+            ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+            self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
+
+            self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+
+            self.add_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Reactivate Category", font=("DM Sans Medium", 14),
+                                                  command=reactivate_category)
+            self.add_category_btn.grid(row=1, column=1, sticky="w", padx=(width*0.0025,width*0.005), pady=(height*0.01))
+
+            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=self.refresh_table)
+            self.refresh_btn.grid(row=1, column=2, sticky="w")
+        
+            self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
+            self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
+
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, width= width*0.635, height= height*0.55, corner_radius=0,
+                                            column_format=f'/No:{int(width*.025)}-#r/CategoryName:x-tl/DisabledBy:{int(width*.165)}-tl/DisableDate:{int(width*.15)}-tc!30!30',
+                                            )
+            self.data_view1.pack()
+
+        def conv_data(self):
+            self.data = database.fetch_data("SELECT categ_name, disabled_by, Date_Format(Cast(disabled_date AS DATE), '%Y-%m-%d') FROM categories WHERE state = 0")
+            self.data_view1.update_table(self.data)
+            self.data_view1.pack()
+            
+        def refresh_table(self):
+            self.conv_data()
+            
+        def place(self, **kwargs):
+            self.conv_data()
+            
+            return super().place(**kwargs)
+    return show_disabled_category(master, info, table_update_callback)
 
 def add_category(master, info:tuple, table_update_callback: callable):
     class add_category(ctk.CTkFrame):
         def __init__(self, master, info:tuple, table_update_callback: callable):
             width = info[0]
             height = info[1]
+            user = info[2]
             super().__init__(master, width=width*0.35, height=height*0.4, corner_radius= 0, fg_color='transparent')
             
             self.grid_columnconfigure(0, weight=1)
@@ -1291,7 +1387,7 @@ def add_category(master, info:tuple, table_update_callback: callable):
                 if self.category_name_entry.get()=='':
                     messagebox.showwarning("Missing Information", "Complete required fields")
                 else:
-                    database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get())]])
+                    database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get(),user)]])
                     reset()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
