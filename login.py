@@ -99,7 +99,9 @@ class loginUI(ctk.CTk):
         
         ctk.set_widget_scaling(set_scale((width, height)))
         ctk.set_window_scaling(set_scale((width, height)))
-        print( width, height, '|', set_scale((width, height)))
+        #print( width, height, '|', set_scale((width, height)))
+        
+        
         
         root_w = 500
         root_h = 600

@@ -1221,6 +1221,7 @@ def show_payment_proceed(master, info:tuple,):
             global IP_Address
 
             self.sender_entity = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], 222, IP_Address["MY_NETWORK_IP"], 200)
+            self.admin_entity = nsu.network_sender(IP_Address["ADMIN_IP"], 222, IP_Address["MY_NETWORK_IP"], 201)
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
@@ -1303,6 +1304,7 @@ def show_payment_proceed(master, info:tuple,):
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
                 self.sender_entity.send("_")
+                #self.admin_entity.send("_")
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()

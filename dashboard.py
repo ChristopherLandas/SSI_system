@@ -614,6 +614,7 @@ class dashboard_frame(ctk.CTkFrame):
             self.stat_tabs.append(copy.copy(temp))
             self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(self.inventory_frame_width*0.001 ),pady=(0,self.inventory_frame_height*0.02))
             del temp """
+        #FIx when in network
         data= [database.fetch(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
                database.fetch_data(sql_commands.get_out_of_stock_state), database.fetch_data(sql_commands.get_critical_state),
                database.fetch_data(sql_commands.get_reorder_state),]
@@ -1478,8 +1479,8 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_treeview_frame.grid(row=1, column=0, columnspan=6, sticky="nsew", padx=width*0.005)
 
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items_state)
-        self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.09)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/SupplierName:{int(width*.175)}-tl/Action:{int(width*.05)}-bD!30!35',
+        self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=[],width= width * .805, height= height * .725, corner_radius=0,
+                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.025)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/SupplierName:{int(width*.125)}-tl/OrderBy:{int(width*.125)}-tl/Action:{int(width*.05)}-bD!30!35',
                                            double_click_command= _restock, bd_commands= disposal_callback,
                                            conditional_colors={2:{'Waiting':'orange', 'Pending':'red'}})
         self.rs_data_view1.configure(double_click_command = _restock)
