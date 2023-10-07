@@ -1643,3 +1643,145 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             return super().place(**kwargs)
             
     return disposal_confirmation(master, info, command_callback)
+
+def order_info_screen(master, info:tuple):
+    class order_info_screen(ctk.CTkFrame):
+        def __init__(self, master, info:tuple):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, corner_radius= 0, fg_color='transparent')
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, height=height*0.765, width=width*0.45, fg_color=Color.White_Color[3], border_width=1, border_color=Color.White_Gray)
+            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew", padx=1, pady=(1,0))
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='', image=Icons.info_icon, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
+            ctk.CTkLabel(self.top_frame, text='ORDER INFO', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=height*0.04, command=self.reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.info_frame= ctk.CTkFrame(self.main_frame,fg_color=Color.White_Platinum,)
+            self.info_frame.grid(row=1,column=0, sticky="nsew",  padx=(width*0.005), pady = (height*0.01))
+            self.info_frame.grid_columnconfigure((0,1), weight=1)
+            self.info_frame.grid_propagate(0)
+            
+            '''ORDER INFO FRAME'''
+            self.order_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.order_info_frame.grid(row=0, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(height*0.015,0))
+            self.order_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.order_info_frame, text="Order Code:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.order_num_label = ctk.CTkLabel(self.order_info_frame, text="R000000", font=("DM Sans Medium", 14), fg_color="transparent")
+            self.order_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))        
+
+            '''DATE INFO FRAME'''
+            self.date_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.date_info_frame.grid(row=1, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(height*0.0075, height*0.02))
+            self.date_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.date_info_frame, text="Date Ordered:  " , font=("DM Sans Medium", 14), width=width*0.085, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.date_num_label = ctk.CTkLabel(self.date_info_frame, text="R000000", font=("DM Sans Medium", 14), fg_color="transparent")
+            self.date_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''ORDER FRAME'''
+            self.order_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.order_info_frame.grid(row=1, column=1, columnspan=1, sticky="nsew", padx=(height*0.015), pady=(height*0.0075, height*0.02))
+            self.order_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.order_info_frame, text="Order By:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.order_by_name_label = ctk.CTkLabel(self.order_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.order_by_name_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''ITEM NUM FRAME'''
+            self.item_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.item_info_frame.grid(row=2, column=0, sticky="nsew",padx=(height*0.015,0), pady=(0, height*0.0075))
+            self.item_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.item_info_frame, text="Item Code:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.item_num_label = ctk.CTkLabel(self.item_info_frame, text="R000000", font=("DM Sans Medium", 14), fg_color="transparent")
+            self.item_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))        
+
+            '''ITEM NAME FRAME'''
+            self.item_name_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.3)
+            self.item_name_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.item_name_frame.pack_propagate(0)
+            ctk.CTkLabel(self.item_name_frame, text="Item Name:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.item_name_label = ctk.CTkLabel(self.item_name_frame, text="R000000", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.item_name_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))        
+        
+            '''STATUS FRAME'''
+            self.status_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.status_info_frame.grid(row=4, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(height*0.0075))
+            self.status_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.status_info_frame, text="Status:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.status_label = ctk.CTkLabel(self.status_info_frame, text="Pending", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.status_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''QUANTITY FRAME'''
+            self.quantity_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.quantity_info_frame.grid(row=5, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(0, height*0.0075))
+            self.quantity_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.quantity_info_frame, text="Ordered Quantity:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.quantity_num_label = ctk.CTkLabel(self.quantity_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.quantity_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''PENDING FRAME'''
+            self.pending_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.pending_info_frame.grid(row=5, column=1, columnspan=1, sticky="nsew", padx=(height*0.015), pady=(0,height*0.0075))
+            self.pending_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.pending_info_frame, text="Pending Quantity:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.pending_num_label = ctk.CTkLabel(self.pending_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.pending_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            
+            '''SUPPLIER CODE FRAME'''
+            self.supplier_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.supplier_info_frame.grid(row=6, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(height*0.015, height*0.0075))
+            self.supplier_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.supplier_info_frame, text="Supplier Code:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.supplier_num_label = ctk.CTkLabel(self.supplier_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent")
+            self.supplier_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''SUPPLIER NAME FRAME'''
+            self.sup_name_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.sup_name_info_frame.grid(row=7, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.sup_name_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.sup_name_info_frame, text="Supplier Name:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.sup_name_label = ctk.CTkLabel(self.sup_name_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.sup_name_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''SUPPLIER PERSON FRAME'''
+            self.supp_person_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.supp_person_info_frame.grid(row=8, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.supp_person_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.supp_person_info_frame, text="Contact Person:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.supp_person_num_label = ctk.CTkLabel(self.supp_person_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.supp_person_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            '''SUPPLIER CONTACT FRAME'''
+            self.supp_contact_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
+            self.supp_contact_info_frame.grid(row=9, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.supp_contact_info_frame.pack_propagate(0)
+            ctk.CTkLabel(self.supp_contact_info_frame, text="Contact Number:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.supp_contact_num_label = ctk.CTkLabel(self.supp_contact_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.supp_contact_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            self.labels = [self.order_num_label, self.date_num_label, self.item_num_label, self.item_name_label,
+                           self.status_label, self.quantity_num_label, self.pending_num_label, self.order_by_name_label,
+                           self.supplier_num_label, self.sup_name_label, self.supp_person_num_label, self.supp_contact_num_label]
+            
+        def reset(self):
+            self.place_forget()
+        
+        def set_label(self):
+            [self.labels[label].configure(text = f"{self.raw_data[label]}") for label in range(len(self.raw_data))]
+                
+        def place(self, data, **kwargs):
+            self.raw_data = database.fetch_data(sql_commands.get_order_info, (data[0],))[0]
+            self.set_label()
+            return super().place(**kwargs)
+            
+    return order_info_screen(master, info)

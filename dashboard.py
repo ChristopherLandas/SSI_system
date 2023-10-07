@@ -10,7 +10,7 @@ from tkinter import messagebox
 from util import *
 from functools import partial
 from tkextrafont import Font
-from Theme import Color
+from Theme import Color, Icons
 from PIL import Image
 from datetime import date
 from customcustomtkinter import customcustomtkinter as cctk
@@ -1171,10 +1171,11 @@ class inventory_frame(ctk.CTkFrame):
         self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
         self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(20,21))
         self.disposal_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
-        self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
+        self.supplier_icon_ = ctk.CTkImage(light_image= Image.open("image/supplier.png"), size=(26,26))
         self.history_icon = ctk.CTkImage(light_image= Image.open("image/histlogs.png"), size=(22,25))
         self.trash_icon = ctk.CTkImage(light_image= Image.open("image/trash.png"), size=(16,18))
         self.edit_icon = ctk.CTkImage(light_image= Image.open("image/edit_icon.png"), size=(16,16))
+        self.info_icon = ctk.CTkImage(light_image= Image.open("image/info.png"), size=(36,36))
 
         self.base_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[3])
         self.base_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
@@ -1185,8 +1186,9 @@ class inventory_frame(ctk.CTkFrame):
         self.inventory_sub_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
         self.restock_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
         self.disposal_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
-
-        self.report_frames=[self.inventory_sub_frame, self.restock_frame,self.disposal_frame]
+        self.supplier_frame = ctk.CTkFrame(self.base_frame, fg_color="red")
+        
+        self.report_frames=[self.inventory_sub_frame, self.restock_frame,self.disposal_frame, self.supplier_frame]
         self.active_report = None
 
         self.sort_type_option_var = ctk.StringVar(value="Sort by Levels")
@@ -1206,6 +1208,7 @@ class inventory_frame(ctk.CTkFrame):
         self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
         self.sell_rate = {s[0]: s[1] for s in database.fetch_data(sql_commands.get_selling_rate)}
 
+        #region Functions
         def load_main_frame(cur_frame: int):
             if self.active_report is not None:
                 self.active_report.pack_forget()
@@ -1299,17 +1302,17 @@ class inventory_frame(ctk.CTkFrame):
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
             self.data_view1.update_table(self.data1)
-
-
+        #endregion
+        #region Tab Setup
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
-        self.top_frame.grid_columnconfigure(2, weight=1)
+        self.top_frame.grid_columnconfigure(3, weight=1)
 
-        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
+        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=5, sticky="nsew")
 
         self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=3, sticky="n")
+        self.date_label.grid(row=0, column=4, sticky="n")
 
 
         self.inventory_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
@@ -1347,12 +1350,25 @@ class inventory_frame(ctk.CTkFrame):
         self.stock_disposal_label.pack(side="left")
         self.stock_disposal_button.grid()
         self.stock_disposal_button.update_children()
+        
+        self.supplier_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
-        self.button_manager = cctku.button_manager([self.inventory_button, self.stock_in_button, self.stock_disposal_button], selected_color, False, 0)
+        self.supplier_button.grid(row=0, column=3, sticky="sw", padx=(0,width*0.0025), pady=0)
+        self.supplier_button.configure(command=partial(load_main_frame, 3))
+        self.supplier_icon = ctk.CTkLabel(self.supplier_button, text="",image=self.supplier_icon_)
+        self.supplier_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.supplier_label = ctk.CTkLabel(self.supplier_button, text="SUPPLIER", text_color="white", font=("DM Sans Medium", 14))
+        self.supplier_label.pack(side="left")
+        self.supplier_button.grid()
+        self.supplier_button.update_children()
+
+        self.button_manager = cctku.button_manager([self.inventory_button, self.stock_in_button, self.stock_disposal_button, self.supplier_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
-
+        #endregion
+        #region Inventory
         '''INVENTORY FRAME: START'''
         self.inventory_sub_frame.pack(fill="both", expand=1)
         self.inventory_sub_frame.grid_propagate(0)
@@ -1372,16 +1388,17 @@ class inventory_frame(ctk.CTkFrame):
                                         width=width*0.005, command=search)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
+        self.refresh_btn = ctk.CTkButton(self.inventory_sub_frame,text="", width=width*0.0275, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1, sticky="w")
+        
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
                                           command= lambda : self.add_item_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+        self.add_item_btn.grid(row=0, column=2, sticky="w", padx=(width*0.005), pady=(height*0.01))
         
         self.view_category = ctk.CTkButton(self.inventory_sub_frame, height=height*0.05,width=width*0.07, text="Category",  font=("DM Sans Medium", 14),
                                            command = lambda: self.category_popup.place(relx=0.5, rely=0.5, anchor="c"))
-        self.view_category.grid(row=0, column=2, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+        self.view_category.grid(row=0, column=3, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.refresh_btn = ctk.CTkButton(self.inventory_sub_frame,text="", width=width*0.0275, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
-        self.refresh_btn.grid(row=0, column=3, sticky="w")
 
         self.sort_frame = ctk.CTkFrame(self.inventory_sub_frame,  height = height*0.05, fg_color=Color.Platinum)
         self.sort_frame.grid(row=0, column=5, padx=(width*0.005), pady=(height*0.01), sticky="nse")
@@ -1415,9 +1432,11 @@ class inventory_frame(ctk.CTkFrame):
         self.refresh_btn.configure(command = refresh)
 
         self.sort_type_option.set("Sort by Levels")
-
+        
         '''INVENTORY FRAME: END'''
-
+        #endregion
+            
+        #region Restock
         '''RESTOCK: START'''
         def refresh_rs_data_view1():
             self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
@@ -1453,7 +1472,9 @@ class inventory_frame(ctk.CTkFrame):
             """ self.restock_popup.stock(self.rs_data_view1)
             temp:dashboard_popup = mainframes[0]
             temp.generate_stat_tabs() """
-        #self.restock_frame.pack(fill="both", expand=1)
+        def show_order_info():
+            self.order_info.place(relx=0.5, rely=0.5, anchor='c', data= self.rs_data_view1.get_selected_data()) if self.rs_data_view1.get_selected_data() else messagebox.showwarning("Warning", "Please select a record first")
+                       
         self.restock_frame.grid_propagate(0)
         self.restock_frame.grid_rowconfigure(1, weight=1)
 
@@ -1470,41 +1491,43 @@ class inventory_frame(ctk.CTkFrame):
                                         width=width*0.005, command=search)
         self.rs_search_btn.pack(side="left", padx=(0, width*0.0025))
 
+        self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= refresh_rs_data_view1)
+        self.rs_refresh_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005))
+        
         self.rs_add_item_btn = ctk.CTkButton(self.restock_frame,width=width*0.1, height = height*0.05, text="Add Order",image=self.add_icon, font=("DM Sans Medium", 14),
                                            command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, relx = .5, rely = .5, anchor = 'c'))
-        self.rs_add_item_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+        self.rs_add_item_btn.grid(row=0, column=2, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= refresh_rs_data_view1)
 
-        self.rs_refresh_btn.grid(row=0, column=2, sticky="w", padx=(0,width*0.005))
-
-        self.pending_btn = ctk.CTkButton(self.restock_frame, width=width*0.025, height = height*0.05, text="Pending Orders(n)", font=("DM Sans Medium", 14),
-                                             command=lambda: self.pending_orders.place(relx = .5, rely = .5, anchor = 'c'))
-        #self.pending_btn.grid(row=0, column=3, sticky="e", padx=(0,width*0.005), pady=(height*0.01))
+        self.info_btn = ctk.CTkButton(self.restock_frame, width=height*0.05, height = height*0.05, image=Icons.info_icon, text="", font=("DM Sans Medium", 14),
+                                             command=show_order_info,)
+        self.info_btn.grid(row=0, column=4, sticky="e", padx=(0,width*0.005), pady=(height*0.01))
 
         self.receive_history = ctk.CTkButton(self.restock_frame, width=width*0.025, height = height*0.05, text="Received Items", image=self.history_icon, font=("DM Sans Medium", 14),
                                              command= lambda: self.history_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.receive_history.grid(row=0, column=4, sticky="e", padx=(0,width*0.005), pady=(height*0.01))
+        self.receive_history.grid(row=0, column=3, sticky="e", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.rs_supplier_btn = ctk.CTkButton(self.restock_frame,width=width*0.08, height = height*0.05, text="Supplier",image=self.person_icon, font=("DM Sans Medium", 14),
+        self.rs_supplier_btn = ctk.CTkButton(self.restock_frame,width=width*0.08, height = height*0.05, text="Supplier",image=self.supplier_icon_, font=("DM Sans Medium", 14),
                                           command= lambda : self.supplier_list_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.rs_supplier_btn.grid(row=0, column=5,sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+        #self.rs_supplier_btn.grid(row=0, column=5,sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
         self.rs_treeview_frame = ctk.CTkFrame(self.restock_frame,fg_color="transparent")
         self.rs_treeview_frame.grid(row=1, column=0, columnspan=6, sticky="nsew", padx=width*0.005)
 
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items_state)
-        self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=[],width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.025)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/SupplierName:{int(width*.125)}-tl/OrderBy:{int(width*.125)}-tl/Action:{int(width*.05)}-bD!30!35',
-                                           double_click_command= _restock, bd_commands= disposal_callback,
-                                           conditional_colors={2:{'Waiting':'orange', 'Pending':'red'}})
+        
+        self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
+                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!30!35',
+                                           double_click_command= _restock, bd_commands= disposal_callback, conditional_colors={2:{'Waiting':'orange', 'Pending':'red'}})
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
         
-        self.pending_btn.configure(text=f"Pending Orders: {database.fetch_data('SELECT COUNT(id) FROM recieving_item WHERE state = 3')[0][0]}")
+       
         
         '''RESTOCK FRAME: END'''
-
+        #endregion
+        
+        #region Disposal 
         '''ITEM DISPOSAL: START'''
         def full_dispose_item(i: int):
             database.exec_nonquery([["UPDATE disposal_history SET disposed_by = ?, full_dispose_date = CURRENT_TIMESTAMP WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (acc_cred[0][0], self.ds_data_view1._data[i][3])]])
@@ -1535,6 +1558,7 @@ class inventory_frame(ctk.CTkFrame):
         self.update_disposal_treeview()
 
         '''ITEM DISPOSAL: END'''
+        #endregion
 
         
         '''POP UP INITIALIZATION'''
@@ -1547,6 +1571,7 @@ class inventory_frame(ctk.CTkFrame):
         self.restock_confirm = Inventory_popup.restock_confirmation(self, (width, height, acc_cred, acc_info))
         self.disposal_confirm_popup = Inventory_popup.disposal_confirmation(self,(width, height, acc_cred, acc_info), command_callback=refresh_rs_data_view1)
         self.pending_orders = Inventory_popup.pending_orders(self, (width, height))
+        self.order_info = Inventory_popup.order_info_screen(self, (width, height))
     
         sort_status_callback("View by Levels")
         load_main_frame(0)
@@ -1632,7 +1657,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
         self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
-        self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
+        self.supplier_icon_ = ctk.CTkImage(light_image= Image.open("image/supplier.png"), size=(24,24))
         self.trash_icon = ctk.CTkImage(light_image= Image.open("image/trash.png"), size=(22,25))
         self.gen_icon = ctk.CTkImage(light_image=Image.open("image/patient_icon.png"),size=(18,20))
 

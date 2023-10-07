@@ -328,7 +328,7 @@ record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ? ,?,
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
 
 get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
-                                NAME, current_stock, supplier_info.supp_name\
+                                NAME, current_stock, supplier_info.supp_name, ordered_by\
                                 FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
                                 WHERE state = 1 OR state = 3 ORDER BY state asc"
 
@@ -343,6 +343,14 @@ update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving
                                                                 WHERE id = ?"
 
 get_pending_items = f"SELECT id, recieving_item.NAME, current_stock, CAST(date_set AS DATE) AS date_set, supp_name FROM recieving_item where state = 3 AND DATE_FORMAT(date_set, '%M %Y') = ?"
+
+get_order_info = f"SELECT id, CAST(date_set AS DATE), item_uid, NAME,\
+                    CASE WHEN state = 1 THEN 'Waiting' WHEN state = 3 THEN 'Pending' END as state,\
+                    initial_stock, current_stock, ordered_by,\
+                    supplier_info.supp_id, supplier_info.supp_name,\
+                    supplier_info.contact_person, supplier_info.contact_number\
+                    FROM recieving_item LEFT JOIN supplier_info\
+                    ON recieving_item.supp_id = supplier_info.supp_id WHERE id = ?"
 
 #DISPOSAL
 get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
