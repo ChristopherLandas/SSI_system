@@ -124,6 +124,8 @@ class dashboard(ctk.CTkToplevel):
                                               mode="indeterminate", indeterminate_speed=3)
         self.progress_bar.pack()
         self.progress_bar.set(0)
+        determinate_speed = self.progress_bar._current_width/11.85
+        self.progress_bar.configure(determinate_speed = determinate_speed)
         update_frame(0)
         
         print(f"Start Time: {datetime.datetime.now()}")
@@ -723,6 +725,7 @@ class reception_frame(ctk.CTkFrame):
     def post_sent_callback(self, i):
         if i == 1:
             self.invoice_treeview.remove_selected_data()
+            messagebox.showinfo("Succeed", 'Invoice preceeded to payment')
         else:
             messagebox.showerror("Error", "An error occured")
 
@@ -735,9 +738,11 @@ class reception_frame(ctk.CTkFrame):
             return
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
+            self.update_invoice_treeview()
         else:
             if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")):
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
+                self.update_invoice_treeview()
 
     def load_invoice_content(self, _:any = None):
         if self.invoice_treeview.get_selected_data() is not None:
@@ -1040,6 +1045,15 @@ class sales_frame(ctk.CTkFrame):
        
         #region Sales Table
         
+        ctk.CTkLabel(self.sort_frame, text="Cashier: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.0225).pack(side="left", padx=(width*0.01,width*0.0025))
+        self.attendant_sort_option= ctk.CTkOptionMenu(self.sort_frame, values=self.attendant_values, anchor="center", font=("DM Sans Medium", 12), width=width*0.125, height = height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=option_callback)
+        self.attendant_sort_option.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
+        
+        #endregion
+       
+        #region Sales Table
+        
         self.sales_table_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum)
         self.sales_table_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(0, height*0.001))
         self.sales_table_frame.grid_columnconfigure(0, weight=1)
@@ -1091,7 +1105,6 @@ class sales_frame(ctk.CTkFrame):
         #endregion
        
         self.no_sales_data = ctk.CTkLabel(self.sales_table_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
-        
         self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=search_callback,
                                              quary_command=sql_commands.get_sales_search_query, dp_width=width*0.275, place_height=height*0.0125, place_width=width*0.006, font=("DM Sans Medium", 14))
         self.search_bar.grid(row=0, column=0, padx=(width*0.005), pady=(height*0.01,0))
@@ -1109,6 +1122,7 @@ class sales_frame(ctk.CTkFrame):
         self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_tree.item(item, "values")[0]) if item else messagebox.showerror("Warning", "Select a record first")
     
     def refresh(self):
+        #self.raw_data = database.fetch_data(sql_commands.get_sales_record_all)
         self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date,(f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
         self.source = self.raw_list
         self.attendant_sort_option.configure(values = self.attendant_values + [s[0] for s in database.fetch_data(sql_commands.get_sales_attendant)])
@@ -1125,6 +1139,7 @@ class sales_frame(ctk.CTkFrame):
         self.update_table()
         
     def update_table(self):
+        self.temp = self.pages[self.page_counter.get()-1] if self.pages else []
         if len(self.pages) != 0:
             self.temp = self.pages[self.page_counter.get()-1]; 
             self.no_sales_data.place_forget() 
