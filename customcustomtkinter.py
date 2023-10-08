@@ -149,7 +149,7 @@ class customcustomtkinter:
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
                      c_bd_configs: Optional[Tuple[str, Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None]]] = None,
                      bd_commands = None, spinner_config: Optional[Tuple[int, int, int, str, str, Literal['multiply', 'add']]] = None, 
-                     spinner_val_range: Tuple[int, int] = None, **kwargs):
+                     spinner_val_range: Tuple[int, int] = None, spinner_command: callable = None, **kwargs):
 
             super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
                              overwrite_preferred_drawing_method, **kwargs)
@@ -188,6 +188,7 @@ class customcustomtkinter:
             self.bd_commands = bd_commands
             self.spinner_val_range = spinner_val_range
             self.spinner_config = spinner_config
+            self.spinner_command = spinner_command
             #encapsulate other arguments
 
             self.pack_propagate(0)
@@ -311,7 +312,7 @@ class customcustomtkinter:
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
                         elif self.column_types[j] == 'id':
-                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 16), bg_color='transparent', fg_color='transparent', val_range= self.spinner_val_range, initial_val= self.spinner_val_range or 0)
+                            spinner = customcustomtkinter.cctkSpinnerCombo(temp ,step_count=1, entry_font=("Lucida", 16), bg_color='transparent', fg_color='transparent', val_range= self.spinner_val_range, initial_val= self.spinner_val_range[0] or 0, command= self.spinner_command)
                             spinner.place(relx = .5, rely = .5, anchor = 'c')
 
                     if self.column_types[j][0] == 't':
@@ -331,7 +332,7 @@ class customcustomtkinter:
                     temp_spinner_command = temp_spinner._command
                     def modified_spinner_command(_: any = None):
                         if source_format != "":
-                            formatted_text_source = float(re.sub(source_format, "", text_source._text))
+                            formatted_text_source = float(re.search(source_format, text_source._text)[0])
                         else:
                             formatted_text_source = float(text_source._text)
                         formatted_text_source = formatted_text_source * temp_spinner.value if mode == 'multiply' else formatted_text_source + temp_spinner.value
@@ -394,6 +395,38 @@ class customcustomtkinter:
                     self._double_click_command = kwargs['double_click_command']
                     i.configure(double_click_command = kwargs['double_click_command'])
                 kwargs.pop('double_click_command')
+
+            if 'spinner_command' in kwargs:
+                self.spinner_command = kwargs['spinner_command']    
+                if self.spinner_config:
+                    for fr in self.data_frames:
+                        spinner: customcustomtkinter.cctkSpinnerCombo = fr.winfo_children()[self.spinner_config[0]].winfo_children()[0]
+                        if self.spinner_config is not None:
+                            text_source: ctk.CTkLabel = fr.winfo_children()[self.spinner_config[1]]
+                            text_reciever: ctk.CTkLabel = fr.winfo_children()[self.spinner_config[2]]
+                            source_format = self.spinner_config[3]
+                            reciever_format = self.spinner_config[4]
+                            mode = self.spinner_config[5]
+                            modified_data:list = list(self._data[self.data_frames.index(fr)])
+
+                            temp_spinner_command = self.spinner_command
+                            def modified_spinner_command(_: any = None):
+                                if source_format != "":
+                                    formatted_text_source = float(re.search(source_format, text_source._text)[0])
+                                else:
+                                    formatted_text_source = float(text_source._text)
+                                formatted_text_source = formatted_text_source * spinner.value if mode == 'multiply' else formatted_text_source + spinner.value
+                                if reciever_format != "":
+                                    text_reciever.configure(text = reciever_format.format(formatted_text_source))
+                                modified_data[self.spinner_config[0]] = spinner.value
+                                modified_data[self.spinner_config[2]] = text_reciever._text
+                                self._data[self.data_frames.index(fr)] = tuple(modified_data)
+                                if temp_spinner_command:
+                                    temp_spinner_command()
+                            spinner._command = modified_spinner_command
+                        else:
+                            spinner.configure(command = kwargs['spinner_command'])
+                kwargs.pop('spinner_command')
             return super().configure(require_redraw, **kwargs)
         
         def get_selected_data(self):
@@ -614,7 +647,7 @@ class customcustomtkinter:
             if "state" in kwargs:
                 self.add_button.configure(state = kwargs["state"])
                 self.sub_button.configure(state = kwargs["state"])
-                self.num_entry.configure(state = kwargs["state"])
+                self.num_entry.configure(state = (kwargs["state"] if kwargs['state'] == ctk.NORMAL else "readonly"))
                 kwargs.pop('state')
             if "mode" in kwargs:
                 self.num_entry.unbind('<Return>', None)
@@ -652,7 +685,6 @@ class customcustomtkinter:
             self.value = None
             self._tab_size = tab_size
             self._tab: ctk.CTkFrame = tab(master if not isinstance(tab_master, ctk.CTkFrame) else tab_master, self._tab_size, self)
-            print(tab_master)
             self._button_text  = button_text
             self.button = ctk.CTkButton(self, width * .8, height * .7, 12, text = self._button_text, command= lambda: self._tab.place(relx = .5, rely=  .5, anchor = 'c'))
             self.button.place(relx = .5, rely = .5, anchor = 'c')
@@ -906,3 +938,6 @@ class customcustomtkinterutil:
                     self.buttons[i].configure(command = partial(self.click, i, cmd))
                 self._og_color.append(self.buttons[i]._fg_color)'''
             #note: not yet applicable in buttons
+
+        def update_colors(self, button: ctk.CTkButton | customcustomtkinter.ctkButtonFrame):
+            self._og_color[self._buttons.index(button)] = button._fg_color
