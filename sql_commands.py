@@ -189,11 +189,15 @@ get_services_data_for_transaction = "SELECT uid,\
 
 
 #RESTOCKING
-add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?)'
+add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)'
 update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
-add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?)"
+add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 show_all_items = "SELECT NAME FROM item_general_info"
+insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, CURRENT_TIMESTAMP)"
+
+get_order_info_history = "SELECT receiving_id, order_quantity, receiver, CAST(date_received AS DATE) FROM receiving_history_info WHERE receiving_id = ?"
+get_order_info_history_id = "SELECT id, NAME, CAST(date_set AS DATE),ordered_by FROM recieving_item WHERE id = ?"
 
 show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
 
@@ -324,7 +328,7 @@ get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
-record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ? ,?, ?, 1, CURRENT_TIMESTAMP, Null)"
+record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? ,?, ?, 1, CURRENT_TIMESTAMP, Null)"
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
 
 get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
@@ -749,7 +753,7 @@ get_invoice_item_content_by_id
 
 '''SUPPLIER INFO SQL'''
 #SET
-insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL)"
+insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL)"
 
 #GET
 get_last_supplier_id = "SELECT supp_id FROM supplier_info ORDER BY supp_id DESC LIMIT 1"

@@ -1185,10 +1185,10 @@ class inventory_frame(ctk.CTkFrame):
 
         self.inventory_sub_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
         self.restock_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
+        self.supplier_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
         self.disposal_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
-        self.supplier_frame = ctk.CTkFrame(self.base_frame, fg_color="red")
         
-        self.report_frames=[self.inventory_sub_frame, self.restock_frame,self.disposal_frame, self.supplier_frame]
+        self.report_frames=[self.inventory_sub_frame, self.restock_frame, self.supplier_frame, self.disposal_frame]
         self.active_report = None
 
         self.sort_type_option_var = ctk.StringVar(value="Sort by Levels")
@@ -1229,7 +1229,13 @@ class inventory_frame(ctk.CTkFrame):
             
             self.data_view1.update_table(sorted_temp)
             self.data_view1.pack()
-
+        
+        def refresh_inventory_table():
+            self.sell_rate = {s[0]: s[1] for s in database.fetch_data(sql_commands.get_selling_rate)}
+            temp = [(self.sell_rate[s[0]], ) + s for s in self.list_show if s[0] in self.sell_rate]
+            sorted_temp = sorted(temp, key=lambda data: self.sorting_order.get(data[-1]))
+            self.data_view1.update_table(sorted_temp)
+            
         def get_categories():
             data = database.fetch_data("SELECT categ_name FROM categories")
             category_data = ["All Items"]
@@ -1303,6 +1309,7 @@ class inventory_frame(ctk.CTkFrame):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
             self.data_view1.update_table(self.data1)
         #endregion
+        
         #region Tab Setup
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
@@ -1342,8 +1349,8 @@ class inventory_frame(ctk.CTkFrame):
         self.stock_disposal_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
-        self.stock_disposal_button.grid(row=0, column=2, sticky="sw", padx=(0,width*0.0025), pady=0)
-        self.stock_disposal_button.configure(command=partial(load_main_frame, 2))
+        self.stock_disposal_button.grid(row=0, column=3, sticky="sw", padx=(0,width*0.0025), pady=0)
+        self.stock_disposal_button.configure(command=partial(load_main_frame, 3))
         self.stock_disposal_icon = ctk.CTkLabel(self.stock_disposal_button, text="",image=self.trash_icon)
         self.stock_disposal_icon.pack(side="left", padx=(width*0.01,width*0.005))
         self.stock_disposal_label = ctk.CTkLabel(self.stock_disposal_button, text="ITEM DISPOSAL", text_color="white", font=("DM Sans Medium", 14))
@@ -1354,8 +1361,8 @@ class inventory_frame(ctk.CTkFrame):
         self.supplier_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
-        self.supplier_button.grid(row=0, column=3, sticky="sw", padx=(0,width*0.0025), pady=0)
-        self.supplier_button.configure(command=partial(load_main_frame, 3))
+        self.supplier_button.grid(row=0, column=2, sticky="sw", padx=(0,width*0.0025), pady=0)
+        self.supplier_button.configure(command=partial(load_main_frame, 2))
         self.supplier_icon = ctk.CTkLabel(self.supplier_button, text="",image=self.supplier_icon_)
         self.supplier_icon.pack(side="left", padx=(width*0.01,width*0.005))
         self.supplier_label = ctk.CTkLabel(self.supplier_button, text="SUPPLIER", text_color="white", font=("DM Sans Medium", 14))
@@ -1363,11 +1370,12 @@ class inventory_frame(ctk.CTkFrame):
         self.supplier_button.grid()
         self.supplier_button.update_children()
 
-        self.button_manager = cctku.button_manager([self.inventory_button, self.stock_in_button, self.stock_disposal_button, self.supplier_button], selected_color, False, 0)
+        self.button_manager = cctku.button_manager([self.inventory_button, self.stock_in_button, self.supplier_button, self.stock_disposal_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
         #endregion
+        
         #region Inventory
         '''INVENTORY FRAME: START'''
         self.inventory_sub_frame.pack(fill="both", expand=1)
@@ -1440,11 +1448,11 @@ class inventory_frame(ctk.CTkFrame):
         '''RESTOCK: START'''
         def refresh_rs_data_view1():
             self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
+            self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not database.fetch_data(sql_commands.get_recieving_items_state) else self.no_order_data.place_forget()
 
         def restocking_callback():
-            update_tables()
-            self.pending_btn.configure(text=f"Pending Orders: {database.fetch_data('SELECT COUNT(id) FROM recieving_item WHERE state = 3')[0][0]}")
             self.inventory_button.response()
+            update_tables()
             refresh_rs_data_view1()
 
         def disposal_callback(i: int):
@@ -1488,7 +1496,7 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_search_entry = ctk.CTkEntry(self.rs_search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.rs_search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.rs_search_btn = ctk.CTkButton(self.rs_search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
-                                        width=width*0.005, command=search)
+                                        width=width*0.005,)
         self.rs_search_btn.pack(side="left", padx=(0, width*0.0025))
 
         self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= refresh_rs_data_view1)
@@ -1507,10 +1515,6 @@ class inventory_frame(ctk.CTkFrame):
                                              command= lambda: self.history_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.receive_history.grid(row=0, column=3, sticky="e", padx=(0,width*0.005), pady=(height*0.01))
 
-        self.rs_supplier_btn = ctk.CTkButton(self.restock_frame,width=width*0.08, height = height*0.05, text="Supplier",image=self.supplier_icon_, font=("DM Sans Medium", 14),
-                                          command= lambda : self.supplier_list_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        #self.rs_supplier_btn.grid(row=0, column=5,sticky="w", padx=(0,width*0.005), pady=(height*0.01))
-
         self.rs_treeview_frame = ctk.CTkFrame(self.restock_frame,fg_color="transparent")
         self.rs_treeview_frame.grid(row=1, column=0, columnspan=6, sticky="nsew", padx=width*0.005)
 
@@ -1522,7 +1526,9 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
         
-       
+        self.no_order_data = ctk.CTkLabel(self.rs_data_view1, text="No order data yet to show.", font=("DM Sans Medium", 14))
+        self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not self.rs_data else self.no_order_data.place_forget()
+
         
         '''RESTOCK FRAME: END'''
         #endregion
@@ -1559,20 +1565,62 @@ class inventory_frame(ctk.CTkFrame):
 
         '''ITEM DISPOSAL: END'''
         #endregion
+        
+        #region Supplier
+        
+        def view_supplier_record():
+                if self.supplier_treeview.get_selected_data():
+                    self.view_supplier_popup.place(relx=0.5, rely=0.5, anchor="c", record_id = self.supplier_treeview.get_selected_data()[0])
+                else:
+                    messagebox.showwarning('Warning','No record is selected', master=self) 
+                    
+        self.main_frame = ctk.CTkFrame(self.supplier_frame, fg_color="transparent")
+        self.main_frame.pack(fill="both", expand=1)
+        self.main_frame.grid_columnconfigure(3, weight=1)
+        self.main_frame.grid_rowconfigure(2,weight=1) 
+               
+        self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
+        self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.0075,width*0.005), pady=(height*0.01))
 
+        self.search_frame.pack_propagate(0)
+        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+
+        self.add_item_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Supplier",image=self.add_icon, font=("DM Sans Medium", 14),
+                                           command=lambda: self.new_supplier_popup.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_item_btn.grid(row=1, column=2, sticky="w", padx=(width*0.005), pady=(height*0.01))
+
+        self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",)
+                                              #command=update_tables)
+        self.refresh_btn.grid(row=1, column=1, sticky="w")
+            
+        self.view_btn = ctk.CTkButton(self.main_frame,width=width*0.085, height = height*0.05, text="View Record", font=("DM Sans Medium", 14), command=view_supplier_record)
+        self.view_btn.grid(row=1, column=3, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+
+        self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
+        self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
+
+        self.supplier_treeview = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .8, height= height * .725, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/SupplierNo:{int(width*.085)}-tc/SupplierName:x-tl/ContactPerson:{int(width*.15)}-tl/ContactNo:{int(width*.135)}-tc/Address:{int(width*.185)}-tl!30!30')
+        self.supplier_treeview.pack()
+        
+        self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
+        #endregion
         
         '''POP UP INITIALIZATION'''
         self.disposal_popup = Inventory_popup.disposal_history(self, (width, height, acc_cred, acc_info))
         self.history_popup = Inventory_popup.receive_history(self, (width, height, acc_cred, acc_info))
-        self.restock_popup = Inventory_popup.restock(self, (width, height, acc_cred, acc_info), self.rs_data_view1)
+        self.restock_popup = Inventory_popup.restock(self, (width, height, acc_cred, acc_info), self.rs_data_view1, command_callback=refresh_rs_data_view1)
         self.add_item_popup = Inventory_popup.add_item(self, (width, height, acc_cred, acc_info))
         self.supplier_list_popup = Inventory_popup.supplier_list(self,(width, height, acc_cred, acc_info))
         self.category_popup = Inventory_popup.show_category(self, (width, height, acc_cred, acc_info))
         self.restock_confirm = Inventory_popup.restock_confirmation(self, (width, height, acc_cred, acc_info))
         self.disposal_confirm_popup = Inventory_popup.disposal_confirmation(self,(width, height, acc_cred, acc_info), command_callback=refresh_rs_data_view1)
-        self.pending_orders = Inventory_popup.pending_orders(self, (width, height))
         self.order_info = Inventory_popup.order_info_screen(self, (width, height))
-    
+        self.new_supplier_popup = Inventory_popup.new_supplier(self, (width, height, acc_cred, acc_info), lambda: print("CALL"))
+        self.view_supplier_popup = Inventory_popup.view_supplier(self, (width, height, acc_cred, acc_info), lambda: print("CALL1"))
+        
         sort_status_callback("View by Levels")
         load_main_frame(0)
 
