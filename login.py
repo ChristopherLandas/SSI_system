@@ -101,8 +101,9 @@ class loginUI(ctk.CTk):
         height = self.winfo_screenheight()
         print(set_scale((width, height)))
         
-        #ctk.set_widget_scaling(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100)
-        #ctk.set_window_scaling(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100)
+        
+        ctk.set_widget_scaling(set_scale((width, height)))
+        ctk.set_window_scaling(set_scale((width, height)))
         #print( width, height, '|', set_scale((width, height)))
         
         
