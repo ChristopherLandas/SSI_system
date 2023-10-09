@@ -27,6 +27,11 @@ import calendar
 import acc_creation
 import network_socket_util as nsu
 import json
+#test
+import screeninfo
+import ctypes
+
+print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -54,6 +59,7 @@ class dashboard(ctk.CTkToplevel):
         is_loading = 1
         rand = random.randint(1,2)
         
+        [print(screen) for screen in screeninfo.get_monitors()]
         '''Global Variables'''
         global width, height, mainframes, IP_Address
         width = self.winfo_screenwidth()
@@ -78,7 +84,6 @@ class dashboard(ctk.CTkToplevel):
 
         except _tkinter.TclError:
             pass
-        print(rand)
         #for testing purposes, might delete after the development
         
         '''Loading Screen'''
@@ -280,14 +285,14 @@ class dashboard(ctk.CTkToplevel):
         self.title_label = ctk.CTkLabel(self.top_frame, text="", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
         self.title_label.grid(row = 0, column=0,sticky='w', padx= width * 0.02)
 
-        self.notif_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()*0.5), text= "", image= self.notif_icon,
+        self.notif_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()*0.5), text= "", image= Icons.notif_icon,
                                               fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight() *0.5), border_width=0, corner_radius=5,
-                                              font=("Poppinds Medium", 16),hover_color=Color.White_Gray,)
-        self.notif_btn.grid(row=0, column= 1, sticky='w')
-        """self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= self.settings_icon,
+                                              font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
+        self.notif_btn.grid(row=0, column= 2, sticky='w')
+        self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= Icons.display_setting_icon,
                                               fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
-                                              font=("Poppinds Medium", 16),hover_color=Color.White_Gray,)
-        self.settings_btn.grid(row=0, column= 2, sticky='w') """
+                                              font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
+        self.settings_btn.grid(row=0, column= 1, sticky='w')
 
         self.acc_btn = cctk.ctkButtonFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12),
                                            round(self.top_frame.winfo_reqheight()*.5), 5,
@@ -308,27 +313,28 @@ class dashboard(ctk.CTkToplevel):
 
         '''menubars'''
         self.notif_menu_bar= cctk.menubar(self, width * default_menubar_width, height * default_menubar_height,
-                                          corner_radius= 0, fg_color='black', border_width= 0,
+                                          corner_radius= 0, fg_color='black', border_width= 0, border_color=Color.Blue_Cobalt,
                                           position=(self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
                                                     self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                                     'c'))
-        """ self.settings_menu_bar = cctk.menubar(self, width * default_menubar_width, height * default_menubar_height,
-                                              corner_radius= 5, fg_color=Color.White_Ghost, border_width= 0,
-                                              position=(self.settings_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
-                                                        self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2+0.005,
+        self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
+                                              corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
+                                              position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
+                                                        self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
                                                         'c'))
-        self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,width=round(width * default_menubar_width/2), height=round(height * .12),text="Dark Mode",
-                                                         font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
-                                                         variable = switch_var_darkmode, onvalue="darkmode", offvalue="lightmode",
-                                                         command=switch_darkmode,)
-        self.settings_menu_bar_dark_mode.pack(anchor= 'c') """
+        
+        
+        self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
+                                                          onvalue="darkmode", offvalue="lightmode",)
+        self.settings_menu_bar_dark_mode.grid(row=0, column=0)
+        
         self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost,
                                          position= (1 - acc_menubar_width/2,
                                                     self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                                     'c'))
 
-        self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
-                                                          children=[self.notif_menu_bar, self.acc_menu_bar])
+        self.top_frame_button_mngr = cctku.button_manager([self.settings_btn ,self.notif_btn, self.acc_btn], Color.Platinum, True,
+                                                          children=[self.settings_menu_bar, self.notif_menu_bar, self.acc_menu_bar])
 
         '''setting default events'''
         
@@ -1054,14 +1060,14 @@ class sales_frame(ctk.CTkFrame):
        
         #region Sales Table
         
-        self.sales_table_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum)
-        self.sales_table_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(0, height*0.001))
+        self.sales_table_frame = ctk.CTkFrame(self.sub_frame, fg_color="red")
+        self.sales_table_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(0,width*0.005))
         self.sales_table_frame.grid_columnconfigure(0, weight=1)
         self.sales_table_frame.grid_rowconfigure(0, weight=1)
         
         self.sales_table_style = ttk.Style()
         self.sales_table_style.theme_use("clam")
-        self.sales_table_style.configure("Treeview", rowheight=int(height*0.05), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=0, font=("DM Sans Medium", 16) )
+        self.sales_table_style.configure("Treeview", rowheight=int(height*0.065), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=0, font=("DM Sans Medium", 16) )
             
         self.sales_table_style.configure("Treeview.Heading", font=("DM Sans Medium", 18), background=Color.Blue_Cobalt, borderwidth=0, foreground=Color.White_AntiFlash)
         self.sales_table_style.layout("Treeview",[("Treeview.treearea",{"sticky": "nswe"})])
@@ -1075,29 +1081,30 @@ class sales_frame(ctk.CTkFrame):
         for i in range(len(self.columns)):
             self.sales_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
 
-        self.sales_tree.column("rec_no", width=int(width*0.02),anchor="e")
-        self.sales_tree.column("or_num", width=int(width*0.15), anchor="c")
-        self.sales_tree.column("client", width=int(width*0.35), anchor="w")
-        self.sales_tree.column("total", width=int(width*0.15), anchor="e")
-        self.sales_tree.column("date", width=int(width*0.15), anchor="c")
-        self.sales_tree.column("cashier", width=int(width*0.15), anchor="w")
+        self.sales_tree.column("rec_no", width=int(width*0.005),anchor="e")
+        self.sales_tree.column("or_num", width=int(width*0.02), anchor="c")
+        self.sales_tree.column("client", width=int(width*0.3), anchor="w")
+        self.sales_tree.column("total", width=int(width*0.1), anchor="e")
+        self.sales_tree.column("date", width=int(width*0.1), anchor="c")
+        self.sales_tree.column("cashier", width=int(width*0.1), anchor="w")
             
         self.sales_tree.tag_configure("odd",background=Color.White_AntiFlash)
         self.sales_tree.tag_configure("even",background=Color.White_Ghost)
-        self.sales_tree.grid(row=0, column=0, sticky="nsew")
         self.sales_tree.bind("<Double-1>", self.on_double_click)
-            
+        
         self.y_scrollbar = ttk.Scrollbar(self.sales_table_frame, orient=tk.VERTICAL, command=self.sales_tree.yview)
+        self.y_scrollbar.grid(row=0, column=1, sticky="ns", pady=(0))
+            
+        self.sales_tree.grid(row=0, column=0, sticky="nsew", pady=(0))
         self.sales_tree.configure(yscroll=self.y_scrollbar.set)
-        self.y_scrollbar.grid(row=0, column=1, sticky="ns")
         
         #endregion
         
         #region Bottom
-        self.bot_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent",)
+        self.bot_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent",height=height*0.055,)
         self.bot_frame.pack(fill="x", expand=0, padx=(width*0.005), pady=(height*0.005))
         
-        self.page_counter = cctk.cctkPageNavigator(self.bot_frame,  width=width*0.115, height=height*0.055, fg_color=Color.White_Platinum, page_fg_color=Color.White_Lotion, 
+        self.page_counter = cctk.cctkPageNavigator(self.bot_frame,  width=width*0.115, height=height*0.05, fg_color=Color.White_Platinum, page_fg_color=Color.White_Lotion, 
                                              font=("DM Sans Medium", 16), page_limit=1, command=page_callback)
         self.page_counter.pack()
         
