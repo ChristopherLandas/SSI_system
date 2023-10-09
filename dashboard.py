@@ -658,7 +658,7 @@ class reception_frame(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.sender_entity = nsu.network_sender(IP_Address["CASHIER_IP"], 250, IP_Address["RECEPTIONIST_IP"], 252, self.post_sent_callback)
+        self.sender_entity = nsu.network_sender(IP_Address["CASHIER_IP"], 250, IP_Address["MY_NETWORK_IP"], 252, self.post_sent_callback)
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
@@ -763,13 +763,12 @@ class reception_frame(ctk.CTkFrame):
         data = self.invoice_treeview.get_selected_data()
         if(data):
             stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
-            if 0 not in stock_quan: 
+            if 0 not in stock_quan:
                 self.sender_entity.send(data[0])
             else:
                 messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")      
         else:
             messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
-        #self.update_invoice_treeview()
 
 class payment_frame(ctk.CTkFrame):
     def __init__(self, master):
@@ -777,7 +776,6 @@ class payment_frame(ctk.CTkFrame):
         global width, height, acc_cred, acc_info, mainframes, IP_Address
 
         '''PAYMENT FRAME: START'''
-
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
         self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
         self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
@@ -794,8 +792,7 @@ class payment_frame(ctk.CTkFrame):
         self.content_frame.grid(row=0, column=0, sticky='nsew',  padx=(width*0.005), pady=(height*0.01))
         self.content_frame.grid_rowconfigure(0, weight=1)
         self.content_frame.grid_columnconfigure(0, weight=1)
-        
-        
+    
         self.search_frame = ctk.CTkFrame(self.content_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
@@ -806,13 +803,15 @@ class payment_frame(ctk.CTkFrame):
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
                                         width=width*0.005)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
-        
+
         """ self.view_btn = ctk.CTkButton(self.payment_frame,text="View Record", width=width*0.05, height = height*0.05, font=("DM Sans Medium",16))
         self.view_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025)) """
         
         self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
-        self.refresh_btn.grid(row=0, column=2, sticky="w")
-        
+        self.refresh_btn.grid(row=0, column=2, sticky="w", padx=(0, width*0.0025))
+
+        self.additional_option = ctk.CTkButton(self.content_frame, width=width*0.05, height = height*0.05, text= "Add item", font= ("Arial", 16), command = self.add_item_command)
+        self.additional_option.grid(row=0, column=3, sticky="w")
        
         self.payment_treeview_frame = ctk.CTkFrame(self.content_frame)
         self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
@@ -829,7 +828,7 @@ class payment_frame(ctk.CTkFrame):
 
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 250, self.received_callback)
         self.receiving_entity.start_receiving()
-
+    
         self.grid_forget()
 
     def received_callback(self, m):
@@ -838,7 +837,14 @@ class payment_frame(ctk.CTkFrame):
         self.payment_treeview.add_data(data, True)
         #print(data)
         #self.update_payment_treeview()
-
+    
+    def add_item_command(self):
+        if not self.payment_treeview.get_selected_data():
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+            return 
+        uid = self.payment_treeview.get_selected_data()[0]
+        transaction_popups.additional_option_invoice(self, (width, height), acc_cred[0][0], uid).place(relx = .5, rely = .5, anchor = 'c')
+        
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
 
@@ -2723,4 +2729,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_service_data()
         
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'Jrizal', datetime.datetime.now)
