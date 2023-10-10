@@ -292,7 +292,7 @@ class dashboard(ctk.CTkToplevel):
         self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= Icons.display_setting_icon,
                                               fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
                                               font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
-        self.settings_btn.grid(row=0, column= 1, sticky='w')
+        #self.settings_btn.grid(row=0, column= 1, sticky='w')
 
         self.acc_btn = cctk.ctkButtonFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12),
                                            round(self.top_frame.winfo_reqheight()*.5), 5,
@@ -1575,6 +1575,9 @@ class inventory_frame(ctk.CTkFrame):
         
         #region Supplier
         
+        def refresh_supplier_table():
+            self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
+        
         def view_supplier_record():
                 if self.supplier_treeview.get_selected_data():
                     self.view_supplier_popup.place(relx=0.5, rely=0.5, anchor="c", record_id = self.supplier_treeview.get_selected_data()[0])
@@ -1598,8 +1601,8 @@ class inventory_frame(ctk.CTkFrame):
                                            command=lambda: self.new_supplier_popup.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item_btn.grid(row=1, column=2, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
-        self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",)
-                                              #command=update_tables)
+        self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
+                                              command=refresh_supplier_table)
         self.refresh_btn.grid(row=1, column=1, sticky="w")
             
         self.view_btn = ctk.CTkButton(self.main_frame,width=width*0.085, height = height*0.05, text="View Record", font=("DM Sans Medium", 14), command=view_supplier_record)
