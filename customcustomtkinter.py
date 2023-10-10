@@ -97,6 +97,10 @@ class customcustomtkinter:
                 self.bind('<Double-Button-1>', kwargs['double_click_command'])
                 self.update_children()
                 kwargs.pop('double_click_command')
+            if 'og_color' in kwargs:
+                self.og_color = kwargs['og_color']
+                kwargs['fg_color'] = kwargs['og_color']
+                kwargs.pop('og_color')
             return super().configure(require_redraw, **kwargs)
         #override configure function of frame, allowing to add those external arguments
     #button frame: a frame with a properties of a buttons
@@ -643,7 +647,7 @@ class customcustomtkinter:
                     self._val_range = kwargs['val_range']
                     if self.value < self._val_range[0]:
                         self.configure(value = self._val_range[0])
-                    elif self.value >  self._val_range[0]:
+                    elif self.value > self._val_range[1]:
                         self.configure(value = self._val_range[1])
                 kwargs.pop('val_range')
             if "state" in kwargs:

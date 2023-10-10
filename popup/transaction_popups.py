@@ -1234,7 +1234,6 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
                         spinner: cctk.cctkSpinnerCombo = frame.winfo_children()[-3].winfo_children()[0]
                         spinner.change_value()
                     else:
-                        print((selected_item[0], selected_item[2], 1))
                         root_treeview.add_data((selected_item[0], selected_item[2], 1))
                         children_frames = root_treeview.data_frames[-1].winfo_children()
                         children_frames[-3].winfo_children()[-1].configure(value = 1, val_range = (1, selected_item[1]))
@@ -1286,9 +1285,9 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
             
     return instance(master, info, root_treeview, service_dict)
 
-def additional_option_invoice(master, info:tuple, attendant: str, uid: str):
+def additional_option_invoice(master, info:tuple, attendant: str, uid: str, update_callback):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple, attendant: str, uid: str):
+        def __init__(self, master, info:tuple, attendant: str, uid: str, update_callback):
             width = info[0]
             height = info[1]
             super().__init__(master,width * .815, height=height*0.875, corner_radius= 0, fg_color="transparent")
@@ -1296,6 +1295,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str):
             self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
             self._attentdant: str = attendant
             self._uid: str = uid
+            self.update_callback = update_callback
             global IP_Address
 
             '''events'''
@@ -1303,8 +1303,33 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str):
                 deduct = price_format_to_float(self.transact_treeview._data[i][-1][1:])
                 self.change_total_value_item(-deduct)
 
-            def save_invoice_callback():
-                pass
+            def update_billing_callback():
+                if len(self.transact_treeview._data) == 0:
+                    messagebox.showerror('Cannot Proceed', "Cannot proceed with an empty content")
+                    return
+                for li in self.transact_treeview._data:
+                    if not li[0] in self.enlisted_services:
+                        if li[0] in self.enlisted_items:
+                            index = self.enlisted_items.index(li[0])
+                            if li[2] != self.enlisted_items[index][2]:
+                                database.exec_nonquery([[sql_commands.update_existing_item_in_invoice, (li[2] ,self._uid, li[0])]])
+                            self.enlisted_items.pop(index)
+                        else:
+                            uid = database.fetch_data(sql_commands.get_uid, (li[0], ))[0][0]
+                            database.exec_nonquery([[sql_commands.add_additional_in_invoice, (self._uid, uid, li[0], li[2], price_format_to_float(li[1][1:]))]])
+                #modifying the item
+
+                database.exec_nonquery([[sql_commands.delete_existing_item_in_invoice, (s, )] for s in self.enlisted_items])
+                #deleting an item
+
+                database.exec_nonquery([[sql_commands.update_invoice_total_amount, (price_format_to_float(self.price_total_amount._text[1:]), self._uid)]])
+                #updating the invoice record data
+                
+
+                self.update_callback()
+                messagebox.showinfo("Success", "Info added")
+                self.transact_treeview.delete_all_data()
+                self.place_forget()
 
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
@@ -1385,7 +1410,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str):
             self.price_total_frame.pack(side="left")
             self.price_total_frame.pack_propagate(0)
  
-            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Record",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command= lambda: print(self.transact_treeview._data))
+            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Record",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command = update_billing_callback)
             self.save_invoice_btn.pack(side="right")
             
             self.cancel_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip, height=height*0.05, width=width*0.06, font=("DM Sans Medium", 16))
@@ -1416,11 +1441,11 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str):
 
         def fill_record(self):
             services = database.fetch_data(sql_commands.get_services_invoice_by_id, (self._uid, ))
+            self.enlisted_services = [s[2] for s in services]
             for li in [(s[2], f'₱{format_price(s[6])}', f'₱{format_price(s[6])}') for s in services]:
                 self.transact_treeview.add_data(li)
                 
-                #self.transact_treeview.data_grid_btn_mng.update_colors(self.transact_treeview.data_frames[-1])
-                #self.transact_treeview.data_frames[-1].configure(fg_color = "green")
+                self.transact_treeview.data_frames[-1].configure(og_color = "green")
                 children_frames = self.transact_treeview.data_frames[-1].winfo_children()
                 children_frames[-1].winfo_children()[-1].destroy()
                 children_frames[-2].configure(fg_color = "yellow")
@@ -1428,14 +1453,14 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str):
             #for services
 
             items = database.fetch_data(sql_commands.get_item_invoice_by_id, (self._uid, ))
-            stocks = {s[2]: database.fetch_data(sql_commands.get_item_and_their_uid_and_stock, (s[1], ))[0][0] for s in items}
-            print(stocks)
+            self.enlisted_items = [s[2] for s in items]
+            stocks = {s[2]:  database.fetch_data(sql_commands.get_item_and_their_uid_and_stock, (s[1], ))[0][0] for s in items}
             for li in [(s[2], f'₱{format_price(s[4])}', s[3]) for s in items]:
                 self.transact_treeview.add_data(li)
                 children_frames = self.transact_treeview.data_frames[-1].winfo_children()
                 children_frames[-3].winfo_children()[-1].configure(value = li[-1], val_range = (1, int(stocks[li[0]])))
                 
-    return instance(master, info, attendant, uid)
+    return instance(master, info, attendant, uid, update_callback)
 
 def show_payment_proceed(master, info:tuple,):
     class instance(ctk.CTkFrame):
@@ -1529,8 +1554,12 @@ def show_payment_proceed(master, info:tuple,):
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
-                self.sender_to_receptionist.send("_")
-                self.sender_to_admin.send("_")
+
+                if IP_Address['MY_NETWORK_IP'] != IP_Address['RECEPTIONIST_IP']:
+                    self.sender_to_receptionist.send("_")
+                if IP_Address['MY_NETWORK_IP'] != IP_Address['ADMIN_IP']:
+                    self.sender_to_admin.send("_")
+                    
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()

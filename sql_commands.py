@@ -792,3 +792,8 @@ get_prices_of_invoice = "SELECT COALESCE(SUM(invoice_item_content.price), 0),\
 
 get_services_invoice_by_id = "SELECT * FROM invoice_service_content WHERE invoice_uid = ?"
 get_item_invoice_by_id = "SELECT * FROM invoice_item_content WHERE invoice_uid = ?"
+
+add_additional_in_invoice = "INSERT INTO invoice_item_content VALUES(?, ?, ?, ?, ?, 0)"
+update_existing_item_in_invoice = "UPDATE invoice_item_content SET quantity = ? WHERE invoice_uid = ? AND item_name = ?"
+delete_existing_item_in_invoice = "DELETE FROM invoice_item_content WHERE item_name = ?"
+update_invoice_total_amount = "UPDATE invoice_record SET Total_amount = ? WHERE invoice_uid = ?"

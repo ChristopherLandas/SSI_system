@@ -616,7 +616,7 @@ class dashboard_frame(ctk.CTkFrame):
             self.stat_tabs.append(copy.copy(temp))
             self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(self.inventory_frame_width*0.001 ),pady=(0,self.inventory_frame_height*0.02))
             del temp """
-        data= [database.fetch(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
+        data= [database.fetch_data(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
                database.fetch_data(sql_commands.get_out_of_stock_state), database.fetch_data(sql_commands.get_critical_state),
                database.fetch_data(sql_commands.get_reorder_state),]
         
@@ -777,9 +777,9 @@ class payment_frame(ctk.CTkFrame):
 
         '''PAYMENT FRAME: START'''
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
-        self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-        self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
-        self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
+        #self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
+        #self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
+        #self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
         self.cal_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(20,20))
         self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
         self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
@@ -789,29 +789,36 @@ class payment_frame(ctk.CTkFrame):
         self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
         
         self.content_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion)
-        self.content_frame.grid(row=0, column=0, sticky='nsew',  padx=(width*0.005), pady=(height*0.01))
+        self.content_frame.grid(row=0, column=0, sticky='nsew', padx=(width*0.005), pady=(height*0.01))
         self.content_frame.grid_rowconfigure(0, weight=1)
         self.content_frame.grid_columnconfigure(0, weight=1)
+
+        self.upper_frame = ctk.CTkFrame(self.content_frame, height = height*0.05, fg_color = 'transparent')
+        self.upper_frame.grid(row = 0, column = 0, sticky = 'nsew', columnspan = 4)
     
-        self.search_frame = ctk.CTkFrame(self.content_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame = ctk.CTkFrame(self.upper_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        #self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
+        self.search_frame.pack(side = ctk.LEFT, padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here... (Invoice ID)", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
-                                        width=width*0.005)
+                                        width=width*0.005, command = self.search_callback)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
-        """ self.view_btn = ctk.CTkButton(self.payment_frame,text="View Record", width=width*0.05, height = height*0.05, font=("DM Sans Medium",16))
-        self.view_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025)) """
-        
-        self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
-        self.refresh_btn.grid(row=0, column=2, sticky="w", padx=(0, width*0.0025))
+        self.refresh_btn = ctk.CTkButton(self.upper_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
+        self.refresh_btn.pack(side = ctk.LEFT, padx=(0, width*0.005), pady=(height*0.01))
+        #self.refresh_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025))
 
-        self.additional_option = ctk.CTkButton(self.content_frame, width=width*0.05, height = height*0.05, text= "Add item", font= ("Arial", 16), command = self.add_item_command)
-        self.additional_option.grid(row=0, column=3, sticky="w")
+        self.additional_option = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Edit Items", font= ("Arial", 16), command = self.add_item_command, image= self.edit_icon)
+        self.additional_option.pack(side = ctk.LEFT, padx=(0, width*0.005), pady=(height*0.01))
+        #self.additional_option.grid(row=0, column=2, sticky="w", padx=(0, width*0.0025))
+
+        self.void_billing = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Void Invoice", font= ("Arial", 16), anchor = ctk.RIGHT, fg_color = '#ff6464', command = self.invoice_callback)
+        self.void_billing.pack(side = ctk.RIGHT, padx=(0, width*0.005), pady=(height*0.01))
+        #self.void_billing.grid(row=0, column=5, sticky="ew", padx=(0, width*0.0025))
        
         self.payment_treeview_frame = ctk.CTkFrame(self.content_frame)
         self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
@@ -831,22 +838,34 @@ class payment_frame(ctk.CTkFrame):
     
         self.grid_forget()
 
+    def invoice_callback(self):
+        if self.payment_treeview.get_selected_data() is None:
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+            return
+        pass    
+
+    def search_callback(self):
+        if self.search_entry.get() == "":
+            self.payment_treeview.update_table(self.treeview_og_data)
+        else:
+            searched = [s for s in self.treeview_og_data if self.search_entry.get() in s[0]]
+            self.payment_treeview.update_table(searched)
+
     def received_callback(self, m):
         database.exec_nonquery([[sql_commands.set_invoice_transaction_to_payment, (m, )]])
         data = database.fetch_data(sql_commands.get_specific_payment_invoice_info, (m, ))[0]
         self.payment_treeview.add_data(data, True)
-        #print(data)
-        #self.update_payment_treeview()
     
     def add_item_command(self):
         if not self.payment_treeview.get_selected_data():
             messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
             return 
         uid = self.payment_treeview.get_selected_data()[0]
-        transaction_popups.additional_option_invoice(self, (width, height), acc_cred[0][0], uid).place(relx = .5, rely = .5, anchor = 'c')
+        transaction_popups.additional_option_invoice(self, (width, height), acc_cred[0][0], uid, self.update_payment_treeview).place(relx = .5, rely = .5, anchor = 'c')
         
     def update_payment_treeview(self):
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
+        self.treeview_og_data = self.payment_treeview._data
 
     def proceed_to_pay(self):
         data = self.payment_treeview.get_selected_data()
