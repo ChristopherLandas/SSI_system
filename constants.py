@@ -1,5 +1,5 @@
 class db:
-    DB = 'ssi_copy_1'
+    DB = 'ssi_copy'
     PORT = 3306
     HOST = '127.0.0.1'
     PASSWORD = 'hello123'

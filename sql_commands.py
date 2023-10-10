@@ -171,6 +171,8 @@ get_item_and_their_total_stock = "SELECT item_general_info.name,\
                                  WHERE item_inventory_info.Stock != 0 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null)\
                                  GROUP BY item_general_info.UID"
 
+get_item_and_their_uid_and_stock = "SELECT SUM(stock) FROM item_inventory_info WHERE item_inventory_info.Stock != 0 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null) AND UID = ? GROUP BY UID"
+
 get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                          item_general_info.name,\
                                          CAST((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)) as DECIMAL(10,2))  \
@@ -790,3 +792,22 @@ get_sales_by_attendant = f"SELECT transaction_uid, client_name , CONCAT('₱', F
                         FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
                             AND Attendant_usn = ?"
                             
+get_client_by_invoice_uid = "SELECT CLIENT_name FROM invoice_record WHERE invoice_uid = ?"
+
+get_prices_of_invoice = "SELECT COALESCE(SUM(invoice_item_content.price), 0),\
+                                 COALESCE(SUM(invoice_service_content.price), 0)\
+                         FROM invoice_record\
+                         LEFT JOIN invoice_item_content\
+                             ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                         LEFT JOIN invoice_service_content\
+                             ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                         WHERE invoice_record.invoice_uid = ?\
+                         GROUP BY invoice_record.invoice_uid"
+
+get_services_invoice_by_id = "SELECT * FROM invoice_service_content WHERE invoice_uid = ?"
+get_item_invoice_by_id = "SELECT * FROM invoice_item_content WHERE invoice_uid = ?"
+
+add_additional_in_invoice = "INSERT INTO invoice_item_content VALUES(?, ?, ?, ?, ?, 0)"
+update_existing_item_in_invoice = "UPDATE invoice_item_content SET quantity = ? WHERE invoice_uid = ? AND item_name = ?"
+delete_existing_item_in_invoice = "DELETE FROM invoice_item_content WHERE item_name = ?"
+update_invoice_total_amount = "UPDATE invoice_record SET Total_amount = ? WHERE invoice_uid = ?"

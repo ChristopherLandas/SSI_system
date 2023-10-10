@@ -67,7 +67,7 @@ class network_sender:
     def send(self, message: Optional[Union[str, callable]], after_sent_callback: Optional[callable] = None):
         _message: str =  message if not callable(message) and isinstance(message, str) else str(message())
         format_message = f"{self.own_ip}//{self.stat_receiving_port}~/{_message}"
-        temp = client_sender(self.target_ip, self.sending_port, format_message, after_sent_callback)
+        temp:client_sender = client_sender(self.target_ip, self.sending_port, format_message, after_sent_callback)
         temp()
 
     def receive_callback(self, m: str):
