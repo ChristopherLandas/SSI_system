@@ -549,9 +549,10 @@ def view_record(master, info:tuple, table_update_callback: callable):
         def load_history(self):
             for c in self.service_record_data_view.get_children():
                 self.service_record_data_view.delete(c)
+                
+            
 
             svc_data = database.fetch_data(sql_commands.get_specific_pet_record, (self.pet_id.get(), ))
-            #print(svc_data)
 
             for i in range(len(svc_data)):
                 if (i % 2) == 0:

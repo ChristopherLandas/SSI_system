@@ -21,9 +21,9 @@ class body(ctk.CTk):
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
         #print(os.path.isdir("C:\\Users\\chris\\Desktop\\Devstuff\\SSI_system"))
-        self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
+        '''self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
         self.notif_frame.place(relx = .5, rely = .5, anchor = 'c')
-        self.update()
+        self.update()'''
         #ntf.create_entity(self.notif_frame, 'hehe', 'tes2323827342372389 23848 92 28347 82937', datetime.datetime.now(), 200, 200, ('Arial', 12))
 
 
@@ -32,9 +32,9 @@ class body(ctk.CTk):
         ''' ids = database.fetch_data('SELECT ID, NAME FROM RECIEVING_ITEM')
         for t in ids:
             database.exec_nonquery([['UPDATE RECIEVING_ITEM SET ITEM_UID = ? WHERE ID = ?', (data[t[1]], t[0])]])'''
-        notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
+        '''notif_entity_example = ntf.create_entity(self.notif_frame, "Reorder Alert",
                                                  "The product Insert Product Name here was only at 50 percent",
-                                                 datetime.datetime(2023, 9, 22), '#00fc56', self.notif_frame._desired_width-10, 100, 'white')
+                                                 datetime.datetime(2023, 9, 22), '#00fc56', self.notif_frame._desired_width-10, 100, 'white')'''
         #inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item else bought_item[s[0]]), s[1]) for s in current_stock]
         #print(*inventory_report_data, sep = '\n')
         '''
@@ -53,8 +53,13 @@ class body(ctk.CTk):
         self.btn.pack()
         self.add_btn = ctk.CTkButton(self, 140, 28, text="ADD", command = lambda: self.treeview.add_data((1,2,3), True))
         self.add_btn.pack()'''
+        """btn = cctk.ctkButtonFrame(self, 200, 60, fg_color='#1101ff')
+        ctk.CTkLabel(btn, text = 'Test Button 1', font=('Arial', 24)).place(relx = .5, rely = .5, anchor = 'c')
+        btn.place(relx = .5, rely = .5, anchor = 'c')"""
 
-
+        spnr = cctk.cctkSpinnerCombo(self, 200, 60, fg_color='White')
+        spnr.num_entry.configure(font = ("Arial", 32))
+        spnr.place(relx = .5, rely = .5, anchor = 'c')
         #nsu.server_listener('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self', )
         self.mainloop()
 body()

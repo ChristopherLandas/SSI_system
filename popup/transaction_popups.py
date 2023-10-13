@@ -1059,7 +1059,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 #temporarily disabled; recording of invoice splitting
 
                 services_price = sum([sum([s[6] for s in li]) for li in formatted_svc_data])
-                if not database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', services_price, None, datetime.now().strftime('%Y-%m-%d'), 0, None)]]):
+                if not database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', services_price + price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]]):
                     return
                 #recording the invoice
 
@@ -1105,7 +1105,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='',image=self.invoice_icon).pack(side="left", padx=(width*0.015,0))
-            ctk.CTkLabel(self.top_frame, text='ADD INVOICE', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
+            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
 
             self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="__",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
@@ -1167,7 +1167,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.price_total_frame.pack(side="left")
             self.price_total_frame.pack_propagate(0)
  
-            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Invoice",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command= save_invoice_callback)
+            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Record",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command= save_invoice_callback)
             self.save_invoice_btn.pack(side="right")
             
             self.cancel_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip, height=height*0.05, width=width*0.06, font=("DM Sans Medium", 16))
@@ -1475,6 +1475,7 @@ def show_payment_proceed(master, info:tuple,):
                 self.or_button.configure(text = f"OR#: {str(int(count)+1).zfill(3)}")
             #set up the or button
 
+            print(invoice_data)
             self.cashier_name.configure(text = cashier)
             self.client_name.configure(text = invoice_data[1])
             self.services_total.configure(text = invoice_data[2])
