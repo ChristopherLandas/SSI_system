@@ -10,6 +10,10 @@ from os import walk
 import sql_commands
 import datetime
 import _tkinter
+import screeninfo
+import ctypes
+
+print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 
 class loginUI(ctk.CTk):
 
@@ -95,11 +99,14 @@ class loginUI(ctk.CTk):
         title_name = "J.Z. Angeles Veterinary Clinic"
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
+        print(set_scale((width, height)))
         
         
         ctk.set_widget_scaling(set_scale((width, height)))
         ctk.set_window_scaling(set_scale((width, height)))
-        print( width, height, '|', set_scale((width, height)))
+        #print( width, height, '|', set_scale((width, height)))
+        
+        
         
         root_w = 500
         root_h = 600

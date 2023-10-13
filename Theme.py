@@ -1,3 +1,6 @@
+import customtkinter as ctk
+from PIL import Image
+
 class Color:
     White_Lotion = "#FCFCFC"
     White_Milk = "#FFFDF6"
@@ -52,7 +55,11 @@ class Color:
     Hover_Out_Stock_Color = "#999185"  #"#413F42"
     Hover_Near_Expire_Color = "#FF8F33" #"#FF9B50"
     Hover_Expire_Color = "#FD7272" #"#E74646"
+
+#TEST ONLY
+class Icons:
     
-   
-    
+    info_icon = ctk.CTkImage(light_image= Image.open("image/info.png"), size=(25,25))
+    notif_icon = ctk.CTkImage(light_image= Image.open("image/notification.png"), size=(30,30))
+    display_setting_icon = ctk.CTkImage(light_image= Image.open("image/display_setting.png"), size=(30,30))
    

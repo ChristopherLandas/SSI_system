@@ -1211,6 +1211,257 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
         
     return instance(master, info, treeview_content_update_callback)
 
+def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict: dict) -> ctk.CTkFrame:
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict: dict):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, corner_radius= 0, fg_color="transparent")
+
+            global IP_Address
+
+            '''internal data'''
+            self.total_transaction_count = 0
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self._service_dict = service_dict
+
+            def item_proceed(_: any = None):
+                selected_item = self.item_treeview.get_selected_data()
+                if selected_item:
+                    items_in_billing = [s[0] for s in root_treeview._data]
+                    if selected_item[0] in items_in_billing:
+                        frame:cctk.ctkButtonFrame = root_treeview.data_frames[items_in_billing.index(selected_item[0])]
+                        spinner: cctk.cctkSpinnerCombo = frame.winfo_children()[-3].winfo_children()[0]
+                        spinner.change_value()
+                    else:
+                        root_treeview.add_data((selected_item[0], selected_item[2], 1))
+                        children_frames = root_treeview.data_frames[-1].winfo_children()
+                        children_frames[-3].winfo_children()[-1].configure(value = 1, val_range = (1, selected_item[1]))
+                    self.place_forget()
+                
+            self.main_frame = ctk.CTkFrame(self, width=width*0.815, height=height*0.875, corner_radius=0,fg_color=Color.White_Color[3])
+            self.main_frame.pack()
+            self.main_frame.grid_columnconfigure((0), weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_propagate(0)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+            ctk.CTkLabel(self.top_frame, text='Particulars', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+            self.content_frame.grid(row=1, column=0,columnspan=2, sticky="nsew")
+            self.content_frame.grid_columnconfigure(0, weight=1)
+            self.content_frame.grid_rowconfigure(0, weight=1)
+                
+            self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
+            self.item_frame.pack_propagate(0)
+            self.item_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005),pady=(height * 0.005, height*0.01))
+            
+            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.8,double_click_command=item_proceed, column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:x-tr!30!30",)
+            self.item_treeview.pack()
+            
+        def reset(self):
+            self.place_forget()
+
+        def place(self, **kwargs):
+            count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
+            if count_temp != self.total_transaction_count:
+                self.update_items_stocks()
+                self.total_transaction_count = count_temp
+            return super().place(**kwargs)
+        
+        def update_items_stocks(self):
+            data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            self.item_treeview.update_table(data)
+        
+        def place_forget(self):
+            if self.item_treeview.data_grid_btn_mng.active:
+                self.item_treeview.data_frames[self.item_treeview._data.index(self.item_treeview.get_selected_data())].response()
+            return super().place_forget()
+            
+    return instance(master, info, root_treeview, service_dict)
+
+def additional_option_invoice(master, info:tuple, attendant: str, uid: str, update_callback):
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, attendant: str, uid: str, update_callback):
+            width = info[0]
+            height = info[1]
+            super().__init__(master,width * .815, height=height*0.875, corner_radius= 0, fg_color="transparent")
+            self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
+            self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
+            self._attentdant: str = attendant
+            self._uid: str = uid
+            self.update_callback = update_callback
+            global IP_Address
+
+            '''events'''
+            def bd_commands(i):
+                deduct = price_format_to_float(self.transact_treeview._data[i][-1][1:])
+                self.change_total_value_item(-deduct)
+
+            def update_billing_callback():
+                if len(self.transact_treeview._data) == 0:
+                    messagebox.showerror('Cannot Proceed', "Cannot proceed with an empty content")
+                    return
+                for li in self.transact_treeview._data:
+                    if not li[0] in self.enlisted_services:
+                        if li[0] in self.enlisted_items:
+                            index = self.enlisted_items.index(li[0])
+                            if li[2] != self.enlisted_items[index][2]:
+                                database.exec_nonquery([[sql_commands.update_existing_item_in_invoice, (li[2] ,self._uid, li[0])]])
+                            self.enlisted_items.pop(index)
+                        else:
+                            uid = database.fetch_data(sql_commands.get_uid, (li[0], ))[0][0]
+                            database.exec_nonquery([[sql_commands.add_additional_in_invoice, (self._uid, uid, li[0], li[2], price_format_to_float(li[1][1:]))]])
+                #modifying the item
+
+                database.exec_nonquery([[sql_commands.delete_existing_item_in_invoice, (s, )] for s in self.enlisted_items])
+                #deleting an item
+
+                database.exec_nonquery([[sql_commands.update_invoice_total_amount, (price_format_to_float(self.price_total_amount._text[1:]), self._uid)]])
+                #updating the invoice record data
+                
+
+                self.update_callback()
+                messagebox.showinfo("Success", "Info added")
+                self.transact_treeview.delete_all_data()
+                self.place_forget()
+
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+
+            self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Color[3], corner_radius=0)
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.02)
+
+            self.main_frame.grid_columnconfigure(2, weight=1)
+            self.main_frame.grid_rowconfigure((2),weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=3, sticky="ew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='',image=self.invoice_icon).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
+
+            self.invoice_id_label =ctk.CTkLabel(self.main_frame, text= self._uid,  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
+            self.invoice_id_label.grid(row=1, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
+
+            self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color="light grey", width=width*0.35, height=height*0.05)
+            self.client_name_frame.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
+            self.client_name_frame.pack_propagate(0)
+
+            self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
+            self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
+
+            self.client_name_entry = ctk.CTkEntry(self.client_name_frame)
+            client = database.fetch_data(sql_commands.get_client_by_invoice_uid, (self._uid, ))[0][0]
+            self.client_name_entry.insert(0, client)
+            self.client_name_entry.configure(state = "readonly")
+            self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
+            
+            self.add_particulars: add_particulars = ctk.CTkButton(self.main_frame,text="Add Particulars", width=width*0.125, height=height*0.05, image=self.add_icon, font=("DM Sans Medium", 14),
+                                               command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c"))
+            self.add_particulars.grid(row=1, column=2, sticky="w")
+
+            self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3])
+            self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=(0))
+
+            self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.685,
+                                                    column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30',
+                                                    spinner_config=(3, 2, 4, ',₱', '₱{:,.2f}', 'multiply'), spinner_initial_val= 1)
+            self.transact_treeview.configure(spinner_command = lambda _:self.change_total_value_item())
+            self.transact_treeview.pack(pady=(0,0))
+            self.transact_treeview.bd_commands = bd_commands
+            
+            self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent", height=height*0.05)
+            self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="ew", padx=(width*0.005), pady=(height*0.01))
+
+            #self.add_particulars = ctk.CTkButton(self.bottom_frame, width=width*0.125, height=height*0.05, text='Add Particulars',
+            #                                   image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c",  ))
+            
+            prices = database.fetch_data(sql_commands.get_prices_of_invoice, (self._uid, ))[0]
+            self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        
+            ctk.CTkLabel(self.price_total_frame, text="Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text=f"₱{format_price(sum(prices))}", font=("Arial", 14))
+            self.price_total_amount.pack(side="right",  padx=(0,width*0.0075))
+            
+            self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+
+            ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text= f'₱{format_price(int(prices[0]))}', font=("Arial", 14))
+            self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
+
+            self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+        
+            ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text=f'₱{format_price(int(prices[1]))}', font=("Arial", 14))
+            self.services_total_amount.pack(side="right",  padx=(0,width*0.0075)) 
+            
+            self.services_total_frame.pack(side="left", padx=(0,width*0.0075))
+            self.services_total_frame.pack_propagate(0)
+            self.item_total_frame.pack(side="left", padx=(0,width*0.0075))
+            self.item_total_frame.pack_propagate(0)
+            self.price_total_frame.pack(side="left")
+            self.price_total_frame.pack_propagate(0)
+ 
+            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Record",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command = update_billing_callback)
+            self.save_invoice_btn.pack(side="right")
+            
+            self.cancel_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip, height=height*0.05, width=width*0.06, font=("DM Sans Medium", 16))
+            self.cancel_invoice_btn.configure(command=self.reset)
+            self.cancel_invoice_btn.pack(side="right", padx=(width*0.005))
+
+            self.fill_record()
+            
+            self.show_particulars:add_particulars = add_item(self, (width, height), self.transact_treeview, {})
+            
+        def change_total_value_item(self, change_value:int = None):
+            value = sum([price_format_to_float(s[1][1:]) * s[2] for s in self.transact_treeview._data]) - price_format_to_float(self.services_total_amount._text[1:])
+            if change_value is not None:
+                value = change_value
+                self.item_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.item_total_amount._text[1:])) + value))
+                self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
+            else:
+                self.item_total_amount.configure(text = f'₱{format_price(value)}');
+                self.price_total_amount.configure(text = f'₱{format_price(price_format_to_float(self.services_total_amount._text[1:]) + value)}')
+
+        def change_total_value_service(self, value: float):
+            value = float(value)
+            self.services_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.services_total_amount._text[1:])) + value))
+            self.price_total_amount.configure(text = '₱' + format_price(float(price_format_to_float(self.price_total_amount._text[1:])) + value))
+
+        def reset(self):
+            self.destroy()
+
+        def fill_record(self):
+            services = database.fetch_data(sql_commands.get_services_invoice_by_id, (self._uid, ))
+            self.enlisted_services = [s[2] for s in services]
+            for li in [(s[2], f'₱{format_price(s[6])}', f'₱{format_price(s[6])}') for s in services]:
+                self.transact_treeview.add_data(li)
+                
+                self.transact_treeview.data_frames[-1].configure(og_color = "green")
+                children_frames = self.transact_treeview.data_frames[-1].winfo_children()
+                children_frames[-1].winfo_children()[-1].destroy()
+                children_frames[-2].configure(fg_color = "yellow")
+                children_frames[-3].winfo_children()[-1].configure(state = ctk.DISABLED, mode = 'click_only')
+            #for services
+
+            items = database.fetch_data(sql_commands.get_item_invoice_by_id, (self._uid, ))
+            self.enlisted_items = [s[2] for s in items]
+            stocks = {s[2]:  database.fetch_data(sql_commands.get_item_and_their_uid_and_stock, (s[1], ))[0][0] for s in items}
+            for li in [(s[2], f'₱{format_price(s[4])}', s[3]) for s in items]:
+                self.transact_treeview.add_data(li)
+                children_frames = self.transact_treeview.data_frames[-1].winfo_children()
+                children_frames[-3].winfo_children()[-1].configure(value = li[-1], val_range = (1, int(stocks[li[0]])))
+                
+    return instance(master, info, attendant, uid, update_callback)
+
 def show_payment_proceed(master, info:tuple,):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple):
@@ -1220,7 +1471,8 @@ def show_payment_proceed(master, info:tuple,):
 
             global IP_Address
 
-            self.sender_entity = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], 222, IP_Address["MY_NETWORK_IP"], 200)
+            self.sender_to_receptionist = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], 222, IP_Address["MY_NETWORK_IP"], 200)
+            self.sender_to_admin = nsu.network_sender(IP_Address["ADMIN_IP"], 222, IP_Address["MY_NETWORK_IP"], 201)
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
@@ -1302,7 +1554,12 @@ def show_payment_proceed(master, info:tuple,):
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
                 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
-                self.sender_entity.send("_")
+
+                if IP_Address['MY_NETWORK_IP'] != IP_Address['RECEPTIONIST_IP']:
+                    self.sender_to_receptionist.send("_")
+                if IP_Address['MY_NETWORK_IP'] != IP_Address['ADMIN_IP']:
+                    self.sender_to_admin.send("_")
+                    
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()
@@ -1475,7 +1732,6 @@ def show_payment_proceed(master, info:tuple,):
                 self.or_button.configure(text = f"OR#: {str(int(count)+1).zfill(3)}")
             #set up the or button
 
-            print(invoice_data)
             self.cashier_name.configure(text = cashier)
             self.client_name.configure(text = invoice_data[1])
             self.services_total.configure(text = invoice_data[2])

@@ -57,10 +57,20 @@ class body(ctk.CTk):
         ctk.CTkLabel(btn, text = 'Test Button 1', font=('Arial', 24)).place(relx = .5, rely = .5, anchor = 'c')
         btn.place(relx = .5, rely = .5, anchor = 'c')"""
 
-        spnr = cctk.cctkSpinnerCombo(self, 200, 60, fg_color='White')
-        spnr.num_entry.configure(font = ("Arial", 32))
-        spnr.place(relx = .5, rely = .5, anchor = 'c')
-        #nsu.server_listener('wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self', )
+        #spnr = cctk.cctkSpinnerCombo(self, 200, 60, fg_color='White')
+        #spnr.num_entry.configure(font = ("Arial", 32))
+        #spnr.place(relx = .5, rely = .5, anchor = 'c')
+
+        '''cs = nsu.network_sender("192.168.1.1", 90, "192.168.1.2", 92)'''
+
+        treeview = cctk.cctkTreeView(self, ('P2.00', 'name', '2'), round(self.screen[0] * .8), round(self.screen[1] * .8),
+                                     column_format= '/test:x-tl/test2:x-id/test3:x-tl/test4:x-tc!50!30',
+                                     spinner_val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), spinner_config=(1,0,3, r'(\d+\.\d+)', '₱{:,.2f}', 'multiply'),
+        )
+        print(treeview._data)
+        #treeview.configure(spinner_command = lambda: print(treeview._data))
+        treeview.place(relx = .5, rely = .5, anchor = 'c')
+
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))
