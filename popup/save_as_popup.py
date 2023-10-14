@@ -207,9 +207,7 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.path_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),pady=(0,height*0.01))
             ctk.CTkLabel(self.path_frame, text='File Path:  ',font=("DM Sans Medium", 14), fg_color='transparent', text_color=Color.Blue_Maastricht,height=height*0.055, width=width*0.075, anchor="e").pack(side="left")
             self.path_entry = ctk.CTkEntry(self.path_frame, font=("DM Sans Medium", 14),height=height*0.055)
-            #self.path_entry.insert(0, self.DEFAULT_PATH)
-            #j
-            self.path_entry.insert(0, 'G:/thesis-reports')
+            self.path_entry.insert(0, self.DEFAULT_PATH)
             self.path_entry.pack(side="left", fill='x', expand=1)
             ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
             #self.file_type_entry = ctk.CTkEntry(self.main_frame, height=height*0.03, corner_radius=20, font=("DM Sans Medium", (height*0.023)), show='*')
