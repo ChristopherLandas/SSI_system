@@ -1522,9 +1522,6 @@ def show_payment_proceed(master, info:tuple,):
                 
                 item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
 
-                print(f'Item: {item}')
-                print(f'Service: {self.services}')
-
                 for _service in self.services:
                     list_of_services.append(_service)
 
@@ -1542,7 +1539,6 @@ def show_payment_proceed(master, info:tuple,):
                 #record the services from within the transaction
 
                 for _item in item:
-                    print(_item)
                     list_of_items.append(_item)
                     stocks = database.fetch_data(sql_commands.get_specific_stock, (_item[1], ))
                     if stocks[0][2] is None:
@@ -1569,8 +1565,6 @@ def show_payment_proceed(master, info:tuple,):
                 #calculate and show the change
                 #jesser
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
-
-                print(f'OR: {record_id} Cashier: {self.cashier_name._text} Client: {self.client_name._text} Paid Amount: {payment} Total: {self.grand_total._text[1:]}')
 
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
 

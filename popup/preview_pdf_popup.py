@@ -109,16 +109,28 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     )
     receipt_header.setStyle(header_style)
     receipt_header2.setStyle(header2_style)
-
+    current_pets = []
     pet_name = None
     ctr = 0
     if not service_particulars is None:
+        for p in service_particulars:
+            if not p[1] in current_pets:
+                current_pets.append(p[1])
+        '''
         for p in service_particulars:
             if ctr > 0:
                 pet_name += ', '
                 pet_name += p[1]
             else:
                 pet_name = p[1]
+                ctr += 1
+        '''
+        for p in current_pets:
+            if ctr > 0:
+                pet_name += ', '
+                pet_name += p
+            else:
+                pet_name = p
                 ctr += 1
             
     
@@ -138,15 +150,15 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ['Total:', '', '', f'{total_amount}'],
         ['Amount Paid:', '', '', f'{amount_paid}']]
     '''
+    if not service_particulars is None:
+        for p in service_particulars:
+            receipt_content.append([f'{p[0]} - {p[1]}', '1', f'P{p[6]}', f'P{p[6]}'])
     if not item_particulars is None:
         for p in item_particulars:
             item_prc = "P{:,.2f}".format(float(p[4]))
             item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
             #receipt_content.append([p[2], p[3], p[4], float(p[4])*float(p[3])])
             receipt_content.append([p[2], p[3], item_prc, item_total])
-    if not service_particulars is None:
-        for p in service_particulars:
-            receipt_content.append([p[0], p[1], f'P{p[6]}', f'P{p[6]}'])
 
     total_amount_price = "P{:,.2f}".format(float(total_amount))
     amount_paid_price = "P{:,.2f}".format(float(amount_paid))
@@ -249,8 +261,21 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     writer.write(filename, p1)
 
     #region none sample
-
-    filename = f'image\\receipt_{or_number}.pdf'
+    
+    current_month = datetime.now().strftime("%m-%Y-receipts")
+    current_day = datetime.now().strftime("%Y_%m_%d_")
+    #region change for default path
+    '''
+    document_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
+    newpath = f'{document_path}\\receipt\\{current_month}' 
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    '''
+    #endregion
+    newpath = f'receipt\\{current_month}' 
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    filename = f'{newpath}\\{current_day}{client_name}_{or_number}_receipt.pdf'
     
     pdf = SimpleDocTemplate(
         filename=filename,
@@ -323,14 +348,15 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ['Total:', '', '', f'{total_amount}'],
         ['Amount Paid:', '', '', f'{amount_paid}']]
     '''
+    
+    if not service_particulars is None:
+        for p in service_particulars:
+            receipt_content.append([f'{p[0]} - {p[1]}', '1', f'P{p[6]}', f'P{p[6]}'])
     if not item_particulars is None:
         for p in item_particulars:
             item_prc = "P{:,.2f}".format(float(p[4]))
             item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
             receipt_content.append([p[2], p[3], item_prc, item_total])
-    if not service_particulars is None:
-        for p in service_particulars:
-            receipt_content.append([p[0], p[1], f'P{p[6]}', f'P{p[6]}'])
 
     total_amount_price = "P{:,.2f}".format(float(total_amount))
     amount_paid_price = "P{:,.2f}".format(float(amount_paid))
