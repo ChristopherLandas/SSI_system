@@ -12,6 +12,7 @@ import sql_commands
 import calendar
 from constants import *
 from customcustomtkinter import customcustomtkinter as cctk
+from popup import preview_pdf_popup as ppdfp
 
 def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> ctk.CTkFrame:
     class add_item(ctk.CTkFrame):
@@ -64,8 +65,14 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                         return
                 generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get(), self.file_name_entry.get())
+                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get(), self.file_name_entry.get(), 1)
                 reset()
+                
+            def preview_pdf_popup():
+                generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
+                                monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
+                                'image', annual_date_text_var.get(), self.include_graphs_checkbox.get(), 'sample.pdf', 0)
+                ppdfp.preview_pdf_popup(0)
 
             def change_name_entry(name: str = None):
                 self.file_name_entry.delete(0, ctk.END)
@@ -247,11 +254,18 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
-            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel)
+            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel, hover_color='#ff392e')
             self.cancel_btn.pack(side="left")
+
             
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback,font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
+            
+
+            self.preview_pdf_btn = ctk.CTkButton(self.bottom_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, fg_color='#a9a9a9', hover_color='#909090')
+            self.preview_pdf_btn.pack(side="right", padx=width*0.008)
+
+        
 
         def place(self, month_selected_date, year_selected_date, daily_selected_date, **kwargs):
             if 'default_config' in kwargs:
@@ -324,10 +338,17 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
                 generate_inventory_report(self.user, self.file_name_entry.get(), self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
                                           self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
-                                          self.path_entry.get())
+                                          self.path_entry.get(), 1)
                 reset()
 
-            
+            def preview_pdf_popup():
+                daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
+                generate_inventory_report(self.user, 'sample.pdf', self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
+                                          self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
+                                          'image', 0)
+                ppdfp.preview_pdf_popup(0)
+
+   
             #create global variable for inventory date text
             global inventory_date_text_var
             inventory_date_text_var = StringVar(value=datetime.datetime.now().strftime("%B %d, %Y"))
@@ -433,11 +454,14 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
-            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel)
+            self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel, hover_color='#ff392e')
             self.cancel_btn.pack(side="left")
             
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback, font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
+
+            self.preview_pdf_btn = ctk.CTkButton(self.bottom_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, fg_color='#a9a9a9', hover_color='#909090')
+            self.preview_pdf_btn.pack(side="right", padx=width*0.008)
             
             """ #file name label
             ctk.CTkLabel(self.box_frame, text='File Name:',font=("DM Sans Medium", (height*0.023)), text_color="#06283D").grid(row=1, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")
@@ -490,7 +514,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
     return add_item(master, info, user)
 
 
-def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int, file_name: str):
+def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int, file_name: str, finish_alerts: int):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -721,6 +745,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             filename = f'{desktop}\\{file_name}'
         else:
             filename = f'{desktop}\\{file_name}.pdf'
+        
         #filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
@@ -828,12 +853,12 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             merger = PdfWriter()
             chart_generator(monthly_data_items_temp , monthly_data_service_temp, 30, months_Text, 'Annual', y_temp, 256, 225, 100, 100, 1, [225,750])
             input1 = open(f"image/charts.pdf", "rb")
-            input2 = open(f"{desktop}\{y_temp}_yearly_report.pdf", "rb")
+            input2 = open(filename, "rb")
             # add the first 3 pages of input1 document to output
             merger.append(input2)
             merger.append(input1)
             # Write to an output PDF document
-            output = open(f"{desktop}\{y_temp}_yearly_report.pdf", "wb")
+            output = open(filename, "wb")
             merger.write(output)
             # Close File Descriptors
             merger.close()
@@ -841,7 +866,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         #add footer
         from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
         
-        p1 = pdfrw1(f"{desktop}\{y_temp}_yearly_report.pdf")
+        p1 = pdfrw1(filename)
         footer_generator(len(p1.pages))
         p2 = pdfrw1("image/footer.pdf")
         footer_gen2()
@@ -854,8 +879,9 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
                 merger.add(p3.pages[0]).render()
 
         writer = pdfrw2()
-        writer.write(f"{desktop}\{file_name}.pdf", p1)
-        messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
+        writer.write(filename, p1)
+        if finish_alerts:
+            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
     
     #monthly
     if 'Monthly' == report_type:
@@ -989,19 +1015,19 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             merger = PdfWriter()
             chart_generator(monthly_data_items_temp , monthly_data_service_temp, 0, monthly_label_temp2, 'Monthly',  f'{full_date_temp} {y_temp}', 256, 225, 100, 100, 1, [195,750])
             input1 = open(f"image/charts.pdf", "rb")
-            input2 = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "rb")
+            input2 = open(f"{filename}", "rb")
             # add the first 3 pages of input1 document to output
             merger.append(input2)
             merger.append(input1)
             # Write to an output PDF document
-            output = open(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", "wb")
+            output = open(filename, "wb")
             merger.write(output)
             # Close File Descriptors
             merger.close()
             output.close()
         #add footer
         from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
-        p1 = pdfrw1(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf")
+        p1 = pdfrw1(filename)
         footer_generator(len(p1.pages))
         p2 = pdfrw1("image/footer.pdf")
         footer_gen2()
@@ -1014,8 +1040,9 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
                 merger.add(p3.pages[0]).render()
 
         writer = pdfrw2()
-        writer.write(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", p1)
-        messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.")
+        writer.write(filename, p1)
+        if finish_alerts:
+            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.")
 
     #daily
     if 'Daily' == report_type:
@@ -1193,11 +1220,15 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
 
         writer = pdfrw2()
         writer.write(filename, p1)
-        messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
+        if finish_alerts:
+            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
+        print(filename)
+
+    print(filename)
 
         #Inventory Report
         
-def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full_name: str, acc_pos: str, date_num: str, date_txt: str, month: int|str, year: int|str, path: str):
+def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full_name: str, acc_pos: str, date_num: str, date_txt: str, month: int|str, year: int|str, path: str, finish_alerts: int):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -1425,4 +1456,5 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
 
     writer = pdfrw2()
     writer.write(filename, p1)
-    messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.")
+    if finish_alerts:
+        messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.")
