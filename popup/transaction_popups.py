@@ -1547,7 +1547,8 @@ def show_payment_proceed(master, info:tuple,):
                         for i in range(s[-1] - 1):
                             targeted_date = (datetime.now() + timedelta(days= (s[-2] * (i + 1))))
                             database.exec_nonquery([[sql_commands.add_preceeding_schedule, (s[0], s[1], s[2], f'Dose {i+2}', targeted_date)]])
-
+                    if s[-3]:
+                            database.exec_nonquery([[sql_commands.add_preceeding_schedule, (s[0], s[1], s[2], f'Release', s[-3])]])
                 #generating a preeceding schedules for multiple instance services
 
                 payment = float(self.payment_entry.get())
