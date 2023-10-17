@@ -2,11 +2,11 @@ from typing import *
 from tkinter import*
 import tkinter as tk
 from tkinter import messagebox
+from typing import Optional, Tuple, Union
 import customtkinter as ctk
-import os
+from os.path import exists
 from tkinter import filedialog
 import datetime
-import re
 from PIL import Image
 #from util import *
 #import sql_commands
@@ -465,17 +465,17 @@ class ShowPdf(pdf.ShowPdf):
             if self.img_object_li:
                 self.text.see(self.img_object_li[-1])
 
-def preview_pdf_popup(receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None):
+""" def preview_pdf_popup(receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None):
     previewpopup = ctk.CTkToplevel()
     previewpopup.attributes('-topmost', 1)
     previewpopup.geometry('630x700+400+100')
-    previewpopup.title('PDF Viewer')
+    previewpopup.title('Transaction Receipt Viewer')
     previewpopup.configure(bg='white')
 
     pdfviewer = ShowPdf()
     if receipt:
         generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
-    filename='image/sample.pdf'
+    #filename='image/sample.pdf'
     vaas2 = NONE
     vaas1=pdf.ShowPdf()
     vaas1.img_object_li.clear()
@@ -483,7 +483,54 @@ def preview_pdf_popup(receipt: int, ornum = None, cashier = None, client = None,
                    pdf_location=r"image/sample.pdf",
                    width=77,height=100)
     vaas2.pack()
-    previewpopup.mainloop()
+    previewpopup.mainloop() """
+    
+class preview_pdf_popup(ctk.CTkToplevel):
+    def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
+                 #Custom Arguments
+                 
+                 receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None,
+                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None,
+                  **kwargs,
+                 ):
+        super().__init__(*args, fg_color=fg_color, **kwargs)
+
+        self.attributes('-topmost',1)
+        
+        position_X = (self.winfo_screenwidth()/2)
+        position_Y = (self.winfo_screenheight()/2)-(400/2)
+
+
+        self.title(title)
+        self.geometry("%dx%d+%d+%d"%(600,700,position_X,position_Y))
+        self.configure(bg='white')
+        
+        pdfviewer = ShowPdf()
+        if receipt:
+            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
+        #filename='image/sample.pdf'
+        vaas2 = NONE
+        vaas1=pdf.ShowPdf()
+        vaas1.img_object_li.clear()
+        current_folder = datetime.now().strftime("%m-%Y-receipts")
+        
+        if view_receipt_by_or:
+            
+            if exists(f"receipt/{current_folder}/{view_receipt_by_or}.pdf"):
+                vaas2=pdfviewer.pdf_view(self, pdf_location=f"receipt/{current_folder}/{view_receipt_by_or}.pdf",
+                                      width=77,height=100)
+                vaas2.pack()
+            else:
+                self.destroy()
+                messagebox.showerror("File Missing", "The file you are trying to access is missing.")
+                
+        else:
+            vaas2=pdfviewer.pdf_view(self, pdf_location=r"image/sample.pdf",
+                        width=77,height=100)
+            vaas2.pack()
+        
+        
+        #print("running")
 '''
     #header
     report_header_temp = [

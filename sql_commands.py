@@ -370,9 +370,9 @@ get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_
 
 
 get_disposal_items = "SELECT item_name, current_quantity AS disposed_qty, reason,\
-                    DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i') AS disposal_time,\
+                    DATE_FORMAT(date_of_disposal, '%m-%d-%Y') AS disposal_time,\
                     disposed_by\
-                    FROM disposal_history WHERE full_dispose_date IS NULL\
+                    FROM disposal_history\
                     ORDER BY date_of_disposal Desc"
 
 #ACCOUNT CREATION
@@ -838,3 +838,5 @@ set_supplier_items = "INSERT INTO supplier_item_info VALUES (?,?,1)"
 get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
                             LEFT JOIN supplier_info ON supplier_info.supp_id = supplier_item_info.supplier_id\
                             WHERE supplier_item_info.item_id = ?"
+                
+update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date < CURRENT_DATE"

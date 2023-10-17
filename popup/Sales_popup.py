@@ -10,7 +10,7 @@ from constants import action
 from PIL import Image
 import tkinter as tk
 from tkinter import ttk
-
+from popup import preview_pdf_popup as ppdfp
 
 
 def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
@@ -28,7 +28,12 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             
             def reset():
                 self.place_forget()
+            
+            def show_receipt():
+                #print(show_receipt)
+                or_num = f"{self.date_label._text.replace('-', '_')}_{self.client_name._text}_{self.or_label._text}_receipt"
                 
+                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer")
             
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Lotion)
             self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.0225)
@@ -82,6 +87,9 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.client_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.client_frame.grid(row=0, column=1, padx=(0,width*0.005), pady= height*0.007)
             self.client_frame.pack_propagate(0)
+            
+            self.view_receipt = ctk.CTkButton(self.client_info_frame, text="View Receipt", font=("DM Sans Medium", 14), command=show_receipt)
+            self.view_receipt.grid(row=0, column=2, sticky="nse",padx=(0,width*0.005), pady= height*0.007)
             
             ctk.CTkLabel(self.client_frame, text="Client: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,0))
             self.client_name = ctk.CTkLabel(self.client_frame, text="Jane Doe",  font=("DM Sans Medium", 14), fg_color="transparent")
