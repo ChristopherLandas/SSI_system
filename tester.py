@@ -61,15 +61,23 @@ class body(ctk.CTk):
         #spnr.num_entry.configure(font = ("Arial", 32))
         #spnr.place(relx = .5, rely = .5, anchor = 'c')
 
-        '''cs = nsu.network_sender("192.168.1.1", 90, "192.168.1.2", 92)'''
+        #cs = nsu.network_sender("192.168.1.7", 90, "192.168.1.2", 92)
 
-        treeview = cctk.cctkTreeView(self, ('P2.00', 'name', '2'), round(self.screen[0] * .8), round(self.screen[1] * .8),
+        '''treeview = cctk.cctkTreeView(self, ('P2.00', 'name', '2'), round(self.screen[0] * .8), round(self.screen[1] * .8),
                                      column_format= '/test:x-tl/test2:x-id/test3:x-tl/test4:x-tc!50!30',
                                      spinner_val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), spinner_config=(1,0,3, r'(\d+\.\d+)', '₱{:,.2f}', 'multiply'),
         )
         print(treeview._data)
         #treeview.configure(spinner_command = lambda: print(treeview._data))
-        treeview.place(relx = .5, rely = .5, anchor = 'c')
+        treeview.place(relx = .5, rely = .5, anchor = 'c')'''
+
+        receiver = nsu.network_receiver('127.0.0.1', 250, lambda m: print(m))
+        receiver.start_receiving()
+
+        sender = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252)
+        sender.send("Hello123123")
+
+        
 
         self.mainloop()
 body()
