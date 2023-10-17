@@ -59,7 +59,7 @@ class Color:
 #TEST ONLY
 class Icons:
     
-    info_icon = ctk.CTkImage(light_image= Image.open("image/info.png"), size=(22,22))
+    info_icon = ctk.CTkImage(light_image= Image.open("image/info.png"), size=(25,25))
     notif_icon = ctk.CTkImage(light_image= Image.open("image/notification.png"), size=(30,30))
     display_setting_icon = ctk.CTkImage(light_image= Image.open("image/display_setting.png"), size=(30,30))
    

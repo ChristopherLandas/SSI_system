@@ -19,11 +19,7 @@ get_inventory_by_group = f"SELECT item_general_info.name,\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
                           WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                           GROUP BY item_general_info.name\
-                          ORDER BY CASE\
-                          WHEN SUM(item_inventory_info.Stock) < 1 THEN 1\
-                          WHEN SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Crit_factor THEN 2\
-                          WHEN SUM(item_inventory_info.Stock) < item_settings.Safe_stock * item_settings.Reorder_factor THEN 3\
-                            ELSE 4 End ASC"
+                          ORDER BY item_general_info.UID"
 
 get_normal_inventory = "SELECT item_general_info.name,\
                             CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
@@ -200,9 +196,9 @@ update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHER
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
 add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 show_all_items = "SELECT NAME FROM item_general_info"
-insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, ?, CURRENT_TIMESTAMP)"
+insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, CURRENT_TIMESTAMP)"
 
-get_order_info_history = "SELECT receiving_id, order_quantity, expiry, receiver, CAST(date_received AS DATE) FROM receiving_history_info WHERE receiving_id = ?"
+get_order_info_history = "SELECT receiving_id, order_quantity, receiver, CAST(date_received AS DATE) FROM receiving_history_info WHERE receiving_id = ?"
 get_order_info_history_id = "SELECT id, NAME, CAST(date_set AS DATE),ordered_by FROM recieving_item WHERE id = ?"
 
 show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
@@ -334,7 +330,7 @@ get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 get_all_position_titles = "SELECT Title from user_level_access"
 
 #RECIEVING ITEMS
-record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? , NULL, ?, 1, CURRENT_TIMESTAMP, Null)"
+record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? ,?, ?, 1, CURRENT_TIMESTAMP, Null)"
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
 
 get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
@@ -428,15 +424,6 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
-                                   
-get_inventory_report = "SELECT item_general_info.UID, item_general_info.name,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
-                                   FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.name\
-                                   ORDER BY item_general_info.UID"
 
 get_inventory_info_with_uid = "SELECT item_general_info.name,\
                                        CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
@@ -822,7 +809,7 @@ insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, CU
 #GET
 get_last_supplier_id = "SELECT supp_id FROM supplier_info ORDER BY supp_id DESC LIMIT 1"
 get_supplier_info = "SELECT supp_id, supp_name, contact_person, contact_number, address FROM supplier_info ORDER BY supp_id ASC"
-get_supplier_record = f"SELECT supp_id, supp_name, telephone, contact_person, contact_number, contact_email, address, created_by, CAST(date_added AS DATE), CAST(date_modified AS DATE)\
+get_supplier_record = f"SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address, created_by, CAST(date_added AS DATE), CAST(date_modified AS DATE)\
                         FROM supplier_info WHERE supp_id = ?"
                         
 get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp_name\
@@ -831,7 +818,7 @@ get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp
                         
 #UPDATES
 
-update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, telephone = ?, contact_person = ?, contact_number = ?,\
+update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, contact_person = ?, contact_number = ?,\
                         contact_email = ?, address = ?, date_modified = CURRENT_TIMESTAMP WHERE supp_id = ?"
 
 
@@ -894,16 +881,3 @@ get_preceeded_services = "SELECT CONCAT('TR# ', service_preceeding_schedule.tran
 
 mark_preceeding_as_done = "UPDATE service_preceeding_schedule SET status = 1 WHERE transaction_uid = ? AND scheduled_date = ? "
 add_preceeding_schedule = "INSERT INTO service_preceeding_schedule (transaction_uid, service_uid, service_name, prefix, scheduled_date, status) VALUES (?, ?, ?, ?, ?, 0)"
-get_item_does_expiry = f"SELECT item_uid, categories.does_expire From recieving_item\
-                        JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
-                        JOIN categories ON item_general_info.Category = categories.categ_name\
-                        WHERE id = ?"
-                        
-get_supplier_items = "SELECT item_id, item_general_info.name FROM supplier_item_info\
-                        JOIN item_general_info ON supplier_item_info.item_id = item_general_info.UID\
-                        WHERE supplier_id = ? "
-set_supplier_items = "INSERT INTO supplier_item_info VALUES (?,?,1)"
-
-get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
-                            LEFT JOIN supplier_info ON supplier_info.supp_id = supplier_item_info.supplier_id\
-                            WHERE supplier_item_info.item_id = ?"

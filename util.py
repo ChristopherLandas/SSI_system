@@ -142,9 +142,6 @@ def convert_date(date: str | datetime.datetime | datetime.date, date_format: str
         return datetime.datetime.strptime(val, convertion_format)
     return val
 
-def not_in_set(reference_list:list, source_list:list):
-    return [element for element in reference_list if element not in source_list]
-     
 def record_action(usn: str, _type: str, action_code: str):
     database.exec_nonquery([["INSERT INTO action_history(usn, type, ACTION, action_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", (usn, _type,  action_code)]])
 

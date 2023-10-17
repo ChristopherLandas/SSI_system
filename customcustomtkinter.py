@@ -556,6 +556,7 @@ class customcustomtkinter:
             self.num_entry = ctk.CTkEntry(self, height=height, width=width*.7, border_width=0, font=entry_font, text_color=entry_text_color,
                                         justify="c", fg_color= entry_fg_color)
             self.num_entry.configure(state= self._state)
+
             self.num_entry.grid(row=0, column=1, padx=(width*0.05),pady=(height*0.15))
 
             self.add_button = ctk.CTkButton(self, command=self.change_value, text_color=button_font_color,
@@ -617,8 +618,9 @@ class customcustomtkinter:
                 return int(self.num_entry.get())
             except ValueError:
                 return None
+
         def set(self, value: int):
-            self.num_entry.delete(0, ctk.END)
+            self.num_entry.delete(0, "end")
             self.num_entry.insert(0, str(value))
 
         def configure(self, require_redraw=False, **kwargs):
