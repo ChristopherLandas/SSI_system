@@ -1235,10 +1235,15 @@ class inventory_frame(ctk.CTkFrame):
 
         self.sorting_order = {'Out Of Stock': 0, 'Critical': 1, 'Reorder': 2, 'Normal': 3, 'N/A':4}
         
+        #region EXPIRATION 
         '''UPDATES EXPIRED ITEMS'''
+        [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, 
+                                  (generateId("D",8).upper(), items[0], items[1], items[2], 
+                                   "Expired", acc_info[0][0])]]) for items in database.fetch_data(sql_commands.get_expired_items_to_dispose, None)] 
+        #insert expired items into the disposal
         database.exec_nonquery([[sql_commands.update_expired_items, None]]) #Updates the state values of items to -1(expired)
         
-        
+        #endregion
         '''data'''
         selected_color = Color.Blue_Yale
         self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
@@ -1585,8 +1590,7 @@ class inventory_frame(ctk.CTkFrame):
 
         
         def refresh_ds_table():
-            pass
-             #self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_disposal_items))
+            self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_disposal_items))
             
         self.disposal_frame.grid_propagate(0)
         self.disposal_frame.grid_rowconfigure(1, weight=1)
@@ -1626,15 +1630,10 @@ class inventory_frame(ctk.CTkFrame):
         self.ds_treeview_frame.grid(row=1, column=0, columnspan=5, sticky="nsew", padx=width*0.005)
 
         self.ds_data_view1 = cctk.cctkTreeView(self.ds_treeview_frame, data = None, width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/DisposalID:{int(width*0.115)}-tc/ItemName:x-tl/QuantityPCS:{int(width*0.115)}-tr/DisposalReason:{int(width*.15)}-tl!30!30',)
+                                           column_format=f'/No:{int(width*.03)}-#r/DisposalID:{int(width*0.1)}-tc/ItemName:x-tl/QuantityPCS:{int(width*0.1)}-tr/Reason:{int(width*.1)}-tl/DisposedDate:{int(width*.1)}-tc/DisposedBy:{int(width*.125)}-tl!30!30',)
         self.ds_data_view1.pack()
-        """ 
-        self.ds_disposal_history = ctk.CTkButton(self.disposal_frame, width=width*0.025, height = height*0.05, text="Disposal Record", image=self.history_icon, font=("DM Sans Medium", 14),
-                                             command=lambda: self.disposal_popup.place(relx = .5, rely = .5, anchor = 'c'))
-
-        self.ds_refresh_btn = ctk.CTkButton(self.disposal_frame,text="", width=width*0.03, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh_ds_table)
-        self.ds_refresh_btn.grid(row=0, column=1, sticky="w", padx=(width*0.005), pady=(height*0.01))
-        self.update_disposal_treeview() """
+        
+        refresh_ds_table()
 
         '''ITEM DISPOSAL: END'''
         #endregion

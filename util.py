@@ -119,7 +119,6 @@ def generateId(initial: Optional[str] = None, length: Union[int, None] = 12) -> 
 def generate_word_num_id(reference: Optional[str] = None):
     pattern = re.findall(r"([a-zA-Z]+)(\d+)",reference)[0]
     res = pattern[0] + str(int(pattern[1])+1).zfill(len(pattern[1]))
-    
     return res
 
 def validate_email(email:str = None):

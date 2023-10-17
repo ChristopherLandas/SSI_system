@@ -369,11 +369,8 @@ delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stoc
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
 
 
-get_disposal_items = "SELECT item_name, current_quantity AS disposed_qty, reason,\
-                    DATE_FORMAT(date_of_disposal, '%m-%d-%Y') AS disposal_time,\
-                    disposed_by\
-                    FROM disposal_history\
-                    ORDER BY date_of_disposal Desc"
+get_disposal_items = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by\
+                        FROM disposal_history ORDER BY item_name ASC"
 
 #ACCOUNT CREATION
 
@@ -840,3 +837,11 @@ get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
                             WHERE supplier_item_info.item_id = ?"
                 
 update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date < CURRENT_DATE"
+
+get_expired_items_to_dispose = "SELECT item_general_info.UID, item_general_info.name, CAST(SUM(Stock) as INT) from item_inventory_info\
+                                JOIN item_general_info ON item_general_info.UID = item_inventory_info.UID\
+                                WHERE Expiry_Date < CURRENT_DATE AND state = 1\
+                                GROUP BY item_inventory_info.UID"
+                                
+set_expired_items_from_inventory = "INSERT INTO disposal_history (id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
+                                    VALUES (?, ?, ?, ?, ?, CURRENT_DATE, ?)"
