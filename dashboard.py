@@ -698,14 +698,14 @@ class reception_frame(ctk.CTkFrame):
                                         width=width*0.005,)
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
-        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.05, text="Add Invoice",image=self.add_icon, font=("DM Sans Medium", 14))
+        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.05, text="Create Transaction ",image=self.add_icon, font=("DM Sans Medium", 14))
         self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item_btn.pack(side="left", padx=(width*0.005))
 
         self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_invoice_treeview)
         self.refresh_btn.pack(side="left", padx=(0,width*0.005))
     
-        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Invoice", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Reception", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
         self.cancel_invoice_btn.pack(side="right")
         
         '''INVOICE FRAME'''
@@ -730,7 +730,7 @@ class reception_frame(ctk.CTkFrame):
     def post_sent_callback(self, i):
         if i == 1:
             self.invoice_treeview.remove_selected_data()
-            messagebox.showinfo("Succeed", 'Invoice preceeded to payment')
+            messagebox.showinfo("Succeed", 'Transaction preceeded to payment')
         else:
             messagebox.showerror("Error", "An error occured")
 
@@ -739,13 +739,13 @@ class reception_frame(ctk.CTkFrame):
 
     def cancel_invoice(self, bypass_confirmation: bool = False):
         if self.invoice_treeview.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel")
+            messagebox.showwarning("Fail to proceed", "Select a reception record \nto cancel")
             return
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
             self.update_invoice_treeview()
         else:
-            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")):
+            if(messagebox.askyesno("Cancel Reception", "Are you really want\nto cancel this reception record")):
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
                 self.update_invoice_treeview()
 
@@ -808,7 +808,7 @@ class payment_frame(ctk.CTkFrame):
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here... (Invoice ID)", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
                                         width=width*0.005, command = self.search_callback)
@@ -822,7 +822,7 @@ class payment_frame(ctk.CTkFrame):
         self.additional_option.pack(side = ctk.LEFT, padx=(0, width*0.005), pady=(height*0.01))
         #self.additional_option.grid(row=0, column=2, sticky="w", padx=(0, width*0.0025))
 
-        self.void_billing = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Void Invoice", font= ("Arial", 16), anchor = ctk.RIGHT, fg_color = '#ff6464', command = self.invoice_callback)
+        self.void_billing = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Void Transaction", font= ("Arial", 16), anchor = ctk.RIGHT, fg_color = '#ff6464', command = self.invoice_callback)
         self.void_billing.pack(side = ctk.RIGHT, padx=(0, width*0.005), pady=(height*0.01))
         #self.void_billing.grid(row=0, column=5, sticky="ew", padx=(0, width*0.0025))
        
@@ -846,9 +846,10 @@ class payment_frame(ctk.CTkFrame):
 
     def invoice_callback(self):
         if self.payment_treeview.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment")
             return
-        pass    
+        else:
+            messagebox.showwarning("No function yet")    
 
     def search_callback(self):
         if self.search_entry.get() == "":
@@ -864,7 +865,7 @@ class payment_frame(ctk.CTkFrame):
     
     def add_item_command(self):
         if not self.payment_treeview.get_selected_data():
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment")
             return 
         uid = self.payment_treeview.get_selected_data()[0]
         transaction_popups.additional_option_invoice(self, (width, height), acc_cred[0][0], uid, self.update_payment_treeview).place(relx = .5, rely = .5, anchor = 'c')
@@ -879,7 +880,7 @@ class payment_frame(ctk.CTkFrame):
             self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
                                             relx = .5, rely = .5, anchor = 'c')
         else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before heading into the payment")
 
     def reset(self):
         for i in mainframes:
@@ -1092,7 +1093,7 @@ class sales_frame(ctk.CTkFrame):
         self.sales_table_style = ttk.Style()
         self.sales_table_style.theme_use("clam")
         self.sales_table_style.configure("Treeview", rowheight=int(height*0.065), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=0, font=("DM Sans Medium", 16) )
-            
+        print(int(height*0.065))
         self.sales_table_style.configure("Treeview.Heading", font=("DM Sans Medium", 18), background=Color.Blue_Cobalt, borderwidth=0, foreground=Color.White_AntiFlash)
         self.sales_table_style.layout("Treeview",[("Treeview.treearea",{"sticky": "nswe"})])
         self.sales_table_style.map("Treeview", background=[("selected",Color.Blue_Steel)])
@@ -1255,10 +1256,12 @@ class inventory_frame(ctk.CTkFrame):
             self.refresh_btn.after(1000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             self.data_view1.pack_forget()
             self.sell_rate = {s[0]: s[1] for s in database.fetch_data(sql_commands.get_selling_rate)}
-            temp = [(self.sell_rate[s[0]], ) + s for s in self.list_show if s[0] in self.sell_rate]
-            sorted_temp = sorted(temp, key=lambda data: self.sorting_order.get(data[-1]))
             
-            self.data_view1.update_table(sorted_temp)
+            temp = [(self.sell_rate[s[0]], ) + s for s in self.list_show if s[0] in self.sell_rate]
+            #print(temp)
+            #sorted_temp = sorted(temp, key=lambda data: self.sorting_order.get(data[-1]))
+            
+            self.data_view1.update_table(temp)
             self.data_view1.pack()
         
         def refresh_inventory_table():
@@ -1530,7 +1533,7 @@ class inventory_frame(ctk.CTkFrame):
                                         width=width*0.005,)
         self.rs_search_btn.pack(side="left", padx=(0, width*0.0025))
 
-        self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= refresh_rs_data_view1)
+        self.rs_refresh_btn = ctk.CTkButton(self.restock_frame,text="", width= height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= refresh_rs_data_view1)
         self.rs_refresh_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005))
         
         self.rs_add_item_btn = ctk.CTkButton(self.restock_frame,width=width*0.1, height = height*0.05, text="Add Order",image=self.add_icon, font=("DM Sans Medium", 14),
@@ -1662,8 +1665,8 @@ class inventory_frame(ctk.CTkFrame):
     def update_disposal_treeview(self):
         self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_disposal_items))
         #print(database.fetch_data(sql_commands.get_for_disposal_items))
-        
-
+    
+    
     def update_tables(self):
         for i in mainframes:
             if isinstance(i, dashboard_frame):
@@ -1684,6 +1687,7 @@ class inventory_frame(ctk.CTkFrame):
                 temp: histlog_frame = i
                 temp.load_both()
 
+    
 class patient_info_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, IP_Address
     def __init__(self, master):
@@ -2073,14 +2077,17 @@ class reports_frame(ctk.CTkFrame):
                                               command = lambda: self.save_as_inventory_rep_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.generate_rep_btn.grid(row=0, column=0, sticky="w", pady=(height*0.005))
 
+        self.receive_btn = ctk.CTkButton(self.inventory_report_frame, text="Receive History", height=height*0.0575, font=("DM Sans Medium", 14),
+                                              command = lambda: self.receive_report.place(relx= 0.5, rely=0.5, anchor='c'))
+        self.receive_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005))
+
         self.bought_item_con_col = None
 
         self.rep_treeview_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="transparent")
         self.rep_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
 
         self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
-                                           column_format=f"/No:{int(width*.025)}-#c/ItemName:x-tl/InitialStock:{int(width*.2)}-tr/CurrentStock:{int(width*.2)}-tr!30!30",
-                                           conditional_colors= self.bought_item_con_col)
+                                           column_format=f"/No:{int(width*.025)}-#c/InitialCode:{int(width*.1)}-tc/ItemName:x-tl/CurrentStockPcs:{int(width*.125)}-tr!30!30")
         self.inventory_rep_treeview.pack()
         
         self.update_invetory_graph()
@@ -2090,17 +2097,19 @@ class reports_frame(ctk.CTkFrame):
 
         self.save_as_popup = save_as_popup.show_popup(self, (width , height), acc_cred[0][0], acc_info[0][1], acc_info[0][2])
         self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height), acc_cred[0][0], acc_info[0][1], acc_info[0][2])
+        self.receive_report = Inventory_popup.receive_report(self, (width, height, acc_cred, acc_info))
+        
         load_main_frame(0)
 
     def update_invetory_graph(self):
-        current_stock = database.fetch_data(sql_commands.get_current_stock_group_by_name)
-        bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)
-        bought_item_dict = {s[0]: s[1] for s in bought_item}
-        bought_item_con_col = {1: {s[0]: 'blue' for s in bought_item}}
+        current_stock = database.fetch_data(sql_commands.get_inventory_report)
+        #bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)
+        #bought_item_dict = {s[0]: s[1] for s in bought_item}
+        #bought_item_con_col = {1: {s[0]: 'blue' for s in bought_item}}
 
-        inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item_dict else bought_item_dict[s[0]]), s[1]) for s in current_stock]
-        self.inventory_rep_treeview._conditional_colors = bought_item_con_col
-        self.inventory_rep_treeview.update_table(inventory_report_data)
+        #inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item_dict else bought_item_dict[s[0]]), s[1]) for s in current_stock]
+        #self.inventory_rep_treeview._conditional_colors = bought_item_con_col
+        self.inventory_rep_treeview.update_table(current_stock)
 
 
     def show_pie(self, data = None):
@@ -2831,4 +2840,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_service_data()
         
 
-dashboard(None, 'Jrizal', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)

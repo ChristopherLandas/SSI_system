@@ -2081,6 +2081,9 @@ def show_invoice_content(master, info:tuple,):
             general_invoice_data = database.fetch_data('SELECT * FROM invoice_record WHERE invoice_uid = ?', (str(invoice_id), ))[0]
             service_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price), 2)) FROM invoice_service_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
             item_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price * quantity), 2)) FROM invoice_item_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
+            
+            #print(general_invoice_data)
+            
             self.or_lbl.configure(text = f"Invoice Id#: {invoice_id}")
             self.client_name.configure(text = general_invoice_data[2])
             self.date_label.configure(general_invoice_data[4].strftime('%B %d, %Y'))
