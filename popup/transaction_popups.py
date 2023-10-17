@@ -18,6 +18,8 @@ import copy
 import network_socket_util as nsu
 import json
 
+from popup import preview_pdf_popup as ppdfp
+
 '''def show_item_list(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func):
@@ -1499,6 +1501,13 @@ def show_payment_proceed(master, info:tuple,):
 
             '''events'''
             def record_transaction():
+
+                global list_of_items
+                global list_of_services
+                global client_pet_name
+                client_pet_name = None
+                list_of_items = []
+                list_of_services = []
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
                     messagebox.showinfo('Invalid', 'Pay the right amount')
                     return
@@ -1512,6 +1521,9 @@ def show_payment_proceed(master, info:tuple,):
                 self.cancel_button.configure(state="disabled")
                 
                 item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
+
+                for _service in self.services:
+                    list_of_services.append(_service)
 
                 service = [(record_id, database.fetch_data(sql_commands.get_service_uid, (s[0], ))[0][0],
                             s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND owner_id = ?", (s[1], owner_id))[0][0],
@@ -1527,6 +1539,7 @@ def show_payment_proceed(master, info:tuple,):
                 #record the services from within the transaction
 
                 for _item in item:
+                    list_of_items.append(_item)
                     stocks = database.fetch_data(sql_commands.get_specific_stock, (_item[1], ))
                     if stocks[0][2] is None:
                         database.exec_nonquery([[sql_commands.update_non_expiry_stock, (-_item[3], _item[1])]])
@@ -1550,9 +1563,9 @@ def show_payment_proceed(master, info:tuple,):
                 payment = float(self.payment_entry.get())
                 self.change_total.configure(text = '₱' + format_price(payment - price_format_to_float(self.grand_total._text[1:])))
                 #calculate and show the change
-
+                #jesser
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
-                
+
                 messagebox.showinfo('Succeed', 'Transaction Recorded')
 
                 if IP_Address['MY_NETWORK_IP'] != IP_Address['RECEPTIONIST_IP']:
@@ -1566,6 +1579,8 @@ def show_payment_proceed(master, info:tuple,):
                 self.complete_button.configure(state="normal")
                 self.cancel_button.configure(state="normal")
                 record_action(self.cashier_name._text, action.TRANSACTION_TYPE,  action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
+
+                ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
                 
             #Payment Callback
