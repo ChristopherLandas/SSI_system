@@ -786,7 +786,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
                     if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
-                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[4].winfo_children()[0]
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[2].winfo_children()[0]
                         spinner.change_value()
                     else: #if there's none
                         root_treeview.add_data(add_data)
@@ -1014,14 +1014,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 
                 uid = self.invoice_id_label._text
                 uid_base = uid[0:-2]
-                uid_count = uid[-2:]
-
-                '''for svc in services:
-                    for i in range(svc[2]):
-                        svc_inf = self.service_dict[svc[0]][i]
-                        pet_uid = database.fetch_data(sql_commands.get_pet_id_by_name_owner, (svc_inf[0], self.client_name_entry.get()))[0][0]
-                        formatted_svc_data.append((uid, database.fetch_data(sql_commands.get_service_uid, (svc[0], ))[0][0], svc[0], pet_uid, svc_inf[0], svc_inf[1], price_format_to_float(svc[1][1:]), 0))
-                #formatting the services into its service invoice content'''
+                uid_count = int(uid[-2:])
 
                 prev_date = None
                 cur_index = -1
@@ -1039,50 +1032,39 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         
                         if len(inf) == 2:
                             #formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
-                            formatted_svc_data[cur_index].append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
+                            formatted_svc_data[cur_index].append((database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], svc_prices[svc_k], 0, None, None, None))
                             #scheduled service
                         if len(inf) == 3:
                             prevtime = datetime.strptime(inf[2], '%Y-%m-%d') - datetime.strptime(inf[1], '%Y-%m-%d')
                             #formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
-                            formatted_svc_data[cur_index].append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
+                            formatted_svc_data[cur_index].append((database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], (svc_prices[svc_k] * (prevtime.days + 1)), 0, inf[2], None, None))
                             #periodic service
                         if len(inf) == 4:
                             price = svc_prices[svc_k] * int(inf[3])
                             #formatted_svc_data[cur_index].append((f"{uid_base}{str(int(uid_count) + cur_index).zfill(2)}", database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
-                            formatted_svc_data[cur_index].append((uid, database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
+                            formatted_svc_data[cur_index].append((database.fetch_data(sql_commands.get_service_uid, (svc_k, ))[0][0], svc_k, pet_uid, inf[0], inf[1], price, 0, None, int(inf[2]), int(inf[3])))
                             #multiple instance periodic service
 
                 
                 """RECORDING THE INVOICE"""
-                """if len(formatted_svc_data) > 0:
-                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:]) + sum([s[6] for s in formatted_svc_data[0]])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
-                else:
-                    database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', (price_format_to_float(self.item_total_amount._text[1:])), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])"""
-                #temporarily disabled; recording of invoice splitting
+                if len(items)> 0:
+                    if database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A' , price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None, 0)]]):
+                        for it in items:
+                            database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
+                        uid_count += 1
+                    #recording of item based on the invoice_id
 
-                services_price = sum([sum([s[6] for s in li]) for li in formatted_svc_data])
-                if not database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A', services_price + price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None)]]):
-                    return
-                #recording the invoice
-
-                for it in items:
-                    database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
-                #recording of item based on the invoice_id
-
+                #services_price = sum([sum([s[6] for s in li]) for li in formatted_svc_data])
                 if len(formatted_svc_data) > 0:
                     for svcs in formatted_svc_data:
                         for li in svcs:
-                            database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
+                            svc_uid = uid_base + str(uid_count).zfill(2)
+                            if database.exec_nonquery([[sql_commands.insert_invoice_data, (svc_uid, self._attentdant, self.client_name_entry.get() or 'N/A', li[-5], None, datetime.now().strftime('%Y-%m-%d'), 0, None, 1)]]):
+                                database.exec_nonquery([[sql_commands.insert_invoice_service_data, (svc_uid, ) + li]])
+                                uid_count += 1
                 #recording of service based on the invoice_id
 
-                '''if len(formatted_svc_data) > 1:
-                    for i in range(1, len(formatted_svc_data), 1):
-                        price_per_date = sum([s[6] for s in formatted_svc_data[i]])
-                        for li in formatted_svc_data[i]:
-                            database.exec_nonquery([[sql_commands.insert_invoice_data, (li[0], self._attentdant, self.client_name_entry.get() or 'N/A', price_per_date, None, datetime.now().strftime('%Y-%m-%d'), 0, None)]])
-                            database.exec_nonquery([[sql_commands.insert_invoice_service_data, li]])
-                #for other services data with different_date, the invoice would split up'''
-                #temporarily in halt of splitting the invoice
+
 
                 self._treeview_content_update_callback()
                 self.save_invoice_btn.configure(state = ctk.DISABLED)
@@ -1560,6 +1542,15 @@ def show_payment_proceed(master, info:tuple,):
                                 break
                 #modify the stock, applying the FIFO
 
+                for s in service:
+                    if s[-1]:
+                        for i in range(s[-1] - 1):
+                            targeted_date = (datetime.now() + timedelta(days= (s[-2] * (i + 1))))
+                            database.exec_nonquery([[sql_commands.add_preceeding_schedule, (s[0], s[1], s[2], f'Dose {i+2}', targeted_date)]])
+                    if s[-3]:
+                            database.exec_nonquery([[sql_commands.add_preceeding_schedule, (s[0], s[1], s[2], f'Release', s[-3])]])
+                #generating a preeceding schedules for multiple instance services
+
                 payment = float(self.payment_entry.get())
                 self.change_total.configure(text = '₱' + format_price(payment - price_format_to_float(self.grand_total._text[1:])))
                 #calculate and show the change
@@ -1672,7 +1663,7 @@ def show_payment_proceed(master, info:tuple,):
             self.receipt_total_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.receipt_total_frame, text="Total: ", font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.01,width*0.0165))
-            self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 000,000.00",  font=("DM Sans Medium", 16))
+            self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 0.00",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
             
             self.payment_frame= ctk.CTkFrame(self.content_frame, width=width*0.275, fg_color=Color.White_Platinum)
@@ -1687,17 +1678,17 @@ def show_payment_proceed(master, info:tuple,):
             self.pay_frame.grid_rowconfigure(5, weight=1)
             
             ctk.CTkLabel(self.pay_frame, text="Services: ", font=("DM Sans Medium",16),).grid(row=0, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
-            self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.services_total.grid(row=0, column=2, padx=(width*0.01), pady=(height*0.025,0), sticky = 'e')
             
             ctk.CTkLabel(self.pay_frame, text="Items: ", font=("DM Sans Medium",16),).grid(row=1, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.items_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor= 'e')
+            self.items_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor= 'e')
             self.items_total.grid(row=1, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01), sticky = 'e')
             
             ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=2, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
             
             ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=3, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
             ctk.CTkLabel(self.pay_frame, text="Amount Tendered: ", font=("DM Sans Medium",16),).grid(row=4, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
@@ -1715,7 +1706,7 @@ def show_payment_proceed(master, info:tuple,):
             self.payment_total.grid(row=6, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
             ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=8, column=0, padx=(width*0.01), pady=(0), sticky="w")
-            self.grand_total_second = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.grand_total_second = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.grand_total_second.grid(row=8, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
             ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=9, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
@@ -1933,7 +1924,7 @@ def show_invoice_record(master, info:tuple,):
             self.receipt_total_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.receipt_total_frame, text="Total: ", font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.01,width*0.0165))
-            self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 000,000.00",  font=("DM Sans Medium", 16))
+            self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 0.00",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
             
         def reset(self):
@@ -2059,7 +2050,7 @@ def show_invoice_content(master, info:tuple,):
             self.receipt_total_frame.pack_propagate(0)
             
             ctk.CTkLabel(self.receipt_total_frame, text="Total: ", font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.01,width*0.0165))
-            self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 000,000.00",  font=("DM Sans Medium", 16))
+            self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ 0.00",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
             
             self.payment_frame= ctk.CTkFrame(self.content_frame, width=width*0.275, fg_color=Color.White_Platinum)
@@ -2074,17 +2065,17 @@ def show_invoice_content(master, info:tuple,):
             self.pay_frame.grid_rowconfigure(5, weight=1)
             
             ctk.CTkLabel(self.pay_frame, text="Services: ", font=("DM Sans Medium",16),).grid(row=0, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
-            self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.services_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.services_total.grid(row=0, column=2, padx=(width*0.01), pady=(height*0.025,0), sticky = 'e')
             
             ctk.CTkLabel(self.pay_frame, text="Items: ", font=("DM Sans Medium",16),).grid(row=1, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.items_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor= 'e')
+            self.items_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor= 'e')
             self.items_total.grid(row=1, column=2, padx=(width*0.01), pady=(height*0.005,height*0.01), sticky = 'e')
             
             ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=2, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
             
             ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=3, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
-            self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 000,000.00", font=("DM Sans Medium",16), anchor='e')
+            self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
             self.cancel_button = ctk.CTkButton(self.payment_frame, text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip
@@ -2093,12 +2084,13 @@ def show_invoice_content(master, info:tuple,):
             self.cancel_button.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(height*0.007))
             
         def place(self, invoice_id: str, **kwargs):
+            print(invoice_id)
             general_invoice_data = database.fetch_data('SELECT * FROM invoice_record WHERE invoice_uid = ?', (str(invoice_id), ))[0]
             service_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price), 2)) FROM invoice_service_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
             item_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price * quantity), 2)) FROM invoice_item_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
             self.or_lbl.configure(text = f"Invoice Id#: {invoice_id}")
             self.client_name.configure(text = general_invoice_data[2])
-            self.date_label.configure(general_invoice_data[4].strftime('%B %d, %Y'))
+            self.date_label.configure(general_invoice_data[5].strftime('%B %d, %Y'))
             self.services_total.configure(text = service_total)
             self.items_total.configure(text = item_total)
             self.grand_total.configure(text = general_invoice_data[3])

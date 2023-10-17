@@ -227,6 +227,7 @@ class pets(ctk.CTkFrame):
         self.parent_service_dict: dict = {}
         self._title = title
         self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
+        print(self._title)
         self._type = database.fetch_data("Select duration_type from service_info_test WHERE service_name = ?", (self._title, ))[0][0]
         self.change_total_val_serv_callback = None
         def cancel_sequence():

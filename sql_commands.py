@@ -500,14 +500,27 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
                                ORDER BY transaction_record.transaction_date;"
 
 #invoices
-insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
 cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
+
+get_invoice_info_item = "SELECT invoice_record.invoice_uid,\
+                            invoice_record.client_name,\
+                            CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
+                            CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
+                            CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                            DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                        FROM invoice_record\
+                        LEFT JOIN invoice_service_content\
+                            ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                        LEFT JOIN invoice_item_content\
+                            ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                        WHERE invoice_record.State = 0\
+                        GROUP BY invoice_record.invoice_uid"
+
 get_invoice_info = "SELECT invoice_record.invoice_uid,\
                            invoice_record.client_name,\
-                           CONCAT('₱', format(SUM(COALESCE(invoice_service_content.price, 0)), 2)) AS service,\
-                           CONCAT('₱', FORMAT(SUM(COALESCE(invoice_item_content.price * invoice_item_content.quantity, 0)), 2)) AS items,\
                            CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
                            DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
                     FROM invoice_record\
@@ -516,7 +529,42 @@ get_invoice_info = "SELECT invoice_record.invoice_uid,\
                     LEFT JOIN invoice_item_content\
                         ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
                     WHERE invoice_record.State = 0\
+                        AND process_type = 0\
                     GROUP BY invoice_record.invoice_uid"
+
+get_invoice_info_service = "SELECT invoice_record.invoice_uid,\
+                                invoice_record.client_name,\
+                                invoice_service_content.patient_name,\
+                                invoice_service_content.service_name,\
+                                CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                DATE_FORMAT(invoice_service_content.scheduled_date, '%M %d, %Y') AS date\
+                            FROM invoice_record\
+                            LEFT JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                            LEFT JOIN invoice_item_content\
+                                ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                            WHERE invoice_record.State = 0\
+                                AND process_type = 1\
+                            GROUP BY invoice_record.invoice_uid\
+                            ORDER BY invoice_service_content.scheduled_date"
+
+
+get_invoice_info_queued = "SELECT invoice_record.invoice_uid,\
+                                invoice_record.client_name,\
+                                invoice_service_content.patient_name,\
+                                CONCAT(invoice_service_content.service_name, case when service_info_test.duration_type != 0 then ' (Initial)' ELSE '' END),\
+                                CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                            FROM invoice_record\
+                            LEFT JOIN invoice_service_content\
+                                ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                            LEFT JOIN invoice_item_content\
+                                ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                            LEFT JOIN service_info_test\
+                            	ON invoice_service_content.service_name = service_info_test.service_name\
+                            WHERE invoice_record.State = 3\
+                                AND process_type = 1\
+                            GROUP BY invoice_record.invoice_uid"
 
 
 get_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
@@ -564,6 +612,7 @@ get_selected_payment_invoice_info = "SELECT invoice_record.invoice_uid,\
                                     GROUP BY invoice_record.invoice_uid"
 
 set_invoice_transaction_to_payment = "UPDATE invoice_record SET state = 1, payment_date = CURRENT_TIMESTAMP  WHERE invoice_uid = ?"
+set_invoice_transaction_to_queue = "UPDATE invoice_record SET state = 3 WHERE invoice_uid = ?"
 set_invoice_transaction_to_recorded = "UPDATE invoice_record SET state = 2, Date_transacted = ? WHERE invoice_uid = ?"
 
 get_invoice_by_id = "SELECT * FROM invoice_record WHERE invoice_uid = ?"
@@ -811,3 +860,24 @@ add_additional_in_invoice = "INSERT INTO invoice_item_content VALUES(?, ?, ?, ?,
 update_existing_item_in_invoice = "UPDATE invoice_item_content SET quantity = ? WHERE invoice_uid = ? AND item_name = ?"
 delete_existing_item_in_invoice = "DELETE FROM invoice_item_content WHERE item_name = ?"
 update_invoice_total_amount = "UPDATE invoice_record SET Total_amount = ? WHERE invoice_uid = ?"
+
+check_todays_accomodated_sched = "SELECT COUNT(*) FROM invoice_record WHERE state = 3"
+get_duration_type = "SELECT duration_type FROM service_info_test WHERE service_name = ?"
+
+get_preceeded_services = "SELECT CONCAT('TR# ', service_preceeding_schedule.transaction_uid),\
+                             transaction_record.client_name,\
+                             services_transaction_content.patient_name,\
+                             CONCAT(services_transaction_content.service_name, ' ', coalesce(prefix, '')),\
+                             'Paid',\
+                             DATE_FORMAT(service_preceeding_schedule.scheduled_date, '%M %d, %Y')\
+                         FROM service_preceeding_schedule\
+                         LEFT JOIN transaction_record\
+                             ON service_preceeding_schedule.transaction_uid = transaction_record.transaction_uid\
+                         LEFT JOIN services_transaction_content\
+                             ON service_preceeding_schedule.transaction_uid = services_transaction_content.transaction_uid\
+                         WHERE service_preceeding_schedule.scheduled_date = CURRENT_DATE\
+                            AND service_preceeding_schedule.status = 0\
+                         ORDER BY service_preceeding_schedule.scheduled_date"
+
+mark_preceeding_as_done = "UPDATE service_preceeding_schedule SET status = 1 WHERE transaction_uid = ? AND scheduled_date = ? "
+add_preceeding_schedule = "INSERT INTO service_preceeding_schedule (transaction_uid, service_uid, service_name, prefix, scheduled_date, status) VALUES (?, ?, ?, ?, ?, 0)"
