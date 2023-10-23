@@ -2965,4 +2965,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_service_data()
         
 
-dashboard(None, 'aila', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)

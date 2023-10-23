@@ -293,7 +293,7 @@ def add_item(master, info:tuple):
             for entries in self.supplier_entries: entries.configure(fg_color = color, border_width = width ,state = state)
             
         def set_categories(self):
-            self.data = database.fetch_data("SELECT * FROM categories where state = 1")
+            self.data = database.fetch_data("SELECT * FROM categories where does_expire = 1")
             self.supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info")
             
             self.supplier_option = [data[1] for data in self.supplier_data]
@@ -515,13 +515,16 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
 
             inventory_data = database.fetch_data("SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL OR Expiry_Date = ?)",
                                                  (uid, receiving_expiry))
-            if inventory_data: # if there was an already existing table; update the existing table
+            '''if inventory_data: # if there was an already existing table; update the existing table
                 if inventory_data[0][2] is None:#updating non-expiry stock
                     database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self._inventory_info[2], uid)]])
                 else: #updating expiry stock
                     database.exec_nonquery([[sql_commands.update_expiry_stock, (self._inventory_info[2], uid, inventory_data[0][2])]])
             else:# if there's no exisiting table; create new instance of an item
-                database.exec_nonquery([[sql_commands.add_new_instance, (uid, self._inventory_info[2], receiving_expiry or None)]])
+                database.exec_nonquery([[sql_commands.add_item_inventory, (uid, self._inventory_info[2], receiving_expiry or None)]])'''
+            #temporary disabled to change the addign item inventory
+            database.exec_nonquery([[sql_commands.add_item_inventory, (uid, self._inventory_info[2], receiving_expiry or None)]])
+
 
             database.exec_nonquery([[sql_commands.update_recieving_item, (acc_name or 'klyde', self._inventory_info[0])]])
 
@@ -1726,9 +1729,8 @@ def restock_confirmation(master, info:tuple,):
                     messagebox.showinfo("Warning", "Please enter a valid expiry date")
                     return
                 elif self.does_expire and (self.expiry_date_entry._text != "Set Expiry Date"):
-                    
                     if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?", (recieving_info[2], self.expiry_date_entry._text))[0][0] == 0:
-                        database.exec_nonquery([[sql_commands.add_new_instance, (recieving_info[2], self.stock_spinner.value, self.expiry_date_entry._text)],])
+                        database.exec_nonquery([[sql_commands.add_item_inventory, (recieving_info[2], self.stock_spinner.value, self.expiry_date_entry._text)],])
                     else:
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  self.expiry_date_entry._text)]]) 
                 else:

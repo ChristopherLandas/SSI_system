@@ -195,10 +195,8 @@ get_services_data_for_transaction = "SELECT uid,\
 
 
 #RESTOCKING
-add_stock_with_different_expiry = 'INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)'
 update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
-add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 show_all_items = "SELECT NAME FROM item_general_info"
 insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, ?, CURRENT_TIMESTAMP)"
 
@@ -219,7 +217,10 @@ show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initia
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
-add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
+#add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
+add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1, CURRENT_DATE)"
+
+
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?)"
 
