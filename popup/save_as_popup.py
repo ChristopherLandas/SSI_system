@@ -353,7 +353,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 generate_inventory_report(self.user, 'sample.pdf', self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
                                           self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
                                           'image', 0)
-                ppdfp.preview_pdf_popup(0)
+                ppdfp.preview_pdf_popup(receipt=0, title="Inventory Viewer")
 
    
             #create global variable for inventory date text

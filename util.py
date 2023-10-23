@@ -134,6 +134,22 @@ def list_to_parted_list(given_list:list, row_count:int, provide_table_count: Opt
 def list_filterer(source: list, reference: list):
     return [data for res in source for data in reference if set(res).issubset(data)]
 
+def remove_unit(source: str,):
+    return re.sub(r'\([^)]*\)', '', source).strip()
+
+def split_unit(source: str):
+    res = re.match(r'^(.*?)\s*(\((.*?)\))?$', source)
+    return (res.group(1), res.group(3)) if res.group(3) else (res.group(1),)
+
+def item_unit(source:list):
+    return [(f"{data[0]} ({data[1]})") if data[1] else (data[0]) for data in source]
+  
+def item_concat_unit(source:list): #BRUH
+    return [(data[0], f"{data[1]} ({data[2]})", data[3], data[4], data[5], data[6]) if data[2] else (data[0], data[1], data[3], data[4], data[5], data[6]) for data in source]
+
+def selling_concat_unit(source:list): #BRUH
+    return [(data[0], data[1], f"{data[2]} ({data[3]})") if data[3] else (data[0], data[1], data[2]) for data in source]
+
 def convert_date(date: str | datetime.datetime | datetime.date, date_format: str, convertion_format: str, value: Literal['str', 'datetime'] = 'str') -> str | datetime.datetime:
     d = datetime.datetime.strptime(date, date_format) if isinstance(date, datetime.datetime | datetime.date) else date
     val = datetime.datetime.strptime(d, date_format).strftime(convertion_format)

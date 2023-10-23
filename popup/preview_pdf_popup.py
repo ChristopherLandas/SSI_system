@@ -515,9 +515,8 @@ class preview_pdf_popup(ctk.CTkToplevel):
         current_folder = datetime.now().strftime("%m-%Y-receipts")
         
         if view_receipt_by_or:
-            
-            if exists(f"receipt/{current_folder}/{view_receipt_by_or}.pdf"):
-                vaas2=pdfviewer.pdf_view(self, pdf_location=f"receipt/{current_folder}/{view_receipt_by_or}.pdf",
+            if exists(f"Resources/receipt/{current_folder}/{view_receipt_by_or}.pdf"):
+                vaas2=pdfviewer.pdf_view(self, pdf_location=f"Resources/receipt/{current_folder}/{view_receipt_by_or}.pdf",
                                       width=77,height=100)
                 vaas2.pack()
             else:
