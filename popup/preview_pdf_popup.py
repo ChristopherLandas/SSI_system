@@ -477,6 +477,146 @@ class ShowPdf(pdf.ShowPdf):
         except IndexError:
             if self.img_object_li:
                 self.text.see(self.img_object_li[-1])
+
+""" def preview_pdf_popup(receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None):
+    previewpopup = ctk.CTkToplevel()
+    previewpopup.attributes('-topmost', 1)
+    previewpopup.geometry('630x700+400+100')
+    previewpopup.title('Transaction Receipt Viewer')
+    previewpopup.configure(bg='white')
+
+    pdfviewer = ShowPdf()
+    if receipt:
+        generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
+    #filename='image/sample.pdf'
+    vaas2 = NONE
+    vaas1=pdf.ShowPdf()
+    vaas1.img_object_li.clear()
+    vaas2=pdfviewer.pdf_view(previewpopup,
+                   pdf_location=r"image/sample.pdf",
+                   width=77,height=100)
+    vaas2.pack()
+    previewpopup.mainloop() """
+    
+class preview_pdf_popup(ctk.CTkToplevel):
+    def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
+                 #Custom Arguments
+                 
+                 receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None,
+                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None,
+                  **kwargs,
+                 ):
+        super().__init__(*args, fg_color=fg_color, **kwargs)
+
+        self.attributes('-topmost',1)
+        
+        position_X = (self.winfo_screenwidth()/2)
+        position_Y = (self.winfo_screenheight()/2)-(400/2)
+
+
+        self.title(title)
+        self.geometry("%dx%d+%d+%d"%(600,700,position_X,position_Y))
+        self.configure(bg='white')
+        
+        pdfviewer = ShowPdf()
+        if receipt:
+            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
+        #filename='image/sample.pdf'
+        vaas2 = NONE
+        vaas1=pdf.ShowPdf()
+        vaas1.img_object_li.clear()
+        current_folder = datetime.now().strftime("%m-%Y-receipts")
+        
+        if view_receipt_by_or:
+            if exists(f"Resources/receipt/{current_folder}/{view_receipt_by_or}.pdf"):
+                vaas2=pdfviewer.pdf_view(self, pdf_location=f"Resources/receipt/{current_folder}/{view_receipt_by_or}.pdf",
+                                      width=77,height=100)
+                vaas2.pack()
+            else:
+                self.destroy()
+                messagebox.showerror("File Missing", "The file you are trying to access is missing.")
+                
+        else:
+            vaas2=pdfviewer.pdf_view(self, pdf_location=r"image/sample.pdf",
+                        width=77,height=100)
+            vaas2.pack()
+        
+        
+        #print("running")
+'''
+    #header
+    report_header_temp = [
+        ['Dr. Joseph Z. Angeles Veterinary Clinic'],
+        
+                    ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
+                    ['+ 02 774 6090']]
+    report_header = Table(report_header_temp)
+    tbl_header_style = TableStyle(
+        [
+        #text alignment, starting axis, -1 = end
+        ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+        #font style
+        ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
+        ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
+        ('FONTSIZE', (0, 0), (0, 0), 18),
+        ('FONTSIZE', (0, 1), (0, 2), 12),
+        #space at the bottom
+        ('BOTTOMPADDING', (0, 0), (0, 0), 20),
+        ('BOTTOMPADDING', (0, 2), (0, 2), 25),
+        ]
+        )
+
+    report_header.setStyle(tbl_header_style)
+        #filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
+        
+
+    #add table style
+    tbl_style = TableStyle(
+        [
+        #text alignment, starting axis, -1 = end
+        ('SPAN', (0, 0), (-1, 0)),
+        #('SPAN', (0, 1), (1, 1)),
+        #('SPAN', (2, 1), (3, 1)),
+        ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+        ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
+        ('ALIGN', (0, 2), (0, -1), 'LEFT'),
+        ('ALIGN', (0, 2), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 2), (-1, -1), 'RIGHT'),
+        #font style
+        ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
+        ('FONTSIZE', (0, 0), (-1, -1), 16),
+        #space at the bottom
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ('LEFTPADDING', (0, 3), (-1, -1), 10),
+        ]
+    )
+
+    table_content.setStyle(tbl_style)
+
+    #alternate background color
+    rowNumb = len(yearly_report_content_temp)
+    for i in range(1, rowNumb):
+        if i % 2 == 0:
+            bc = colors.white
+        else:
+            bc = colors.lightgrey
+
+        ts = TableStyle(
+            [('BACKGROUND', (0, i), (-1, i), bc)]
+        )
+        table_content.setStyle(ts)
+
+    #add borders
+    ts = TableStyle([
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ])
+    table_content.setStyle(ts)
+    elems = []
+    elems.append(report_header)
+    elems.append(table_content)
+    pdf.build(elems)
+    #pdf compilation
     
 #region Zoom Functions
 def zoom_in():
@@ -587,4 +727,4 @@ class preview_pdf_popup(ctk.CTkToplevel):
             vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
                         width=77,height=100)
             vaas2.pack()
-        
+'''

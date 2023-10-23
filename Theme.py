@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL import Image
-
+import screeninfo
+[print(screen) for screen in screeninfo.get_monitors()]
 class Color:
     White_Lotion = "#FCFCFC"
     White_Milk = "#FFFDF6"
@@ -32,6 +33,7 @@ class Color:
     
     Red_Tulip = "#FD8A8A"
     Red_Pastel = "#FF6464"
+    Red_Hover = "#D45353"
     
     Green_Pistachio = "#83BD75"
     Green_Aparagus = "#6E9D62"
@@ -62,4 +64,7 @@ class Icons:
     info_icon = ctk.CTkImage(light_image= Image.open("image/info.png"), size=(22,22))
     notif_icon = ctk.CTkImage(light_image= Image.open("image/notification.png"), size=(30,30))
     display_setting_icon = ctk.CTkImage(light_image= Image.open("image/display_setting.png"), size=(30,30))
+    delete_one_icon = ctk.CTkImage(light_image= Image.open("image/delete.png"), size=(25,25))
+    delete_all_icon = ctk.CTkImage(light_image= Image.open("image/delete_all.png"), size=(25,25))
+    
    

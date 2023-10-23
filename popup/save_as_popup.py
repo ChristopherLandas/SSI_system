@@ -72,7 +72,8 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                 generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 'image', annual_date_text_var.get(), self.include_graphs_checkbox.get(), 'sample.pdf', 0)
-                ppdfp.preview_pdf_popup(0)
+                #ppdfp.preview_pdf_popup(0)
+                ppdfp.preview_pdf_popup(receipt=0, title="Report Viewer")
 
             def change_name_entry(name: str = None):
                 self.file_name_entry.delete(0, ctk.END)
@@ -170,10 +171,10 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                 self.place_forget()
             '''code goes here'''
             #From here
-            self.main_frame = ctk.CTkFrame(self, width=width*0.385, height=height*0.55, fg_color=Color.White_Lotion, corner_radius=0)
+            self.main_frame = ctk.CTkFrame(self, width=width*0.385, height=height*0.625, fg_color=Color.White_Lotion, corner_radius=0)
             self.main_frame.pack(fill=BOTH, expand=True)
             self.main_frame.grid_columnconfigure(0, weight=1)
-            self.main_frame.grid_rowconfigure(1, weight=1)
+            self.main_frame.grid_rowconfigure((1,7), weight=1)
             self.main_frame.grid_propagate(0)
 
             self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
@@ -221,18 +222,25 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.report_type_option.pack(side="left", fill='x', expand=1)
 
             #checkbox if include graphs
-            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs')
+            self.include_graphs_checkbox = ctk.CTkCheckBox(self.sub_frame, text = 'Include Graphs', font=("DM Sans Medium", 14))
             self.include_graphs_checkbox.grid(row=3, column=0, sticky="nsew", padx=(width*0.085))
 
+
+
+            self.preview_pdf_btn = ctk.CTkButton(self.sub_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, 
+                                                 fg_color=Color.Green_Pistachio, hover_color=Color.Green_Aparagus, text_color="white")
+            self.preview_pdf_btn.grid(row=7, column=0, sticky="nse", padx=(width*0.005), pady=(height*0.01,0))
+                
+                
             '''TITLE SETTING'''
             self.title_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.title_frame.grid(row=4, column=0, sticky="nsew", padx=(width*0.005))
+            self.title_frame.grid(row=5, column=0, sticky="nsew", padx=(width*0.005))
             self.title_setting = ctk.CTkLabel(self.title_frame, text= 'Select Date:', font=("DM Sans Medium", 14))
             self.title_setting.grid(row = 0, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.02, 0))
             
             self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
             self.setting_frame.pack_propagate(0)
-            self.setting_frame.grid(row=5, column=0, sticky = 'nsew', padx=(width*0.005))
+            self.setting_frame.grid(row=6, column=0, sticky = 'nsew', padx=(width*0.005))
             
             #daily
             #j
@@ -262,8 +270,7 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.generate_btn.pack(side="right")
             
 
-            self.preview_pdf_btn = ctk.CTkButton(self.bottom_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, fg_color='#a9a9a9', hover_color='#909090')
-            self.preview_pdf_btn.pack(side="right", padx=width*0.008)
+            
 
         
 
@@ -346,7 +353,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 generate_inventory_report(self.user, 'sample.pdf', self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
                                           self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
                                           'image', 0)
-                ppdfp.preview_pdf_popup(0)
+                ppdfp.preview_pdf_popup(receipt=0, title="Inventory Viewer")
 
    
             #create global variable for inventory date text
@@ -451,6 +458,13 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                                                        command=lambda:cctk.tk_calendar(inventory_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
             self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .005), pady=(height*0.005))
             
+            self.preview_pdf_btn = ctk.CTkButton(self.sub_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, 
+                                                 fg_color=Color.Green_Pistachio, hover_color=Color.Green_Aparagus, text_color="white")
+            self.preview_pdf_btn.grid(row=7, column=0, sticky="nse", padx=(width*0.005), pady=(height*0.01,0))
+            
+            
+            
+            
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
             
@@ -460,8 +474,6 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback, font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
 
-            self.preview_pdf_btn = ctk.CTkButton(self.bottom_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, fg_color='#a9a9a9', hover_color='#909090')
-            self.preview_pdf_btn.pack(side="right", padx=width*0.008)
             
             """ #file name label
             ctk.CTkLabel(self.box_frame, text='File Name:',font=("DM Sans Medium", (height*0.023)), text_color="#06283D").grid(row=1, column=0, padx=(width*0.006), pady=((height*0.01),0), sticky="w")

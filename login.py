@@ -13,7 +13,7 @@ import _tkinter
 import screeninfo
 import ctypes
 
-print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
+#print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 
 class loginUI(ctk.CTk):
 
