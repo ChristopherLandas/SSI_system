@@ -1222,9 +1222,6 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         writer.write(filename, p1)
         if finish_alerts:
             messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
-        print(filename)
-
-    print(filename)
 
         #Inventory Report
         
@@ -1252,13 +1249,52 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     ttfFile = os.path.join('C:\Windows\Fonts', 'Timesbd.ttf')
     pdfmetrics.registerFont(TTFont("Times-New-Roman-Bold", ttfFile))
 
+    def footer_generator(page_count: int):
+        #footer
+        filename = f'image/footer.pdf'
+        pdf = SimpleDocTemplate(
+            filename=filename,
+            pagesize=letter,
+        )
+        pdf.bottomMargin = 20
+        pdf.leftMargin = 20
+        pdf.rightMargin = 20
+
+        tbl_footer_style = TableStyle(
+            [
+            #text alignment, starting axis, -1 = end
+            ('ALIGN', (0, 1), (0, 1), 'RIGHT'),
+            #font style
+            ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
+            ('FONTSIZE', (0, 0), (0, -1), 14),
+            ('FONTSIZE', (0, 0), (0, 0), 10),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.lightgrey),
+            #space at the bottom
+            ('TOPPADDING', (0, 0), (0, -1), 670),
+            ('RIGHTPADDING', (0, 0), (0, 0), 300),
+            ]
+        )
+        elems = []
+        footer_content = []
+        for page in range(page_count):
+            footer_content.append([["Dr. Joseph Z. Angeles Veterinary Clinic", f"Page {page+1} of {page_count}"]])
+        for footer_page in range(len(footer_content)):
+            table_footer = Table(footer_content[footer_page])
+            table_footer.setStyle(tbl_footer_style)
+            elems.append(table_footer)
+
+        pdf.build(elems)
+
     def footer_gen2():
         filename = f'image/footer2.pdf'
         pdf = SimpleDocTemplate(
             filename=filename,
             pagesize=letter,
         )
-        footer_content = [['', ''],['Prepared by:', 'Prepared Date/Time:'],['____________________', f'{datetime.datetime.now().strftime("%x     %I:%M:%S %p")}'],[f'{acc_full_name}', ''],[f'{acc_pos}', ''],]
+        footer_content = [['', '', ''],
+                          ['Prepared by:', '', 'Prepared Date/Time:'],
+                          [f'{acc_full_name}', '', f'{datetime.datetime.now().strftime("%x     %I:%M:%S %p")}'],
+                          [f'{acc_pos}', '', ''],]
         table_footer = Table(footer_content)
         tbl_footer_style = TableStyle(
             [
@@ -1269,15 +1305,16 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
             #font style
             ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
             ('FONTSIZE', (0, -1), (-1, -1), 14),
-            ('FONTSIZE', (0, 4), (0, 4), 8),
+            ('FONTSIZE', (0, 3), (0, 3), 8),
             #('FONTSIZE', (1, 2), (1, 2), 8),
             #space at the bottom
             ('TOPPADDING', (0, 0), (-1, 0), 540),#670
-            ('BOTTOMPADDING', (0, 2), (0, -1), -20),#670
-            ('TOPPADDING', (0, 3), (0, 4), -40),#670
-            ('RIGHTPADDING', (0, 1), (0, -1), 200),
+            #('BOTTOMPADDING', (0, 2), (0, -1), -20),
+            ('TOPPADDING', (0, 3), (0, 3), -40),
+            ('TOPPADDING', (0, 2), (0, 2), 20),
+            ('RIGHTPADDING', (1, 1), (1, -1), 200),
             #Signature line
-            ('LINEABOVE', (0,1), (1,1), 0.5, colors.black),
+            ('LINEBELOW', (0,2), (0,2), 0.5, colors.black),
            #('BOX', (0,0), (-1,-1), 0.5, colors.red)
             ]
         )
@@ -1447,7 +1484,8 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     p2 = pdfrw1("image/footer.pdf")
     footer_gen2()
     p3 = pdfrw1("image/footer2.pdf")
-            
+
+    
     for page in range(len(p1.pages)):
         merger = pdfrw(p1.pages[page])
         merger.add(p2.pages[page]).render()
