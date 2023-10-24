@@ -20,7 +20,38 @@ from tkPDFViewer import tkPDFViewer as pdf
 r'''
 goto
 C:\Users\username\AppData\Local\Programs\Python\Python311\Lib\site-packages\tkPDFViewer\tkPDFViewer.py
-change def add_img() to this - >
+change def ShowPdf() to this - >
+
+class ShowPdf():
+
+    img_object_li = []
+
+    def pdf_view(self,master,width=1200,height=600,pdf_location="",bar=True,load="after",zoomDPI=72):
+
+        self.frame = Frame(master,width= width,height= height,bg="white")
+
+        scroll_y = Scrollbar(self.frame,orient="vertical")
+        scroll_x = Scrollbar(self.frame,orient="horizontal")
+
+        scroll_x.pack(fill="x",side="bottom")
+        scroll_y.pack(fill="y",side="right")
+
+        percentage_view = 0
+        percentage_load = StringVar()
+
+        if bar==True and load=="after":
+            self.display_msg = Label(textvariable=percentage_load)
+            self.display_msg.pack(pady=10)
+
+            loading = Progressbar(self.frame,orient= HORIZONTAL,length=100,mode='determinate')
+            loading.pack(side = TOP,fill=X)
+
+        self.text = Text(self.frame,yscrollcommand=scroll_y.set,xscrollcommand= scroll_x.set,width= width,height= height)
+        self.text.pack(side="left")
+
+        scroll_x.config(command=self.text.xview)
+        scroll_y.config(command=self.text.yview)
+
 
         def add_img():
             precentage_dicide = 0
@@ -35,8 +66,8 @@ change def add_img() to this - >
                 if bar==True and load=="after":
                     precentage_dicide = precentage_dicide + 1
                     percentage_view = (float(precentage_dicide)/float(len(open_pdf))*float(100))
-                    #loading['value'] = percentage_view
-                    #percentage_load.set(f"Please wait!, your pdf is loading {int(math.floor(percentage_view))}%")
+                    loading['value'] = percentage_view
+                    percentage_load.set(f"Please wait!, your pdf is loading {int(math.floor(percentage_view))}%")
             if bar==True and load=="after":
                 loading.pack_forget()
                 self.display_msg.pack_forget()
@@ -540,13 +571,16 @@ class preview_pdf_popup(ctk.CTkToplevel):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
         self.attributes('-topmost',1)
-        
-        position_X = (self.winfo_screenwidth()/2)
-        position_Y = (self.winfo_screenheight()/2)-(400/2)
+        toplvl_width = 800
+        toplvl_height = 600
+        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
+        position_Y = (self.winfo_screenheight()/2) - (toplvl_height/2)
 
 
         self.title(title)
-        self.geometry("%dx%d+%d+%d"%(600,700,position_X,position_Y))
+        self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
+        print(position_X)
+        print(position_Y)
         self.configure(bg='white')
         global zoom_out_btn, zoom_in_btn, zoom_label, vaas2, ctr, pdf_viewer_frame
         ctr = 2
@@ -577,7 +611,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
             
             if exists(f"receipt/{current_folder}/{view_receipt_by_or}.pdf"):
                 vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=f"receipt/{current_folder}/{view_receipt_by_or}.pdf",
-                                      width=77,height=100)
+                                      width=100,height=50, zoomDPI=100)
                 vaas2.pack()
             else:
                 self.destroy()
@@ -585,6 +619,6 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 
         else:
             vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
-                        width=77,height=100)
+                        width=100,height=50, zoomDPI=100)
             vaas2.pack()
         
