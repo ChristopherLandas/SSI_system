@@ -155,7 +155,7 @@ from popup import preview_pdf_popup as ppdfp
                         #update the treeview's data
 
                         if quantity_column._base_val * quantity_column.value >= quantity_column._base_val * quantity_column._val_range[1]:
-                            quantity_column.num_entry.configure(text_color = 'red')
+                            quantity_column.num_entry.configure(text_color = 'transparent')
                             #messagebox.showinfo('NOTE!', 'Maximum stock reached')
                         else:
                             quantity_column.num_entry.configure(text_color = quantity_column._entry_text_color)
@@ -1070,7 +1070,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 self.save_invoice_btn.configure(state = ctk.DISABLED)
                 self.cancel_invoice_btn.configure(state = ctk.DISABLED)
                 record_action(self._attentdant, action.INVOICE_TYPE, action.MAKE_INVOICE % (self._attentdant, uid))
-                messagebox.showinfo('Success', 'Invoice Saved')
+                messagebox.showinfo('Success', 'Reception record is saved')
                 self.reset(True)
 
                 
@@ -1173,7 +1173,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
         def reset(self, bypass_warning: bool = False):
             if self.client_name_entry.get() != "" or len(self.transact_treeview._data) > 0:
-                if bypass_warning or messagebox.askyesno("Cancel Invoice", "Are you sure you want to discard the invoice"):
+                if bypass_warning or messagebox.askyesno("Cancel Reception", "Are you sure you want to discard the reception record"):
                     self.save_invoice_btn.configure(state = ctk.NORMAL)
                     self.cancel_invoice_btn.configure(state = ctk.NORMAL)
                     self.client_name_entry.set("")
@@ -1571,9 +1571,10 @@ def show_payment_proceed(master, info:tuple,):
                 self.cancel_button.configure(state="normal")
                 record_action(self.cashier_name._text, action.TRANSACTION_TYPE,  action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
 
-                ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
+                #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
-                
+                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
+                                        title="Transaction Receipt Viewer")
             #Payment Callback
             def payment_callback(var, index, mode):
                 if self.payment_var.get().isdigit():
@@ -1794,7 +1795,7 @@ def payment_confirm(master, info:tuple,):
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
             
-            self.main_frame = ctk.CTkFrame(self, width=width*0.35, height=height*0.4 ,corner_radius=0, fg_color="red")
+            self.main_frame = ctk.CTkFrame(self, width=width*0.35, height=height*0.4 ,corner_radius=0, fg_color="transparent")
             self.main_frame.grid(row=0, column=0)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
@@ -1944,6 +1945,10 @@ def show_invoice_content(master, info:tuple,):
             global IP_Address
 
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
+        
+            def close():
+                self.place_forget()
+
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
             self.main_frame.pack()
@@ -1954,9 +1959,11 @@ def show_invoice_content(master, info:tuple,):
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
+
+
             ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.payment_icon).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="PAYMENT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
-            #ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.destroy()).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=close).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
             
@@ -1975,9 +1982,9 @@ def show_invoice_content(master, info:tuple,):
             self.cashier_frame.grid(row=0, column=0, padx=(width*0.005,0), pady= height*0.007)
             self.cashier_frame.pack_propagate(0)
             
-            ctk.CTkLabel(self.cashier_frame, text="Cashier: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01))
-            self.cashier_name = ctk.CTkLabel(self.cashier_frame, text="Jane Doe",  font=("DM Sans Medium", 14))
-            self.cashier_name.pack(side="left",padx=(0,width*0.005))
+            ctk.CTkLabel(self.cashier_frame, text="Cashier: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,0))
+            self.cashier_name = ctk.CTkLabel(self.cashier_frame, text="Jane Doe",  font=("DM Sans Medium", 14), fg_color="transparent" )
+            self.cashier_name.pack(side="left",padx=(0), fill='x', expand=1)
             
             self.time_frame = ctk.CTkFrame(self.client_info_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.time_frame.grid(row=0, column=3, padx=width*0.005, pady= height*0.007, sticky="nse")
@@ -1992,16 +1999,16 @@ def show_invoice_content(master, info:tuple,):
             
             #self.or_button = ctk.CTkButton(self.receipt_frame,  text="OR#: ___",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
             #self.or_button.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
-            self.or_lbl = ctk.CTkLabel(self.receipt_frame,  text="OR#: ___",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1)
+            self.or_lbl = ctk.CTkLabel(self.receipt_frame,  text="OR#: ___",  font=("DM Sans Medium", 14),  height=height*0.05, width=width*0.1, fg_color=Color.White_Lotion, padx=width*0.01, corner_radius=5)
             self.or_lbl.grid(row=0, column=0, padx=width*0.005, pady= height*0.007)
 
             self.client_frame = ctk.CTkFrame(self.receipt_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.25)
             self.client_frame.grid(row=0, column=1, padx=(0,width*0.005), pady= height*0.007)
             self.client_frame.pack_propagate(0)
             
-            ctk.CTkLabel(self.client_frame, text="Client: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
-            self.client_name = ctk.CTkLabel(self.client_frame, text="Jane Doe",  font=("DM Sans Medium", 14))
-            self.client_name.pack(side="left") 
+            ctk.CTkLabel(self.client_frame, text="Client: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,0))
+            self.client_name = ctk.CTkLabel(self.client_frame, text="Jane Doe",  font=("DM Sans Medium", 14), fg_color="transparent")
+            self.client_name.pack(side="left", fill='x', expand=1) 
             
             self.receipt_table_frame = ctk.CTkFrame(self.receipt_frame,)
             self.receipt_table_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=width*0.005, pady=(0,height*0.007) )
@@ -2078,25 +2085,28 @@ def show_invoice_content(master, info:tuple,):
             self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
-            self.cancel_button = ctk.CTkButton(self.payment_frame, text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip
-                                               ,font=("DM Sans Medium",16), width=width*0.065, height=height*0.05)
-            self.cancel_button.configure(command=self.destroy)
-            self.cancel_button.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(height*0.007))
+            self.cancel_button = ctk.CTkButton(self.payment_frame, text="Close", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip
+                                               ,font=("DM Sans Medium",16), width=width*0.05, height=height*0.05)
+            self.cancel_button.configure(command=close)
+            self.cancel_button.grid(row=2, column=0, sticky='nsw',padx=(width*0.005,0), pady=(height*0.007))
             
         def place(self, invoice_id: str, **kwargs):
             print(invoice_id)
             general_invoice_data = database.fetch_data('SELECT * FROM invoice_record WHERE invoice_uid = ?', (str(invoice_id), ))[0]
-            service_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price), 2)) FROM invoice_service_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
-            item_total = database.fetch_data("SELECT CONCAT('₱', FORMAT(SUM(price * quantity), 2)) FROM invoice_item_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
+            service_total = database.fetch_data("SELECT CONCAT('₱ ', FORMAT(SUM(price), 2)) FROM invoice_service_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
+            item_total = database.fetch_data("SELECT CONCAT('₱ ', FORMAT(SUM(price * quantity), 2)) FROM invoice_item_content WHERE invoice_uid = ?", (str(invoice_id), ))[0][0]
             
             #print(general_invoice_data)
+            #print(general_invoice_data, '\n', service_total, '\n', item_total)
             
-            self.or_lbl.configure(text = f"Invoice Id#: {invoice_id}")
+            
+            self.or_lbl.configure(text = f"Reception Code:   {invoice_id}")
+            self.cashier_name.configure(text = general_invoice_data[1])
             self.client_name.configure(text = general_invoice_data[2])
             self.date_label.configure(general_invoice_data[5].strftime('%B %d, %Y'))
-            self.services_total.configure(text = service_total)
-            self.items_total.configure(text = item_total)
-            self.grand_total.configure(text = general_invoice_data[3])
+            self.services_total.configure(text = service_total or "₱ 0.00")
+            self.items_total.configure(text = item_total or "₱ 0.00")
+            self.grand_total.configure(text = "₱ {:.2f}".format(general_invoice_data[3]))
             self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_id, ))
             self.items = database.fetch_data(sql_commands.get_invoice_item_content_by_id, (invoice_id, ))
             self.receipt_total_amount.configure(text= general_invoice_data[3])
