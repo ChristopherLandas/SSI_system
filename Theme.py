@@ -67,4 +67,8 @@ class Icons:
     delete_one_icon = ctk.CTkImage(light_image= Image.open("image/delete.png"), size=(25,25))
     delete_all_icon = ctk.CTkImage(light_image= Image.open("image/delete_all.png"), size=(25,25))
     
+    zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
+    zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
+    zoom_reset_icon = ctk.CTkImage(light_image= Image.open("image/zoomreset.png"), size=(25,25))
+    
    
