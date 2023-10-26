@@ -241,7 +241,6 @@ delete_stocks_by_id = "DELETE FROM item_inventory_info WHERE id = ?"
 deduct_stocks_by_id = "UPDATE item_inventory_info SET Stock = Stock - ? WHERE id = ?"
 null_stocks_by_id = "UPDATE item_inventory_info SET Stock = 0 WHERE id = ?"
 
-
 #FOR SALES
 get_transaction_data = "SELECT * FROM transaction_record"
 

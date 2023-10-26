@@ -1527,18 +1527,17 @@ def show_payment_proceed(master, info:tuple,):
                                                  else sql_commands.get_specific_stock_ordered_by_date_added, (_item[1], ))
                     
                     for st in stocks:
-                        print(st)
-                        if st[2] > quantity_needed:
+                        if st[2] == quantity_needed and st == stocks[-1]:
+                            database.exec_nonquery([[sql_commands.null_stocks_by_id, (st[0], )]])
+                        elif st[2] > quantity_needed:
                             database.exec_nonquery([[sql_commands.deduct_stocks_by_id, (quantity_needed, st[0])]])
                             quantity_needed = 0
                             break
                             #if the  stock of an instance is higher than needed stock
-                        elif st[2] < quantity_needed:
+                        elif st[2] <= quantity_needed:
                             database.exec_nonquery([[sql_commands.delete_stocks_by_id, (st[0], )]])
                             quantity_needed -= st[2]
                             #if the stock needed is higher than stock instance
-                        elif st[2] == quantity_needed:
-                            database.exec_nonquery([[sql_commands.null_stocks_by_id, (st[0], )]])
 
                 'FIX NEEDED'
                 '''new FIFO algorithm'''
