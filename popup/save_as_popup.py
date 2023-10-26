@@ -80,13 +80,13 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                 self.file_name_entry.insert(0, name)
 
             def daily_callback(e: any = None):
-                change_name_entry('_'.join(re.findall(r'(\w+)',  daily_date_text_var_split))+'_report.pdf')
+                change_name_entry('_'.join(re.findall(r'(\w+)',  daily_date_text_var_split))+'_Daily_Sales_Report.pdf')
 
             def monthly_callback(e: any = None):
-                change_name_entry(f'{monthly_date_text_var.get()}_{annual_date_text_var.get()}_monthly_report.pdf')
+                change_name_entry(f'{monthly_date_text_var.get()}_{annual_date_text_var.get()}_Monthly_Sales_report.pdf')
 
             def yearly_callback(e: any = None):
-                change_name_entry(f'{annual_date_text_var.get()}_annual_report.pdf')
+                change_name_entry(f'{annual_date_text_var.get()}_Annual_Sales_Report.pdf')
 
             def change_date_entry(date: str = None):
                 #self.daily_date_entry.configure(state = ctk.NORMAL)
@@ -342,9 +342,10 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                             temp_f_path += f'({ctr}).pdf'
                     elif question == None:
                         return
-                daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
+                daily_date_select_temp = datetime.datetime.now()#datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
                 generate_inventory_report(self.user, self.file_name_entry.get(), self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
-                                          self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
+                                          #self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
+                                          daily_date_select_temp, daily_date_select_temp.month, daily_date_select_temp.year,
                                           self.path_entry.get(), 1)
                 reset()
 
@@ -386,7 +387,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 self.daily_date_entry.configure(text=f"{date or self.CURRENT_DAY.strftime('%B %d, %Y')}")
 
             def inventory_date_callback(e: any = None):
-                change_name_entry('_'.join(re.findall(r'(\w+)',  inventory_date_text_var_split))+'_inventory_report.pdf')
+                change_name_entry('_'.join(re.findall(r'(\w+)',  inventory_date_text_var_split))+'_Inventory_Report.pdf')
 
             def path_save_cmd():
                 save_path = filedialog.askdirectory(title= 'Save')
@@ -441,22 +442,22 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
             ctk.CTkButton(self.path_frame, text='', command=path_save_cmd,font=("DM Sans Medium", 14), text_color='white', height=height*0.055, width=width*0.03, image=self.folder_icon).pack(side="left")
             
             '''TITLE SETTING'''
-            self.title_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.title_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005))
-            self.title_setting = ctk.CTkLabel(self.title_frame, text= 'Select Date:', font=("DM Sans Medium", 14))
-            self.title_setting.grid(row = 0, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.02, 0))
+            #self.title_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            #self.title_frame.grid(row=2, column=0, sticky="nsew", padx=(width*0.005))
+            #self.title_setting = ctk.CTkLabel(self.title_frame, text= 'Select Date:', font=("DM Sans Medium", 14))
+            #self.title_setting.grid(row = 0, column = 0, sticky = 'w', padx=(width*0.006), pady=(height*0.02, 0))
             
-            self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
-            self.setting_frame.pack_propagate(0)
-            self.setting_frame.grid(row=5, column=0, sticky = 'nsew', padx=(width*0.005))
+            #self.setting_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, height=height * .075)
+            #self.setting_frame.pack_propagate(0)
+            #self.setting_frame.grid(row=5, column=0, sticky = 'nsew', padx=(width*0.005))
             #daily
-            self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5, textvariable=inventory_date_text_var)
-            self.daily_date_entry.pack(side = ctk.LEFT, fill="x", expand=1, padx = (width * .005), pady=(height*0.005))
-            change_date_entry()
-            change_name_entry('_'.join(re.findall(r'(\w+)', inventory_date_text_var_split))+'_report.pdf')
-            self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
-                                                       command=lambda:cctk.tk_calendar(inventory_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
-            self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .005), pady=(height*0.005))
+            #self.daily_date_entry = ctk.CTkLabel(self.setting_frame, width * .213, height * .05,  fg_color=Color.White_Lotion, font=("DM Sans Medium", 14), corner_radius=5, textvariable=inventory_date_text_var)
+            #self.daily_date_entry.pack(side = ctk.LEFT, fill="x", expand=1, padx = (width * .005), pady=(height*0.005))
+            #change_date_entry()
+            change_name_entry('_'.join(re.findall(r'(\w+)', inventory_date_text_var_split))+'_Inventory_Report.pdf')
+            #self.daily_calendar_button = ctk.CTkButton(self.setting_frame, height=height*0.055, width=width*0.03, text="", image=self.calendar_icon,
+            #                                          command=lambda:cctk.tk_calendar(inventory_date_text_var, "%s", date_format="word", max_date=datetime.datetime.now()) )
+            #self.daily_calendar_button.pack(side = ctk.LEFT, padx = (0, width * .005), pady=(height*0.005))
             
             self.preview_pdf_btn = ctk.CTkButton(self.sub_frame, text='Preview PDF', command= preview_pdf_popup,font=("DM Sans Medium", 14),height=height*0.055, 
                                                  fg_color=Color.Green_Pistachio, hover_color=Color.Green_Aparagus, text_color="white")
@@ -1348,10 +1349,11 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     else:
         full_date_temp = datetime.datetime.strptime(self.date_selected_label._text, '%B %d, %Y').strftime('%B %d, %Y')'''
     current_date = datetime.datetime.now().strftime('%B %d, %Y')
-    day_date_temp = datetime.datetime.strptime(date_txt, '%B %d, %Y').strftime('%d')
-    month_date_temp = datetime.datetime.strptime(date_txt, '%B %d, %Y').strftime('%B')
-
-    y_temp = year
+    #print('BRUH',date_txt, type(date_txt))
+    #day_date_temp = datetime.datetime.strftime(date_txt, '%B %d, %Y').strftime('%d')
+    #month_date_temp = datetime.datetime.strftime(date_txt, '%B %d, %Y').strftime('%B')
+    day_date_temp, month_date_temp, y_temp = date_txt.strftime('%d'), date_txt.strftime('%B'), year
+    #y_temp = year
     #end
     
     #footer
@@ -1497,12 +1499,12 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     footer_gen2()
     p3 = pdfrw1("image/footer2.pdf")
 
-    
     for page in range(len(p1.pages)):
         merger = pdfrw(p1.pages[page])
-        merger.add(p2.pages[page]).render()
         if page == (len(p1.pages)-1):
-                merger.add(p3.pages[0]).render()
+            merger.add(p3.pages[0]).render()
+        else:
+            merger.add(p2.pages[page]).render()
 
     writer = pdfrw2()
     writer.write(filename, p1)

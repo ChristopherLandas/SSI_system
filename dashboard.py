@@ -2265,9 +2265,9 @@ class reports_frame(ctk.CTkFrame):
                                               command = lambda: self.save_as_inventory_rep_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.generate_rep_btn.grid(row=0, column=0, sticky="w", pady=(height*0.005))
 
-        self.receive_btn = ctk.CTkButton(self.inventory_report_frame, text="Receive History", height=height*0.0575, font=("DM Sans Medium", 14),
-                                              command = lambda: self.receive_report.place(relx= 0.5, rely=0.5, anchor='c'))
-        self.receive_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005))
+        #self.receive_btn = ctk.CTkButton(self.inventory_report_frame, text="Receive History", height=height*0.0575, font=("DM Sans Medium", 14),
+        #                                      command = lambda: self.receive_report.place(relx= 0.5, rely=0.5, anchor='c'))
+        #self.receive_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005))
 
         self.bought_item_con_col = None
 

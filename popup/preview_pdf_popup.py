@@ -10,17 +10,51 @@ import datetime
 from PIL import Image
 #from util import *
 #import sql_commands
-import calendar
-#from constants import *
-#from customcustomtkinter import customcustomtkinter as cctk
+import ctypes
+from Theme import Color, Icons
+from functools import partial
+
 from datetime import datetime
+import customTkPDFViewer as pdf
+scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
 from tkPDFViewer import tkPDFViewer as pdf
 #region README
 r'''
 goto
 C:\Users\username\AppData\Local\Programs\Python\Python311\Lib\site-packages\tkPDFViewer\tkPDFViewer.py
-change def add_img() to this - >
+change def ShowPdf() to this - >
+
+class ShowPdf():
+
+    img_object_li = []
+
+    def pdf_view(self,master,width=1200,height=600,pdf_location="",bar=True,load="after",zoomDPI=72):
+
+        self.frame = Frame(master,width= width,height= height,bg="white")
+
+        scroll_y = Scrollbar(self.frame,orient="vertical")
+        scroll_x = Scrollbar(self.frame,orient="horizontal")
+
+        scroll_x.pack(fill="x",side="bottom")
+        scroll_y.pack(fill="y",side="right")
+
+        percentage_view = 0
+        percentage_load = StringVar()
+
+        if bar==True and load=="after":
+            self.display_msg = Label(textvariable=percentage_load)
+            self.display_msg.pack(pady=10)
+
+            loading = Progressbar(self.frame,orient= HORIZONTAL,length=100,mode='determinate')
+            loading.pack(side = TOP,fill=X)
+
+        self.text = Text(self.frame,yscrollcommand=scroll_y.set,xscrollcommand= scroll_x.set,width= width,height= height)
+        self.text.pack(side="left")
+
+        scroll_x.config(command=self.text.xview)
+        scroll_y.config(command=self.text.yview)
+
 
         def add_img():
             precentage_dicide = 0
@@ -35,8 +69,8 @@ change def add_img() to this - >
                 if bar==True and load=="after":
                     precentage_dicide = precentage_dicide + 1
                     percentage_view = (float(precentage_dicide)/float(len(open_pdf))*float(100))
-                    #loading['value'] = percentage_view
-                    #percentage_load.set(f"Please wait!, your pdf is loading {int(math.floor(percentage_view))}%")
+                    loading['value'] = percentage_view
+                    percentage_load.set(f"Please wait!, your pdf is loading {int(math.floor(percentage_view))}%")
             if bar==True and load=="after":
                 loading.pack_forget()
                 self.display_msg.pack_forget()
@@ -477,146 +511,6 @@ class ShowPdf(pdf.ShowPdf):
         except IndexError:
             if self.img_object_li:
                 self.text.see(self.img_object_li[-1])
-
-""" def preview_pdf_popup(receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None):
-    previewpopup = ctk.CTkToplevel()
-    previewpopup.attributes('-topmost', 1)
-    previewpopup.geometry('630x700+400+100')
-    previewpopup.title('Transaction Receipt Viewer')
-    previewpopup.configure(bg='white')
-
-    pdfviewer = ShowPdf()
-    if receipt:
-        generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
-    #filename='image/sample.pdf'
-    vaas2 = NONE
-    vaas1=pdf.ShowPdf()
-    vaas1.img_object_li.clear()
-    vaas2=pdfviewer.pdf_view(previewpopup,
-                   pdf_location=r"image/sample.pdf",
-                   width=77,height=100)
-    vaas2.pack()
-    previewpopup.mainloop() """
-    
-class preview_pdf_popup(ctk.CTkToplevel):
-    def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
-                 #Custom Arguments
-                 
-                 receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None,
-                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None,
-                  **kwargs,
-                 ):
-        super().__init__(*args, fg_color=fg_color, **kwargs)
-
-        self.attributes('-topmost',1)
-        
-        position_X = (self.winfo_screenwidth()/2)
-        position_Y = (self.winfo_screenheight()/2)-(400/2)
-
-
-        self.title(title)
-        self.geometry("%dx%d+%d+%d"%(600,700,position_X,position_Y))
-        self.configure(bg='white')
-        
-        pdfviewer = ShowPdf()
-        if receipt:
-            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
-        #filename='image/sample.pdf'
-        vaas2 = NONE
-        vaas1=pdf.ShowPdf()
-        vaas1.img_object_li.clear()
-        current_folder = datetime.now().strftime("%m-%Y-receipts")
-        
-        if view_receipt_by_or:
-            if exists(f"Resources/receipt/{current_folder}/{view_receipt_by_or}.pdf"):
-                vaas2=pdfviewer.pdf_view(self, pdf_location=f"Resources/receipt/{current_folder}/{view_receipt_by_or}.pdf",
-                                      width=77,height=100)
-                vaas2.pack()
-            else:
-                self.destroy()
-                messagebox.showerror("File Missing", "The file you are trying to access is missing.")
-                
-        else:
-            vaas2=pdfviewer.pdf_view(self, pdf_location=r"image/sample.pdf",
-                        width=77,height=100)
-            vaas2.pack()
-        
-        
-        #print("running")
-'''
-    #header
-    report_header_temp = [
-        ['Dr. Joseph Z. Angeles Veterinary Clinic'],
-        
-                    ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                    ['+ 02 774 6090']]
-    report_header = Table(report_header_temp)
-    tbl_header_style = TableStyle(
-        [
-        #text alignment, starting axis, -1 = end
-        ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-        #font style
-        ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-        ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
-        ('FONTSIZE', (0, 0), (0, 0), 18),
-        ('FONTSIZE', (0, 1), (0, 2), 12),
-        #space at the bottom
-        ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-        ('BOTTOMPADDING', (0, 2), (0, 2), 25),
-        ]
-        )
-
-    report_header.setStyle(tbl_header_style)
-        #filename = f'{desktop}\\{y_temp}_yearly_report.pdf'
-        
-
-    #add table style
-    tbl_style = TableStyle(
-        [
-        #text alignment, starting axis, -1 = end
-        ('SPAN', (0, 0), (-1, 0)),
-        #('SPAN', (0, 1), (1, 1)),
-        #('SPAN', (2, 1), (3, 1)),
-        ('ALIGN', (0, 0), (0, -1), 'CENTER'),
-        ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
-        ('ALIGN', (0, 2), (0, -1), 'LEFT'),
-        ('ALIGN', (0, 2), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 2), (-1, -1), 'RIGHT'),
-        #font style
-        ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
-        ('FONTSIZE', (0, 0), (-1, -1), 16),
-        #space at the bottom
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-        ('LEFTPADDING', (0, 3), (-1, -1), 10),
-        ]
-    )
-
-    table_content.setStyle(tbl_style)
-
-    #alternate background color
-    rowNumb = len(yearly_report_content_temp)
-    for i in range(1, rowNumb):
-        if i % 2 == 0:
-            bc = colors.white
-        else:
-            bc = colors.lightgrey
-
-        ts = TableStyle(
-            [('BACKGROUND', (0, i), (-1, i), bc)]
-        )
-        table_content.setStyle(ts)
-
-    #add borders
-    ts = TableStyle([
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ])
-    table_content.setStyle(ts)
-    elems = []
-    elems.append(report_header)
-    elems.append(table_content)
-    pdf.build(elems)
-    #pdf compilation
     
 #region Zoom Functions
 def zoom_in():
@@ -670,6 +564,7 @@ def zoom_out():
 #endregion
 
 class preview_pdf_popup(ctk.CTkToplevel):
+
     def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
                  #Custom Arguments
                  
@@ -680,13 +575,16 @@ class preview_pdf_popup(ctk.CTkToplevel):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
         self.attributes('-topmost',1)
-        
-        position_X = (self.winfo_screenwidth()/2)
-        position_Y = (self.winfo_screenheight()/2)-(400/2)
+        toplvl_width = 800
+        toplvl_height = 600
+        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
+        position_Y = (self.winfo_screenheight()/2) - (toplvl_height/2)
 
 
         self.title(title)
-        self.geometry("%dx%d+%d+%d"%(600,700,position_X,position_Y))
+        self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
+        print(position_X)
+        print(position_Y)
         self.configure(bg='white')
         global zoom_out_btn, zoom_in_btn, zoom_label, vaas2, ctr, pdf_viewer_frame
         ctr = 2
@@ -701,30 +599,100 @@ class preview_pdf_popup(ctk.CTkToplevel):
         zoom_in_btn.pack(side = 'left')
         #endregion
         
-        pdf_viewer_frame = ctk.CTkFrame(self)
-        pdf_viewer_frame.pack()
+        '''ALTERATION FOR THIS ^'''
+        '''self.attributes('-topmost',1)
+        self.view_by_reciept = view_receipt_by_or
+        self.zoom_step = 10
+        self.zoom_limit = 10
+        self.default_dpi=100
+        self.zoom_counter = 0
+        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
+        self.window_width = window_width
 
-        pdfviewer = ShowPdf()
+        toplvl_width = 600
+        toplvl_height = 650
+        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
+        position_Y = (window_height/2) - (toplvl_height/2)
+
+        self.title(title)
+        self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
+        
+        self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum, width=window_width*0.5)
+        self.main_frame.pack(pady=window_width*0.005, padx=window_width*0.005)
+        
+        
+        self.zoom_frame = ctk.CTkFrame(self.main_frame, fg_color='transparent')
+        self.zoom_frame.pack()
+        self.zoom_out_btn = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_out_icon, font = ("DM Sans Medium", 14), width=window_width*0.03, height=window_width*0.03,
+                                          command=partial(self.zoom_function, -1))
+        self.zoom_out_btn.pack(side = 'left', padx = (window_width*0.005), pady = (window_width*0.005, 0))
+        
+        self.zoom_in_btn = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_in_icon, font=("DM Sans Medium", 14), width=window_width*0.03, height=window_width*0.03,
+                                         command=partial(self.zoom_function, 1))
+        self.zoom_in_btn.pack(side = 'left', padx = (0,window_width*0.005), pady = (window_width*0.005, 0))
+        
+        self.zoom_reset = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_reset_icon,font=("DM Sans Medium", 14), width=window_width*0.03, height=window_width*0.03,
+                                         command=partial(self.zoom_function, 0))
+        self.zoom_reset.pack(side = 'left', padx = (0,window_width*0.005),pady = (window_width*0.005, 0))
+        self.zoom_entry = ctk.CTkLabel(self.zoom_frame, fg_color=Color.White_Lotion, text = '---%',font=("DM Sans Medium", 14), height=40,
+                                       width=toplvl_width*0.175, corner_radius=window_width*0.005)
+        self.zoom_entry.pack(side = 'left', padx = (0,window_width*0.005), pady = (window_width*0.005, 0))
+        
+        
+        self.pdf_viewer_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.pdf_viewer_frame.pack(pady=(0, window_width*0.005), )
+
+        self.pdfviewer = ShowPdf()'''
+        
+        self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
             generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
-        #filename='image/sample.pdf'
-        vaas2 = NONE
-        vaas1=pdf.ShowPdf()
-        vaas1.img_object_li.clear()
-        current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if view_receipt_by_or:
+        self.vaas2 = NONE
+        self.vaas1=pdf.ShowPdf()
+        self.vaas1.img_object_li.clear()
+        self.current_folder = datetime.now().strftime("%m-%Y-receipts")
+        
+        if self.view_by_reciept:
             
-            if exists(f"receipt/{current_folder}/{view_receipt_by_or}.pdf"):
-                vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=f"receipt/{current_folder}/{view_receipt_by_or}.pdf",
-                                      width=77,height=100)
-                vaas2.pack()
+            if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
+                self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
+                                      width=80,height=100,zoomDPI=self.default_dpi)
+                self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
                 self.destroy()
                 messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
         else:
-            vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
-                        width=77,height=100)
-            vaas2.pack()
-'''
+            '''vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
+                        width=100,height=50, zoomDPI=100)
+            vaas2.pack()'''
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
+                        width=80,height=100,zoomDPI=self.default_dpi)
+            self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
+            
+    def zoom_function(self, value):
+        self.zoom_counter += value
+        if value == 0: self.zoom_counter = 0 
+        self.zoom_state_check(zoom_dpi=max(50, ((self.zoom_counter * self.zoom_step) + self.default_dpi)))
+    
+    def zoom_state_check(self, zoom_dpi):
+        self.zoom_in_btn.configure(state = 'disabled' if self.zoom_counter == self.zoom_limit else 'normal') 
+        self.zoom_out_btn.configure(state = 'disabled' if self.zoom_counter == -self.zoom_limit else 'normal')
+        self.zoom_entry.configure(text=f"{zoom_dpi}%")
+        
+        if self.vaas2: # if old instance exists, destroy it first
+            self.vaas2.destroy()
+         # creating object of ShowPdf from tkPDFViewer. 
+        self.vaas1 = pdf.ShowPdf() 
+        # clear the image list # this corrects the bug inside tkPDFViewer module
+        self.vaas1.img_object_li.clear()
+        # Adding pdf location and width and height. 
+        if self.view_by_reciept:
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
+                                      width=80,height=100,zoomDPI=zoom_dpi)
+            self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
+        else:
+            self.vaas2=self.vaas1.pdf_view(self.pdf_viewer_frame,pdf_location = r"image\sample.pdf", zoomDPI=zoom_dpi, width=80,height=100 ) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
+            # Placing Pdf inside gui
+            self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))

@@ -9,7 +9,7 @@
 
 INSERT INTO `account_access_level` (`usn`, `Dashboard`, `Reception`, `Payment`, `Services`, `Sales`, `Inventory`, `Pet_Info`, `Report`, `User`, `Action`, `Gen_Settings`) VALUES
 	('123123', 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0),
-	('admin', 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+	('admin', 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0),
 	('aila', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
 	('assisstant', 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0),
 	('Chris', 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0),
@@ -37,6 +37,19 @@ INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('Jrizal', 'Jose Rizal', 'Assisstant', 0),
 	('jayr', 'jayr', 'Assisstant', 0);
 
+-- Dumping structure for table ssi_copy_1.action_history
+CREATE TABLE IF NOT EXISTS `action_history` (
+  `Column 5` int(11) NOT NULL AUTO_INCREMENT,
+  `usn` varchar(128) NOT NULL,
+  `Type` varchar(25) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `ACTION` varchar(256) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `action_date` datetime NOT NULL,
+  PRIMARY KEY (`Column 5`),
+  KEY `usn` (`usn`),
+  CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+
+-- Dumping data for table ssi_copy_1.action_history: ~102 rows (approximately)
 INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`) VALUES
 	(1, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-09-11 23:50:11'),
 	(2, 'aila', 'invoice', 'INVM/aila/Pec804', '2023-08-23 15:11:35'),
@@ -154,16 +167,44 @@ INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date
 	('Test005', 1, 'admin', 0, '2023-10-03 22:14:57', 'admin', '2023-10-04 11:39:53'),
 	('Test006', 0, 'admin', 0, '2023-10-03 22:14:58', 'admin', '2023-10-04 11:38:29');
 
-INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `initial_quantity`, `Current_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
-	('D2CBCF8C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 12, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('D3B574C6', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 113, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('D57799ED', NULL, 'I65B51', 'Medicine-ABC (10g)', 100, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('D6FB1207', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 113, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('D8AD9E8F', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 10, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('DA30FCF8', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 10, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('DA36F355', NULL, 'I65B51', 'Medicine-ABC (10g)', 100, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
-	('DF4A897C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 48, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin');
+-- Dumping structure for table ssi_copy_1.disposal_history
+CREATE TABLE IF NOT EXISTS `disposal_history` (
+  `id` varchar(8) NOT NULL DEFAULT '0',
+  `receive_id` varchar(6) DEFAULT NULL,
+  `item_uid` varchar(6) NOT NULL,
+  `item_name` varchar(64) NOT NULL,
+  `initial_quantity` int(11) NOT NULL,
+  `reason` varchar(50) NOT NULL,
+  `date_of_disposal` datetime NOT NULL,
+  `full_dispose_date` datetime DEFAULT NULL,
+  `disposed_by` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
+-- Dumping data for table ssi_copy_1.disposal_history: ~8 rows (approximately)
+INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `initial_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
+	('D2CBCF8C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 12, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D3B574C6', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 113, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D57799ED', NULL, 'I65B51', 'Medicine-ABC (10g)', 100, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D6FB1207', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 113, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D8AD9E8F', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 10, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('DA30FCF8', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 10, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('DA36F355', NULL, 'I65B51', 'Medicine-ABC (10g)', 100, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('DF4A897C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 48, 'Expired', '2023-10-22 00:00:00', NULL, 'admin');
+
+-- Dumping structure for table ssi_copy_1.invoice_item_content
+CREATE TABLE IF NOT EXISTS `invoice_item_content` (
+  `invoice_uid` varchar(8) NOT NULL,
+  `Item_uid` varchar(6) NOT NULL,
+  `item_name` varchar(64) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` float NOT NULL,
+  `deduction` float NOT NULL,
+  KEY `invoice_uid` (`invoice_uid`),
+  CONSTRAINT `invoice_item_content_ibfk_1` FOREIGN KEY (`invoice_uid`) REFERENCES `invoice_record` (`invoice_uid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+
+-- Dumping data for table ssi_copy_1.invoice_item_content: ~71 rows (approximately)
 INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`) VALUES
 	('Pc9c14', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
 	('P2e8cf', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
