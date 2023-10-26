@@ -17,7 +17,7 @@ from functools import partial
 from datetime import datetime
 import customTkPDFViewer as pdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
-zoom_counter = 0
+
     
 def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid):
     from reportlab.graphics.shapes import Drawing, Rect, String
@@ -445,7 +445,7 @@ class ShowPdf(pdf.ShowPdf):
         except IndexError:
             if self.img_object_li:
                 self.text.see(self.img_object_li[-1])
-    
+  
 class preview_pdf_popup(ctk.CTkToplevel):
     
     
@@ -461,13 +461,15 @@ class preview_pdf_popup(ctk.CTkToplevel):
         
         
         self.attributes('-topmost',1)
-        #self._fg_color = Color.White_Platinum
+        self.view_by_reciept = view_receipt_by_or
         self.zoom_step = 10
         self.zoom_limit = 10
         self.default_dpi=100
+        self.zoom_counter = 0
         window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
-    
-        toplvl_width = 700
+        self.window_width = window_width
+
+        toplvl_width = 600
         toplvl_height = 650
         position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
         position_Y = (window_height/2) - (toplvl_height/2)
@@ -476,29 +478,29 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
         
         self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum, width=window_width*0.5)
-        self.main_frame.pack(pady=10, padx=10)
+        self.main_frame.pack(pady=window_width*0.005, padx=window_width*0.005)
         
         
         self.zoom_frame = ctk.CTkFrame(self.main_frame, fg_color='transparent')
         self.zoom_frame.pack()
-        self.zoom_out_btn = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_out_icon, font = ("DM Sans Medium", 14), width=40, height=40,
+        self.zoom_out_btn = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_out_icon, font = ("DM Sans Medium", 14), width=window_width*0.03, height=window_width*0.03,
                                           command=partial(self.zoom_function, -1))
-        self.zoom_out_btn.pack(side = 'left', padx = (0,5), pady =5)
+        self.zoom_out_btn.pack(side = 'left', padx = (window_width*0.005), pady = (window_width*0.005, 0))
         
-        self.zoom_in_btn = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_in_icon, font=("DM Sans Medium", 14), width=40, height=40,
+        self.zoom_in_btn = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_in_icon, font=("DM Sans Medium", 14), width=window_width*0.03, height=window_width*0.03,
                                          command=partial(self.zoom_function, 1))
-        self.zoom_in_btn.pack(side = 'left', padx = (0,5), pady =5)
+        self.zoom_in_btn.pack(side = 'left', padx = (0,window_width*0.005), pady = (window_width*0.005, 0))
         
-        self.zoom_reset = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_reset_icon,font=("DM Sans Medium", 14), width=40, height=40,
+        self.zoom_reset = ctk.CTkButton(self.zoom_frame, text='', image=Icons.zoom_reset_icon,font=("DM Sans Medium", 14), width=window_width*0.03, height=window_width*0.03,
                                          command=partial(self.zoom_function, 0))
-        self.zoom_reset.pack(side = 'left', padx = (0,5))
+        self.zoom_reset.pack(side = 'left', padx = (0,window_width*0.005),pady = (window_width*0.005, 0))
         self.zoom_entry = ctk.CTkLabel(self.zoom_frame, fg_color=Color.White_Lotion, text = '---%',font=("DM Sans Medium", 14), height=40,
-                                       width=toplvl_width*0.175, corner_radius=5)
-        self.zoom_entry.pack(side = 'left', padx = 5, pady =5)
+                                       width=toplvl_width*0.175, corner_radius=window_width*0.005)
+        self.zoom_entry.pack(side = 'left', padx = (0,window_width*0.005), pady = (window_width*0.005, 0))
         
         
         self.pdf_viewer_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.pdf_viewer_frame.pack()
+        self.pdf_viewer_frame.pack(pady=(0, window_width*0.005), )
 
         self.pdfviewer = ShowPdf()
         
@@ -511,12 +513,12 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.vaas1.img_object_li.clear()
         self.current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if view_receipt_by_or:
+        if self.view_by_reciept:
             
-            if exists(f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf"):
-                self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
+            if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
+                self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=80,height=100,zoomDPI=self.default_dpi)
-                self.vaas2.pack(padx=(10), pady=(0,10))
+                self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
                 self.destroy()
                 messagebox.showerror("File Missing", "The file you are trying to access is missing.")
@@ -524,17 +526,16 @@ class preview_pdf_popup(ctk.CTkToplevel):
         else:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
                         width=80,height=100,zoomDPI=self.default_dpi)
-            self.vaas2.pack(padx=(10), pady=(0,10))
+            self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             
     def zoom_function(self, value):
-        global zoom_counter
-        zoom_counter += value
-        if value == 0: zoom_counter = 0 
-        self.zoom_state_check(zoom_dpi=((zoom_counter * self.zoom_step) + self.default_dpi))
-            
+        self.zoom_counter += value
+        if value == 0: self.zoom_counter = 0 
+        self.zoom_state_check(zoom_dpi=max(50, ((self.zoom_counter * self.zoom_step) + self.default_dpi)))
+    
     def zoom_state_check(self, zoom_dpi):
-        self.zoom_in_btn.configure(state = 'disabled' if zoom_counter == self.zoom_limit else 'normal') 
-        self.zoom_out_btn.configure(state = 'disabled' if zoom_counter == -self.zoom_limit else 'normal')
+        self.zoom_in_btn.configure(state = 'disabled' if self.zoom_counter == self.zoom_limit else 'normal') 
+        self.zoom_out_btn.configure(state = 'disabled' if self.zoom_counter == -self.zoom_limit else 'normal')
         self.zoom_entry.configure(text=f"{zoom_dpi}%")
         
         if self.vaas2: # if old instance exists, destroy it first
@@ -544,6 +545,13 @@ class preview_pdf_popup(ctk.CTkToplevel):
         # clear the image list # this corrects the bug inside tkPDFViewer module
         self.vaas1.img_object_li.clear()
         # Adding pdf location and width and height. 
-        self.vaas2=self.vaas1.pdf_view(self.pdf_viewer_frame,pdf_location = r"image\sample.pdf", zoomDPI=zoom_dpi, width=80,height=100 ) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
-        # Placing Pdf inside gui
-        self.vaas2.pack(padx=(10), pady=(0,10))
+        if self.view_by_reciept:
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
+                                      width=80,height=100,zoomDPI=zoom_dpi)
+            self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
+        else:
+            self.vaas2=self.vaas1.pdf_view(self.pdf_viewer_frame,pdf_location = r"image\sample.pdf", zoomDPI=zoom_dpi, width=80,height=100 ) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
+            # Placing Pdf inside gui
+            self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
+    
+    
