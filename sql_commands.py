@@ -17,7 +17,8 @@ get_inventory_by_group = f"SELECT item_general_info.brand, item_general_info.nam
                           FROM item_general_info\
                           JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                          WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                          WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                            AND item_inventory_info.state = 1\
                           GROUP BY item_general_info.name, item_general_info.unit\
                           ORDER BY CASE\
                           WHEN SUM(item_inventory_info.Stock) < 1 THEN 1\
@@ -923,3 +924,10 @@ get_expired_items_to_dispose = "SELECT item_general_info.UID, item_general_info.
                                 
 set_expired_items_from_inventory = "INSERT INTO disposal_history (id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
                                     VALUES (?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+
+get_out_of_stock_names = "SELECT item_general_info.name\
+                          FROM item_general_info\
+                          JOIN item_inventory_info \
+                              ON item_general_info.UID = item_inventory_info.UID\
+                          WHERE item_inventory_info.Stock = 0\
+                          GROUP BY item_general_info.UID"

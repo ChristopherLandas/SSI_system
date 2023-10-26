@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import datetime;
 import _tkinter
 import sql_commands
+import notif_popup_entities as ntf
 import numpy as np
 from tkinter import messagebox
 from util import *
@@ -329,7 +330,10 @@ class dashboard(ctk.CTkToplevel):
                                                         self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
                                                         'c'))
         
-        
+        out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
+        ntf_c = [('Out Of Stock', f'Item {s} is currently out of stock', datetime.datetime.now()) for s in out_of_stock]
+        notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1], s[2],  width * default_menubar_width * .95, 100) for s in ntf_c]
+
         self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
                                                           onvalue="darkmode", offvalue="lightmode",)
         self.settings_menu_bar_dark_mode.grid(row=0, column=0)
