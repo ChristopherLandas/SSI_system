@@ -1521,6 +1521,29 @@ def show_payment_proceed(master, info:tuple,):
                 #record the services from within the transaction
 
                 for _item in item:
+                    does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (_item[1], ))[0][0])
+                    quantity_needed = _item[3]
+                    stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_expiry if does_expire
+                                                 else sql_commands.get_specific_stock_ordered_by_date_added, (_item[1], ))
+                    
+                    for st in stocks:
+                        print(st)
+                        if st[2] > quantity_needed:
+                            database.exec_nonquery([[sql_commands.deduct_stocks_by_id, (quantity_needed, st[0])]])
+                            quantity_needed = 0
+                            break
+                            #if the  stock of an instance is higher than needed stock
+                        elif st[2] < quantity_needed:
+                            database.exec_nonquery([[sql_commands.delete_stocks_by_id, (st[0], )]])
+                            quantity_needed -= st[2]
+                            #if the stock needed is higher than stock instance
+                        elif st[2] == quantity_needed:
+                            database.exec_nonquery([[sql_commands.null_stocks_by_id, (st[0], )]])
+
+                'FIX NEEDED'
+                '''new FIFO algorithm'''
+                            
+                '''for _item in item:
                     list_of_items.append(_item)
                     stocks = database.fetch_data(sql_commands.get_specific_stock, (_item[1], ))
                     if stocks[0][2] is None:
@@ -1540,7 +1563,7 @@ def show_payment_proceed(master, info:tuple,):
                                 else:
                                     database.exec_nonquery([['DELETE FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?', (st[0], st[2])]])
                                 break
-                #modify the stock, applying the FIFO
+                #modify the stock, applying the FIFO'''
 
                 for s in service:
                     if s[-1]:
@@ -1573,8 +1596,8 @@ def show_payment_proceed(master, info:tuple,):
 
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
-                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
-                                        title="Transaction Receipt Viewer")
+                #ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
+                #                        title="Transaction Receipt Viewer")
             #Payment Callback
             def payment_callback(var, index, mode):
                 if self.payment_var.get().isdigit():

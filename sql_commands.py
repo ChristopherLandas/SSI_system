@@ -193,11 +193,14 @@ get_services_data_for_transaction = "SELECT uid,\
                                      FROM service_info\
                                      WHERE service_name = ?;"
 
+check_item_if_it_expire_by_categ = "SELECT categories.does_expire\
+                                    FROM item_general_info JOIN categories\
+                                    ON item_general_info.Category = categories.categ_name\
+                                    WHERE item_general_info.UID = ?"
 
 #RESTOCKING
 update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
-add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 show_all_items = "SELECT name, unit FROM item_general_info"
 insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, ?, CURRENT_TIMESTAMP)"
 
@@ -218,8 +221,7 @@ show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initia
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
-#add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
-add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1, CURRENT_DATE)"
+add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, state, added_date) VALUES (?, ?, ?, 1, CURRENT_DATE)"
 
 
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
@@ -233,6 +235,12 @@ record_services_transaction_content = "INSERT INTO services_transaction_content 
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
+get_specific_stock_ordered_by_expiry = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) AND state = 1 ORDER BY Expiry_Date ASC"
+get_specific_stock_ordered_by_date_added = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) AND state = 1 ORDER BY added_date"
+delete_stocks_by_id = "DELETE FROM item_inventory_info WHERE id = ?"
+deduct_stocks_by_id = "UPDATE item_inventory_info SET Stock = Stock - ? WHERE id = ?"
+null_stocks_by_id = "UPDATE item_inventory_info SET Stock = 0 WHERE id = ?"
+
 
 #FOR SALES
 get_transaction_data = "SELECT * FROM transaction_record"

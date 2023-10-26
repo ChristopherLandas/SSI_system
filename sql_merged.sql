@@ -1,10 +1,3 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               11.1.2-MariaDB - mariadb.org binary distribution
--- Server OS:                    Win64
--- HeidiSQL Version:             12.3.0.6589
--- --------------------------------------------------------
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -14,34 +7,9 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-
--- Dumping database structure for ssi_copy_1
-CREATE DATABASE IF NOT EXISTS `ssi_copy_1` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
-USE `ssi_copy_1`;
-
--- Dumping structure for table ssi_copy_1.account_access_level
-CREATE TABLE IF NOT EXISTS `account_access_level` (
-  `usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `Dashboard` int(1) NOT NULL,
-  `Reception` int(1) NOT NULL,
-  `Payment` int(1) NOT NULL,
-  `Services` int(1) NOT NULL,
-  `Sales` int(1) NOT NULL,
-  `Inventory` int(1) NOT NULL,
-  `Pet_Info` int(1) NOT NULL,
-  `Report` int(1) NOT NULL,
-  `User` int(1) NOT NULL,
-  `Action` int(1) NOT NULL,
-  `Gen_Settings` int(11) NOT NULL,
-  PRIMARY KEY (`usn`) USING BTREE,
-  KEY `usn` (`usn`) USING BTREE,
-  CONSTRAINT `account_access_level_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.account_access_level: ~8 rows (approximately)
 INSERT INTO `account_access_level` (`usn`, `Dashboard`, `Reception`, `Payment`, `Services`, `Sales`, `Inventory`, `Pet_Info`, `Report`, `User`, `Action`, `Gen_Settings`) VALUES
 	('123123', 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0),
-	('admin', 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+	('admin', 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
 	('aila', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
 	('assisstant', 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0),
 	('Chris', 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0),
@@ -49,16 +17,6 @@ INSERT INTO `account_access_level` (`usn`, `Dashboard`, `Reception`, `Payment`, 
 	('Jrizal', 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0),
 	('jayr', 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0);
 
--- Dumping structure for table ssi_copy_1.acc_cred
-CREATE TABLE IF NOT EXISTS `acc_cred` (
-  `usn` varchar(128) NOT NULL,
-  `pss` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `slt` varchar(64) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `entry_OTP` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  PRIMARY KEY (`usn`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
-
--- Dumping data for table ssi_copy_1.acc_cred: ~8 rows (approximately)
 INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('123123', '94bc6207156f186a77106c5c456a80017eff6f8d949265ecf515a4cb3b851eba', '3HCIZ_k8Speg-Ik3Ia2DgA==', NULL),
 	('admin', '0c149295209d5f543cf1ba14956c5c135a78b9b311ad551715899e02c27dc99d', 'rCRF4amTSEOYQjqvWYuI7A==', 'f5fec805ff0f8f65b818d9bfe45953e096f7ae5bacd552f42447527113197d2d'),
@@ -69,19 +27,6 @@ INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('Jrizal', '4436a253401b8e74a80e7a9a04930e16ae6e37dbc8c36f49f871ead477044f53', '3wbtXJDmSTm98iubl13hLw==', NULL),
 	('jayr', '56a1f73718b12d1a021f12eee52d2d1bbe1e6c067698c27e98c5fdd22fb0a0dd', 'WqMM26lyQDirax7evZgFuQ==', NULL);
 
--- Dumping structure for table ssi_copy_1.acc_info
-CREATE TABLE IF NOT EXISTS `acc_info` (
-  `usn` varchar(128) NOT NULL,
-  `full_name` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `job_position` varchar(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `state` int(1) NOT NULL,
-  PRIMARY KEY (`usn`),
-  KEY `job_position` (`job_position`),
-  CONSTRAINT `acc_info_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`),
-  CONSTRAINT `acc_info_ibfk_2` FOREIGN KEY (`job_position`) REFERENCES `user_level_access` (`Title`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
-
--- Dumping data for table ssi_copy_1.acc_info: ~8 rows (approximately)
 INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('123123', '123123', 'Assisstant', 0),
 	('admin', 'Big Boss 1', 'Owner', 1),
@@ -92,19 +37,6 @@ INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('Jrizal', 'Jose Rizal', 'Assisstant', 0),
 	('jayr', 'jayr', 'Assisstant', 0);
 
--- Dumping structure for table ssi_copy_1.action_history
-CREATE TABLE IF NOT EXISTS `action_history` (
-  `Column 5` int(11) NOT NULL AUTO_INCREMENT,
-  `usn` varchar(128) NOT NULL,
-  `Type` varchar(25) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `ACTION` varchar(256) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `action_date` datetime NOT NULL,
-  PRIMARY KEY (`Column 5`),
-  KEY `usn` (`usn`),
-  CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
-
--- Dumping data for table ssi_copy_1.action_history: ~64 rows (approximately)
 INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`) VALUES
 	(1, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-09-11 23:50:11'),
 	(2, 'aila', 'invoice', 'INVM/aila/Pec804', '2023-08-23 15:11:35'),
@@ -169,21 +101,46 @@ INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`
 	(61, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-15 01:53:56'),
 	(62, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-15 01:55:35'),
 	(63, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-15 02:00:29'),
-	(64, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-15 02:01:30');
+	(64, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-15 02:01:30'),
+	(65, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-17 23:28:20'),
+	(66, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-17 23:51:03'),
+	(67, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-17 23:57:38'),
+	(68, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-17 23:59:31'),
+	(69, 'admin', 'invoice', 'INVM/admin/23101800', '2023-10-18 00:01:00'),
+	(70, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 00:01:11'),
+	(71, 'admin', 'invoice', 'INVM/admin/23101801', '2023-10-18 00:13:14'),
+	(72, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 00:13:28'),
+	(73, 'admin', 'invoice', 'INVM/admin/23101802', '2023-10-18 00:15:28'),
+	(74, 'admin', 'invoice', 'INVM/admin/23101803', '2023-10-18 00:17:07'),
+	(75, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 00:17:28'),
+	(76, 'admin', 'invoice', 'INVM/admin/23101804', '2023-10-18 00:22:59'),
+	(77, 'admin', 'invoice', 'INVM/admin/23101805', '2023-10-18 00:44:12'),
+	(78, 'admin', 'invoice', 'INVM/admin/23101806', '2023-10-18 01:00:37'),
+	(79, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 01:51:59'),
+	(80, 'admin', 'invoice', 'INVM/admin/23101807', '2023-10-18 01:56:12'),
+	(81, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 01:56:30'),
+	(82, 'admin', 'invoice', 'INVM/admin/23101808', '2023-10-18 09:24:21'),
+	(83, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 09:24:40'),
+	(84, 'admin', 'invoice', 'INVM/admin/23101809', '2023-10-18 09:25:32'),
+	(85, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-10-18 09:25:52'),
+	(86, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-10-22 11:45:41'),
+	(87, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-10-22 11:47:12'),
+	(88, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-22 12:06:29'),
+	(89, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-22 12:06:49'),
+	(90, 'admin', 'Item Encoding', 'ADD/admin/I00002', '2023-10-22 12:07:12'),
+	(91, 'admin', 'Item Encoding', 'ADD/admin/I32CCE', '2023-10-22 12:10:07'),
+	(92, 'admin', 'Item Encoding', 'ADD/admin/I7A986', '2023-10-22 12:10:37'),
+	(93, 'admin', 'Item Encoding', 'ADD/admin/IFF357', '2023-10-22 12:49:00'),
+	(94, 'admin', 'Item Encoding', 'ADD/admin/IFF357', '2023-10-22 12:49:50'),
+	(95, 'admin', 'Item Encoding', 'ADD/admin/IFF357', '2023-10-22 13:07:49'),
+	(96, 'admin', 'Item Encoding', 'ADD/admin/I00001', '2023-10-22 14:02:19'),
+	(97, 'admin', 'Item Encoding', 'ADD/admin/Iaad08', '2023-10-22 20:24:28'),
+	(98, 'admin', 'Item Encoding', 'ADD/admin/Iaad08', '2023-10-22 20:32:13'),
+	(99, 'admin', 'Item Encoding', 'ADD/admin/Iaad08', '2023-10-22 20:35:58'),
+	(100, 'admin', 'Item Encoding', 'ADD/admin/I00001', '2023-10-22 20:36:56'),
+	(101, 'admin', 'Item Encoding', 'ADD/admin/IACBE3', '2023-10-22 21:22:05'),
+	(102, 'admin', 'Item Encoding', 'ADD/admin/I1F3E7', '2023-10-22 22:20:23');
 
--- Dumping structure for table ssi_copy_1.categories
-CREATE TABLE IF NOT EXISTS `categories` (
-  `categ_name` varchar(50) NOT NULL,
-  `does_expire` int(1) NOT NULL,
-  `creator` varchar(50) NOT NULL,
-  `state` int(11) NOT NULL,
-  `date_created` datetime DEFAULT NULL,
-  `disabled_by` varchar(50) DEFAULT NULL,
-  `disabled_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`categ_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.categories: ~11 rows (approximately)
 INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date_created`, `disabled_by`, `disabled_date`) VALUES
 	('Accessories', 0, 'admin', 1, '2023-10-03 22:14:50', NULL, NULL),
 	('Food', 1, 'admin', 1, '2023-10-03 22:14:52', NULL, NULL),
@@ -197,50 +154,16 @@ INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date
 	('Test005', 1, 'admin', 0, '2023-10-03 22:14:57', 'admin', '2023-10-04 11:39:53'),
 	('Test006', 0, 'admin', 0, '2023-10-03 22:14:58', 'admin', '2023-10-04 11:38:29');
 
--- Dumping structure for table ssi_copy_1.disposal_history
-CREATE TABLE IF NOT EXISTS `disposal_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `recieving_id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
-  `item_uid` varchar(6) NOT NULL,
-  `item_name` varchar(64) NOT NULL,
-  `Initial_quantity` int(11) DEFAULT NULL,
-  `Current_quantity` int(11) NOT NULL,
-  `reason` int(11) DEFAULT NULL,
-  `date_of_disposal` datetime NOT NULL,
-  `full_dispose_date` datetime DEFAULT NULL,
-  `disposed_by` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `date_of_disposal` (`date_of_disposal`),
-  UNIQUE KEY `full_dispose_date` (`full_dispose_date`),
-  KEY `FK_disposal_history_recieving_item` (`recieving_id`),
-  CONSTRAINT `FK_disposal_history_recieving_item` FOREIGN KEY (`recieving_id`) REFERENCES `recieving_item` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `initial_quantity`, `Current_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
+	('D2CBCF8C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 12, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D3B574C6', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 113, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D57799ED', NULL, 'I65B51', 'Medicine-ABC (10g)', 100, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D6FB1207', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 113, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('D8AD9E8F', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 10, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('DA30FCF8', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 10, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('DA36F355', NULL, 'I65B51', 'Medicine-ABC (10g)', 100, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
+	('DF4A897C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 48, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin');
 
--- Dumping data for table ssi_copy_1.disposal_history: ~9 rows (approximately)
-INSERT INTO `disposal_history` (`id`, `recieving_id`, `item_uid`, `item_name`, `Initial_quantity`, `Current_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
-	(4, 'Ra9de5', 'I00002', 'Taglory Rope Dog Leash', 50, 50, NULL, '2023-08-30 21:53:12', '2023-08-30 23:10:34', 'admin'),
-	(6, 'R86f29', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 15, NULL, '2023-08-30 21:56:53', '2023-08-30 23:11:08', 'admin'),
-	(7, 'R86f29', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 15, NULL, '2023-08-30 22:03:02', NULL, 'admin'),
-	(8, 'R86f29', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 15, NULL, '2023-08-30 22:12:03', '2023-08-30 23:11:24', 'admin'),
-	(9, 'R86f29', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 15, NULL, '2023-08-30 22:13:15', '2023-08-30 23:11:14', 'admin'),
-	(10, 'R31a74', 'I00003', 'Fresh Step Clumping Cat Litter', 5, 5, NULL, '2023-08-30 23:05:46', NULL, NULL),
-	(11, 'R2ae83', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 5, NULL, '2023-08-30 23:07:23', '2023-08-30 23:11:12', 'admin'),
-	(12, 'Ra9de5', 'I00002', 'Taglory Rope Dog Leash', 50, 50, NULL, '2023-08-30 23:20:57', NULL, NULL),
-	(13, 'Ra9de5', 'I00002', 'Taglory Rope Dog Leash', 50, 50, NULL, '2023-08-30 23:21:06', NULL, NULL);
-
--- Dumping structure for table ssi_copy_1.invoice_item_content
-CREATE TABLE IF NOT EXISTS `invoice_item_content` (
-  `invoice_uid` varchar(8) NOT NULL,
-  `Item_uid` varchar(6) NOT NULL,
-  `item_name` varchar(64) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `price` float NOT NULL,
-  `deduction` float NOT NULL,
-  KEY `invoice_uid` (`invoice_uid`),
-  CONSTRAINT `invoice_item_content_ibfk_1` FOREIGN KEY (`invoice_uid`) REFERENCES `invoice_record` (`invoice_uid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.invoice_item_content: ~54 rows (approximately)
 INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`) VALUES
 	('Pc9c14', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
 	('P2e8cf', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
@@ -304,159 +227,141 @@ INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `qua
 	('23100107', 'I00006', 'UniLeash', 1, 144, 0),
 	('23100106', 'I0AE71', 'Test ITem 003', 3, 310, 0),
 	('23101200', 'I32CCE', 'Test 0010', 5, 101, 0),
-	('23101201', 'I7A986', 'TEST ITEM 004', 10, 1010, 0);
+	('23101201', 'I7A986', 'TEST ITEM 004', 10, 1010, 0),
+	('23101800', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
+	('23101801', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 1, 1140.15, 0),
+	('23101802', 'I00006', 'UniLeash', 2, 144, 0),
+	('23101803', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
+	('23101804', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
+	('23101805', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 1, 796.95, 0),
+	('23101808', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 522.5, 0),
+	('23101809', 'IACBE3', 'Test Item 006', 5, 101, 0);
 
--- Dumping structure for table ssi_copy_1.invoice_record
-CREATE TABLE IF NOT EXISTS `invoice_record` (
-  `invoice_uid` varchar(8) NOT NULL,
-  `Attendant_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `client_name` varchar(50) NOT NULL,
-  `Total_amount` float NOT NULL,
-  `payment_date` datetime DEFAULT NULL,
-  `transaction_date` date NOT NULL,
-  `State` int(1) NOT NULL DEFAULT 0,
-  `Date_transacted` date DEFAULT NULL,
-  PRIMARY KEY (`invoice_uid`),
-  KEY `Attendant_usn` (`Attendant_usn`) USING BTREE,
-  CONSTRAINT `invoice_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `payment_date`, `transaction_date`, `State`, `Date_transacted`, `process_type`) VALUES
+	('08282302', 'aila', 'N/A', 1140.15, NULL, '2023-08-28', -1, NULL, 0),
+	('08282303', 'aila', 'N/A', 577.5, NULL, '2023-08-28', 2, '2023-08-29', 0),
+	('08292300', 'aila', 'N/A', 577.5, NULL, '2023-08-29', -1, NULL, 0),
+	('08292301', 'aila', 'N/A', 577.5, NULL, '2023-08-29', 2, '2023-08-30', 0),
+	('08292302', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', 2, '2023-08-29', 0),
+	('08292303', 'aila', 'Bud Tan', 900, NULL, '2023-08-29', -1, NULL, 0),
+	('08292304', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', 2, '2023-08-29', 0),
+	('08292305', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', 2, '2023-08-29', 0),
+	('08292306', 'aila', 'Bud Tan', 1500, NULL, '2023-08-29', 2, '2023-08-29', 0),
+	('08292307', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', -1, NULL, 0),
+	('08292308', 'aila', 'James V.', 500, NULL, '2023-08-29', 2, '2023-08-29', 0),
+	('08292309', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', -1, NULL, 0),
+	('08292310', 'aila', 'Jose R.', 1700, NULL, '2023-08-29', 2, '2023-08-29', 0),
+	('08302300', 'aila', 'James V.', 500, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302301', 'aila', 'James V.', 1500, NULL, '2023-08-30', -1, NULL, 0),
+	('08302302', 'aila', 'James V.', 3000, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302303', 'aila', 'Bud Tan', 2100, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302304', 'aila', 'James V.', 900, NULL, '2023-08-30', -1, NULL, 0),
+	('08302305', 'aila', 'Bud Tan', 500, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302306', 'aila', 'Bud Tan', 500, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302307', 'aila', 'Bud Tan', 500, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302308', 'aila', 'James V.', 500, NULL, '2023-08-30', -1, NULL, 0),
+	('08302309', 'aila', 'James V.', 1000, NULL, '2023-08-30', -1, NULL, 0),
+	('08302310', 'aila', 'James V.', 1000, NULL, '2023-08-30', -1, NULL, 0),
+	('08302311', 'aila', 'James V.', 1500, NULL, '2023-08-30', -1, NULL, 0),
+	('08302312', 'aila', 'James V.', 1000, NULL, '2023-08-30', -1, NULL, 0),
+	('08302313', 'aila', 'James V.', 500, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302314', 'aila', 'N/A', 577.5, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302315', 'aila', 'N/A', 577.5, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302316', 'admin', 'Christopher L.', 2310, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302317', 'admin', 'N/A', 522.5, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302318', 'admin', 'James V.', 1567.5, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302319', 'admin', 'N/A', 522.5, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08302320', 'admin', 'N/A', 577.5, NULL, '2023-08-30', 2, '2023-08-30', 0),
+	('08312300', 'admin', 'Bud Tan', 1567.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312301', 'admin', 'N/A', 1045, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312302', 'admin', 'N/A', 880, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312303', 'admin', 'N/A', 1155, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312304', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312305', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312306', 'admin', 'N/A', 1567.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312307', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-09-02', 0),
+	('08312308', 'admin', 'N/A', 2390.85, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312309', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312310', 'admin', 'N/A', 1567.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('08312311', 'admin', 'N/A', 1567.5, NULL, '2023-08-31', 2, '2023-08-31', 0),
+	('09022300', 'admin', 'James V.', 2780.3, NULL, '2023-09-02', 2, '2023-09-02', 0),
+	('09022301', 'admin', 'James V.', 1000, NULL, '2023-09-02', 2, '2023-09-03', 0),
+	('09022302', 'admin', 'Davin F.', 2500, NULL, '2023-09-02', 2, '2023-09-03', 0),
+	('09022303', 'admin', 'Bud Tan', 500, NULL, '2023-09-02', 2, '2023-09-02', 0),
+	('09022304', 'admin', 'Jose R.', 1000, NULL, '2023-09-02', 2, '2023-09-03', 0),
+	('09022305', 'admin', 'James V.', 500, NULL, '2023-09-02', 2, '2023-09-03', 0),
+	('09022306', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-02', 2, '2023-09-02', 0),
+	('09032300', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032301', 'admin', 'Bud Tan', 500, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032302', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032303', 'admin', 'Patrick Feniza', 2500, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032304', 'admin', 'James V.', 3000, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032305', 'admin', 'Davin F.', 4600, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032306', 'admin', 'James V.', 2100, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032307', 'admin', 'Patrick Feniza', 2000, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032308', 'admin', 'Christopher L.', 2500, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032309', 'admin', 'N/A', 2280.3, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032310', 'admin', 'N/A', 2280.3, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032311', 'admin', 'N/A', 288, NULL, '2023-09-03', 2, '2023-09-03', 0),
+	('09032312', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-03', 2, '2023-10-01', 0),
+	('09032313', 'admin', 'Patrick Feniza', 1500, NULL, '2023-09-03', -1, NULL, 0),
+	('09072300', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-07', -1, NULL, 0),
+	('09072301', 'admin', 'James Viñas', 4500, NULL, '2023-09-07', 2, '2023-09-07', 0),
+	('09082300', 'admin', 'Budjette Tan', 500, NULL, '2023-09-08', 2, '2023-10-01', 0),
+	('23092200', 'admin', 'N/A', 0, '2023-09-22 11:18:44', '2023-09-22', 2, '2023-10-17', 0),
+	('23092900', 'admin', 'Davin Ferrancullo', 500, '2023-09-29 10:32:05', '2023-09-29', 2, '2023-09-29', 0),
+	('23092901', 'admin', 'Patrick Feniza', 2200, '2023-09-29 10:37:18', '2023-09-29', 2, '2023-09-29', 0),
+	('23092902', 'admin', 'N/A', 0, '2023-09-29 10:40:19', '2023-09-29', 2, '2023-09-29', 0),
+	('23100100', 'admin', 'N/A', 0, '2023-10-01 18:40:43', '2023-10-01', 2, '2023-10-01', 0),
+	('23100101', 'admin', 'N/A', 0, '2023-10-01 18:44:36', '2023-10-01', 2, '2023-10-01', 0),
+	('23100102', 'admin', 'N/A', 0, '2023-10-01 18:49:08', '2023-10-01', 2, '2023-10-01', 0),
+	('23100103', 'admin', 'N/A', 0, '2023-10-01 18:51:29', '2023-10-01', 2, '2023-10-01', 0),
+	('23100104', 'admin', 'N/A', 0, '2023-10-01 18:53:39', '2023-10-01', 2, '2023-10-01', 0),
+	('23100105', 'admin', 'N/A', 0, '2023-10-01 19:05:42', '2023-10-01', 2, '2023-10-17', 0),
+	('23100106', 'admin', 'Davin Ferrancullo', 2475, '2023-10-01 19:09:08', '2023-10-01', 2, '2023-10-17', 0),
+	('23100107', 'admin', 'N/A', 2151.5, '2023-10-11 08:04:19', '2023-10-01', 2, '2023-10-17', 0),
+	('23100108', 'admin', 'N/A', 0, NULL, '2023-10-01', -1, NULL, 0),
+	('23101200', 'admin', 'N/A', 505, '2023-10-12 10:12:36', '2023-10-12', 2, '2023-10-12', 0),
+	('23101201', 'admin', 'N/A', 10100, '2023-10-12 10:23:41', '2023-10-12', 2, '2023-10-12', 0),
+	('23101800', 'admin', 'Patrick Feniza', 440, '2023-10-18 00:01:03', '2023-10-18', 2, '2023-10-18', 0),
+	('23101801', 'admin', 'Joze Rizal', 1140.15, '2023-10-18 00:13:17', '2023-10-18', 2, '2023-10-18', 0),
+	('23101802', 'admin', 'James Viñas', 288, '2023-10-18 00:15:32', '2023-10-18', 1, NULL, 0),
+	('23101803', 'admin', 'James Viñas', 440, '2023-10-18 00:17:14', '2023-10-18', 2, '2023-10-18', 0),
+	('23101804', 'admin', 'James Rubiales', 577.5, '2023-10-18 00:43:47', '2023-10-18', 2, '2023-10-18', 0),
+	('23101805', 'admin', 'Budjette Tan', 796.95, NULL, '2023-10-18', 0, NULL, 0),
+	('23101806', 'admin', 'Joze Rizal', 500, NULL, '2023-10-18', 0, NULL, 0),
+	('23101807', 'admin', 'Davin Ferrancullo', 1000, '2023-10-18 01:56:18', '2023-10-18', 2, '2023-10-18', 0),
+	('23101808', 'admin', 'Joze Rizal', 7837.5, '2023-10-18 09:24:25', '2023-10-18', 2, '2023-10-18', 0),
+	('23101809', 'admin', 'Joze Rizal', 505, '2023-10-18 09:25:38', '2023-10-18', 2, '2023-10-18', 0),
+	('P0b8cb', 'aila', 'James V.', 2100, NULL, '2023-08-26', -1, NULL, 0),
+	('P0e4d2', 'aila', 'James V.', 500, NULL, '2023-08-20', 2, '2023-08-22', 0),
+	('P0ebe4', 'aila', 'James V.', 2280.3, NULL, '2023-08-26', 2, '2023-08-26', 0),
+	('P14b84', 'aila', 'Jose R.', 0, NULL, '2023-08-26', 2, '2023-08-30', 0),
+	('P15921', 'aila', 'N/A', 1760, NULL, '2023-08-23', 2, '2023-08-23', 0),
+	('P1d58d', 'aila', 'James V.', 500, NULL, '2023-08-19', 2, '2023-08-20', 0),
+	('P22b46', 'aila', 'N/A', 2200, NULL, '2023-08-20', 2, '2023-08-22', 0),
+	('P2792b', 'aila', 'N/A', 440, NULL, '2023-08-22', 2, '2023-08-22', 0),
+	('P2cc66', 'aila', 'N/A', 2171.4, NULL, '2023-08-28', 2, '2023-08-28', 0),
+	('P2e8cf', 'aila', 'N/A', 440, NULL, '2023-08-19', 2, '2023-08-22', 0),
+	('P31f82', 'aila', 'N/A', 0, NULL, '2023-08-28', -1, NULL, 0),
+	('P3d236', 'aila', 'Davin F.', 500, NULL, '2023-08-19', 2, '2023-08-22', 0),
+	('P4e070', 'aila', 'N/A', 440, NULL, '2023-08-22', 2, '2023-08-22', 0),
+	('P5a62c', 'aila', 'Davin F.', 500, NULL, '2023-08-28', 2, '2023-08-29', 0),
+	('P5d98a', 'aila', 'N/A', 1320, NULL, '2023-08-22', 2, '2023-08-22', 0),
+	('P660f0', 'aila', 'N/A', 880, NULL, '2023-08-20', 2, '2023-08-20', 0),
+	('P6848e', 'aila', 'James V.', 2100, NULL, '2023-08-26', -1, NULL, 0),
+	('P6953f', 'aila', 'James V.', 1380, NULL, '2023-08-20', 2, '2023-08-20', 0),
+	('P69823', 'aila', 'N/A', 440, NULL, '2023-08-22', 2, '2023-08-22', 0),
+	('P956ee', 'aila', 'N/A', 440, NULL, '2023-08-19', 2, '2023-08-22', 0),
+	('P9754c', 'aila', 'N/A', 1320, NULL, '2023-08-22', 2, '2023-08-22', 0),
+	('Pc0aa9', 'aila', 'James V.', 1500, NULL, '2023-08-20', 2, '2023-08-20', 0),
+	('Pc7cae', 'aila', 'Jose R.', 0, NULL, '2023-08-26', 2, '2023-08-28', 0),
+	('Pc9c14', 'aila', 'N/A', 440, NULL, '2023-08-19', 2, '2023-08-22', 0),
+	('Pd260b', 'aila', 'N/A', 2310, NULL, '2023-08-23', 2, '2023-08-28', 0),
+	('Pe327c', 'aila', 'Jose R.', 440, NULL, '2023-08-23', 2, '2023-08-23', 0),
+	('Pec804', 'aila', 'Christopher L.', 440, NULL, '2023-08-23', -1, NULL, 0),
+	('Pf6e9c', 'aila', 'N/A', 796.95, NULL, '2023-08-23', 2, '2023-08-23', 0);
 
--- Dumping data for table ssi_copy_1.invoice_record: ~107 rows (approximately)
-INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `payment_date`, `transaction_date`, `State`, `Date_transacted`) VALUES
-	('08282302', 'aila', 'N/A', 1140.15, NULL, '2023-08-28', -1, NULL),
-	('08282303', 'aila', 'N/A', 577.5, NULL, '2023-08-28', 2, '2023-08-29'),
-	('08292300', 'aila', 'N/A', 577.5, NULL, '2023-08-29', -1, NULL),
-	('08292301', 'aila', 'N/A', 577.5, NULL, '2023-08-29', 2, '2023-08-30'),
-	('08292302', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', 2, '2023-08-29'),
-	('08292303', 'aila', 'Bud Tan', 900, NULL, '2023-08-29', -1, NULL),
-	('08292304', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', 2, '2023-08-29'),
-	('08292305', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', 2, '2023-08-29'),
-	('08292306', 'aila', 'Bud Tan', 1500, NULL, '2023-08-29', 2, '2023-08-29'),
-	('08292307', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', -1, NULL),
-	('08292308', 'aila', 'James V.', 500, NULL, '2023-08-29', 2, '2023-08-29'),
-	('08292309', 'aila', 'Bud Tan', 500, NULL, '2023-08-29', -1, NULL),
-	('08292310', 'aila', 'Jose R.', 1700, NULL, '2023-08-29', 2, '2023-08-29'),
-	('08302300', 'aila', 'James V.', 500, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302301', 'aila', 'James V.', 1500, NULL, '2023-08-30', -1, NULL),
-	('08302302', 'aila', 'James V.', 3000, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302303', 'aila', 'Bud Tan', 2100, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302304', 'aila', 'James V.', 900, NULL, '2023-08-30', -1, NULL),
-	('08302305', 'aila', 'Bud Tan', 500, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302306', 'aila', 'Bud Tan', 500, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302307', 'aila', 'Bud Tan', 500, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302308', 'aila', 'James V.', 500, NULL, '2023-08-30', -1, NULL),
-	('08302309', 'aila', 'James V.', 1000, NULL, '2023-08-30', -1, NULL),
-	('08302310', 'aila', 'James V.', 1000, NULL, '2023-08-30', -1, NULL),
-	('08302311', 'aila', 'James V.', 1500, NULL, '2023-08-30', -1, NULL),
-	('08302312', 'aila', 'James V.', 1000, NULL, '2023-08-30', -1, NULL),
-	('08302313', 'aila', 'James V.', 500, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302314', 'aila', 'N/A', 577.5, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302315', 'aila', 'N/A', 577.5, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302316', 'admin', 'Christopher L.', 2310, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302317', 'admin', 'N/A', 522.5, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302318', 'admin', 'James V.', 1567.5, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302319', 'admin', 'N/A', 522.5, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08302320', 'admin', 'N/A', 577.5, NULL, '2023-08-30', 2, '2023-08-30'),
-	('08312300', 'admin', 'Bud Tan', 1567.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312301', 'admin', 'N/A', 1045, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312302', 'admin', 'N/A', 880, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312303', 'admin', 'N/A', 1155, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312304', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312305', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312306', 'admin', 'N/A', 1567.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312307', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-09-02'),
-	('08312308', 'admin', 'N/A', 2390.85, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312309', 'admin', 'N/A', 522.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312310', 'admin', 'N/A', 1567.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('08312311', 'admin', 'N/A', 1567.5, NULL, '2023-08-31', 2, '2023-08-31'),
-	('09022300', 'admin', 'James V.', 2780.3, NULL, '2023-09-02', 2, '2023-09-02'),
-	('09022301', 'admin', 'James V.', 1000, NULL, '2023-09-02', 2, '2023-09-03'),
-	('09022302', 'admin', 'Davin F.', 2500, NULL, '2023-09-02', 2, '2023-09-03'),
-	('09022303', 'admin', 'Bud Tan', 500, NULL, '2023-09-02', 2, '2023-09-02'),
-	('09022304', 'admin', 'Jose R.', 1000, NULL, '2023-09-02', 2, '2023-09-03'),
-	('09022305', 'admin', 'James V.', 500, NULL, '2023-09-02', 2, '2023-09-03'),
-	('09022306', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-02', 2, '2023-09-02'),
-	('09032300', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032301', 'admin', 'Bud Tan', 500, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032302', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032303', 'admin', 'Patrick Feniza', 2500, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032304', 'admin', 'James V.', 3000, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032305', 'admin', 'Davin F.', 4600, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032306', 'admin', 'James V.', 2100, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032307', 'admin', 'Patrick Feniza', 2000, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032308', 'admin', 'Christopher L.', 2500, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032309', 'admin', 'N/A', 2280.3, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032310', 'admin', 'N/A', 2280.3, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032311', 'admin', 'N/A', 288, NULL, '2023-09-03', 2, '2023-09-03'),
-	('09032312', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-03', 2, '2023-10-01'),
-	('09032313', 'admin', 'Patrick Feniza', 1500, NULL, '2023-09-03', -1, NULL),
-	('09072300', 'admin', 'Patrick Feniza', 500, NULL, '2023-09-07', -1, NULL),
-	('09072301', 'admin', 'James Viñas', 4500, NULL, '2023-09-07', 2, '2023-09-07'),
-	('09082300', 'admin', 'Budjette Tan', 500, NULL, '2023-09-08', 2, '2023-10-01'),
-	('23092200', 'admin', 'N/A', 0, '2023-09-22 11:18:44', '2023-09-22', 1, NULL),
-	('23092900', 'admin', 'Davin Ferrancullo', 500, '2023-09-29 10:32:05', '2023-09-29', 2, '2023-09-29'),
-	('23092901', 'admin', 'Patrick Feniza', 2200, '2023-09-29 10:37:18', '2023-09-29', 2, '2023-09-29'),
-	('23092902', 'admin', 'N/A', 0, '2023-09-29 10:40:19', '2023-09-29', 2, '2023-09-29'),
-	('23100100', 'admin', 'N/A', 0, '2023-10-01 18:40:43', '2023-10-01', 2, '2023-10-01'),
-	('23100101', 'admin', 'N/A', 0, '2023-10-01 18:44:36', '2023-10-01', 2, '2023-10-01'),
-	('23100102', 'admin', 'N/A', 0, '2023-10-01 18:49:08', '2023-10-01', 2, '2023-10-01'),
-	('23100103', 'admin', 'N/A', 0, '2023-10-01 18:51:29', '2023-10-01', 2, '2023-10-01'),
-	('23100104', 'admin', 'N/A', 0, '2023-10-01 18:53:39', '2023-10-01', 2, '2023-10-01'),
-	('23100105', 'admin', 'N/A', 0, '2023-10-01 19:05:42', '2023-10-01', 1, NULL),
-	('23100106', 'admin', 'Davin Ferrancullo', 2475, '2023-10-01 19:09:08', '2023-10-01', 1, NULL),
-	('23100107', 'admin', 'N/A', 2151.5, '2023-10-11 08:04:19', '2023-10-01', 1, NULL),
-	('23100108', 'admin', 'N/A', 0, NULL, '2023-10-01', -1, NULL),
-	('23101200', 'admin', 'N/A', 505, '2023-10-12 10:12:36', '2023-10-12', 2, '2023-10-12'),
-	('23101201', 'admin', 'N/A', 10100, '2023-10-12 10:23:41', '2023-10-12', 2, '2023-10-12'),
-	('P0b8cb', 'aila', 'James V.', 2100, NULL, '2023-08-26', -1, NULL),
-	('P0e4d2', 'aila', 'James V.', 500, NULL, '2023-08-20', 2, '2023-08-22'),
-	('P0ebe4', 'aila', 'James V.', 2280.3, NULL, '2023-08-26', 2, '2023-08-26'),
-	('P14b84', 'aila', 'Jose R.', 0, NULL, '2023-08-26', 2, '2023-08-30'),
-	('P15921', 'aila', 'N/A', 1760, NULL, '2023-08-23', 2, '2023-08-23'),
-	('P1d58d', 'aila', 'James V.', 500, NULL, '2023-08-19', 2, '2023-08-20'),
-	('P22b46', 'aila', 'N/A', 2200, NULL, '2023-08-20', 2, '2023-08-22'),
-	('P2792b', 'aila', 'N/A', 440, NULL, '2023-08-22', 2, '2023-08-22'),
-	('P2cc66', 'aila', 'N/A', 2171.4, NULL, '2023-08-28', 2, '2023-08-28'),
-	('P2e8cf', 'aila', 'N/A', 440, NULL, '2023-08-19', 2, '2023-08-22'),
-	('P31f82', 'aila', 'N/A', 0, NULL, '2023-08-28', -1, NULL),
-	('P3d236', 'aila', 'Davin F.', 500, NULL, '2023-08-19', 2, '2023-08-22'),
-	('P4e070', 'aila', 'N/A', 440, NULL, '2023-08-22', 2, '2023-08-22'),
-	('P5a62c', 'aila', 'Davin F.', 500, NULL, '2023-08-28', 2, '2023-08-29'),
-	('P5d98a', 'aila', 'N/A', 1320, NULL, '2023-08-22', 2, '2023-08-22'),
-	('P660f0', 'aila', 'N/A', 880, NULL, '2023-08-20', 2, '2023-08-20'),
-	('P6848e', 'aila', 'James V.', 2100, NULL, '2023-08-26', -1, NULL),
-	('P6953f', 'aila', 'James V.', 1380, NULL, '2023-08-20', 2, '2023-08-20'),
-	('P69823', 'aila', 'N/A', 440, NULL, '2023-08-22', 2, '2023-08-22'),
-	('P956ee', 'aila', 'N/A', 440, NULL, '2023-08-19', 2, '2023-08-22'),
-	('P9754c', 'aila', 'N/A', 1320, NULL, '2023-08-22', 2, '2023-08-22'),
-	('Pc0aa9', 'aila', 'James V.', 1500, NULL, '2023-08-20', 2, '2023-08-20'),
-	('Pc7cae', 'aila', 'Jose R.', 0, NULL, '2023-08-26', 2, '2023-08-28'),
-	('Pc9c14', 'aila', 'N/A', 440, NULL, '2023-08-19', 2, '2023-08-22'),
-	('Pd260b', 'aila', 'N/A', 2310, NULL, '2023-08-23', 2, '2023-08-28'),
-	('Pe327c', 'aila', 'Jose R.', 440, NULL, '2023-08-23', 2, '2023-08-23'),
-	('Pec804', 'aila', 'Christopher L.', 440, NULL, '2023-08-23', -1, NULL),
-	('Pf6e9c', 'aila', 'N/A', 796.95, NULL, '2023-08-23', 2, '2023-08-23');
-
--- Dumping structure for table ssi_copy_1.invoice_service_content
-CREATE TABLE IF NOT EXISTS `invoice_service_content` (
-  `invoice_uid` varchar(8) NOT NULL,
-  `service_uid` varchar(6) NOT NULL,
-  `service_name` varchar(64) NOT NULL,
-  `pet_uid` varchar(6) DEFAULT NULL,
-  `patient_name` varchar(128) NOT NULL,
-  `scheduled_date` date NOT NULL,
-  `price` float NOT NULL,
-  `deduction` float NOT NULL,
-  `end_schedule` date DEFAULT NULL,
-  `multiple_sched_quan` int(11) DEFAULT NULL,
-  `instance_of_mul_sched` int(11) DEFAULT NULL,
-  KEY `invoice_uid` (`invoice_uid`),
-  KEY `FK_invoice_service_content_pet_info` (`pet_uid`),
-  CONSTRAINT `FK_invoice_service_content_pet_info` FOREIGN KEY (`pet_uid`) REFERENCES `pet_info` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `invoice_service_content_ibfk_1` FOREIGN KEY (`invoice_uid`) REFERENCES `invoice_record` (`invoice_uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.invoice_service_content: ~58 rows (approximately)
 INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
 	('P1d58d', 'S00001', 'Grooming', 'P1ec18', 'Brutus', '2023-08-19', 500, 0, NULL, NULL, NULL),
 	('P3d236', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-08-19', 500, 0, NULL, NULL, NULL),
@@ -519,108 +424,89 @@ INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_na
 	('23092900', 'S00001', 'Grooming', '143436', 'Gabi', '2023-09-29', 500, 0, NULL, NULL, NULL),
 	('23092901', 'S00001', 'Grooming', '001431', 'Muning', '2023-09-29', 500, 0, NULL, NULL, NULL),
 	('23092901', 'S00005', 'Canine Castration Surgery', '001431', 'Muning', '2023-09-29', 1700, 0, NULL, NULL, NULL),
-	('23100106', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-05', 500, 0, NULL, NULL, NULL);
+	('23100106', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-05', 500, 0, NULL, NULL, NULL),
+	('23101806', 'S00001', 'Grooming', 'P482dc', 'Whitey', '2023-10-18', 500, 0, NULL, NULL, NULL),
+	('23101807', 'S00001', 'Grooming', '143436', 'Gabi', '2023-10-18', 500, 0, NULL, NULL, NULL),
+	('23101807', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-18', 500, 0, NULL, NULL, NULL);
 
--- Dumping structure for table ssi_copy_1.item_general_info
-CREATE TABLE IF NOT EXISTS `item_general_info` (
-  `UID` varchar(6) NOT NULL,
-  `name` varchar(64) NOT NULL,
-  `Category` varchar(64) NOT NULL,
-  PRIMARY KEY (`UID`),
-  UNIQUE KEY `name` (`name`),
-  KEY `Category` (`Category`),
-  CONSTRAINT `item_general_info_ibfk_1` FOREIGN KEY (`Category`) REFERENCES `categories` (`categ_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+INSERT INTO `item_general_info` (`UID`, `name`, `Category`, `brand`, `unit`, `added_by`, `added_date`, `updated_by`, `updated_date`) VALUES
+	('I00001', 'MayPaw Heavy Duty Rope Dog Leash', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I00002', 'Taglory Rope Dog Leash', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I00003', 'Fresh Step Clumping Cat Litter', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 'Medicine', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I00006', 'UniLeash', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I00007', 'Amoxiccilin Paracetamol 250mg', 'Medicine', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I0AE71', 'Test ITem 003', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I10fdf', 'Test', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I1aa81', 'Comedy', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I1F3E7', '1000', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 16:49:04', NULL, NULL),
+	('I2b993', 'Kessoku Band', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I2F75F', 'TESTB', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 17:19:53', NULL, NULL),
+	('I3128E', 'Test Item', 'Accessories', 'TEST', '10mg', 'admin', '2023-10-23 10:15:16', NULL, NULL),
+	('I32CCE', 'Test 0010', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I39DC8', 'Test Item 002', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I65B51', 'Medicine-ABC', 'Medicine', 'TEST', '10g', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I79FD7', 'Test Item', 'Accessories', 'TEST', '10g', 'admin', '2023-10-22 18:53:33', NULL, NULL),
+	('I7A986', 'TEST ITEM 004', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I7E29F', 'Medicine-B', 'Medicine', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('I8EC1F', 'TESTA', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 17:13:40', NULL, NULL),
+	('Ia71e7', 'Kawaki wo ameku', 'Accessories', 'DONG-A', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('Iaad08', 'Test Item', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('IACBE3', 'Test Item 006', 'Test003', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('ID121A', 'Cat Nips', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL),
+	('IED7B0', 'UNIT TEST', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 16:54:42', NULL, NULL),
+	('IFF357', 'Test Item 005', 'Accessories', 'TEST', '100mg', 'admin', '2023-10-22 10:07:46', NULL, NULL);
 
--- Dumping data for table ssi_copy_1.item_general_info: ~16 rows (approximately)
-INSERT INTO `item_general_info` (`UID`, `name`, `Category`) VALUES
-	('I00001', 'MayPaw Heavy Duty Rope Dog Leash', 'Accessories'),
-	('I00002', 'Taglory Rope Dog Leash', 'Accessories'),
-	('I00003', 'Fresh Step Clumping Cat Litter', 'Accessories'),
-	('I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 'Accessories'),
-	('I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 'Medicine'),
-	('I00006', 'UniLeash', 'Accessories'),
-	('I00007', 'Amoxiccilin Paracetamol 250mg', 'Medicine'),
-	('I0AE71', 'Test ITem 003', 'Accessories'),
-	('I10fdf', 'Test', 'Accessories'),
-	('I1aa81', 'Comedy', 'Accessories'),
-	('I2b993', 'Kessoku Band', 'Accessories'),
-	('I32CCE', 'Test 0010', 'Accessories'),
-	('I39DC8', 'Test Item 002', 'Accessories'),
-	('I7A986', 'TEST ITEM 004', 'Accessories'),
-	('Ia71e7', 'Kawaki wo ameku', 'Accessories'),
-	('Iaad08', 'Test Item', 'Accessories'),
-	('IACBE3', 'Test Item 006', 'Test003'),
-	('ID121A', 'Cat Nips (5 gram)', 'Accessories'),
-	('IFF357', 'Test Item 005', 'Accessories');
+INSERT INTO `item_inventory_info` (`UID`, `Stock`, `Expiry_Date`, `state`, `added_date`) VALUES
+	('I00002', 87, NULL, 1, '0000-00-00'),
+	('I00003', 48, NULL, 1, '0000-00-00'),
+	('I00004', 51, NULL, 1, '0000-00-00'),
+	('I00005', 134, '2023-10-26', 1, '0000-00-00'),
+	('I00005', 45, '2023-08-31', -1, '0000-00-00'),
+	('I00006', 216, NULL, 1, '0000-00-00'),
+	('I00005', 10, NULL, 1, '0000-00-00'),
+	('I00005', 0, NULL, 1, '0000-00-00'),
+	('I00005', 35, NULL, 1, '0000-00-00'),
+	('I00001', 5, NULL, 1, '0000-00-00'),
+	('I00003', 1, NULL, 1, '0000-00-00'),
+	('I00005', 1, '2023-09-28', -1, '0000-00-00'),
+	('I00004', 10, NULL, 1, '0000-00-00'),
+	('I00004', 8, NULL, 1, '0000-00-00'),
+	('I00004', 8, NULL, 1, '0000-00-00'),
+	('I00002', 57, NULL, 1, '0000-00-00'),
+	('I1aa81', 170, NULL, 1, '0000-00-00'),
+	('Ia71e7', 117, NULL, 1, '0000-00-00'),
+	('I2b993', 112, NULL, 1, '0000-00-00'),
+	('Iaad08', 95, NULL, 1, '0000-00-00'),
+	('I39DC8', 20, NULL, 1, '0000-00-00'),
+	('I0AE71', 47, NULL, 1, '0000-00-00'),
+	('I7A986', 10, NULL, 1, '0000-00-00'),
+	('IFF357', 30, NULL, 1, '0000-00-00'),
+	('IACBE3', 15, NULL, 1, '0000-00-00'),
+	('I00005', 50, '2023-10-08', -1, '0000-00-00'),
+	('I00005', 30, '2023-10-30', 1, '0000-00-00'),
+	('I00005', 10, '2023-10-30', 1, '0000-00-00'),
+	('I32CCE', 10, NULL, 1, '0000-00-00'),
+	('I00005', 10, '2023-10-20', -1, '0000-00-00'),
+	('I00005', 5, '2023-10-15', -1, '0000-00-00'),
+	('I00005', 21, '2023-10-27', 1, '0000-00-00'),
+	('I00005', 7, '2023-10-29', 1, '0000-00-00'),
+	('I00005', 2, '2023-10-19', -1, '0000-00-00'),
+	('I00005', 5, '2023-11-22', 1, '0000-00-00'),
+	('I00005', 1, '2023-11-03', 1, '0000-00-00'),
+	('I00005', 15, '2023-12-31', 1, '0000-00-00'),
+	('I00005', 5, '2023-11-04', 1, '0000-00-00'),
+	('ID121A', 10, NULL, 1, '0000-00-00'),
+	('I65B51', 100, '2023-10-17', -1, '0000-00-00'),
+	('I7E29F', 100, '2023-10-31', 1, '0000-00-00'),
+	('I1F3E7', 10, NULL, 1, '0000-00-00'),
+	('IED7B0', 5, NULL, 1, '0000-00-00'),
+	('I8EC1F', 10, NULL, 1, '0000-00-00'),
+	('I2F75F', 8, NULL, 1, '0000-00-00'),
+	('I79FD7', 10, NULL, 1, '0000-00-00'),
+	('I3128E', 1, NULL, 1, '0000-00-00');
 
--- Dumping structure for table ssi_copy_1.item_inventory_info
-CREATE TABLE IF NOT EXISTS `item_inventory_info` (
-  `UID` varchar(6) NOT NULL,
-  `Stock` int(11) NOT NULL,
-  `Expiry_Date` date DEFAULT NULL,
-  `state` int(1) NOT NULL DEFAULT 1,
-  KEY `UID` (`UID`),
-  CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.item_inventory_info: ~38 rows (approximately)
-INSERT INTO `item_inventory_info` (`UID`, `Stock`, `Expiry_Date`, `state`) VALUES
-	('I00002', 72, NULL, 1),
-	('I00003', 49, NULL, 1),
-	('I00004', 51, NULL, 1),
-	('I00005', 134, '2023-10-26', 1),
-	('I00005', 45, '2023-08-31', -1),
-	('I00006', 217, NULL, 1),
-	('I00005', 11, NULL, 1),
-	('I00005', 1, NULL, 1),
-	('I00005', 36, NULL, 1),
-	('I00001', 38, NULL, 1),
-	('I00003', 2, NULL, 1),
-	('I00001', 0, NULL, 1),
-	('I00005', 1, '2023-09-28', 1),
-	('I00004', 10, NULL, 1),
-	('I00004', 8, NULL, 1),
-	('I00004', 8, NULL, 1),
-	('I00002', 42, NULL, 1),
-	('I1aa81', 170, NULL, 1),
-	('Ia71e7', 117, NULL, 1),
-	('I2b993', 112, NULL, 1),
-	('Iaad08', 110, NULL, 1),
-	('I39DC8', 20, NULL, 1),
-	('I0AE71', 50, NULL, 1),
-	('I7A986', 0, NULL, 1),
-	('IFF357', 10, NULL, 1),
-	('IACBE3', 10, NULL, 1),
-	('I00005', 50, '2023-10-08', 1),
-	('I00005', 30, '2023-10-30', 1),
-	('I00005', 10, '2023-10-30', 1),
-	('I32CCE', 0, NULL, 1),
-	('I00005', 10, '2023-10-20', 1),
-	('I00005', 5, '2023-10-15', 1),
-	('I00005', 21, '2023-10-27', 1),
-	('I00005', 7, '2023-10-29', 1),
-	('I00005', 2, '2023-10-19', 1),
-	('I00005', 5, '2023-11-22', 1),
-	('I00005', 1, '2023-11-03', 1),
-	('I00005', 15, '2023-12-31', 1),
-	('I00005', 5, '2023-11-04', 1),
-	('ID121A', 10, NULL, 1);
-
--- Dumping structure for table ssi_copy_1.item_settings
-CREATE TABLE IF NOT EXISTS `item_settings` (
-  `UID` varchar(6) NOT NULL,
-  `Cost_Price` float NOT NULL,
-  `Markup_Factor` float NOT NULL,
-  `Reorder_factor` float NOT NULL,
-  `Crit_factor` float NOT NULL,
-  `Safe_stock` int(11) NOT NULL,
-  `Average_monthly_selling_rate` int(11) NOT NULL,
-  PRIMARY KEY (`UID`),
-  CONSTRAINT `item_settings_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.item_settings: ~14 rows (approximately)
 INSERT INTO `item_settings` (`UID`, `Cost_Price`, `Markup_Factor`, `Reorder_factor`, `Crit_factor`, `Safe_stock`, `Average_monthly_selling_rate`) VALUES
 	('I00001', 475, 0.1, 0.85, 0.5, 50, 5),
 	('I00002', 400, 0.1, 0.85, 0.5, 50, 5),
@@ -631,33 +517,35 @@ INSERT INTO `item_settings` (`UID`, `Cost_Price`, `Markup_Factor`, `Reorder_fact
 	('I0AE71', 100, 2.1, 0.85, 0.5, 10, 5),
 	('I10fdf', 100, 0, 0.85, 0.5, 50, 5),
 	('I1aa81', 123, 0.9709, 0.85, 0.5, 8, 5),
+	('I1F3E7', 100, 1, 0.85, 0.5, 10, 5),
 	('I2b993', 121, 0.9901, 0.85, 0.5, 5, 5),
+	('I2F75F', 100, 0.2, 0.85, 0.5, 8, 5),
+	('I3128E', 1000, 0.01, 0.85, 0.5, 1, 5),
 	('I32CCE', 100, 0.01, 0.85, 0.5, 5, 5),
 	('I39DC8', 100, 0.1, 0.85, 0.5, 10, 5),
+	('I65B51', 100, 0.1, 0.85, 0.5, 100, 5),
+	('I79FD7', 100, 0.1, 0.85, 0.5, 10, 5),
 	('I7A986', 1000, 0.01, 0.85, 0.5, 10, 5),
+	('I7E29F', 250, 0.25, 0.85, 0.5, 100, 5),
+	('I8EC1F', 100, 0.1, 0.85, 0.5, 10, 5),
 	('Ia71e7', 123, 0.9901, 0.85, 0.5, 55, 5),
 	('Iaad08', 100, 0.1, 0.85, 0.5, 100, 5),
 	('IACBE3', 100, 0.01, 0.85, 0.5, 10, 5),
 	('ID121A', 110, 0.1, 0.85, 0.5, 10, 5),
+	('IED7B0', 100, 1, 0.85, 0.5, 5, 5),
 	('IFF357', 100, 0.1, 0.85, 0.5, 10, 5);
 
--- Dumping structure for table ssi_copy_1.item_supplier_info
-CREATE TABLE IF NOT EXISTS `item_supplier_info` (
-  `UID` varchar(6) NOT NULL,
-  `supp_id` varchar(8) NOT NULL,
-  PRIMARY KEY (`UID`),
-  KEY `supplier_info_fk` (`supp_id`) USING BTREE,
-  CONSTRAINT `FK_item_supplier_info_supplier_info` FOREIGN KEY (`supp_id`) REFERENCES `supplier_info` (`supp_id`),
-  CONSTRAINT `item_supplier_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.item_supplier_info: ~17 rows (approximately)
 INSERT INTO `item_supplier_info` (`UID`, `supp_id`) VALUES
 	('I0AE71', 'SU000001'),
+	('I1F3E7', 'SU000001'),
+	('I2F75F', 'SU000001'),
 	('I32CCE', 'SU000001'),
 	('I39DC8', 'SU000001'),
+	('I79FD7', 'SU000001'),
+	('I8EC1F', 'SU000001'),
 	('IACBE3', 'SU000001'),
 	('ID121A', 'SU000001'),
+	('IED7B0', 'SU000001'),
 	('IFF357', 'SU000001'),
 	('I7A986', 'SU000002'),
 	('I00003', 'SU000003'),
@@ -671,21 +559,11 @@ INSERT INTO `item_supplier_info` (`UID`, `supp_id`) VALUES
 	('I2b993', 'SU000004'),
 	('I00007', 'SU000005'),
 	('Ia71e7', 'SU000005'),
-	('Iaad08', 'SU000005');
+	('Iaad08', 'SU000005'),
+	('I3128E', 'SU000008'),
+	('I7E29F', 'SU000008'),
+	('I65B51', 'SU000009');
 
--- Dumping structure for table ssi_copy_1.item_transaction_content
-CREATE TABLE IF NOT EXISTS `item_transaction_content` (
-  `transaction_uid` varchar(8) NOT NULL,
-  `Item_uid` varchar(6) NOT NULL,
-  `item_name` varchar(64) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `price` float NOT NULL,
-  `deduction` float NOT NULL,
-  KEY `FK_item_transaction_content_transaction_record` (`transaction_uid`),
-  CONSTRAINT `FK_item_transaction_content_transaction_record` FOREIGN KEY (`transaction_uid`) REFERENCES `transaction_record` (`transaction_uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.item_transaction_content: ~50 rows (approximately)
 INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`) VALUES
 	('0', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0),
 	('2', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
@@ -744,35 +622,27 @@ INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_nam
 	('87', 'IACBE3', 'Test Item 006', 10, 101, 0),
 	('88', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
 	('90', 'I32CCE', 'Test 0010', 5, 101, 0),
-	('91', 'I7A986', 'TEST ITEM 004', 10, 1010, 0);
+	('91', 'I7A986', 'TEST ITEM 004', 10, 1010, 0),
+	('92', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
+	('92', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
+	('92', 'I00006', 'UniLeash', 1, 144, 0),
+	('93', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0),
+	('93', 'I0AE71', 'Test ITem 003', 3, 310, 0),
+	('94', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
+	('95', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
+	('96', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
+	('97', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 1, 1140.15, 0),
+	('98', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
+	('99', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
+	('101', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 522.5, 0),
+	('102', 'IACBE3', 'Test Item 006', 5, 101, 0);
 
--- Dumping structure for table ssi_copy_1.login_report
-CREATE TABLE IF NOT EXISTS `login_report` (
-  `attempt_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
-  `usn_used` varchar(128) NOT NULL,
-  `date_created` datetime NOT NULL,
-  KEY `attempt_usn` (`attempt_usn`),
-  CONSTRAINT `login_report_ibfk_1` FOREIGN KEY (`attempt_usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.login_report: ~4 rows (approximately)
 INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'admin', '2023-06-07 23:50:59'),
 	('admin', 'admin', '2023-06-07 23:54:09'),
 	('admin', 'admin', '2023-06-07 23:55:45'),
 	(NULL, 'chris', '2023-07-05 17:36:56');
 
--- Dumping structure for table ssi_copy_1.log_history
-CREATE TABLE IF NOT EXISTS `log_history` (
-  `usn` varchar(128) NOT NULL,
-  `date_logged` date NOT NULL,
-  `time_in` time NOT NULL,
-  `time_out` time NOT NULL,
-  KEY `usn` (`usn`),
-  CONSTRAINT `log_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
-
--- Dumping data for table ssi_copy_1.log_history: ~31 rows (approximately)
 INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('Chris2', '2023-08-31', '00:05:36', '00:05:36'),
 	('admin', '2023-09-11', '23:28:25', '23:28:25'),
@@ -808,31 +678,6 @@ INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('admin', '2023-09-16', '01:16:35', '01:16:35'),
 	('admin', '2023-09-30', '22:34:06', '22:34:06');
 
--- Dumping structure for procedure ssi_copy_1.newUser
-DELIMITER //
-CREATE PROCEDURE `newUser`()
-BEGIN
-    DECLARE newid INT;
-
-    SET newid = 10;
-    SELECT newid;
-END//
-DELIMITER ;
-
--- Dumping structure for table ssi_copy_1.partially_recieving_item
-CREATE TABLE IF NOT EXISTS `partially_recieving_item` (
-  `id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `NAME` varchar(64) NOT NULL,
-  `stock` int(11) NOT NULL,
-  `supp_name` varchar(64) NOT NULL,
-  `exp_date` date DEFAULT NULL,
-  `reciever` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
-  `date_recieved` datetime DEFAULT NULL,
-  KEY `FK_partially_recieving_item_recieving_item` (`id`),
-  CONSTRAINT `FK_partially_recieving_item_recieving_item` FOREIGN KEY (`id`) REFERENCES `recieving_item` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.partially_recieving_item: ~34 rows (approximately)
 INSERT INTO `partially_recieving_item` (`id`, `NAME`, `stock`, `supp_name`, `exp_date`, `reciever`, `date_recieved`) VALUES
 	('R43417', 'Nutri-Vet Bladder Control Supplement for Dogs', 15, 'Pfizer corp..', NULL, 'kylde', '2023-08-23 00:00:00'),
 	('R43417', 'Nutri-Vet Bladder Control Supplement for Dogs', 1, 'Pfizer corp..', NULL, 'kylde', '2023-08-23 00:00:00'),
@@ -873,35 +718,12 @@ INSERT INTO `partially_recieving_item` (`id`, `NAME`, `stock`, `supp_name`, `exp
 	('RE2198', 'Taglory Rope Dog Leash', 5, 'Jesser Supplier Company', NULL, 'admin', '2023-10-15 00:00:00'),
 	('RC3713', 'Nutri-Vet Bladder Control Supplement for Dogs', 15, 'Jesser Supplier Company', NULL, 'admin', '2023-10-15 00:00:00');
 
--- Dumping structure for table ssi_copy_1.pet_breed
-CREATE TABLE IF NOT EXISTS `pet_breed` (
-  `type` varchar(32) NOT NULL,
-  `breed` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- Dumping data for table ssi_copy_1.pet_breed: ~4 rows (approximately)
 INSERT INTO `pet_breed` (`type`, `breed`) VALUES
 	('Dog', 'Aspin'),
 	('Cat', 'Puspin'),
 	('test1', 'test'),
 	('Cat', 'Siamese');
 
--- Dumping structure for table ssi_copy_1.pet_info
-CREATE TABLE IF NOT EXISTS `pet_info` (
-  `id` varchar(6) NOT NULL,
-  `p_name` varchar(128) NOT NULL,
-  `owner_id` int(6) unsigned NOT NULL DEFAULT 0,
-  `breed` varchar(32) NOT NULL,
-  `type` varchar(32) NOT NULL,
-  `sex` varchar(12) NOT NULL,
-  `weight` varchar(12) NOT NULL,
-  `bday` date NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `owner_id` (`owner_id`),
-  CONSTRAINT `owner_id_FK` FOREIGN KEY (`owner_id`) REFERENCES `pet_owner_info` (`owner_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.pet_info: ~21 rows (approximately)
 INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `weight`, `bday`) VALUES
 	('001431', 'Muning', 1, 'Puspin', 'Cat', 'Male', '2.5', '2023-08-16'),
 	('012633', 'Bantay', 6, 'Female', 'Dog', 'Male', '50.2', '2023-08-25'),
@@ -924,17 +746,6 @@ INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `wei
 	('Pe3b3d', 'John', 3, 'Siamese', 'Cat', 'Male', '1', '2023-09-12'),
 	('Pfcad9', 'Lina', 2, 'Short Hair', 'Cat', 'Female', '1.5', '2023-09-07');
 
--- Dumping structure for table ssi_copy_1.pet_owner_info
-CREATE TABLE IF NOT EXISTS `pet_owner_info` (
-  `owner_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `owner_name` varchar(128) NOT NULL,
-  `address` varchar(256) NOT NULL,
-  `contact_number` varchar(20) NOT NULL,
-  PRIMARY KEY (`owner_id`),
-  UNIQUE KEY `name` (`owner_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- Dumping data for table ssi_copy_1.pet_owner_info: ~11 rows (approximately)
 INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_number`) VALUES
 	(1, 'Patrick Feniza', 'Diliman, Quezon City', '09874561234'),
 	(2, 'Davin Ferrancullo', 'Almar, Caloocan City', '09478056123'),
@@ -948,18 +759,6 @@ INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_numb
 	(29, 'Clarence Ugay', 'Almar, Caloocan City', '0923902397'),
 	(30, 'Tyrone Tuazon', 'STI College Fairview', '09831809378');
 
--- Dumping structure for table ssi_copy_1.receiving_history_info
-CREATE TABLE IF NOT EXISTS `receiving_history_info` (
-  `receiving_id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `order_quantity` int(11) NOT NULL,
-  `receiver` varchar(50) NOT NULL,
-  `expiry` date DEFAULT NULL,
-  `date_received` datetime NOT NULL,
-  KEY `receiving_id` (`receiving_id`),
-  CONSTRAINT `FK_receiving_history_info_recieving_item` FOREIGN KEY (`receiving_id`) REFERENCES `recieving_item` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- Dumping data for table ssi_copy_1.receiving_history_info: ~43 rows (approximately)
 INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receiver`, `expiry`, `date_received`) VALUES
 	('R20205', 10, 'admin', NULL, '2023-10-08 15:11:26'),
 	('R6B64B', 5, 'admin', NULL, '2023-10-08 15:20:51'),
@@ -1008,30 +807,26 @@ INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receive
 	('R47299', 4, 'admin', '2023-10-27', '2023-10-15 01:59:59'),
 	('RE2198', 5, 'admin', NULL, '2023-10-15 02:01:35'),
 	('RC3713', 15, 'admin', '2023-12-31', '2023-10-15 09:07:36'),
-	('RC3713', 5, 'admin', '2023-11-04', '2023-10-15 09:07:47');
+	('RC3713', 5, 'admin', '2023-11-04', '2023-10-15 09:07:47'),
+	('RE2198', 5, 'admin', NULL, '2023-10-22 11:45:26'),
+	('RE966E', 4, 'admin', NULL, '2023-10-22 11:45:49'),
+	('RC0730', 4, 'admin', NULL, '2023-10-22 11:47:16'),
+	('R8CB43', 4, 'admin', NULL, '2023-10-22 12:06:34'),
+	('R661CB', 6, 'admin', NULL, '2023-10-22 12:06:55'),
+	('R380EA', 4, 'admin', NULL, '2023-10-22 12:07:22'),
+	('R4C5B1', 10, 'admin', NULL, '2023-10-22 12:10:14'),
+	('RE010B', 10, 'admin', NULL, '2023-10-22 12:10:43'),
+	('R90FFC', 5, 'admin', NULL, '2023-10-22 12:49:06'),
+	('R86C3C', 5, 'admin', NULL, '2023-10-22 12:49:55'),
+	('RE3D4D', 10, 'admin', NULL, '2023-10-22 13:07:58'),
+	('R6668D', 1, 'admin', NULL, '2023-10-22 14:02:23'),
+	('R57F67', 10, 'admin', NULL, '2023-10-22 20:24:10'),
+	('R0C860', 10, 'admin', NULL, '2023-10-22 20:30:30'),
+	('R4A553', 50, 'admin', NULL, '2023-10-22 20:32:21'),
+	('R535AC', 20, 'admin', NULL, '2023-10-22 20:36:05'),
+	('R64855', 4, 'admin', NULL, '2023-10-22 20:37:02'),
+	('R443FA', 10, 'admin', NULL, '2023-10-22 21:22:25');
 
--- Dumping structure for table ssi_copy_1.recieving_item
-CREATE TABLE IF NOT EXISTS `recieving_item` (
-  `id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `NAME` varchar(64) NOT NULL,
-  `item_uid` varchar(6) NOT NULL,
-  `ordered_by` varchar(128) NOT NULL,
-  `initial_stock` int(11) NOT NULL,
-  `current_stock` int(11) NOT NULL,
-  `supp_id` varchar(8) NOT NULL,
-  `exp_date` date DEFAULT NULL,
-  `reciever` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
-  `state` int(1) NOT NULL,
-  `date_set` datetime NOT NULL,
-  `date_recieved` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_recieving_item_item_general_info` (`item_uid`),
-  KEY `supp_id` (`supp_id`),
-  CONSTRAINT `FK_recieving_item_item_general_info` FOREIGN KEY (`item_uid`) REFERENCES `item_general_info` (`UID`),
-  CONSTRAINT `FK_recieving_item_supplier_info` FOREIGN KEY (`supp_id`) REFERENCES `supplier_info` (`supp_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.recieving_item: ~70 rows (approximately)
 INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_stock`, `current_stock`, `supp_id`, `exp_date`, `reciever`, `state`, `date_set`, `date_recieved`) VALUES
 	('1', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 15, 0, 'SU000001', '2023-10-26', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:49:18'),
 	('2', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 25, 25, 'SU000001', '2023-08-03', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:57:52'),
@@ -1040,6 +835,7 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('R08012', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 2, 'SU000004', '2023-10-27', 'admin', 2, '2023-10-14 19:11:31', '2023-10-15 01:32:34'),
 	('R0A465', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 50, 50, 'SU000004', '2023-10-08', 'admin', 2, '2023-10-08 19:57:45', '2023-10-08 19:57:56'),
 	('R0C22D', 'Comedy', 'I1aa81', 'admin', 1, 1, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:14:58', '2023-10-08 20:18:29'),
+	('R0C860', 'Test Item', 'Iaad08', 'admin', 10, 10, 'SU000005', NULL, 'admin', 2, '2023-10-22 20:24:26', '2023-10-22 20:30:27'),
 	('R13022', 'Fresh Step Clumping Cat Litter', 'I00003', 'admin', 4, 4, 'SU000001', NULL, 'acc_name', 2, '2023-08-30 23:42:34', '2023-08-30 23:42:43'),
 	('R13D3C', 'Kawaki wo ameku', 'Ia71e7', 'admin', 1, 1, 'SU000005', NULL, 'admin', 2, '2023-10-01 17:10:13', '2023-10-08 16:01:42'),
 	('R16f93', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 21, 21, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 11:42:10'),
@@ -1055,19 +851,29 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('R2b87d', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 50, 50, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 09:51:31'),
 	('R2e4c7', 'Taglory Rope Dog Leash', 'I00002', 'admin', 10, 10, 'SU000001', NULL, 'acc_name', 2, '2023-08-30 23:54:15', '2023-08-30 23:54:20'),
 	('R31a74', 'Fresh Step Clumping Cat Litter', 'I00003', 'admin', 5, 5, 'SU000001', NULL, NULL, -1, '2023-08-30 23:05:43', NULL),
+	('R380EA', 'Taglory Rope Dog Leash (TEST)', 'I00002', 'admin', 4, 4, 'SU000004', NULL, 'admin', 2, '2023-10-22 12:07:11', '2023-10-22 12:07:21'),
 	('R38FF5', 'Taglory Rope Dog Leash', 'I00002', 'admin', 1, 1, 'SU000004', NULL, 'admin', 2, '2023-10-15 01:53:55', '2023-10-15 01:54:02'),
 	('R3FE2D', 'Comedy', 'I1aa81', 'admin', 5, 5, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:31:26', '2023-10-08 20:31:42'),
 	('R40675', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 50, 50, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 09:50:16'),
 	('R43417', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 50, 41, 'SU000001', NULL, 'acc_name', 2, '2023-08-23 15:36:20', '2023-08-30 14:57:18'),
+	('R443FA', 'Test Item 006 (100mg)', 'IACBE3', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-22 21:22:04', '2023-10-22 21:22:23'),
 	('R47299', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 4, 'SU000004', NULL, 'admin', 2, '2023-10-15 01:33:04', '2023-10-15 01:59:58'),
+	('R4A553', 'Test Item', 'Iaad08', 'admin', 50, 50, 'SU000005', NULL, 'admin', 2, '2023-10-22 20:32:12', '2023-10-22 20:32:20'),
 	('R4B774', 'Comedy', 'I1aa81', 'admin', 3, 3, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:06:56', '2023-10-08 20:07:01'),
+	('R4C5B1', 'Test 0010 (TEST)', 'I32CCE', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-22 12:10:05', '2023-10-22 12:10:13'),
 	('R4D212', 'Test Item 002', 'I39DC8', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-08 20:42:25', '2023-10-08 20:42:30'),
 	('R513E9', 'Test ITem 003', 'I0AE71', 'admin', 50, 10, 'SU000001', NULL, 'acc_name', 2, '2023-09-16 15:22:47', '2023-10-01 17:35:21'),
+	('R535AC', 'Test Item', 'Iaad08', 'admin', 20, 20, 'SU000005', NULL, 'admin', 2, '2023-10-22 20:35:56', '2023-10-22 20:36:04'),
 	('R5652B', 'Comedy', 'I1aa81', 'admin', 10, 10, 'SU000003', NULL, 'admin', 2, '2023-10-08 19:56:05', '2023-10-08 19:57:23'),
+	('R57F67', 'Test Item', 'Iaad08', 'admin', 10, 10, 'SU000005', NULL, 'admin', 2, '2023-10-22 20:22:51', '2023-10-22 20:24:09'),
 	('R59c25', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 03:08:22'),
 	('R61f49', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 50, 50, 'SU000001', '2023-08-31', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-13 20:28:05'),
+	('R64855', 'MayPaw Heavy Duty Rope Dog Leash (100mg)', 'I00001', 'admin', 4, 4, 'SU000004', NULL, 'admin', 2, '2023-10-22 20:36:54', '2023-10-22 20:37:01'),
+	('R661CB', 'Taglory Rope Dog Leash (TEST)', 'I00002', 'admin', 6, 6, 'SU000004', NULL, 'admin', 2, '2023-10-22 12:06:48', '2023-10-22 12:06:53'),
 	('R66215', 'Comedy', 'I1aa81', 'admin', 5, 5, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:38:49', '2023-10-08 20:38:55'),
+	('R6668D', 'MayPaw Heavy Duty Rope Dog Leash (TEST)', 'I00001', 'admin', 1, 1, 'SU000004', NULL, 'admin', 2, '2023-10-22 14:02:19', '2023-10-22 14:02:22'),
 	('R6838c', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 5, 5, 'SU000001', '2023-08-29', 'acc_name', 2, '2023-08-28 12:56:18', '2023-08-28 12:56:39'),
+	('R69EB1', '1000 (100mg)', 'I1F3E7', 'admin', 1, 1, 'SU000001', NULL, NULL, 1, '2023-10-22 22:20:22', NULL),
 	('R6B64B', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 10, 5, 'SU000004', NULL, 'admin', 2, '2023-09-16 15:28:09', '2023-10-08 15:20:49'),
 	('R723f5', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 20, 20, 'SU000001', NULL, 'acc_name', 2, '0000-00-00 00:00:00', '2023-08-23 06:56:32'),
 	('R73829', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 10, 10, 'SU000004', NULL, 'acc_name', 2, '2023-09-16 15:27:04', '2023-09-16 15:34:42'),
@@ -1075,9 +881,12 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('R808a6', 'UniLeash', 'I00006', 'admin', 50, 50, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-13 17:43:22'),
 	('R822b5', 'UniLeash', 'I00006', 'admin', 50, 50, 'SU000001', '2023-07-27', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-13 17:45:42'),
 	('R84D95', 'Comedy', 'I1aa81', 'admin', 10, 5, 'SU000003', NULL, 'admin', 2, '2023-10-10 07:38:47', '2023-10-10 07:42:26'),
+	('R86C3C', 'Test Item 005 (TEST)', 'IFF357', 'admin', 5, 5, 'SU000001', NULL, 'admin', 2, '2023-10-22 12:49:49', '2023-10-22 12:49:54'),
 	('R86f29', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 15, 15, 'SU000001', NULL, NULL, -1, '2023-08-30 21:54:04', NULL),
 	('R877EB', 'Comedy', 'I1aa81', 'admin', 50, 50, 'SU000003', NULL, 'admin', 2, '2023-10-08 18:50:28', '2023-10-08 19:55:55'),
 	('R8780B', 'Taglory Rope Dog Leash', 'I00002', 'admin', 3, 2, 'SU000004', NULL, 'admin', 2, '2023-10-15 01:55:33', '2023-10-15 01:55:49'),
+	('R8CB43', 'Taglory Rope Dog Leash (TEST)', 'I00002', 'admin', 4, 4, 'SU000004', NULL, 'admin', 2, '2023-10-22 12:06:28', '2023-10-22 12:06:33'),
+	('R90FFC', 'Test Item 005 (TEST)', 'IFF357', 'admin', 5, 5, 'SU000001', NULL, 'admin', 2, '2023-10-22 12:48:59', '2023-10-22 12:49:04'),
 	('R917e0', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 5, 1, 'SU000001', NULL, 'acc_name', 2, '2023-08-30 23:53:06', '2023-08-30 23:53:59'),
 	('R9d3a7', 'UniLeash', 'I00006', 'admin', 90, 5, 'SU000001', NULL, 'admin', 2, '2023-09-13 09:58:01', '2023-10-08 16:01:26'),
 	('R9F732', 'Comedy', 'I1aa81', 'admin', 5, 5, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:29:31', '2023-10-08 20:29:38'),
@@ -1089,6 +898,7 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('RBE2A2', 'Test Item 006', 'IACBE3', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-08 19:59:26', '2023-10-08 20:05:12'),
 	('Rb074c', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 4, 'SU000001', '2023-09-28', 'acc_name', 2, '2023-08-30 23:43:49', '2023-08-30 23:52:33'),
 	('Rb556f', 'Taglory Rope Dog Leash', 'I00002', 'admin', 5, 5, 'SU000001', NULL, 'acc_name', 2, '2023-08-23 06:54:02', '2023-08-26 14:38:02'),
+	('RC0730', 'TEST', 'I10fdf', 'admin', 4, 4, 'SU000004', NULL, 'admin', 2, '2023-10-22 11:47:11', '2023-10-22 11:47:15'),
 	('RC0AC6', 'Comedy', 'I1aa81', 'admin', 50, 10, 'SU000003', NULL, 'admin', 2, '2023-10-10 09:08:44', '2023-10-10 09:18:48'),
 	('RC3713', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 50, 5, 'SU000004', '2023-10-30', 'admin', 2, '2023-10-10 09:10:39', '2023-10-15 09:07:46'),
 	('RCDA5A', 'Comedy', 'I1aa81', 'admin', 5, 5, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:45:16', '2023-10-08 20:45:21'),
@@ -1096,8 +906,11 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('RD06C1', 'Taglory Rope Dog Leash', 'I00002', 'admin', 4, 4, 'SU000004', NULL, 'admin', 2, '2023-10-15 02:00:28', '2023-10-15 02:00:31'),
 	('Rd584c', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 55, 55, 'SU000001', NULL, 'acc_name', 2, '2023-08-30 14:58:50', '2023-08-30 14:58:56'),
 	('Rdf3a5', 'Test Item', 'Iaad08', 'admin', 10, 10, 'SU000001', NULL, 'acc_name', 2, '2023-09-14 12:09:10', '2023-09-16 20:35:59'),
-	('RE2198', 'Taglory Rope Dog Leash', 'I00002', 'admin', 10, 5, 'SU000004', NULL, 'admin', 3, '2023-10-15 02:01:29', '2023-10-15 02:01:34'),
+	('RE010B', 'TEST ITEM 004 (TEST)', 'I7A986', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-22 12:10:36', '2023-10-22 12:10:41'),
+	('RE2198', 'Taglory Rope Dog Leash', 'I00002', 'admin', 10, 5, 'SU000004', NULL, 'admin', 2, '2023-10-15 02:01:29', '2023-10-22 11:45:25'),
+	('RE3D4D', 'Test Item 005 (TEST)', 'IFF357', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-22 13:07:48', '2023-10-22 13:07:56'),
 	('RE6362', 'Kawaki wo ameku', 'Ia71e7', 'admin', 1, 1, 'SU000005', NULL, 'admin', 2, '2023-10-08 20:22:36', '2023-10-08 20:23:02'),
+	('RE966E', 'TEST', 'I10fdf', 'admin', 4, 4, 'SU000004', NULL, 'admin', 2, '2023-10-22 11:45:40', '2023-10-22 11:45:48'),
 	('RECA53', 'Kessoku Band', 'I2b993', 'admin', 1, 1, 'SU000004', NULL, 'admin', 2, '2023-10-08 20:44:59', '2023-10-08 20:45:02'),
 	('RF85FE', 'Kessoku Band', 'I2b993', 'admin', 1, 1, 'SU000004', NULL, 'admin', 2, '2023-10-08 20:22:29', '2023-10-08 20:22:40'),
 	('RF8D0A', 'Comedy', 'I1aa81', 'admin', 9, 9, 'SU000003', NULL, 'admin', 2, '2023-10-08 20:26:06', '2023-10-08 20:26:10'),
@@ -1105,42 +918,16 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('RFFE1B', 'Test', 'I10fdf', 'admin', 10, 5, 'SU000004', NULL, 'admin', 2, '2023-09-16 15:25:28', '2023-10-08 16:01:37'),
 	('Rf166d', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 03:08:47');
 
--- Dumping structure for table ssi_copy_1.services_transaction_content
-CREATE TABLE IF NOT EXISTS `services_transaction_content` (
-  `transaction_uid` varchar(8) NOT NULL,
-  `service_uid` varchar(6) NOT NULL,
-  `service_name` varchar(64) NOT NULL,
-  `pet_uid` varchar(6) NOT NULL,
-  `patient_name` varchar(128) NOT NULL,
-  `scheduled_date` date NOT NULL,
-  `price` float NOT NULL,
-  `deduction` float NOT NULL,
-  `status` int(11) NOT NULL,
-  `end_schedule` date DEFAULT NULL,
-  `multiple_sched_quan` int(11) DEFAULT NULL,
-  `instance_of_mul_sched` int(11) DEFAULT NULL,
-  KEY `transaction_uid` (`transaction_uid`),
-  KEY `FK_services_transaction_content_pet_info` (`pet_uid`),
-  CONSTRAINT `FK_services_transaction_content_pet_info` FOREIGN KEY (`pet_uid`) REFERENCES `pet_info` (`id`),
-  CONSTRAINT `FK_services_transaction_content_transaction_record` FOREIGN KEY (`transaction_uid`) REFERENCES `transaction_record` (`transaction_uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.services_transaction_content: ~5 rows (approximately)
 INSERT INTO `services_transaction_content` (`transaction_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `status`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
 	('80', 'S00001', 'Grooming', '143436', 'Gabi', '2023-09-29', 500, 0, 0, NULL, NULL, NULL),
 	('81', 'S00001', 'Grooming', '001431', 'Muning', '2023-09-29', 500, 0, 0, NULL, NULL, NULL),
 	('81', 'S00005', 'Canine Castration Surgery', '001431', 'Muning', '2023-09-29', 1700, 0, 0, NULL, NULL, NULL),
 	('83', 'S00001', 'Grooming', '001431', 'Muning', '2023-09-03', 500, 0, 0, NULL, NULL, NULL),
-	('89', 'S00001', 'Grooming', '012633', 'Bantay', '2023-09-08', 500, 0, 0, NULL, NULL, NULL);
+	('89', 'S00001', 'Grooming', '012633', 'Bantay', '2023-09-08', 500, 0, 0, NULL, NULL, NULL),
+	('93', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-05', 500, 0, 0, NULL, NULL, NULL),
+	('100', 'S00001', 'Grooming', '143436', 'Gabi', '2023-10-18', 500, 0, 0, NULL, NULL, NULL),
+	('100', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-18', 500, 0, 0, NULL, NULL, NULL);
 
--- Dumping structure for table ssi_copy_1.service_category_test
-CREATE TABLE IF NOT EXISTS `service_category_test` (
-  `category` varchar(64) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `state` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- Dumping data for table ssi_copy_1.service_category_test: ~5 rows (approximately)
 INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Grooming', 1),
 	('Pet Care', 1),
@@ -1148,19 +935,6 @@ INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Test', 1),
 	('Vaccination', 1);
 
--- Dumping structure for table ssi_copy_1.service_info
-CREATE TABLE IF NOT EXISTS `service_info` (
-  `UID` varchar(6) NOT NULL,
-  `service_name` varchar(256) NOT NULL,
-  `Item_needed` varchar(512) NOT NULL,
-  `price` float NOT NULL,
-  `state` int(1) NOT NULL,
-  `date_added` date NOT NULL,
-  PRIMARY KEY (`UID`),
-  UNIQUE KEY `service_name` (`service_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.service_info: ~8 rows (approximately)
 INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 'test', 500, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 'test', 1500, 1, '2023-05-29'),
@@ -1171,20 +945,6 @@ INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `stat
 	('S00007', 'Euthanasion', 'test', 900, 1, '2023-05-29'),
 	('S00008', 'Feline Castration Srugery', 'test', 500, 1, '2023-05-29');
 
--- Dumping structure for table ssi_copy_1.service_info_test
-CREATE TABLE IF NOT EXISTS `service_info_test` (
-  `UID` varchar(6) NOT NULL,
-  `service_name` varchar(256) NOT NULL,
-  `price` float NOT NULL,
-  `category` varchar(64) NOT NULL,
-  `duration_type` int(1) NOT NULL,
-  `state` int(1) NOT NULL,
-  `date_added` date NOT NULL,
-  PRIMARY KEY (`UID`) USING BTREE,
-  UNIQUE KEY `service_name` (`service_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci ROW_FORMAT=DYNAMIC;
-
--- Dumping data for table ssi_copy_1.service_info_test: ~8 rows (approximately)
 INSERT INTO `service_info_test` (`UID`, `service_name`, `price`, `category`, `duration_type`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 500, 'Grooming', 0, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 1500, 'Vaccination', 0, 1, '2023-05-29'),
@@ -1195,24 +955,7 @@ INSERT INTO `service_info_test` (`UID`, `service_name`, `price`, `category`, `du
 	('S00008', 'Feline Castration Srugery', 500, 'Surgery', 0, 1, '2023-05-29'),
 	('Se7c43', 'Canine Diagnostic', 1200, 'Pet Care', 0, 1, '2023-08-31');
 
--- Dumping structure for table ssi_copy_1.supplier_info
-CREATE TABLE IF NOT EXISTS `supplier_info` (
-  `supp_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `supp_name` varchar(128) NOT NULL,
-  `telephone` varchar(50) DEFAULT NULL,
-  `contact_person` varchar(128) NOT NULL,
-  `contact_number` varchar(32) NOT NULL,
-  `contact_email` varchar(128) DEFAULT NULL,
-  `address` varchar(256) NOT NULL,
-  `created_by` varchar(128) NOT NULL,
-  `date_added` datetime NOT NULL,
-  `updated_by` varchar(128) DEFAULT NULL,
-  `date_modified` datetime DEFAULT NULL,
-  PRIMARY KEY (`supp_id`),
-  UNIQUE KEY `supp_name` (`supp_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
--- Dumping data for table ssi_copy_1.supplier_info: ~6 rows (approximately)
 INSERT INTO `supplier_info` (`supp_id`, `supp_name`, `telephone`, `contact_person`, `contact_number`, `contact_email`, `address`, `created_by`, `date_added`, `updated_by`, `date_modified`) VALUES
 	('SU000001', 'ABC Corporation', '0054-7941-5674', 'James Vinas', '09457891234', 'jamesvinas@abc.net', 'Quezon City', 'admin', '2023-09-15 00:00:00', 'admin', '2023-10-15 11:13:11'),
 	('SU000002', 'XYZ Corporation', '000000000', 'Ryan Gosling', '01234567890', 'ryangosling@gmail.com', 'Quezon City', 'admin', '2023-09-15 20:40:22', NULL, '2023-10-15 11:12:26'),
@@ -1222,20 +965,8 @@ INSERT INTO `supplier_info` (`supp_id`, `supp_name`, `telephone`, `contact_perso
 	('SU000006', 'BreadCrumb Corp.', '000000000', 'James Rubiales', '09745734891', 'NULL', 'Manila, Manila City', 'admin', '2023-09-16 14:11:36', NULL, NULL),
 	('SU000007', 'JKL Corp', '000000000', 'Jose Rizal', '09208902063', 'jkl@gmail.com', 'QC', 'aila', '2023-09-20 09:45:47', NULL, NULL),
 	('SU000008', 'DK Corporation', '000000000', 'Kajo Baldismo', '0213549870', 'kajo.bald@dkcorp.net', 'Quezon City', 'admin', '2023-10-08 02:14:19', NULL, NULL),
-	('SU000009', 'John and Carlo Supplier', '000000000', 'Carlo Almero', '09807502958', 'NULL', 'Quezon City', 'admin', '2023-10-10 07:48:01', NULL, NULL);
+	('SU000009', 'John and Carlo Supplier', '000000000', 'Carlo Almero', '09807502958', 'HELLOW@gmail.com', 'Quezon City', 'admin', '2023-10-10 07:48:01', NULL, '2023-10-22 15:17:11');
 
--- Dumping structure for table ssi_copy_1.supplier_item_info
-CREATE TABLE IF NOT EXISTS `supplier_item_info` (
-  `supplier_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `item_id` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `active` int(1) NOT NULL DEFAULT 1,
-  KEY `supplier_id` (`supplier_id`),
-  KEY `item_id` (`item_id`),
-  CONSTRAINT `FK_supplier_item_info_item_general_info` FOREIGN KEY (`item_id`) REFERENCES `item_general_info` (`UID`),
-  CONSTRAINT `FK_supplier_item_info_supplier_info` FOREIGN KEY (`supplier_id`) REFERENCES `supplier_info` (`supp_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- Dumping data for table ssi_copy_1.supplier_item_info: ~18 rows (approximately)
 INSERT INTO `supplier_item_info` (`supplier_id`, `item_id`, `active`) VALUES
 	('SU000001', 'I39DC8', 1),
 	('SU000001', 'I00002', 1),
@@ -1254,25 +985,25 @@ INSERT INTO `supplier_item_info` (`supplier_id`, `item_id`, `active`) VALUES
 	('SU000001', 'I7A986', 1),
 	('SU000002', 'I00007', 1),
 	('SU000002', 'I00006', 1),
-	('SU000001', 'ID121A', 1);
+	('SU000001', 'ID121A', 1),
+	('SU000009', 'I65B51', 1),
+	('SU000008', 'I7E29F', 1),
+	('SU000001', 'I65B51', 1),
+	('SU000001', 'I10fdf', 1),
+	('SU000001', 'I1F3E7', 1),
+	('SU000001', 'IED7B0', 1),
+	('SU000001', 'I8EC1F', 1),
+	('SU000001', 'I2F75F', 1),
+	('SU000001', 'I79FD7', 1),
+	('SU000008', 'I3128E', 1);
 
--- Dumping structure for table ssi_copy_1.transaction_record
-CREATE TABLE IF NOT EXISTS `transaction_record` (
-  `transaction_uid` varchar(8) NOT NULL,
-  `Attendant_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `client_name` varchar(50) DEFAULT NULL,
-  `Total_amount` float NOT NULL,
-  `transaction_date` date NOT NULL,
-  PRIMARY KEY (`transaction_uid`),
-  KEY `Attendant_usn` (`Attendant_usn`),
-  CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.transaction_record: ~89 rows (approximately)
 INSERT INTO `transaction_record` (`transaction_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `transaction_date`) VALUES
 	('0', 'aila', 'N/A', 1045, '2023-07-14'),
 	('1', 'aila', 'James V.', 500, '2023-07-15'),
 	('10', 'aila', 'Jose R.', 500, '2023-08-01'),
+	('100', 'admin', 'Davin Ferrancullo', 1000, '2023-10-18'),
+	('101', 'admin', 'Joze Rizal', 7837.5, '2023-10-18'),
+	('102', 'admin', 'Joze Rizal', 505, '2023-10-18'),
 	('11', 'aila', 'N/A', 440, '2023-08-06'),
 	('12', 'aila', 'James V.', 900, '2023-08-06'),
 	('13', 'aila', 'James V.', 500, '2023-08-07'),
@@ -1360,27 +1091,16 @@ INSERT INTO `transaction_record` (`transaction_uid`, `Attendant_usn`, `client_na
 	('89', 'admin', 'Budjette Tan', 500, '2023-10-01'),
 	('9', 'aila', 'N/A', 144, '2023-08-01'),
 	('90', 'admin', 'N/A', 505, '2023-10-12'),
-	('91', 'admin', 'N/A', 10100, '2023-10-12');
+	('91', 'admin', 'N/A', 10100, '2023-10-12'),
+	('92', 'admin', 'N/A', 2151.5, '2023-10-17'),
+	('93', 'admin', 'Davin Ferrancullo', 2475, '2023-10-17'),
+	('94', 'admin', 'N/A', 0, '2023-10-17'),
+	('95', 'admin', 'N/A', 0, '2023-10-17'),
+	('96', 'admin', 'Patrick Feniza', 440, '2023-10-18'),
+	('97', 'admin', 'Joze Rizal', 1140.15, '2023-10-18'),
+	('98', 'admin', 'James Viñas', 440, '2023-10-18'),
+	('99', 'admin', 'James Rubiales', 577.5, '2023-10-18');
 
--- Dumping structure for table ssi_copy_1.user_level_access
-CREATE TABLE IF NOT EXISTS `user_level_access` (
-  `Title` varchar(32) NOT NULL,
-  `add_item` int(1) NOT NULL,
-  `Dashboard` int(1) NOT NULL,
-  `Reception` int(1) NOT NULL,
-  `Payment` int(1) NOT NULL,
-  `Services` int(1) NOT NULL,
-  `Sales` int(1) NOT NULL,
-  `Inventory` int(1) NOT NULL,
-  `Pet_Info` int(1) NOT NULL,
-  `Report` int(1) NOT NULL,
-  `User` int(1) NOT NULL,
-  `Action` int(1) NOT NULL,
-  `Gen_Settings` int(11) NOT NULL,
-  PRIMARY KEY (`Title`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
--- Dumping data for table ssi_copy_1.user_level_access: ~2 rows (approximately)
 INSERT INTO `user_level_access` (`Title`, `add_item`, `Dashboard`, `Reception`, `Payment`, `Services`, `Sales`, `Inventory`, `Pet_Info`, `Report`, `User`, `Action`, `Gen_Settings`) VALUES
 	('Assisstant', 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0),
 	('Owner', 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0);
