@@ -18,6 +18,72 @@ from datetime import datetime
 import customTkPDFViewer as pdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
+from tkPDFViewer import tkPDFViewer as pdf
+#region README
+r'''
+goto
+C:\Users\username\AppData\Local\Programs\Python\Python311\Lib\site-packages\tkPDFViewer\tkPDFViewer.py
+change def ShowPdf() to this - >
+
+class ShowPdf():
+
+    img_object_li = []
+
+    def pdf_view(self,master,width=1200,height=600,pdf_location="",bar=True,load="after",zoomDPI=72):
+
+        self.frame = Frame(master,width= width,height= height,bg="white")
+
+        scroll_y = Scrollbar(self.frame,orient="vertical")
+        scroll_x = Scrollbar(self.frame,orient="horizontal")
+
+        scroll_x.pack(fill="x",side="bottom")
+        scroll_y.pack(fill="y",side="right")
+
+        percentage_view = 0
+        percentage_load = StringVar()
+
+        if bar==True and load=="after":
+            self.display_msg = Label(textvariable=percentage_load)
+            self.display_msg.pack(pady=10)
+
+            loading = Progressbar(self.frame,orient= HORIZONTAL,length=100,mode='determinate')
+            loading.pack(side = TOP,fill=X)
+
+        self.text = Text(self.frame,yscrollcommand=scroll_y.set,xscrollcommand= scroll_x.set,width= width,height= height)
+        self.text.pack(side="left")
+
+        scroll_x.config(command=self.text.xview)
+        scroll_y.config(command=self.text.yview)
+
+
+        def add_img():
+            precentage_dicide = 0
+            open_pdf = fitz.open(pdf_location)
+
+            for page in open_pdf:
+                pix = page.get_pixmap(dpi=zoomDPI)
+                pix1 = fitz.Pixmap(pix,0) if pix.alpha else pix
+                img = pix1.tobytes("ppm")
+                timg = PhotoImage(data = img)
+                self.img_object_li.append(timg)
+                if bar==True and load=="after":
+                    precentage_dicide = precentage_dicide + 1
+                    percentage_view = (float(precentage_dicide)/float(len(open_pdf))*float(100))
+                    loading['value'] = percentage_view
+                    percentage_load.set(f"Please wait!, your pdf is loading {int(math.floor(percentage_view))}%")
+            if bar==True and load=="after":
+                loading.pack_forget()
+                self.display_msg.pack_forget()
+
+            for i in self.img_object_li:
+                self.text.image_create(END,image=i)
+                self.text.insert(END,"\n\n")
+            self.text.configure(state="disabled")
+
+for functioning 'zoom' level and preview
+'''
+
+#endregion
     
 def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid):
     from reportlab.graphics.shapes import Drawing, Rect, String
@@ -445,10 +511,60 @@ class ShowPdf(pdf.ShowPdf):
         except IndexError:
             if self.img_object_li:
                 self.text.see(self.img_object_li[-1])
-  
+    
+#region Zoom Functions
+def zoom_in():
+    #global variables for the widgets
+    global vaas2, ctr, zoom_in_btn, zoom_out_btn, zoom_label, pdf_viewer_frame
+    #count how many times zoom in, if reached endpoint disable button
+    ctr += 1
+    if ctr == 5:
+        zoom_in_btn.configure(state = 'disabled')
+    if ctr == 2:
+        zoom_out_btn.configure(state = 'normal')
+    #if pdf viewer exists, destroy it
+    if vaas2:
+        vaas2.destroy()
+    zoomValue = 50 * ctr
+    if zoomValue > 250:
+        zoomValue = 250
+    # creating object of ShowPdf from tkPDFViewer. 
+    vaas1 = pdf.ShowPdf() 
+    # clear the image list # this corrects the bug inside tkPDFViewer module
+    vaas1.img_object_li.clear()
+    # Adding pdf location and width and height. 
+    zoom_label.configure(text = f'{zoomValue}%')
+    vaas2=vaas1.pdf_view(pdf_viewer_frame,pdf_location = r"image\sample.pdf",zoomDPI=zoomValue) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
+    # Placing Pdf inside gui
+    vaas2.pack()
+
+def zoom_out():
+    #global variables for the widgets
+    global vaas2, ctr, zoom_label, zoom_in_btn, zoom_out_btn, pdf_viewer_frame
+    #count how many times zoom in, if reached endpoint disable button
+    ctr -= 1
+    if ctr == 1:
+        zoom_out_btn.configure(state = 'disabled')
+    if ctr == 4:
+        zoom_in_btn.configure(state = 'normal')
+    if vaas2: # if old instance exists, destroy it first
+        vaas2.destroy()
+    zoomValue = 50 * ctr
+    if zoomValue < 50:
+        zoomValue = 50
+    zoom_label.configure(text = f'{zoomValue}%')
+    # creating object of ShowPdf from tkPDFViewer. 
+    vaas1 = pdf.ShowPdf() 
+    # clear the image list # this corrects the bug inside tkPDFViewer module
+    vaas1.img_object_li.clear()
+    # Adding pdf location and width and height. 
+    vaas2=vaas1.pdf_view(pdf_viewer_frame,pdf_location = r"image\sample.pdf",zoomDPI=zoomValue) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
+    # Placing Pdf inside gui
+    vaas2.pack()
+#endregion
+
 class preview_pdf_popup(ctk.CTkToplevel):
-    
-    
+
     def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
                  #Custom Arguments
                  
@@ -458,9 +574,33 @@ class preview_pdf_popup(ctk.CTkToplevel):
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
-        
-        
         self.attributes('-topmost',1)
+        toplvl_width = 800
+        toplvl_height = 600
+        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
+        position_Y = (self.winfo_screenheight()/2) - (toplvl_height/2)
+
+
+        self.title(title)
+        self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
+        print(position_X)
+        print(position_Y)
+        self.configure(bg='white')
+        global zoom_out_btn, zoom_in_btn, zoom_label, vaas2, ctr, pdf_viewer_frame
+        ctr = 2
+        #region add zooming function widgets
+        zoom_frame = ctk.CTkFrame(self)
+        zoom_frame.pack()
+        zoom_out_btn = ctk.CTkButton(zoom_frame, text='-', command=zoom_out, font = ("DM Sans Medium", 14), width=30)
+        zoom_out_btn.pack(side = 'left')
+        zoom_label = ctk.CTkLabel(zoom_frame, fg_color='#ffffff', text = '100%', corner_radius=5)
+        zoom_label.pack(side = 'left', padx = 5)
+        zoom_in_btn = ctk.CTkButton(zoom_frame, text='+', command=zoom_in, font=("DM Sans Medium", 14), width=30)
+        zoom_in_btn.pack(side = 'left')
+        #endregion
+        
+        '''ALTERATION FOR THIS ^'''
+        '''self.attributes('-topmost',1)
         self.view_by_reciept = view_receipt_by_or
         self.zoom_step = 10
         self.zoom_limit = 10
@@ -502,7 +642,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.pdf_viewer_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.pdf_viewer_frame.pack(pady=(0, window_width*0.005), )
 
-        self.pdfviewer = ShowPdf()
+        self.pdfviewer = ShowPdf()'''
         
         self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
@@ -524,6 +664,9 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
         else:
+            '''vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
+                        width=100,height=50, zoomDPI=100)
+            vaas2.pack()'''
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
                         width=80,height=100,zoomDPI=self.default_dpi)
             self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
@@ -553,5 +696,3 @@ class preview_pdf_popup(ctk.CTkToplevel):
             self.vaas2=self.vaas1.pdf_view(self.pdf_viewer_frame,pdf_location = r"image\sample.pdf", zoomDPI=zoom_dpi, width=80,height=100 ) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
             # Placing Pdf inside gui
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
-    
-    
