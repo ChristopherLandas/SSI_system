@@ -197,13 +197,13 @@ class dashboard(ctk.CTkToplevel):
         self.labels = []
         self.icons = []
         self.main_frames:list = []
+        print(f"Loading")
         for i in range(len(temp_main_frames)):
             if temp_user_lvl_access[i]:
                 self.icons.append(temp_icons[i])
                 self.labels.append(temp_labels[i])
                 self.loading_message.configure(text=f"Loading {temp_labels[i]}...")
                 self.main_frames.append(temp_main_frames[i](self))
-            #print(f"Loading - {temp_labels[i]} Time: {datetime.datetime.now()}")
             
         del temp_main_frames, temp_user_lvl_access, temp_labels, temp_icons
         
@@ -366,7 +366,8 @@ class dashboard_frame(ctk.CTkFrame):
         def open_schedule(_):
             if self.sched_data_treeview.get_selected_data():
                 self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=self.sched_data_treeview.get_selected_data())
-                
+        
+        self.state = None
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 222, self.update_receiver)
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
@@ -476,7 +477,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.out_stock_button.grid(row=2, column=1, columnspan=1, sticky="nsew", pady=(0, width*0.005))
         
         
-        self.inventory_tabs = (self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button)
+        self.inventory_tabs = [self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button]
         #endregion
 
         """
@@ -635,11 +636,17 @@ class dashboard_frame(ctk.CTkFrame):
         [self.inventory_tabs[tabs].update_data(len(data[tabs]), data[tabs]) for tabs in range(len(self.inventory_tabs))] 
 
     def grid(self, **kwargs):
+        self.state = 1
+        [tabs.update_state('opened') for tabs in self.inventory_tabs]
         self.load_scheduled_service()
         self.load_saled_data_treeview()
         self.generate_DISumarry()
 
         return super().grid(**kwargs)
+    
+    def grid_forget(self, **kwargs):
+        if self.state: [tabs.update_state('closed') for tabs in self.inventory_tabs]
+        return super().grid_forget(**kwargs)
 
     def update_receiver(self, m):
         print("triggered")
@@ -1224,9 +1231,9 @@ class sales_frame(ctk.CTkFrame):
         
         self.sales_table_style = ttk.Style()
         self.sales_table_style.theme_use("clam")
-        self.sales_table_style.configure("Treeview", rowheight=int(height*0.055), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=5, font=("DM Sans Medium", 14) )
+        self.sales_table_style.configure("Treeview", rowheight=int(height*0.065), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=5, font=("DM Sans Medium", 12) )
         #print(int(height*0.065))
-        self.sales_table_style.configure("Treeview.Heading", font=("DM Sans Medium", 14), background=Color.Blue_Cobalt, borderwidth=0, foreground=Color.White_AntiFlash)
+        self.sales_table_style.configure("Treeview.Heading", font=("DM Sans Medium", 12), background=Color.Blue_Cobalt, borderwidth=0, foreground=Color.White_AntiFlash)
         self.sales_table_style.layout("Treeview",[("Treeview.treearea",{"sticky": "nswe"})])
         self.sales_table_style.map("Treeview", background=[("selected",Color.Blue_Steel)])
             
@@ -1715,7 +1722,7 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items_state)
         
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!30!35',
+                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/QuantityPcs:{int(width*.1)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!30!35',
                                            double_click_command= _restock, bd_commands= disposal_callback, conditional_colors={2:{'Waiting':'orange', 'Pending':'red'}})
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()

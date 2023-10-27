@@ -878,7 +878,8 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
                 self.set_entries()
                 
             def refresh_table():
-                self.item_data = database.fetch_data(sql_commands.get_supplier_items, (self.supplier_id._text,))
+                self.raw_item_data = database.fetch_data(sql_commands.get_supplier_items, (self.supplier_id._text,))
+                self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
                 self.item_treeview.update_table(self.item_data)
                 
             def update_record():
@@ -904,10 +905,16 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
                     #self._callback()
             
             def add_item_supplier():
-                add_supplier_item(self, (width, height), command_callback=refresh_table).place(relx=0.5, rely=0.5, anchor='c', items=self.item_data, supplier_id=self.supplier_id._text)
-            
+                self.raw_item_data = database.fetch_data(sql_commands.get_supplier_items, (self.record_id,))
+                add_supplier_item(self, (width, height), command_callback=refresh_table).place(relx=0.5, rely=0.5, anchor='c', items=self.raw_item_data, supplier_id=self.supplier_id._text)
+                
             def view_audit_info():
-                audit_info(self, (width, height)).place(relx=0.5, rely=0.5, anchor='c')
+                info = database.fetch_data(sql_commands.get_supplier_audit_trail, (self.supplier_id._text,))
+                audit_info(self, (width, height)).place(relx=0.5, rely=0.5, anchor='c', info=info)
+                
+            def deactive_item_supplier(var):
+                database.exec_nonquery([[sql_commands.update_supplier_item_info_deactive, (self.supplier_id._text, self.raw_item_data[var][0])]])
+                messagebox.showinfo("Success", "Item is removed for this supplier.")
             
             self.contact_var = ctk.StringVar()
             self.tele_var = ctk.StringVar()
@@ -933,7 +940,7 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
             self.content_frame.grid_columnconfigure(1, weight=1)
             
             '''SUPPLIER ID'''
-            ctk.CTkLabel(self.content_frame, text="Supplier Number: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.0825, anchor="e").grid(row=0, column=0,  sticky="nsew", padx=width*0.005, pady=(height*0.01, height*0.01))
+            ctk.CTkLabel(self.content_frame, text="Supplier Code: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.0825, anchor="e").grid(row=0, column=0,  sticky="nsew", padx=width*0.005, pady=(height*0.01, height*0.01))
             self.id_frame= ctk.CTkFrame(self.content_frame, fg_color="transparent")
             self.id_frame.grid(row=0, column=1, columnspan=4, sticky="ew", padx=(0, width*0.005))
             
@@ -953,24 +960,6 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
             self.cancel_edit = ctk.CTkButton(self.id_frame, text="Cancel", hover_color=Color.Red_Tulip, fg_color=Color.Red_Pastel, font=("DM Sans Medium", 14), width=width*0.015, height=height*0.05,
                                              command=cancel_edit)
                         
-            """ '''ADDED BY'''
-            ctk.CTkLabel(self.content_frame, text="Added By: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.0825, anchor="e").grid(row=1, column=0,  sticky="nsew", padx=width*0.005, pady=(height*0.01,0))
-            self.created_by = ctk.CTkLabel(self.content_frame, font=("DM Sans Medium", 14), width=width*0.15, height=height*0.05, corner_radius=5,fg_color=Color.White_Platinum)
-            self.created_by.grid(row=1, column=1, sticky="nsw", padx=(0, width*0.005), pady=(height*0.01,0))
-            
-            '''SUPPLIER DATE ADDED'''
-            ctk.CTkLabel(self.content_frame, text="Date Added: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.0825, anchor="e").grid(row=2, column=0,  sticky="nsew", padx=width*0.005, pady=(height*0.01,0))
-            self.date_added = ctk.CTkLabel(self.content_frame, font=("DM Sans Medium", 14), width=width*0.15, height=height*0.05, corner_radius=5,fg_color=Color.White_Platinum)
-            self.date_added.grid(row=2, column=1, sticky="nsw", padx=(0, width*0.005), pady=(height*0.01,0))
-            
-            '''SUPPLIER DATE UPDATED'''
-            self.date_update_label = ctk.CTkLabel(self.content_frame, text="Date Updated: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.0825, anchor="e")
-            self.date_update_label.grid(row=3, column=0,  sticky="nsew", padx=width*0.005, pady=height*0.01)
-            self.date_update = ctk.CTkLabel(self.content_frame, font=("DM Sans Medium", 14), width=width*0.15, height=height*0.05, corner_radius=5,fg_color=Color.White_Platinum)
-            self.date_update.grid(row=3, column=1, sticky="nsw", padx=(0, width*0.005), pady=(height*0.01))
-            
-            ctk.CTkLabel(self.content_frame, text="Supplier Information ", fg_color="transparent", font=("DM Sans Medium", 14), text_color=Color.Grey_Davy, width=width*0.0825, anchor="w").grid(row=4, column=0,  sticky="nsew", padx=width*0.005, pady=(height*0.001)) """
-            
             '''SUPPLIER NAME'''
             ctk.CTkLabel(self.content_frame, text="Supplier Name: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.0825, anchor="e").grid(row=1, column=0,  sticky="nsew", padx=width*0.005, pady=height*0.005)
             self.supplier_name_entry = ctk.CTkEntry(self.content_frame, font=("DM Sans Medium", 14), height=height*0.05, width=width*0.275)
@@ -1020,7 +1009,8 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
             self.item_treeview_frame.grid(row=1,column=0, sticky="nsew", columnspan=2, padx=(height*0.01), pady=(0, height*0.01))
             
             self.item_treeview = cctk.cctkTreeView(self.item_treeview_frame, data=[],width= width*0.775, height= height*0.475, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.1)}-tc/ItemName:x-tl/Action:{int(width*.075)}-bD!30!35',
+                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.1)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl/Action:{int(width*.075)}-bD!30!35',
+                                           bd_commands=deactive_item_supplier,
                                            )
             self.item_treeview.pack()
             
@@ -1054,7 +1044,9 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
         def place(self, record_id, **kwargs):
             self.record_id = record_id
             self.set_entries()
-            self.item_data = database.fetch_data(sql_commands.get_supplier_items, (record_id,))
+            self.raw_item_data = database.fetch_data(sql_commands.get_supplier_items, (self.record_id,))
+            self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
+            #print(self.item_data)
             self.item_treeview.update_table(self.item_data)
             
             return super().place(**kwargs)
@@ -1075,15 +1067,24 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
             
             def reset():
                 self.place_forget()
+            
+            
                 
             def add_item_to_supplier():
+                exist = database.fetch_data(sql_commands.get_supplier_item_info_if_exist, (self.supplier_id, self.item_treeview.get_selected_data()[0]))[0][0]
                 if self.item_treeview.get_selected_data():
-                    database.exec_nonquery([[sql_commands.set_supplier_items, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
-                    #print(self.supplier_id, self.item_treeview.get_selected_data()[0])
+                    if exist:
+                        print("IF")
+                        database.exec_nonquery([[sql_commands.update_supplier_item_info_active, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
+                    else:
+                        print("ELSE")
+                        database.exec_nonquery([[sql_commands.set_supplier_items, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
                     messagebox.showinfo("Item Added", "Item added to supplier delivery.")
+                else:
+                    messagebox.showwarning('Warning','No record is selected')
+                self.refresh_table()
                 if self.command_callback:
                     self.command_callback()
-                reset()
                     
                     
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], border_width=1, border_color=Color.Platinum)
@@ -1104,7 +1105,7 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
             self.item_treeview_frame.grid(row=1, column=0, sticky="nsew", pady=(height*0.01), padx=(height*0.01))
             
             self.item_treeview = cctk.cctkTreeView(self.item_treeview_frame, data=[],width= width*0.64, height= height*0.5, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.1)}-tc/ItemName:x-tl!30!35',)
+                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.085)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl!30!35',)
             self.item_treeview.pack()
             
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color = Color.White_Platinum)
@@ -1117,11 +1118,16 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
             self.cancel_btn = ctk.CTkButton(self.bottom_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
                                             font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left", pady=(height*0.01), padx=(height*0.01,0))
-            
+        
+        def refresh_table(self):
+            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info")
+            self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in not_in_set(self.raw_item_data, self.items)]
+            self.item_treeview.update_table(self.item_data)
+                
         def place(self, items, supplier_id, **kwargs):
-            self.item_data = database.fetch_data("SELECT UID, name FROM item_general_info")
-            self.item_treeview.update_table(not_in_set(self.item_data, items))
+            self.items = items
             self.supplier_id = supplier_id
+            self.refresh_table()
             return super().place(**kwargs)
         
     return add_supplier_item(master, info, command_callback)
@@ -1931,7 +1937,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='', image=self.restock, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
-            ctk.CTkLabel(self.top_frame, text='DISPOSAL', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            ctk.CTkLabel(self.top_frame, text='ORDER DISPOSAL', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -1975,7 +1981,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
                 messagebox.showerror('Missing Field','Enter a reason')
             else:
                 item_id = database.fetch_data("Select item_uid from recieving_item where id = ?", (self.data[0], ))[0][0]
-                database.exec_nonquery([[sql_commands.record_disposal_process, (self.data[0], item_id, self.data[1], self.data[2], self.data[3], f'{self.disposal_entry.get()}', self.acc_user)],
+                database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), self.data[0], item_id, self.data[2], self.data[3], f'{self.disposal_entry.get()}', self.acc_user)],
                                             ["UPDATE recieving_item SET state = -1 WHERE id = ?", (self.data[0], )]])
                 messagebox.showinfo("Succeed", "Item Disposed")
                 self.reset()
@@ -2055,7 +2061,8 @@ def item_disposal_confirmation(master, info:tuple, command_callback: callable = 
         def dispose_confirm(self):
             if self.disposal_entry.get() == 'testing':
                 temp= [(data[0], f"{data[1]} ({data[2]})", data[3]) if data[2] else (data[0],data[1],data[3]) for data in (database.fetch_data(sql_commands.get_expired_items_to_dispose, None))]
-                [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
+                print(temp)
+                [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), None, items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
                 database.exec_nonquery([[sql_commands.update_expired_items, None]])
                 messagebox.showinfo("Item Disposal", "Item is fully disposed")
                 self.command_callback()
@@ -2103,35 +2110,42 @@ def audit_info(master, info:tuple, title: Optional[str] = "Record Information"):
             '''Added By'''
             self.added_by_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
             self.added_by_frame.grid(row=0, column=0, sticky='nsew', pady = (height*0.025,height*0.01), padx = (width*0.005))
-            ctk.CTkLabel(self.added_by_frame, text="Added By: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            ctk.CTkLabel(self.added_by_frame, text="Added By:  ", font=("DM Sans Medium", 14), width=width*0.0925, fg_color="transparent", anchor='e').pack(side='left',pady = (height*0.01), padx = (0))
             self.added_by_name = ctk.CTkLabel(self.added_by_frame, text="🐱", font=("DM Sans Medium", 14))
             self.added_by_name.pack(side='left',pady = (height*0.01), padx = (0))
             
             '''Added Date'''
             self.added_date_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
             self.added_date_frame.grid(row=1, column=0, sticky='nsew', pady = (0,height*0.01), padx = (width*0.005))
-            ctk.CTkLabel(self.added_date_frame, text="Added By: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            ctk.CTkLabel(self.added_date_frame, text="Added Date:  ", font=("DM Sans Medium", 14), width=width*0.0925, fg_color="transparent", anchor='e').pack(side='left',pady = (height*0.01), padx = (0))
             self.added_date_entry = ctk.CTkLabel(self.added_date_frame, text="🐱", font=("DM Sans Medium", 14))
             self.added_date_entry.pack(side='left',pady = (height*0.01), padx = (0))
             
             '''Added By'''
             self.updated_by_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
             self.updated_by_frame.grid(row=2, column=0, sticky='nsew', pady = (0,height*0.01), padx = (width*0.005))
-            ctk.CTkLabel(self.updated_by_frame, text="Added By: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            ctk.CTkLabel(self.updated_by_frame, text="Updated By:  ", font=("DM Sans Medium", 14), width=width*0.0925, fg_color="transparent", anchor='e').pack(side='left',pady = (height*0.01), padx = (0))
             self.updated_by_name = ctk.CTkLabel(self.updated_by_frame, text="🐱", font=("DM Sans Medium", 14))
             self.updated_by_name.pack(side='left',pady = (height*0.01), padx = (0))
             
             '''Added Date'''
             self.updated_date_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
             self.updated_date_frame.grid(row=3, column=0, sticky='nsew', pady = (0,height*0.01), padx = (width*0.005))
-            ctk.CTkLabel(self.updated_date_frame, text="Added By: ", font=("DM Sans Medium", 14), width=width*0.015, fg_color="red" ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            ctk.CTkLabel(self.updated_date_frame, text="Updated Date:  ", font=("DM Sans Medium", 14), width=width*0.0925, fg_color="transparent", anchor='e' ).pack(side='left',pady = (height*0.01), padx = (0))
             self.updated_date_entry = ctk.CTkLabel(self.updated_date_frame, text="🐱", font=("DM Sans Medium", 14))
             self.updated_date_entry.pack(side='left',pady = (height*0.01), padx = (0))
             
+            self.entries = [self.added_by_name, self.added_date_entry, self.updated_by_name, self.updated_date_entry]
         def reset(self):
             self.place_forget()
         
-        def place(self, **kwargs):
+        def set_entries(self):
+            for entry in range(len(self.entries)):
+                self.entries[entry].configure(text=self.info[entry])
+        
+        def place(self, info,**kwargs):
+            self.info = info[0]
+            self.set_entries()
             return super().place(**kwargs)
             
     return audit_info(master, info, title)

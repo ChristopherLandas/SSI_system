@@ -366,7 +366,7 @@ get_order_info = f"SELECT id, CAST(date_set AS DATE), item_uid, NAME,\
 
 #DISPOSAL
 get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
-record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal, reason, disposed_by) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?);"
+record_disposal_process = "INSERT INTO disposal_history (id, receive_id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by) VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, ?);" #?, ?, ?, ?, ?, ?, CURRENT_DATE, ?
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
 
@@ -897,22 +897,36 @@ get_item_does_expiry = f"SELECT item_uid, categories.does_expire From recieving_
                         JOIN categories ON item_general_info.Category = categories.categ_name\
                         WHERE id = ?"
                         
-get_supplier_items = "SELECT item_id, item_general_info.name FROM supplier_item_info\
+get_supplier_items = "SELECT supplier_item_info.item_id, item_general_info.brand, item_general_info.name, item_general_info.unit\
+                        FROM supplier_item_info\
                         JOIN item_general_info ON supplier_item_info.item_id = item_general_info.UID\
-                        WHERE supplier_id = ? "
+                        WHERE supplier_id = ?  AND active = 1"
+                        
 set_supplier_items = "INSERT INTO supplier_item_info VALUES (?,?,1)"
 
 get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
                             LEFT JOIN supplier_info ON supplier_info.supp_id = supplier_item_info.supplier_id\
                             WHERE supplier_item_info.item_id = ?"
                 
-update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date < CURRENT_DATE"
+update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date <= CURRENT_DATE"
 
 get_expired_items_to_dispose = "SELECT item_general_info.UID, item_general_info.name, item_general_info.unit,\
                                 CAST(SUM(Stock) as INT) from item_inventory_info\
                                 JOIN item_general_info ON item_general_info.UID = item_inventory_info.UID\
-                                WHERE Expiry_Date < CURRENT_DATE AND state = 1\
+                                WHERE Expiry_Date <= CURRENT_DATE AND state = 1\
                                 GROUP BY item_inventory_info.UID"
                                 
-set_expired_items_from_inventory = "INSERT INTO disposal_history (id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
-                                    VALUES (?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+set_expired_items_from_inventory = "INSERT INTO disposal_history (id, receive_id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
+                                    VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+                                    
+update_supplier_item_info_deactive = "UPDATE supplier_item_info SET active = 0\
+                                    WHERE supplier_id = ? and item_id = ? "
+
+update_supplier_item_info_active = "UPDATE supplier_item_info SET active = 1\
+                                    WHERE supplier_id = ? and item_id = ? "
+
+get_supplier_item_info_if_exist = "SELECT COUNT(1) FROM supplier_item_info\
+                                    WHERE supplier_id = ? AND item_id = ?"
+
+get_supplier_audit_trail = "SELECT created_by, CAST(date_added AS DATE), updated_by, CAST(date_modified AS DATE) FROM supplier_info\
+                            WHERE supp_id = ?"
