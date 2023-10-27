@@ -14,6 +14,10 @@ import ctypes
 from Theme import Color, Icons
 from functools import partial
 
+import ctypes
+from Theme import Color, Icons
+from functools import partial
+
 from datetime import datetime
 import customTkPDFViewer as pdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100

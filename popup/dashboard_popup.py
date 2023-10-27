@@ -74,7 +74,7 @@ def sales_history_popup(master, info:tuple):
                 self.place_forget()
                 
             def open_record(_):
-                print(self.sales_treeview.get_selected_data()[0])
+                #print(self.sales_treeview.get_selected_data()[0])
                 pass
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.685, height=height*0.755, fg_color=Color.White_Color[3], corner_radius= 0)

@@ -1,13 +1,13 @@
-from typing import Callable, Optional, Tuple, Union
+#from typing import Callable, Optional, Tuple, Union
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import transaction_popups, notif_popup_entities as ntf
-from decimal import Decimal
+from popup import notif_popup_entities as ntf
+#from decimal import Decimal
 from util import *
-import sql_commands
-import PyPDF2
-from tkinter import filedialog
-import network_socket_util as nsu
+#import sql_commands
+#import PyPDF2
+#from tkinter import filedialog
+#import network_socket_util as nsu
 
 ctk.set_appearance_mode('dark')
 
@@ -21,10 +21,11 @@ class body(ctk.CTk):
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
         #print(os.path.isdir("C:\\Users\\chris\\Desktop\\Devstuff\\SSI_system"))
-        '''self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
+        self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
         self.notif_frame.place(relx = .5, rely = .5, anchor = 'c')
-        self.update()'''
-        #ntf.create_entity(self.notif_frame, 'hehe', 'tes2323827342372389 23848 92 28347 82937', datetime.datetime.now(), 200, 200, ('Arial', 12))
+        self.update()
+        print(self.screen[0] * .15)
+        ntf.create_entity(self.notif_frame, 'hehe', 'this is a test this is a test this is a test', datetime.datetime.now(), 250, 100)
 
 
         #data = {s[1]: s[0] for s in database.fetch_data('SELECT UID, NAME FROM ITEM_GENERAL_INFO')}
@@ -71,14 +72,11 @@ class body(ctk.CTk):
         #treeview.configure(spinner_command = lambda: print(treeview._data))
         treeview.place(relx = .5, rely = .5, anchor = 'c')'''
 
-        receiver = nsu.network_receiver('127.0.0.1', 250, lambda m: print(m))
+        '''receiver = nsu.network_receiver('127.0.0.1', 250, lambda m: print(m))
         receiver.start_receiving()
 
         sender = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252)
-        sender.send("Hello123123")
-
-        
-
+        sender.send("Hello123123")'''
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))
