@@ -239,8 +239,6 @@ def text_overflow_ellipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1,
     
     def ellipse(sentence: str) -> str:
         ans = ""
-        if font_tool(sentence) < width:
-            return
     
         for st in sentence:
             if font_tool.measure(ans + st) < width - ellipsis_length:
