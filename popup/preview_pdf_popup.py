@@ -598,6 +598,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         zoom_in_btn = ctk.CTkButton(zoom_frame, text='+', command=zoom_in, font=("DM Sans Medium", 14), width=30)
         zoom_in_btn.pack(side = 'left')
         #endregion
+        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
         
         '''ALTERATION FOR THIS ^'''
         '''self.attributes('-topmost',1)
@@ -606,7 +607,6 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.zoom_limit = 10
         self.default_dpi=100
         self.zoom_counter = 0
-        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
         self.window_width = window_width
 
         toplvl_width = 600
