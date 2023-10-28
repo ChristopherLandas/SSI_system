@@ -4,32 +4,34 @@ from typing import Callable, Optional, Tuple, Union
 from customcustomtkinter import customcustomtkinter as cctk
 import customtkinter as ctk
 import re
+from util import text_overflow_ellipsis as fit_to_trim
 
 from util import Callable, Optional, Tuple, Union
 def create_entity(master: any,
                  notif_title: str,
                  notif_desc: str,
-                 notif_date: datetime.datetime, 
+                 #notif_date: datetime.datetime, 
                  width: int = 200,
                  height: int = 200,
                  fg_color: str| tuple[str, str]= None,
-                 font_sizes: Optional[Tuple[float, float, float]] = None):
+                 font_sizes: Optional[Tuple[float, float, float]] = None,
+                 Desc_lines: int = 2,
+                 offset: float = .85):
     "Creates the Notif and automatically place it to the master"
-    instance: notif_entity = notif_entity(master, notif_title, notif_desc, notif_date, 100, height, fg_color, font_sizes= font_sizes)
+    #instance: notif_entity = notif_entity(master, notif_title, notif_desc, 100, height, fg_color, font_sizes= font_sizes)
+    instance: notif_entity = notif_entity(master, notif_title, notif_desc, width, height, fg_color, font_sizes= font_sizes)
     instance.pack(fill = 'x')
     instance.update()
-    text_overflow_elipsis(instance.Notif_description, width, 2)
+    fit_to_trim(instance.Notif_description, width - height * offset, Desc_lines)
     instance.update_children()
     return instance
-
-
 
 class notif_entity(cctk.ctkButtonFrame):
     def __init__(self,
                  master: any,
                  notif_title: str,
                  notif_desc: str,
-                 notif_date: datetime.datetime, 
+                 #notif_date: datetime.datetime, 
                  width: int = 100,
                  height: int = 200,
                  fg_color: str| tuple[str, str]= None,
@@ -41,32 +43,34 @@ class notif_entity(cctk.ctkButtonFrame):
                  font_sizes: Optional[Tuple[float, float, float]] = None,
                  **kwargs):
         "notif entity object"
-        super().__init__(master, width=100, height = height, corner_radius = 0, border_width = 0, bg_color = 'transparent', fg_color = fg_color,
+        super().__init__(master, width= width, height = height, corner_radius = 0, border_width = 0, bg_color = 'transparent', fg_color = fg_color,
                          border_color = None, background_corner_colors = None, overwrite_preferred_drawing_method = None, command = command, hover = hover,
                          hover_color = hover_color, double_click_command = None, **kwargs)
         self._notif_title = notif_title
         self._notif_desc = notif_desc
-        self._notif_date = notif_date
+        #self._notif_date = notif_date
         self._font_sizes = font_sizes or (24, 16, 13)
         self._fonts: ctk.CTkFont = fonts or (('DM Sans', self._font_sizes[0]), ('DM Sans', self._font_sizes[1]), ('DM Sans', self._font_sizes[2]))
         self._text_colors = text_colors or ('black', 'black', '#777777')
 
-        #self.rowconfigure(1, weight=1)
-        #self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
         #region: appearance
+        self.icon = ctk.CTkFrame(self, width= height, height= height, fg_color= 'red')
+        self.icon.grid(row = 0, column = 0, sticky = 'nsew', rowspan = 3)
+
         self.Notif_title = ctk.CTkLabel(self, text= notif_title, fg_color='transparent', anchor='w',
                                         text_color= self._text_colors[0], font = self._fonts[0])
-        self.Notif_title.grid(row = 0, column = 0, sticky = 'we', padx = (3, 0), pady = (2, 0))
+        self.Notif_title.grid(row = 0, column = 1, sticky = 'we', padx = (3, 0), pady = (2, 0))
         
         self.Notif_description = ctk.CTkLabel(self, text= notif_desc, fg_color='transparent', anchor='w',
                                               text_color= self._text_colors[1], font= self._fonts[1])
         self.Notif_description._label.configure(justify= 'left')
-        self.Notif_description.grid(row = 1, column = 0, sticky = 'we', padx = (3, 0), pady = (2, 0))
+        self.Notif_description.grid(row = 1, column = 1, sticky = 'we', padx = (3, 0), pady = (2, 0))
         
-        self.Notif_date_diff = ctk.CTkLabel(self, text= calculate_day(notif_date), fg_color='transparent', anchor= 'w',
+        '''self.Notif_date_diff = ctk.CTkLabel(self, text= calculate_day(notif_date), fg_color='transparent', anchor= 'w',
                                             text_color= self._text_colors[2], font= self._fonts[2])
-        self.Notif_date_diff.grid(row = 2, column = 0, sticky = 'we', padx = (3, 0), pady = (2, 0))
+        self.Notif_date_diff.grid(row = 2, column = 1, sticky = 'we', padx = (3, 0), pady = (2, 0))'''
         #endregion
     
     def pack(self, **kwargs):
@@ -94,7 +98,7 @@ def calculate_day(date_time: datetime.datetime, return_type: Literal['datetime',
         hours = time_difference.seconds // 3600
         return f'{f"{hours} hours" if hours > 1 else "an hour"} ago'
         
-def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0):
+'''def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0):
     font_tool = ctk.CTkFont(lbl._font[0], lbl._font[1]) if isinstance(lbl._font, tuple) else lbl._font
 
     ellipsis_length:int = (font_tool.measure("..."))
@@ -111,6 +115,7 @@ def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, 
                     txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}...")
                     break
         else:
+            """Fix here"""
             for _ in range(index_holder, len(lbl._text)):
                 if font_tool.measure(txt + lbl._text[i]) < ((lbl._current_width if width is None else width) - width_padding):
                     try:    
@@ -130,4 +135,4 @@ def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, 
                     txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                     break
                 
-    lbl.configure(text = ''.join(txt_dvd))
+    lbl.configure(text = ''.join(txt_dvd))'''
