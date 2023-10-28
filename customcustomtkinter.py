@@ -135,6 +135,34 @@ class customcustomtkinter:
             self.place_forget()
         #hide the menubar
 
+    class scrollable_menubar(ctk.CTkScrollableFrame):
+        def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
+                     border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
+                     overwrite_preferred_drawing_method: Union[str, None] = None, position: tuple = (0, 0, 'c'), **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
+                             overwrite_preferred_drawing_method, **kwargs)
+
+            self._position = position
+            self._shadow = ctk.CTkFrame(master, 0, 0)
+
+        def place(self):
+            #place shadow here
+            return super().place(relx = self._position[0], rely = self._position[1], anchor = self._position[2])
+        #override the place to place a shadow first
+
+        def update_pos(self,  position: tuple = (0, 0, 'c')):
+            self.deiconify()
+            self._position = position
+            self.place()
+        #update the position, including the shadow
+
+        def deiconify(self):
+            self._shadow.place_forget()
+            self.place_forget()
+        #hide the menubar
+
     class cctkTreeView(ctk.CTkFrame):
         def __init__(self, master: any, data: Union [Union[tuple, list], None] = None, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
@@ -300,7 +328,7 @@ class customcustomtkinter:
                         temp_lbl._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
                         temp_lbl._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
                         temp_lbl.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
-                        text_overflow_elipsis(temp_lbl, self.column_widths[j] * .9)
+                        text_overflow_ellipsis(temp_lbl, self.column_widths[j] * .9)
                     #for info tab column
                     elif self.column_types[j] == 'iT':
                         temp:customcustomtkinter.info_tab = customcustomtkinter.info_tab(frm, width= self.column_widths[j], corner_radius= 0,
