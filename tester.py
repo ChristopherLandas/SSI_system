@@ -77,6 +77,14 @@ class body(ctk.CTk):
 
         sender = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252)
         sender.send("Hello123123")'''
+
+
+        label = ctk.CTkLabel(self, width=120, text = 'The item 23i23efo erjfoier jfoierfji doisjdfi weifjwei is currently out of stock fix it now bitch tanginamo')
+        label._label.configure(justify='left')
+        text_overflow_ellipsis(label, 250, 5)
+        label.place(relx = .5, rely = .5, anchor = 'c')
+
+        ctk.CTkLabel(self, width= 120, text = 'test').place(relx = .5, rely = .55, anchor = 'c')
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))
