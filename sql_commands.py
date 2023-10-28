@@ -925,9 +925,31 @@ get_expired_items_to_dispose = "SELECT item_general_info.UID, item_general_info.
 set_expired_items_from_inventory = "INSERT INTO disposal_history (id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
                                     VALUES (?, ?, ?, ?, ?, CURRENT_DATE, ?)"
 
+
+#NOTIFICATION DATA
 get_out_of_stock_names = "SELECT item_general_info.name\
                           FROM item_general_info\
                           JOIN item_inventory_info \
                               ON item_general_info.UID = item_inventory_info.UID\
                           WHERE item_inventory_info.Stock = 0\
                           GROUP BY item_general_info.UID"
+
+get_low_items_name = "SELECT item_general_info.name,\
+                             SUM(item_inventory_info.Stock) AS price,\
+                             item_settings.Reorder_factor,\
+                             item_settings.Safe_stock,\
+                             item_settings.Crit_factor\
+                             FROM item_inventory_info\
+                      JOIN item_general_info \
+                            ON item_inventory_info.UID = item_general_info.UID\
+                      JOIN item_settings\
+                            ON item_inventory_info.UID = item_settings.UID\
+                      WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null\
+                      GROUP BY item_general_info.UID\
+                      HAVING price BETWEEN 1 AND item_settings.Safe_stock * item_settings.Reorder_factor;"
+
+get_scheduled_clients_today_names = "SELECT service_name, patient_name from services_transaction_content\
+                                     WHERE scheduled_date = current_date"
+
+get_past_scheduled_clients_names = "SELECT service_name, patient_name from services_transaction_content\
+                                     WHERE scheduled_date < current_date"

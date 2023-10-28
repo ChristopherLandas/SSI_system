@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 import datetime;
 import _tkinter
 import sql_commands
-import notif_popup_entities as ntf
 import numpy as np
+from popup import notif_popup_entities as ntf
 from tkinter import messagebox
 from util import *
 from functools import partial
@@ -319,11 +319,12 @@ class dashboard(ctk.CTkToplevel):
         self.update()
 
         '''menubars'''
-        self.notif_menu_bar= cctk.menubar(self, width * default_menubar_width, height * default_menubar_height,
-                                          corner_radius= 0, fg_color='black', border_width= 0, border_color=Color.Blue_Cobalt,
-                                          position=(self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
-                                                    self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
-                                                    'c'))
+        self.notif_menu_bar= cctk.scrollable_menubar(self, width * default_menubar_width * 1.5, height * .9,
+                                          corner_radius= 0, fg_color='white', border_width= 0, border_color=Color.Blue_Cobalt,
+                                          position=(1 - default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
+                                          #'''position=(self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
+                                          #          self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
+                                          #          'c'))'''
         self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
                                               corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
                                               position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
@@ -331,8 +332,19 @@ class dashboard(ctk.CTkToplevel):
                                                         'c'))
         
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c = [('Out Of Stock', f'Item {s} is currently out of stock', datetime.datetime.now()) for s in out_of_stock]
-        notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1], s[2],  width * default_menubar_width * .95, 100) for s in ntf_c]
+        ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
+        
+        low_stock = database.fetch_data(sql_commands.get_low_items_name)
+        ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
+    
+        scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
+        ntf_c3 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
+
+        past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
+        ntf_c4 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+
+        ntf_c = ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
+        notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1],  width * default_menubar_width * 1.5 * .95, 100, Desc_lines= 3) for s in ntf_c]
 
         self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
                                                           onvalue="darkmode", offvalue="lightmode",)
