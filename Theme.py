@@ -126,5 +126,12 @@ class Icons:
     view_icon = ctk.CTkImage(light_image= Image.open("image/view.png"), size=(25,25))
     
 #endregion
+<<<<<<< HEAD
+=======
+    
+    zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
+    zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
+    zoom_reset_icon = ctk.CTkImage(light_image= Image.open("image/zoomreset.png"), size=(25,25))
+>>>>>>> 036159baf0882c2705acd7f1e8119998b41cd528
     
    

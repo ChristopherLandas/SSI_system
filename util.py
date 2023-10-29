@@ -183,7 +183,7 @@ def decode_action(type_code: str):
 
     
 
-def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):
+'''def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):
     font_tool = ctk.CTkFont(lbl._font[0], lbl._font[1]) if isinstance(lbl._font, tuple) else lbl._font
 
     ellipsis_length:int = (font_tool.measure("..."))
@@ -223,9 +223,41 @@ def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, 
                 else:
                     txt_dvd.append(f"{txt[1:] if txt.startswith(' ') else txt}\n")
                     break
-    lbl.configure(text = ''.join(txt_dvd))
+    lbl.configure(text = ''.join(txt_dvd))'''
+#OBSOLETE
 
+def text_overflow_ellipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):
+    font_tool = ctk.CTkFont(lbl._font[0], lbl._font[1]) if isinstance(lbl._font, tuple) else lbl._font
 
+    ellipsis_length:int = (font_tool.measure("..."))
+    txt_dvd: list = [[]]
+    label_text = str(lbl._text)
+
+    if font_tool.measure(label_text) < ((int(lbl._current_width) if width is None else width) - ellipsis_length - width_padding) or width is None:
+        return
+    #if cutting is not necessary at all
+    
+    def ellipse(sentence: str) -> str:
+        ans = ""
+    
+        for st in sentence:
+            if font_tool.measure(ans + st) < width - ellipsis_length:
+                ans += st
+            else:
+                ans += "..."
+                break
+        return (ans).split()
+    #add ellipsis for the word to fit
+    
+    for wrd in label_text.split():
+        if font_tool.measure(" ".join(txt_dvd[-1]) + wrd) > width :
+            if len(txt_dvd) < lines:
+                txt_dvd.append([])
+        txt_dvd[-1].append(wrd)
+    # split the sentence by words, creates new line if it reaches the max width and add all the remaining words at the last line
+
+    txt_dvd[-1] = ellipse(" ".join(txt_dvd[-1]))
+    lbl.configure(text = '\n'.join([" ".join(s) for s in txt_dvd]))
 
 ''' example of inserting data
 usn = 'admin'

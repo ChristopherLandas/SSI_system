@@ -562,9 +562,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
                 database.exec_nonquery([[sql_commands.add_item_inventory, (uid, self._inventory_info[2], receiving_expiry or None)]])'''
             #temporary disabled to change the addign item inventory
             database.exec_nonquery([[sql_commands.add_item_inventory, (uid, self._inventory_info[2], receiving_expiry or None)]])
-
-
-            database.exec_nonquery([[sql_commands.update_recieving_item, (acc_name or 'klyde', self._inventory_info[0])]])
+            database.exec_nonquery([[sql_commands.update_recieving_item, (acc_name, self._inventory_info[0])]])
 
             if isinstance(inventory_info, cctk.cctkTreeView):
                 inventory_info.update_table(database.fetch_data(sql_commands.get_recieving_items))
@@ -1766,16 +1764,32 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
                     return
                 self.place_forget()
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
-                if self.does_expire and self.expiry_date_entry._text == "Set Expiry Date":
+
+                '''if self.does_expire and self.expiry_date_entry._text == "Set Expiry Date":
                     messagebox.showinfo("Warning", "Please enter a valid expiry date")
                     return
+                    #return none if there's no expiry
                 elif self.does_expire and (self.expiry_date_entry._text != "Set Expiry Date"):
                     if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?", (recieving_info[2], self.expiry_date_entry._text))[0][0] == 0:
                         database.exec_nonquery([[sql_commands.add_item_inventory, (recieving_info[2], self.stock_spinner.value, self.expiry_date_entry._text)],])
                     else:
                         database.exec_nonquery([[sql_commands.update_expiry_stock, (self.stock_spinner.value, recieving_info[2],  self.expiry_date_entry._text)]]) 
+                    #if the item has expiry
                 else:
                     database.exec_nonquery([[sql_commands.update_non_expiry_stock, (self.stock_spinner.value, recieving_info[2])]])
+                    #if the item is non-expiry'''
+                #disabled to change the the management of stock
+                
+                if self.does_expire and self.expiry_date_entry._text == "Set Expiry Date":
+                    messagebox.showinfo("Warning", "Please enter a valid expiry date")
+                    return
+                    #return none if there's no expiry
+                elif self.does_expire and (self.expiry_date_entry._text != "Set Expiry Date"):
+                    database.exec_nonquery([[sql_commands.add_item_inventory, (recieving_info[2], self.stock_spinner.value, self.expiry_date_entry._text)],])
+                    #if the item has expiry
+                else:
+                    database.exec_nonquery([[sql_commands.add_item_inventory, (recieving_info[2], self.stock_spinner.value, None,)]])
+                    #if the item is non-expiry
                 
                 if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
                     database.exec_nonquery([[sql_commands.update_recieving_item, (acc_user, self.receiving_id.get())]])

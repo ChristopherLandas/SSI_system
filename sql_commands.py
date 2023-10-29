@@ -17,7 +17,8 @@ get_inventory_by_group = f"SELECT item_general_info.brand, item_general_info.nam
                           FROM item_general_info\
                           JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                           INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                          WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                          WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                            AND item_inventory_info.state = 1\
                           GROUP BY item_general_info.name, item_general_info.unit\
                           ORDER BY CASE\
                           WHEN SUM(item_inventory_info.Stock) < 1 THEN 1\
@@ -193,11 +194,14 @@ get_services_data_for_transaction = "SELECT uid,\
                                      FROM service_info\
                                      WHERE service_name = ?;"
 
+check_item_if_it_expire_by_categ = "SELECT categories.does_expire\
+                                    FROM item_general_info JOIN categories\
+                                    ON item_general_info.Category = categories.categ_name\
+                                    WHERE item_general_info.UID = ?"
 
 #RESTOCKING
 update_non_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date IS NULL"
 update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UID = ? AND Expiry_Date = ?"
-add_new_instance = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
 show_all_items = "SELECT name, unit FROM item_general_info"
 insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, ?, CURRENT_TIMESTAMP)"
 
@@ -218,8 +222,7 @@ show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initia
 
 #ADDING ITEMS THROUGH THE INVENTORY
 add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
-#add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1)"
-add_item_inventory = "INSERT INTO item_inventory_info VALUES (?, ?, ?, 1, CURRENT_DATE)"
+add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, state, added_date) VALUES (?, ?, ?, 1, CURRENT_DATE)"
 
 
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
@@ -233,6 +236,11 @@ record_services_transaction_content = "INSERT INTO services_transaction_content 
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
+get_specific_stock_ordered_by_expiry = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) AND state = 1 ORDER BY Expiry_Date ASC"
+get_specific_stock_ordered_by_date_added = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) AND state = 1 ORDER BY added_date"
+delete_stocks_by_id = "DELETE FROM item_inventory_info WHERE id = ?"
+deduct_stocks_by_id = "UPDATE item_inventory_info SET Stock = Stock - ? WHERE id = ?"
+null_stocks_by_id = "UPDATE item_inventory_info SET Stock = 0 WHERE id = ?"
 
 #FOR SALES
 get_transaction_data = "SELECT * FROM transaction_record"
@@ -916,3 +924,32 @@ get_expired_items_to_dispose = "SELECT item_general_info.UID, item_general_info.
                                 
 set_expired_items_from_inventory = "INSERT INTO disposal_history (id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
                                     VALUES (?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+
+
+#NOTIFICATION DATA
+get_out_of_stock_names = "SELECT item_general_info.name\
+                          FROM item_general_info\
+                          JOIN item_inventory_info \
+                              ON item_general_info.UID = item_inventory_info.UID\
+                          WHERE item_inventory_info.Stock = 0\
+                          GROUP BY item_general_info.UID"
+
+get_low_items_name = "SELECT item_general_info.name,\
+                             SUM(item_inventory_info.Stock) AS price,\
+                             item_settings.Reorder_factor,\
+                             item_settings.Safe_stock,\
+                             item_settings.Crit_factor\
+                             FROM item_inventory_info\
+                      JOIN item_general_info \
+                            ON item_inventory_info.UID = item_general_info.UID\
+                      JOIN item_settings\
+                            ON item_inventory_info.UID = item_settings.UID\
+                      WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null\
+                      GROUP BY item_general_info.UID\
+                      HAVING price BETWEEN 1 AND item_settings.Safe_stock * item_settings.Reorder_factor;"
+
+get_scheduled_clients_today_names = "SELECT service_name, patient_name from services_transaction_content\
+                                     WHERE scheduled_date = current_date"
+
+get_past_scheduled_clients_names = "SELECT service_name, patient_name from services_transaction_content\
+                                     WHERE scheduled_date < current_date"
