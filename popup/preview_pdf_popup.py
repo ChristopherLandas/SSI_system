@@ -248,19 +248,12 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     #region none sample
     
     current_month = datetime.now().strftime("%m-%Y-receipts")
-    current_day = datetime.now().strftime("%Y_%m_%d_")
-    #region change for default path
-    '''
-    document_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
-    newpath = f'{document_path}\\receipt\\{current_month}' 
+    current_day = datetime.now().strftime("%Y_%m_%d")
+    
+    newpath = f'Resources\\receipt\\{current_month}' 
     if not os.path.exists(newpath):
         os.makedirs(newpath)
-    '''
-    #endregion
-    newpath = f'receipt\\{current_month}' 
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-    filename = f'{newpath}\\{current_day}{client_name}_{or_number}_receipt.pdf'
+    filename = f'{newpath}\\{current_day}_{client_name}_{or_number}_receipt.pdf'
     
     pdf = SimpleDocTemplate(
         filename=filename,
@@ -517,7 +510,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.vaas1.img_object_li.clear()
         self.current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if self.view_by_reciept:
+        if not self.view_by_reciept is None:
             
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
@@ -538,6 +531,8 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.zoom_state_check(zoom_dpi=max(50, ((self.zoom_counter * self.zoom_step) + self.default_dpi)))
     
     def zoom_state_check(self, zoom_dpi):
+        #self.zoom_in_btn.configure(state=)
+        
         self.zoom_in_btn.configure(state = 'disabled' if self.zoom_counter == self.zoom_limit else 'normal') 
         self.zoom_out_btn.configure(state = 'disabled' if self.zoom_counter == -self.zoom_limit else 'normal')
         self.zoom_entry.configure(text=f"{zoom_dpi}%")

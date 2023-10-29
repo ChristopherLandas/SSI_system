@@ -126,10 +126,9 @@ def sales_history_popup(master, info:tuple):
             self.current_total.pack(side=ctk.RIGHT, padx=(width*0.01))
             
         def place(self, sales_info,**kwargs):
-            
-            self.date_label.configure(text=f"{sales_info[0].strftime('%B %d, %Y')}")
+            self.date_label.configure(text=f"{sales_info[0]}")
             self.current_total.configure(text = f"{sales_info[1]}")
-            self.raw_data = database.fetch_data(sql_commands.get_daily_sales_data_by_day, (f"{sales_info[0]}",))
+            self.raw_data = database.fetch_data(sql_commands.get_daily_sales_data_by_day, (f"{convert_date(date=sales_info[0], date_format='%B %d, %Y', convertion_format='%Y-%m-%d', value='str')}",))
             self.sales_treeview.update_table(self.raw_data)
                        
             return super().place(**kwargs)

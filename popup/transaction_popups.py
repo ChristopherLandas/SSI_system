@@ -1564,6 +1564,9 @@ def show_payment_proceed(master, info:tuple,):
                                 break
                 #modify the stock, applying the FIFO'''
 
+                for _item in item:
+                    list_of_items.append(_item)
+                    
                 for s in service:
                     if s[-1]:
                         for i in range(s[-1] - 1):
@@ -1595,8 +1598,8 @@ def show_payment_proceed(master, info:tuple,):
 
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
-                #ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
-                #                        title="Transaction Receipt Viewer")
+                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
+                                        title="Transaction Receipt Viewer")
             #Payment Callback
             def payment_callback(var, index, mode):
                 if self.payment_var.get().isdigit():

@@ -719,7 +719,7 @@ update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transa
                                                            WHERE usn = ?"
 
 #dashboard
-get_monthly_sales_data = "SELECT transaction_date,\
+get_monthly_sales_data = "SELECT DATE_FORMAT(transaction_date, '%M %d, %Y'),\
                                CONCAT('₱', FORMAT(sum(total_amount), 2)) AS price\
                           FROM transaction_record\
                           WHERE MONTH(transaction_date) = ?\
@@ -938,3 +938,10 @@ get_supplier_item_info_if_exist = "SELECT COUNT(1) FROM supplier_item_info\
 
 get_supplier_audit_trail = "SELECT created_by, CAST(date_added AS DATE), updated_by, CAST(date_modified AS DATE) FROM supplier_info\
                             WHERE supp_id = ?"
+                            
+get_out_of_stock_names = "SELECT item_general_info.name\
+                          FROM item_general_info\
+                          JOIN item_inventory_info \
+                              ON item_general_info.UID = item_inventory_info.UID\
+                          WHERE item_inventory_info.Stock = 0\
+                          GROUP BY item_general_info.UID"

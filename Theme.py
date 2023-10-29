@@ -58,6 +58,10 @@ class Color:
     Hover_Near_Expire_Color = "#FF8F33" #"#FF9B50"
     Hover_Expire_Color = "#FD7272" #"#E74646"
 
+    Test_Color_Red = 'red'
+    Test_Color_Blue = 'blue'
+    Test_Color_Yellow = 'yellow'
+    Test_Color_Green = 'green'
 #TEST ONLY
 #region icons
 class Icons:
@@ -130,9 +134,7 @@ class Icons:
     zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
     zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
     zoom_reset_icon = ctk.CTkImage(light_image= Image.open("image/zoomreset.png"), size=(25,25))
-    
-    zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
-    zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
-    zoom_reset_icon = ctk.CTkImage(light_image= Image.open("image/zoomreset.png"), size=(25,25))
-    
+
+    admin_user_icon = ctk.CTkImage(light_image= Image.open("image/admin_icon.png"), size=(35,35))
+    other_user_icon = ctk.CTkImage(light_image= Image.open("image/other_icon.png"), size=(35,35))
    
