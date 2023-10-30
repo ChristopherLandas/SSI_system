@@ -168,7 +168,7 @@ get_category_specific_inventory = "SELECT item_general_info.brand, item_general_
                                     ORDER BY item_general_info.UID"
 
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
-get_item_and_their_total_stock = "SELECT item_general_info.name,\
+get_item_and_their_total_stock = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                          CAST(SUM(item_inventory_info.Stock) as INT),\
                                          CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)), 2))\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -254,7 +254,7 @@ get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT
 
 #FOR INVENTORY STATE
 
-get_safe_state = "SELECT item_general_info.name,\
+get_safe_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                             case when sum(item_inventory_info.stock) > item_settings.Reorder_factor * item_settings.Safe_stock\
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -262,7 +262,7 @@ get_safe_state = "SELECT item_general_info.name,\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock"
 
-get_reorder_state= "SELECT item_general_info.name,\
+get_reorder_state= "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                             case when sum(item_inventory_info.stock) <= item_settings.Reorder_factor * item_settings.Safe_stock\
                                     AND sum(item_inventory_info.stock) > item_settings.Crit_factor * item_settings.Safe_stock\
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
@@ -271,7 +271,7 @@ get_reorder_state= "SELECT item_general_info.name,\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
-get_critical_state = "SELECT item_general_info.name,\
+get_critical_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                             case when sum(item_inventory_info.stock) <= item_settings.Crit_factor * item_settings.Safe_stock\
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -279,7 +279,7 @@ get_critical_state = "SELECT item_general_info.name,\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
-get_out_of_stock_state = "SELECT item_general_info.name,\
+get_out_of_stock_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                  case when sum(item_inventory_info.stock) = 0\
                                            then sum(item_inventory_info.stock) ELSE -1 END AS stock\
                           FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -287,7 +287,7 @@ get_out_of_stock_state = "SELECT item_general_info.name,\
                           GROUP BY item_inventory_info.uid\
                           HAVING stock >= 0;"
 
-get_near_expire_state = "SELECT item_general_info.name,\
+get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                  item_inventory_info.Stock,\
                                  case when item_inventory_info.Expiry_Date <= DATE_ADD(CURRENT_DATE, INTERVAL 15 DAY)\
                                              AND item_inventory_info.Expiry_Date > CURRENT_DATE\
@@ -297,7 +297,7 @@ get_near_expire_state = "SELECT item_general_info.name,\
                          HAVING exp;"
 
 
-get_expired_state = "SELECT item_general_info.name,\
+get_expired_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                              item_inventory_info.Stock,\
                              case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
                                          AND item_inventory_info.Expiry_Date IS NOT NULL \
@@ -347,7 +347,7 @@ get_all_position_titles = "SELECT Title from user_level_access"
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? , NULL, ?, 1, CURRENT_TIMESTAMP, Null)"
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
 
-get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
+get_recieving_items_state = f"SELECT id, case When state = 3 then 'Partial' when state = 1 then 'On Order' END AS stats,\
                                 NAME, current_stock, supplier_info.supp_name, ordered_by\
                                 FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
                                 WHERE state = 1 OR state = 3 ORDER BY state asc"
@@ -945,3 +945,13 @@ get_out_of_stock_names = "SELECT item_general_info.name\
                               ON item_general_info.UID = item_inventory_info.UID\
                           WHERE item_inventory_info.Stock = 0\
                           GROUP BY item_general_info.UID"
+                          
+get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
+                        FROM recieving_item\
+                        JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
+                        WHERE state = 1"
+
+get_on_pending_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
+                        FROM recieving_item\
+                        JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
+                        WHERE state = 3"

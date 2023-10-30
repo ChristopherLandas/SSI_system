@@ -749,9 +749,11 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def item_proceed(_: any = None):
                 if self.item_treeview.data_grid_btn_mng.active:
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
-                    add_data = (data[0], data[2], data[2])
-                    if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
-                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                    print(data)
+                    add_data = (data[1], data[3], data[3])
+                    print(add_data)
+                    if data[1] in [s[0] for s in root_treeview._data]: # if there's existing record
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[1])].winfo_children()[3].winfo_children()[0]
                         spinner.change_value()
                     else: #if there's none
                         root_treeview.add_data(add_data)
@@ -761,8 +763,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         data_frames = root_treeview.data_frames[-1]
                         spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
 
-                        spinner.configure(val_range = (1, data[1]))
-                        change_val_func_item(price_format_to_float(data[2][1:]))
+                        spinner.configure(val_range = (1, data[2]))
+                        change_val_func_item(price_format_to_float(data[3][1:]))
                         #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
 
                         def spinner_command(_: any = None):
@@ -881,7 +883,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            ctk.CTkLabel(self.top_frame, text='Particulars', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkLabel(self.top_frame, text='PARTICULARS', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
             
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
@@ -896,13 +898,13 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.service_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.service_frame.pack_propagate(0)
             
-            self.service_treeview = cctk.cctkTreeView(self.service_frame, height=height*0.4, width=width*0.8,corner_radius=0,double_click_command=service_proceed, column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
+            self.service_treeview = cctk.cctkTreeView(self.service_frame, height=height*0.4, width=width*0.805,corner_radius=0,double_click_command=service_proceed, column_format=f"/No:{int(width*.035)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
 
             self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.item_frame.pack_propagate(0)
             
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.8,double_click_command=item_proceed, column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:x-tr!30!30",)
+            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.805,double_click_command=item_proceed, column_format=f"/No:{int(width*.035)}-#r/ItemBrand:{int(width*.085)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.115)}-tr/Price:{int(width*.115)}-tr!30!30",)
             #self.item_treeview.pack()
             
             filter_func("All")
@@ -911,25 +913,28 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.place_forget()
 
         def place(self, **kwargs):
-            if('client' in kwargs):
-                self.check_client(kwargs['client'])
-                kwargs.pop('client')
-            count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
-            if count_temp != self.total_transaction_count:
-                self.update_service()
-                self.update_items_stocks()
-                self.total_transaction_count = count_temp
+            try:
+                if('client' in kwargs):
+                    self.check_client(kwargs['client'])
+                    kwargs.pop('client')
+                return super().place(**kwargs)
+            finally:
+                count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
+                if count_temp != self.total_transaction_count:
+                    self.update_service()
+                    self.update_items_stocks()
+                    self.total_transaction_count = count_temp
 
             #update the particulars if it's not been updated yet
             #update could be triggered by every invoice saved
-            return super().place(**kwargs)
+            
         
         def update_service(self):
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test)
             self.service_treeview.update_table([(s[1], s[2]) for s in raw_data])
 
         def update_items_stocks(self):
-            data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            data = [(data[0], f"{data[1]} ({data[2]})", data[3], data[4]) if data[2] else (data[0], data[1], data[3], data[4]) for data in database.fetch_data(sql_commands.get_item_and_their_total_stock, None)]
             self.item_treeview.update_table(data)
         
         def check_client(self, client_name: str):
@@ -1089,7 +1094,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='',image=self.invoice_icon).pack(side="left", padx=(width*0.015,0))
-            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
+            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
 
             self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="__",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
@@ -1116,7 +1121,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=(0))
 
             self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.685,
-                                                    column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30')
+                                                    column_format=f'/No:{int(width*0.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.115)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!35')
             self.transact_treeview.pack(pady=(0,0))
             self.transact_treeview.bd_commands = bd_commands
             

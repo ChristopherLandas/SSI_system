@@ -4,7 +4,7 @@ from customcustomtkinter import customcustomtkinterutil as cctku
 
 import sql_commands
 import tkcalendar
-from Theme import Color
+from Theme import Color, Icons
 from util import database, generateId
 from tkinter import messagebox
 from constants import action
@@ -18,39 +18,58 @@ from util import *
 import util
 from datetime import date
 
-def status_bar(master, info: tuple, height, width, text: str, icon_color: str, count: int, window: callable, data: dict, 
-               fg_color:str = Color.White_AntiFlash, hover_color:str = Color.Platinum):
+def status_bar(master, info: tuple, height, width, text: str, icon_color: str, count: Optional[int] = 0, command:callable = None, icon:Optional[ctk.CTkImage] = None,
+               fg_color:str = Color.White_AntiFlash, hover_color:str = Color.Platinum, display_warning: bool=True, indicator_space:bool = True, display_count: bool=True):
     class instance(cctk.ctkButtonFrame):
-        def __init__(self, master, info:tuple,  height, width, text: str, icon_color: str, count: int, window: callable, data: list,
+        def __init__(self, master, info:tuple,  height, width, text: str, icon_color: str,
                      fg_color:str, hover_color:str):
             self.info =info
             self.width = width
             self.height = height
-            self._window = window
-            self._data = data
+            self._display= display_warning
+            self._indicator_space = indicator_space
+            self._display_count = display_count
+            self._icon = icon
 
             super().__init__(master, height=self.height, width=self.width, fg_color=fg_color ,hover_color=hover_color,corner_radius=5,cursor="hand2")
-            
-            self.grid_columnconfigure(0, weight=1)
+            self.grid_columnconfigure(1, weight=1)
             self.grid_rowconfigure(0, weight=1)
             
-            self.status_label = ctk.CTkLabel(self, text=text, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht)
-            self.status_label.grid(row = 0, column = 0, padx=(self.height*0.15, 0), stick='w')
+            self.status_label = ctk.CTkLabel(self, text=text, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color='transparent')
             self.status_light = ctk.CTkFrame(self, height=self.height*0.15, width=self.height*0.15, corner_radius=8, border_width=1,
                                              border_color=Color.White_Ghost,fg_color=icon_color)
             self.status_count = ctk.CTkLabel(self, text=count, font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
+            self.icon_label = ctk.CTkLabel(self, text='', image=self._icon)
             
+            if self._icon:
+                self.icon_label.grid(row = 0, column = 0, padx=(self.height*0.225, 0), sticky='w')
+                self.status_label.grid(row = 0, column = 1, padx=(0, self.height*0.25), sticky='ew')
+            else:    
+                self.icon_label.grid_forget()
+                self.status_label.grid(row = 0, column = 1, padx=(self.height*0.225, 0), sticky='ew')
+                
             
-            self.status_light.grid(row = 0, column = 2, padx=(0,self.height*0.15))    
-            self.status_count.grid(row = 0, column = 1, padx=(0, self.height*0.15))
-            
-            if self.status_count._text == 0 or self.status_label._text == 'Safe/Normal': 
+                   
+            if self._indicator_space and self._display_count:
+                self.status_light.grid(row = 0, column = 3, padx=(0,self.height*0.15))
+                self.status_count.grid(row = 0, column = 2, padx=(0, self.height*0.15))
+                self.status_label.configure(anchor='w')  
+            elif not self._indicator_space and self._display_count: 
+                self.status_count.grid(row = 0, column = 2, padx=(0, self.height*0.35))
+                self.status_light.grid_forget()
+                self.status_label.configure(anchor='w')
+            else:
+                self.status_count.grid_forget()
+                self.status_label.configure(anchor='center')
+                  
+            if self.status_count._text == 0 or not self._display : 
                 self.status_light.configure(fg_color='transparent',border_width=0)
                 
             self.update_children()
 
         def response(self, _):
-            self._window(self.status_label._text, self._data )
+            if command: 
+                command()
             return super().response(_)
         
         def update_data(self, count, data):
@@ -58,7 +77,7 @@ def status_bar(master, info: tuple, height, width, text: str, icon_color: str, c
             self._data = data
 
 
-    return instance(master, info, height, width, text, icon_color, count, window, data, fg_color, hover_color)
+    return instance(master, info, height, width, text, icon_color, fg_color, hover_color)
 
 
 def sales_history_popup(master, info:tuple):
@@ -68,7 +87,7 @@ def sales_history_popup(master, info:tuple):
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color='transparent')
 
-            self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_history.png"), size=(25,25))
+            #self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_history.png"), size=(25,25))
 
             def reset():
                 self.place_forget()
@@ -87,8 +106,8 @@ def sales_history_popup(master, info:tuple):
             self.top_frame.grid(row=0, column=0,sticky="nsew")
             self.top_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.top_frame, text='', image=self.sales_icon, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
-            ctk.CTkLabel(self.top_frame, text='SALES HISTORY', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            ctk.CTkLabel(self.top_frame, text='', image=Icons.sales_history_icon, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
+            ctk.CTkLabel(self.top_frame, text='SALES HISTORY', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -126,12 +145,13 @@ def sales_history_popup(master, info:tuple):
             self.current_total.pack(side=ctk.RIGHT, padx=(width*0.01))
             
         def place(self, sales_info,**kwargs):
-            self.date_label.configure(text=f"{sales_info[0]}")
-            self.current_total.configure(text = f"{sales_info[1]}")
-            self.raw_data = database.fetch_data(sql_commands.get_daily_sales_data_by_day, (f"{convert_date(date=sales_info[0], date_format='%B %d, %Y', convertion_format='%Y-%m-%d', value='str')}",))
-            self.sales_treeview.update_table(self.raw_data)
-                       
-            return super().place(**kwargs)
+            try:    
+                return super().place(**kwargs)
+            finally:
+                self.date_label.configure(text=f"{sales_info[0]}")
+                self.current_total.configure(text = f"{sales_info[1]}")
+                self.raw_data = database.fetch_data(sql_commands.get_daily_sales_data_by_day, (f"{convert_date(date=sales_info[0], date_format='%B %d, %Y', convertion_format='%Y-%m-%d', value='str')}",))
+                self.sales_treeview.update_table(self.raw_data)
             
     return instance(master, info)
 

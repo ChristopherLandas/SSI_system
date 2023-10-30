@@ -138,7 +138,7 @@ class customcustomtkinter:
     class cctkTreeView(ctk.CTkFrame):
         def __init__(self, master: any, data: Union [Union[tuple, list], None] = None, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
-                     fg_color: Optional[Union[str, Tuple[str, str]]] = Color.Platinum, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = Color.White_Platinum, border_color: Optional[Union[str, Tuple[str, str]]] = None,
                      background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                      overwrite_preferred_drawing_method: Union[str, None] = None,
 
@@ -467,6 +467,7 @@ class customcustomtkinter:
             
             def set_date():
                 date_text = None
+                self.withdraw()
                 if "numerical" in date_format:
                     #label.configure(text= ( format % (self.cal.get_date())))
                     date_text = str(self.cal.get_date())
@@ -485,7 +486,6 @@ class customcustomtkinter:
                 
                 if set_date_callback:
                     set_date_callback()
-                self.withdraw()
 
             position_X = (self.winfo_screenwidth()/2)
             position_Y = (self.winfo_screenheight()/2)-(400/2)
@@ -815,7 +815,8 @@ class customcustomtkinter:
                 page_limit: int = 1,
                 command: callable = None,
                 font: Tuple[str, int] = None,
-                page_fg_color: str = None, 
+                page_fg_color: str = None,
+                disable_timer: int = 0,
                 
                  
                  **kwargs):
@@ -828,15 +829,23 @@ class customcustomtkinter:
             
                     
             def navigate(direction: int):
+                self.prev_button.configure(state="disabled")
+                self.next_button.configure(state="disabled")
                 if direction:
                     self.page_count = min(self.page_count+1, self.page_limit)
                 else:
                     self.page_count = max(self.page_count-1, 1)
                     
                 self.page_counter.configure(text=f"{self.page_count}")
-                self.checker()
+                #self.checker()
                 if self.command:self.command()
+                self.after(disable_timer, reenable())
             
+            def reenable():
+                self.prev_button.configure(state="normal")
+                self.next_button.configure(state="normal")
+                self.checker()
+                
             self.prev_button = ctk.CTkButton(self, text="<", font=self._font, height=self._current_height, width=self._current_height-width*0.05,
                                             image=None, command=partial(navigate, 0),)
             self.prev_button.pack(side="left", padx=(width*0.025, 0), pady=(width*0.025))
@@ -848,7 +857,7 @@ class customcustomtkinter:
                                             , image=None, command=partial(navigate, 1))
             self.next_button.pack(side="right", padx=(0, width*0.025), pady=(width*0.025))
             self.checker()
-
+            
         def checker(self):
             if self.page_count == 1:
                 self.prev_button.configure(state="disabled")
@@ -859,15 +868,16 @@ class customcustomtkinter:
                 self.next_button.configure(state="disabled")
             else:
                 self.next_button.configure(state="normal")
-
+        
         def get(self):
             return self.page_count
         
         def update_page_limit(self, page):
             if page == 0: page = 1
-            if self.page_count > page: self.page_count = 1; self.page_counter.configure(text=self.page_count)
+            if self.page_count > page: self.page_count = 1
+            self.page_counter.configure(text=self.page_count)
             self.page_limit = page
-            self.checker()
+            self.checker()             
             
             
         

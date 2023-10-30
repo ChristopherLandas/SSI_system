@@ -312,8 +312,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     
     receipt_content = [
         ['Statement of Account', '', f'Date: {today}', ''], 
-        [f'OR#: {or_number}', '', f'Cashier: {cashier_name}', ''],
-        [f'Name of Client: {client_name}', '', '', ''],
+        [f'TransactionID: {or_number}', '', f'Cashier: {cashier_name}', ''],
+        [f'Client: {client_name}', '', '', ''],
         [f'Pet Name: {pet_name}', '', '', ''],
         ['Particulars', 'Quantity', 'Unit Price', 'Amount']]
     ''',

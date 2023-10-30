@@ -580,19 +580,25 @@ def show_status(master, info:tuple,):
 
             def reset():
                 self.place_forget()
+                
+            def page_callback():
+                self.update_table()
 
-            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.5, height=height*0.85)
+            self.page_row_count = 14
+            
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.86,
+                                           border_width=1, border_color=Color.White_Platinum)
             self.main_frame.grid(row=0, column=0, sticky="n")
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(2,weight=1)
 
-
             self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
-            self.top_frame.grid(row=0, column=0, sticky="nsew")
+            self.top_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=(1,0))
             self.top_frame.pack_propagate(0)
-
-            ctk.CTkLabel(self.top_frame, text="INVENTORY STATUS", text_color="white", font=("DM Sans Medium", 16)).pack(side="left",padx=width*0.015)
+            
+            ctk.CTkLabel(self.top_frame, text="", image=Icons.inventory_status, font=("DM Sans Medium", 14)).pack(side="left",padx=(width*0.004, width*0.0035))
+            ctk.CTkLabel(self.top_frame, text="INVENTORY STATUS", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=(0,width*0.015))
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
@@ -603,26 +609,48 @@ def show_status(master, info:tuple,):
             self.status_label = ctk.CTkLabel(self.status_frame, text="", font=("DM Sans Medium", 14))
             self.status_label.pack(side="left", padx=width*0.015)
 
-            self.status_count = ctk.CTkLabel(self.status_frame, text="", font=("DM Sans Medium", 16))
+            self.status_count = ctk.CTkLabel(self.status_frame, text="", font=("DM Sans Medium", 14))
             self.status_count.pack(side="right", padx=width*0.015)
 
-            self.db_inventory_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.db_inventory_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum,corner_radius=0)
             self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
-            self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.49, height=height*0.85,
-                                               column_format=f'/No:{int(width*.025)}-#c/ItemName:x-tl/Quantity:{int(width*0.075)}-tr!30!30',)
+            self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.64, height=height*0.85,
+                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*0.1)}-tl/ItemDescription:x-tl/QuantityPcs:{int(width*0.125)}-tr!30!30',)
             self.db_inventory_treeview.pack()
             
-            self.no_data_label = ctk.CTkLabel(self.db_inventory_frame, text="", font=("DM Sans Medium", 14))
+            self.page_counter = cctk.cctkPageNavigator(self.main_frame,  width=width*0.125, height=height*0.055, fg_color=Color.White_Platinum, page_fg_color=Color.White_Lotion, 
+                                             font=("DM Sans Medium", 14), page_limit=1, disable_timer=100, command=page_callback,)
+            self.page_counter.grid(row=3, column=0, sticky="ns", padx=width*0.005, pady=(0,height*0.01))
             
-        def update_treeview(self, data):
-            self.db_inventory_treeview.update_table(data)
-            self.status_count.configure(text=len(data))
-            if len(data) == 0: 
-                self.no_data_label.place(relx=0.5, rely=0.5, anchor='c');
-                self.no_data_label.configure(text=f'No {self.status_label._text.lower()} status data to show yet')
+            self.no_data_label = ctk.CTkLabel(self.db_inventory_frame, text="", font=("DM Sans Medium", 14))
+        
+        def set_table(self, given:Optional[list] = None):      
+            self.raw_list = given if given else self.raw_data
+            self.pages, self.page_count = list_to_parted_list(self.raw_list, self.page_row_count, 1)
+            self.page_counter.update_page_limit(self.page_count)
+            self.update_table()
+        
+        def update_table(self):
+            self.temp = self.pages[self.page_counter.get()-1] if self.pages else []
+            if len(self.pages) != 0:
+                self.temp = self.pages[self.page_counter.get()-1]; 
+                self.no_data_label.place_forget() 
             else:
-                self.no_data_label.place_forget()         
+                self.temp = []
+                self.no_data_label.configure(text=f'No {self.status_label._text.lower()} status data yet to show.')
+                self.no_data_label.place(relx=0.5, rely=0.5, anchor='c')
+            self.db_inventory_treeview.update_table(self.temp)
+         
+        def place(self, data, title, color, count, processing: Optional[bool] = True,**kwargs):
+            try:
+                return super().place(**kwargs)
+            finally:
+                self.raw_data = [(data[0], f'{data[1]} ({data[2]})', data[3]) if data[2] else (data[0],data[1], data[3]) for data in data] if processing else data
+                self.status_frame.configure(fg_color=color)
+                self.status_label.configure(text=title)
+                self.status_count.configure(text=count)
+                self.set_table()      
 
     return show_status(master, info,)
 
