@@ -810,7 +810,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[1] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
                                                                                          self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
-                                                                                                                                                        master_frame= data_frames))
+                                                                                                                                                        master_frame= data_frames, service_dict= service_dict,
+                                                                                                                                                        root_treeview= root_treeview, change_total_val_serv_callback= change_total_val_serv_callback))
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -1511,10 +1512,11 @@ def show_payment_proceed(master, info:tuple,):
                 self.complete_button.configure(state="disabled")
                 self.cancel_button.configure(state="disabled")
                 
+                print(self.items)
                 temp = [(split_unit(data[0]) + data[1:]) for data in self.items]
-                item = [(record_id, database.fetch_data(sql_commands.get_uid,(s[0], s[1]))[0][0], f'{s[0]} ({s[1]})', s[2], (price_format_to_float(s[3]) / s[2]), 0) if len(s) == 4 
+                item = [(record_id, database.fetch_data(sql_commands.get_uid,(s[0], s[1]))[0][0], f'{s[0]} ({s[1]})', s[2], (price_format_to_float(s[3]) / s[2]), 0) if len(s) >= 4 
                         else (record_id, database.fetch_data(sql_commands.get_uid_null_unit,(s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in temp]
-                
+
                 for _service in self.services:
                     list_of_services.append(_service)
 

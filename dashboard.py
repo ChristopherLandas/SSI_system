@@ -66,7 +66,7 @@ class dashboard(ctk.CTkToplevel):
         
         #[print(screen) for screen in screeninfo.get_monitors()]
         '''Global Variables'''
-        global width, height, mainframes, IP_Address
+        global width, height, mainframes, IP_Address, SETTINGS_VAL
         width = self.winfo_screenwidth() / scaling
         height = self.winfo_screenheight() / scaling
             
@@ -315,20 +315,16 @@ class dashboard(ctk.CTkToplevel):
         self.notif_menu_bar= cctk.scrollable_menubar(self, width * self.default_menubar_width * 1.5, height * .9,
                                           corner_radius= 0, fg_color='white', border_width= 0, border_color=Color.Blue_Cobalt,
                                           position=(1 - self.default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
-        self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
+        '''self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
                                               corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
                                               position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
                                                         self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
-                                                        'c'))
+                                                        'c'))'''
         
-        self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
+        '''self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
                                                           onvalue="darkmode", offvalue="lightmode",)
-        self.settings_menu_bar_dark_mode.grid(row=0, column=0)
+        self.settings_menu_bar_dark_mode.grid(row=0, column=0)'''
         
-        #self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
-        #                                                  onvalue="darkmode", offvalue="lightmode",)
-        #self.settings_menu_bar_dark_mode.grid(row=0, column=0)
-
         self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost,
                                          position= (1 - acc_menubar_width/2,
                                                     self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
@@ -351,18 +347,32 @@ class dashboard(ctk.CTkToplevel):
     
     def generate_notification(self):
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
+        ntf_c1 = [('Out sf stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock')]
+        #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
-        ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
-    
+        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock')]
+        #ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
+
+        #near expiry items add here
+
+        expired = database.fetch_data(sql_commands.get_expired_items_name)
+        #ntf_c3 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
+        ntf_c3 = [('Expired stock', f'{len(expired)} Item{"s" if len(low_stock) > 1 else ""} had an expired stocks')]
+
+        near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
+        ntf_c4 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}') for s in near_shceduled]
+
         scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
-        ntf_c3 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
+        ntf_c5 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
 
         past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
-        ntf_c4 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        ntf_c6 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment')]
+        #ntf_c6 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
 
-        ntf_c = ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
+        ntf_c = ntf_c4 + ntf_c2 + ntf_c3 + ntf_c1 + ntf_c5 + ntf_c6
+
+        #fix 0 value notifs
 
         for _ntf in self.notifs:
             _ntf.destroy()
@@ -628,10 +638,7 @@ class dashboard_frame(ctk.CTkFrame):
     def show_pie(self, data: list = None):
         if(self.canvas is not None):
             self.canvas.get_tk_widget().destroy()
-        #self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
-        #           float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
-        self.data = [34,49]
-        data = self.data if self.data[0] + self.data[1] > 0 else [1, 0]
+        data = [self.data[0], self.data[1]] if self.data[0] + self.data[1] > 0 else [1, 0]
         
         pie_figure= Figure(figsize=(self.income_frame_height*0.008,self.income_frame_height*0.008), dpi=100)
         pie_figure.set_facecolor(Color.White_Lotion)
@@ -647,6 +654,7 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.no_data = ctk.CTkLabel(self.income_summary_frame,text='No transactions yet.', font=("DM Sans Medium", 14), fg_color=Color.White_Platinum)
         self.no_data.grid_forget() if self.data[0] + self.data[1] > 0 else self.no_data.grid(row = 0, column=1, rowspan = 6)
+
     def generate_DISumarry(self):
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0),
@@ -2116,6 +2124,7 @@ class reports_frame(ctk.CTkFrame):
 
         def report_menu_callback(report_type):
             if "Daily" in report_type:
+                self.refresh_btn.pack_forget()
                 self.monthly_graph.grid_forget()
                 self.month_option.pack_forget()
                 self.year_option.pack_forget()
@@ -2126,8 +2135,10 @@ class reports_frame(ctk.CTkFrame):
                 self.daily_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.date_selected_label.pack(side="left", padx=(0, width*0.005))
                 self.show_calendar.pack(side="left",  padx=(0, width*0.005))
+                self.refresh_btn.pack(side="left",  padx=(0, width*0.0025))
 
             elif "Monthly" in report_type:
+                self.refresh_btn.pack_forget()
                 self.date_selected_label.pack_forget()
                 self.show_calendar.pack_forget()
                 self.daily_graph.pack_forget()
@@ -2139,8 +2150,10 @@ class reports_frame(ctk.CTkFrame):
                 self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.month_option.pack(side="left", padx=(0, width*0.005))
                 self.year_option.pack(side="left", padx=(0, width*0.005))
+                self.refresh_btn.pack(side="left",  padx=(0, width*0.0025))
 
             elif "Yearly" in report_type:
+                self.refresh_btn.pack_forget()
                 self.date_selected_label.pack_forget()
                 self.show_calendar.pack_forget()
                 self.month_option.pack_forget()
@@ -2150,6 +2163,8 @@ class reports_frame(ctk.CTkFrame):
                 self.yearly_data_view.pack()
                 self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.year_option.pack(side="left", padx=(0, width*0.005))
+                self.refresh_btn.pack(side="left",  padx=(0, width*0.0025))
+
             self.update_graphs()
 
         def set_date():
@@ -2226,8 +2241,8 @@ class reports_frame(ctk.CTkFrame):
         self.show_calendar = ctk.CTkButton(self.sales_report_top, text="", image=self.calendar_icon, height=height*0.045, width=width*0.025, command=set_date)
         self.show_calendar.pack(side="left",  padx=(0, width*0.0025))
 
-        """ self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
-        self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0)) """
+        self.refresh_btn = ctk.CTkButton(self.sales_report_top, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
+        #self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
         
         self.show_gen_report = ctk.CTkButton(self.top_con_frame, image=self.generate_report_icon, width=width*0.125,  text="Generate Report", height=height*0.0575, font=("DM Sans Medium", 14),
                                              command = lambda: self.save_as_popup.place(daily_selected_date = self.date_selected_label._text, month_selected_date = self.month_option.get(),year_selected_date = self.year_option.get(), relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))

@@ -961,11 +961,29 @@ get_low_items_name = "SELECT item_general_info.name,\
                       GROUP BY item_general_info.UID\
                       HAVING price BETWEEN 1 AND item_settings.Safe_stock * item_settings.Reorder_factor;"
 
+get_expired_items_name = "SELECT item_general_info.name, SUM(item_inventory_info.Stock)\
+                                  FROM item_inventory_info\
+                          JOIN item_general_info \
+                                  ON item_inventory_info.UID = item_general_info.UID\
+                          JOIN item_settings\
+                                  ON item_inventory_info.UID = item_settings.UID\
+                          WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE\
+                          GROUP BY item_general_info.UID"
+
 get_scheduled_clients_today_names = "SELECT service_name, patient_name from services_transaction_content\
                                      WHERE scheduled_date = current_date"
 
 get_past_scheduled_clients_names = "SELECT service_name, patient_name from services_transaction_content\
                                      WHERE scheduled_date < current_date"
+
+get_past_scheduled_clients_names = "SELECT service_name, patient_name from services_transaction_content\
+                                     WHERE scheduled_date < current_date"
+
+get_near_scheduled_clients_names = "SELECT service_name,\
+                                    patient_name,\
+                                    DATEDIFF(current_date, DATE_sub(scheduled_date, INTERVAL ? DAY))\
+                                    from services_transaction_content\
+                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date"
                           
 get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
                         FROM recieving_item\
