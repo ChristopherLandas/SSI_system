@@ -728,6 +728,8 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
 
     return instance(master, info, parent)
 
+#obsolete codes up here
+
 def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict, change_total_val_serv_callback: callable) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict, change_total_val_serv_callback: callable):
@@ -806,9 +808,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                                                    command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[1] for s in self.client],
                                                                                          proceed_command, None, self.winfo_screenwidth() * .65,
                                                                                          self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
-                                                                                                                                                        service_dict= self._service_dict,
-                                                                                                                                                        root_treeview=root_treeview,
-                                                                                                                                                        change_total_val_serv_callback= self.change_total_val_serv_callback,
                                                                                                                                                         master_frame= data_frames))
                         #make a button
                         for i in data_frames.winfo_children():
