@@ -456,7 +456,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
-        self.attributes('-topmost',1)
+        '''self.attributes('-topmost',1)
         toplvl_width = 800
         toplvl_height = 600
         position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
@@ -480,9 +480,9 @@ class preview_pdf_popup(ctk.CTkToplevel):
         zoom_in_btn = ctk.CTkButton(zoom_frame, text='+', command=zoom_in, font=("DM Sans Medium", 14), width=30)
         zoom_in_btn.pack(side = 'left')
         #endregion
+        '''       
+        
         window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
-        
-        
         self.attributes('-topmost',1)
         self.view_by_reciept = view_receipt_by_or
         self.zoom_step = 10
