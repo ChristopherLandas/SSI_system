@@ -33,7 +33,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 #print(show_receipt)
                 or_num = f"{self.date_label._text.replace('-', '_')}_{self.client_name._text}_{self.or_label._text}_receipt"
                 #print(or_num)
-                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer")
+                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer", is_receipt=1)
             
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Lotion)
             self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.0225)
@@ -122,15 +122,18 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
         
         
         def place(self, sales_info, **kwargs):
-            raw_items = database.fetch_data(sql_commands.get_item_record, (sales_info,))
-            raw_service = database.fetch_data(sql_commands.get_service_record, (sales_info,))
-            self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info,))[0]         
-            self.set_values()
-             
-            temp =  raw_service + raw_items
-            self.tree_data = [(data[0], data[1], f"₱ {format_price(data[2])}", f"₱ {format_price(data[3])}") for data in temp]
+            try:
+                return super().place(**kwargs)
+            finally:
+                raw_items = database.fetch_data(sql_commands.get_item_record, (sales_info[0],))
+                raw_service = database.fetch_data(sql_commands.get_service_record, (sales_info[0],))
+                self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]         
+                self.set_values()
+                temp =  raw_service + raw_items
+                print(temp)
+                self.tree_data = [(data[0], data[1], f"₱ {format_price(data[2])}", f"₱ {format_price(data[3])}") for data in temp]
+                
+                self.receipt_treeview.update_table(self.tree_data) 
             
-            self.receipt_treeview.update_table(self.tree_data) 
             
-            return super().place(**kwargs)
     return instance(master, info)

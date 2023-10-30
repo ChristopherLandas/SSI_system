@@ -59,6 +59,7 @@ class dashboard(ctk.CTkToplevel):
         self._master = master
         self.notifs = []
         #self.attributes("-topmost",1)
+        self._fg_color=Color.White_Platinum
         
         is_loading = 1
         rand = random.randint(1,2)
@@ -68,18 +69,11 @@ class dashboard(ctk.CTkToplevel):
         global width, height, mainframes, IP_Address
         width = self.winfo_screenwidth() / scaling
         height = self.winfo_screenheight() / scaling
-        
-       
-        print(self.winfo_screenwidth(), self.winfo_screenheight(), '\n', width, height)
-        
-        
+            
         title_name = "J.Z. Angeles Veterinary Clinic"
         
         '''Fonts'''
         try:
-            Font(file="Font/Poppins-Medium.ttf")
-            Font(file="Font/Poppins-Regular.ttf")
-            Font(file='Font/Poppins-Bold.ttf')
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
@@ -100,7 +94,7 @@ class dashboard(ctk.CTkToplevel):
         frame_count = 12
         self.pet_frames = [tk.PhotoImage(file=gif_file, format= 'gif -index %i' %(i)) for i in range(frame_count)]
         
-        self.loading_frame = ctk.CTkFrame(self, fg_color=Color.Blue_Cobalt)
+        self.loading_frame = ctk.CTkFrame(self, fg_color=Color.Blue_Cobalt, corner_radius=0)
         self.loading_frame.place(relx =0.5, rely=0.5, relwidth=1, relheight=1, anchor='center')
         
         def update_frame(index):
@@ -191,9 +185,9 @@ class dashboard(ctk.CTkToplevel):
         selected_btn_color = Color.Blue_Steel
 
         #self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
-        temp_labels = ['Dashboard', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Info', 'Reports', 'User Settings', 'General Settings', 'History']
-        temp_icons = [self.dashboard_icon,  self.transact_icon, self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
-        temp_main_frames = [dashboard_frame, reception_frame, payment_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
+        temp_labels = ['Dashboard', 'Reception', 'Payment', 'Customers', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Reports', 'User Settings', 'Settings', 'History']
+        temp_icons = [self.dashboard_icon,  self.transact_icon, self.transact_icon,  self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
+        temp_main_frames = [dashboard_frame, reception_frame, payment_frame, customer_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
 
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
         self.labels = []
@@ -205,7 +199,6 @@ class dashboard(ctk.CTkToplevel):
                 self.labels.append(temp_labels[i])
                 self.loading_message.configure(text=f"Loading {temp_labels[i]}...")
                 self.main_frames.append(temp_main_frames[i](self))
-            #print(f"Loading - {temp_labels[i]} Time: {datetime.datetime.now()}")
             
         del temp_main_frames, temp_user_lvl_access, temp_labels, temp_icons
         
@@ -281,7 +274,7 @@ class dashboard(ctk.CTkToplevel):
 
         '''Top Frame'''
         self.top_frame = ctk.CTkFrame(self, height=round(height * 0.1), width=round(width* 0.825),
-                                      corner_radius=0,fg_color=Color.White_Ghost)
+                                      corner_radius=0,fg_color=Color.White_Lotion)
         self.top_frame.grid(row=0, column=1, sticky="nsew")
         self.top_frame.grid_propagate(False)
 
@@ -292,27 +285,29 @@ class dashboard(ctk.CTkToplevel):
         self.title_label.grid(row = 0, column=0,sticky='w', padx= width * 0.02)
 
         self.notif_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()*0.5), text= "", image= Icons.notif_icon,
-                                              fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight() *0.5), border_width=0, corner_radius=5,
+                                              fg_color=Color.White_Lotion, height= round(self.top_frame.winfo_reqheight() *0.5), border_width=0, corner_radius=5,
                                               font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
-        self.notif_btn.grid(row=0, column= 2, sticky='w')
-        self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= Icons.display_setting_icon,
-                                              fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
-                                              font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
+        self.notif_btn.grid(row=0, column= 1, sticky='w')
+        #self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= Icons.display_setting_icon,
+        #                                      fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
+        #                                      font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
+        #self.settings_btn.grid(row=0, column= 1, sticky='w')
+        #divider
+        #ctk.CTkFrame(self.top_frame, width=width*0.0025, fg_color=Color.Grey_Bright_2,corner_radius=0).grid(row=0, column=2, padx=(width*0.0025),)
 
-        self.acc_btn = cctk.ctkButtonFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12),
-                                           round(self.top_frame.winfo_reqheight()*.5), 5,
-                                           fg_color=Color.White_Ghost,
-                                           hover_color= Color.White_Gray,cursor="hand2")
+        self.acc_btn = cctk.ctkButtonFrame(self.top_frame, width=round(self.top_frame.winfo_reqwidth() * .12),
+                                           height=round(self.top_frame.winfo_reqheight()*.5), corner_radius=5,
+                                           fg_color=Color.White_Gray,
+                                           hover_color= Color.White_Platinum, cursor="hand2")
 
-        self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
-        self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=self.acc_icon,)
-        self.dp.grid(row = 0, column = 0, rowspan = 3, sticky = 'nsew', pady = (round(height * .005), 0), padx = (round(height * .01), 0))
-        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][1]).upper(), font=("DM Sans Medium", 15))
-        self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .005), 0), pady = (5,0))
-        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][2]).upper(), font=("DM Sans Medium", 12))
-        self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .005), 0), pady = 0)
-
-        self.acc_btn.grid(row=0, column= 3, sticky='e', padx=(0,10))
+        self.acc_btn.grid(row=0, column=3, sticky='e', padx=(0,width*0.005))
+        self.acc_btn.grid_rowconfigure((0,1), weight=1)
+        self.dp = ctk.CTkLabel(self.acc_btn, width * .03, width * .03, 0, 'transparent', 'transparent', text='', image=Icons.admin_user_icon,)
+        self.dp.grid(row = 0, column = 0, rowspan = 2, sticky = 'nsew', pady = (0,2), padx = (round(height * .005), 0))
+        self.acc_name = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][1]).upper(), font=("DM Sans Bold", 14,), text_color=Color.Blue_Maastricht)
+        self.acc_name.grid(row = 0, column = 1, sticky = 'sw', padx = (round(height * .0025), 0), pady = (0))
+        self.position = ctk.CTkLabel(self.acc_btn, height = 0, fg_color='transparent', text=str(acc_info[0][2]).upper(), font=("DM Sans Medium", 12), text_color=Color.Blue_Maastricht)
+        self.position.grid(row = 1, column = 1, sticky = 'nw', padx = (round(height * .0025), 0), pady = 0)
         self.acc_btn.update_children()
         self.update()
 
@@ -330,13 +325,17 @@ class dashboard(ctk.CTkToplevel):
                                                           onvalue="darkmode", offvalue="lightmode",)
         self.settings_menu_bar_dark_mode.grid(row=0, column=0)
         
+        #self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
+        #                                                  onvalue="darkmode", offvalue="lightmode",)
+        #self.settings_menu_bar_dark_mode.grid(row=0, column=0)
+
         self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost,
                                          position= (1 - acc_menubar_width/2,
                                                     self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                                     'c'))
 
-        self.top_frame_button_mngr = cctku.button_manager([self.settings_btn ,self.notif_btn, self.acc_btn], Color.Platinum, True,
-                                                          children=[self.settings_menu_bar, self.notif_menu_bar, self.acc_menu_bar])
+        self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
+                                                          children=[self.notif_menu_bar, self.acc_menu_bar])
 
         '''setting default events'''
         
@@ -379,7 +378,7 @@ class dashboard(ctk.CTkToplevel):
 class dashboard_frame(ctk.CTkFrame):
     global width, height, IP_Address
     def __init__(self, master):
-        super().__init__(master,corner_radius=0,fg_color=Color.White_Chinese)
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
         def open_sale_history(_):
             if self.sales_data_treeview.get_selected_data():
@@ -388,20 +387,25 @@ class dashboard_frame(ctk.CTkFrame):
         def open_schedule(_):
             if self.sched_data_treeview.get_selected_data():
                 self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=self.sched_data_treeview.get_selected_data())
-                
+        
+        self.grid_columnconfigure((0,1),weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_propagate(1)
+        
+        self.state = None
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 222, self.update_receiver)
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
 
-        self.date_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, corner_radius= 5)
-        self.date_frame.grid(row=0, column=7, padx = (width * .025, width * .01), pady= (height * .01), sticky='e')
+        self.date_frame = ctk.CTkFrame(self, fg_color=Color.White_Ghost, corner_radius= 5,)
+        self.date_frame.grid(row=0, column=1, padx = (width*0.005), pady= (width*0.005), sticky='e')
         self.date_label = ctk.CTkLabel(self.date_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 14))
         self.date_label.pack(anchor='c', padx = width * .015, pady = height * .01)
 
         '''Income summary frame'''
-        self.income_summary_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
-        self.income_summary_frame.grid(row=1, column=0, columnspan=4, padx= (width*.01 ,width*(.005)))
+        self.income_summary_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Lotion, corner_radius=5)
+        self.income_summary_frame.grid(row=1, column=0, padx=(width*0.005),sticky="nsew")
         self.income_summary_frame.grid_propagate(0)
 
         self.income_frame_width, self.income_frame_height = self.income_summary_frame.cget('width'), self.income_summary_frame.cget("height")
@@ -415,28 +419,28 @@ class dashboard_frame(ctk.CTkFrame):
         self.income_summary_sub.grid(row=1, column=0, sticky="ew")
 
         self.num_transactions = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.White_AntiFlash, corner_radius=5)
-        self.num_transactions.grid(row=2, column=0, sticky="nsew", padx=(self.income_frame_width*0.03), pady=(self.income_frame_height*0.05, self.income_frame_height*.015),)
+        self.num_transactions.grid(row=2, column=0, sticky="nsew", padx=(self.income_frame_width*0.03,0), pady=(self.income_frame_height*0.05, self.income_frame_height*.015),)
         self.num_transactions.pack_propagate(0)
         ctk.CTkLabel(self.num_transactions, text="Transactions Today:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
         self.transaction_today_count = ctk.CTkLabel(self.num_transactions, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
         self.transaction_today_count.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
         self.items_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.Light_Green, corner_radius=5)
-        self.items_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(self.income_frame_width*0.03), pady=(self.income_frame_height*0.015, self.income_frame_height*.015),)
+        self.items_sales_frame.grid(row=3, column=0, sticky="nsew", padx=(self.income_frame_width*0.03,0), pady=(self.income_frame_height*0.015, self.income_frame_height*.015),)
         self.items_sales_frame.pack_propagate(0)
         self.items_sales_label = ctk.CTkLabel(self.items_sales_frame, text="Items:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
         self.items_sales_value = ctk.CTkLabel(self.items_sales_frame, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
         self.items_sales_value.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
-        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.Red_Tulip, corner_radius=5)
-        self.services_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(self.income_frame_width*0.03),pady=( self.income_frame_height*.015))
+        self.services_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.18, fg_color=Color.Blue_Cornflower, corner_radius=5)
+        self.services_sales_frame.grid(row=4, column=0, sticky="nsew", padx=(self.income_frame_width*0.03,0),pady=( self.income_frame_height*.015))
         self.services_sales_frame.pack_propagate(0)
         ctk.CTkLabel(self.services_sales_frame, text="Services:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
         self.services_sales_value = ctk.CTkLabel(self.services_sales_frame, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
         self.services_sales_value.pack(side="right", anchor="c", padx=(0,self.income_frame_width*.025))
 
         self.total_sales_frame = ctk.CTkFrame(self.income_summary_frame,height=self.income_frame_height*0.15, fg_color=Color.White_AntiFlash, corner_radius=5)
-        self.total_sales_frame.grid(row=5, column=0, sticky="nsew", padx=(self.income_frame_width*0.03),pady=(self.income_frame_height*.015, self.income_frame_height*.05))
+        self.total_sales_frame.grid(row=5, column=0, sticky="nsew", padx=(self.income_frame_width*0.03,0),pady=(self.income_frame_height*.015, self.income_frame_height*.05))
         self.total_sales_frame.pack_propagate(0)
         ctk.CTkLabel(self.total_sales_frame, text="Total:", font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht).pack(side="left", anchor="c", padx=(self.income_frame_width*.025,0))
         self.total_sales_value = ctk.CTkLabel(self.total_sales_frame, font=("DM Sans Medium", 15),text_color=Color.Blue_Maastricht)
@@ -446,13 +450,20 @@ class dashboard_frame(ctk.CTkFrame):
         '''Inventory Stat Frame'''
         self.inventory_stat_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.inventory_stat_frame.grid_propagate(0)
-        self.inventory_stat_frame.grid(row=1, column=4, columnspan=4, padx= (width*(.005) ,width * .01))
+        self.inventory_stat_frame.grid(row=1, column=1, padx= (0,width*0.005), sticky='nsew')
         self.inventory_stat_frame.grid_columnconfigure(0, weight=1)
+        self.inventory_stat_frame.grid_rowconfigure(1, weight=1)
 
         self.inventory_frame_width, self.inventory_frame_height = self.inventory_stat_frame.cget('width'), self.inventory_stat_frame.cget('height')
 
         #region Iventory Status
-        self.safe = database.fetch_data(sql_commands.get_safe_state)
+        sell_data, item_data = selling_concat_unit(database.fetch_data(sql_commands.get_selling_rate)), item_concat_unit(database.fetch_data(sql_commands.get_inventory_by_group))
+        temp = [tuple(rate[0]) + (item[0], item[1], item[2]) for item in item_data for rate in sell_data  if rate[-1] == item[1]]
+        self.fast = [data[1:] for data in list_filterer(reference=temp, source=['🠉'])]
+        self.slow = [data[1:] for data in list_filterer(reference=temp, source=['🠋'])]
+        self.order = database.fetch_data(sql_commands.get_on_order_items)
+        self.partial = database.fetch_data(sql_commands.get_on_pending_items)
+        self.safe = database.fetch_data(sql_commands.get_safe_state) 
         self.expired = database.fetch_data(sql_commands.get_expired_state)
         self.near_expired = database.fetch_data(sql_commands.get_near_expire_state)
         self.out_stock =  database.fetch_data(sql_commands.get_out_of_stock_state)
@@ -462,59 +473,98 @@ class dashboard_frame(ctk.CTkFrame):
         self.inventory_stat_label = ctk.CTkLabel(self.inventory_stat_frame, text="Inventory Status", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht)
         self.inventory_stat_label.grid(row=0, column=0, sticky="w", padx=(self.inventory_frame_width*0.03,0),pady=(self.inventory_frame_height*0.045,self.inventory_frame_height*0.0125))
         
-        self.inventory_content_frame = ctk.CTkFrame(self.inventory_stat_frame, height=self.inventory_frame_height*0.16, fg_color="transparent", corner_radius=0)
-        self.inventory_content_frame.grid_propagate()
-        self.inventory_content_frame.grid_columnconfigure((0,1), weight=1)
-        self.inventory_content_frame.grid(row=1, column=0, sticky="new", padx=self.inventory_frame_width*0.0325, pady=(0,self.inventory_frame_height*0.015))
+        self.inventory_content_frame = ctk.CTkFrame(self.inventory_stat_frame, fg_color="transparent", corner_radius=0)
+        self.inventory_content_frame.grid_propagate(0)
+        self.inventory_content_frame.grid_columnconfigure((0,1,2,3), weight=1)
+        self.inventory_content_frame.grid(row=1, column=0, sticky="nsew", padx=width*0.01, pady=(0,width*0.005))
         
-        self.safety_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.08, width=self.inventory_content_frame._current_width,
-                                                        fg_color=Color.Safe_color, hover_color=Color.Hover_Safe_color,
-                                                        text="Safe/Normal", count=len(self.safe), icon_color='transparent', window=self.show_status_popup, data=self.safe )
-        self.safety_button.grid(row=0, column=0, columnspan=1, sticky="nsew", pady=(height*0.015, width*0.005), padx=(0, width*0.005))
+        self.fast_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width/2,
+                                                        fg_color=Color.Fast_Color, hover_color=Color.Hover_Fast_Color, display_warning=False, indicator_space=0,
+                                                        text="Fast", icon_color='transparent', icon=Icons.fast_moving_icon, display_count=0,
+                                                        command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', processing=0,
+                                                        data=self.fast, title="Fast Moving Items", color=Color.Fast_Color, count=len(self.fast)))
+        self.fast_button.grid(row=0, column=0, columnspan=1, sticky="nsew", pady=(0, width*0.005), padx=(0, width*0.005))
         
-        self.near_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.08, width=self.inventory_content_frame._current_width, 
+        self.slow_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width/2,
+                                                        fg_color=Color.Slow_Color, hover_color=Color.Hover_Slow_Color, display_warning=False, indicator_space=0,
+                                                        text="Slow", icon_color='transparent', icon=Icons.slow_moving_icon, display_count=0,
+                                                        command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', processing=0,
+                                                                                                   data=self.slow, title="Slow Moving Items", color=Color.Slow_Color, count=len(self.slow)))
+        self.slow_button.grid(row=0, column=1, columnspan=1, sticky="nsew", pady=(0, width*0.005), padx=(0, width*0.005))
+        
+        self.on_order_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width/2,
+                                                        fg_color=Color.On_Order_Color, hover_color=Color.Hover_On_Order, display_warning=False, indicator_space=0,
+                                                        text="On Order", count=len(self.order), icon_color='transparent',
+                                                        command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', processing=0,
+                                                                                                   data=self.order, title="On Order", color=Color.Slow_Color, count=len(self.order)))#window=self.show_status_popup, data=self.safe )
+        self.on_order_button.grid(row=0, column=2, columnspan=1, sticky="nsew", pady=(0, width*0.005), padx=(0, width*0.005))
+        
+        self.partial_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width/2,
+                                                        fg_color=Color.On_Partial_Color, hover_color=Color.Hover_On_Partial, display_warning=False, indicator_space=0,
+                                                        text="Partial", count=len(self.partial), icon_color='transparent',
+                                                        command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', processing=0,
+                                                                                                   data=self.partial, title="Partial Orders", color=Color.Slow_Color, count=len(self.partial)))
+        self.partial_button.grid(row=0, column=3, columnspan=1, sticky="nsew", pady=(0, width*0.005), padx=(0))
+        
+        self.safety_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width,
+                                                        fg_color=Color.Safe_color, hover_color=Color.Hover_Safe_color, display_warning=False,
+                                                        text="Safe/Normal", count=len(self.safe), icon_color='transparent',
+                                                        command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', 
+                                                                                                   data=self.safe, title="Safe/Normal Level Items", color=Color.Safe_color, count=len(self.safe)))# window=self.show_status_popup, data=self.safe )
+        self.safety_button.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(0, width*0.005), padx=(0, width*0.005))
+        
+        self.near_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width, 
                                                         fg_color=Color.Near_Expire_Color, hover_color=Color.Hover_Near_Expire_Color,
-                                                        text="Near Expire", count=len(self.near_expired), icon_color=Color.Red_Pastel, window=self.show_status_popup, data=self.near_expired )
-        self.near_button.grid(row=0, column=1, columnspan=2, pady=(height*0.015, width*0.005), sticky='nsew')
+                                                        text="Near Expire", count=len(self.near_expired), icon_color=Color.Red_Pastel,
+                                                        command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', 
+                                                                                                   data=self.near_expired, title="Near Expire Items", color=Color.Near_Expire_Color, count=len(self.near_expired)))
+        self.near_button.grid(row=1, column=2, columnspan=2, pady=(0, width*0.005), sticky='nsew')
         
-        self.reorder_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.08, width=self.inventory_content_frame._current_width,
+        self.reorder_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width,
                                                          fg_color=Color.Reorder_Color, hover_color=Color.Hover_Reorder_Color,
-                                                        text="Reorder", count=len(self.reorder), icon_color=Color.Red_Pastel, window=self.show_status_popup, data=self.reorder )
-        self.reorder_button.grid(row=1, column=0, columnspan=1, sticky="nsew", padx=(0, width*0.005), pady=(0, width*0.005))
+                                                        text="Reorder", count=len(self.reorder), icon_color=Color.Red_Pastel,
+                                                         command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', 
+                                                                                                   data=self.reorder, title="Reorder Level Items", color=Color.Reorder_Color, count=len(self.reorder))) 
+        self.reorder_button.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(0, width*0.005), pady=(0, width*0.005))
         
-        self.expire_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.08, width=self.inventory_content_frame._current_width, 
+        self.expire_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width, 
                                                         fg_color=Color.Expire_Color, hover_color=Color.Hover_Expire_Color,
-                                                        text="Expired", count=len(self.expired), icon_color=Color.Red_Pastel, window=self.show_status_popup, data=self.expired )
-        self.expire_button.grid(row=1, column=1, columnspan=1, sticky='nsew', pady=(0, width*0.005) )
+                                                        text="Expired", count=len(self.expired), icon_color=Color.Red_Pastel,
+                                                         command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', 
+                                                                                                   data=self.expired, title="Expired Items", color=Color.Expire_Color, count=len(self.expired)))
+        self.expire_button.grid(row=2, column=2, columnspan=2, sticky='nsew', pady=(0, width*0.005) )
         
-        self.critical_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.08, width=self.inventory_content_frame._current_width,
+        self.critical_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width,
                                                             fg_color=Color.Critical_Color, hover_color=Color.Hover_Critical_Color,
-                                                        text="Critical", count=len(self.critical), icon_color=Color.Red_Pastel, window=self.show_status_popup, data=self.critical )
-        self.critical_button.grid(row=2, column=0, columnspan=1, sticky="nsew", padx=(0, width*0.005),pady=(0, width*0.005))
+                                                        text="Critical", count=len(self.critical), icon_color=Color.Red_Pastel,
+                                                         command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', 
+                                                                                                   data=self.critical, title="Critical Level Items", color=Color.Critical_Color, count=len(self.critical)))
+        self.critical_button.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=(0, width*0.005),pady=(0))
         
-        self.out_stock_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.08, width=self.inventory_content_frame._current_width,
+        self.out_stock_button = dashboard_popup.status_bar(self.inventory_content_frame, info=(), height=height*0.075, width=self.inventory_content_frame._current_width,
                                                             fg_color=Color.Out_Stock_Color, hover_color=Color.Hover_Out_Stock_Color,
-                                                        text="Out of Stock", count=len(self.out_stock), icon_color=Color.Red_Pastel, window=self.show_status_popup, data=self.out_stock )
-        self.out_stock_button.grid(row=2, column=1, columnspan=1, sticky="nsew", pady=(0, width*0.005))
+                                                        text="Out of Stock", count=len(self.out_stock), icon_color=Color.Red_Pastel,
+                                                         command = lambda : self.status_popup.place(relx = .5, rely = .5, anchor = 'c', 
+                                                                                                   data=self.out_stock, title="Out-of-Stock Items", color=Color.Out_Stock_Color, count=len(self.out_stock)))
+        self.out_stock_button.grid(row=3, column=2, columnspan=2, sticky="nsew", pady=(0))
         
         
-        self.inventory_tabs = (self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button)
+        self.inventory_tabs = [self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button]
         #endregion
-
         '''Sales History'''
         self.sales_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
-        self.sales_history_frame.grid(row=2, column=0, columnspan=4, padx= (width * .01, width*(.005)), pady=(height*0.017))
+        self.sales_history_frame.grid(row=2, column=0, padx= ((width*0.005)), pady=( width*0.005), sticky='nsew')
         self.sales_history_frame.grid_propagate(0)
         self.sales_history_frame.grid_columnconfigure(1,weight=1)
         self.sales_history_frame.grid_rowconfigure(1,weight=1)
 
-        ctk.CTkLabel(self.sales_history_frame, text=f"Sales History", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=(width*0.02,0), pady=(height*0.025, height*0.005))
-        ctk.CTkLabel(self.sales_history_frame, text=f"as of {date.today().strftime('%B %Y')}", text_color="grey", font=("DM Sans Medium",14)).grid(row=0, column=1, sticky="sw", padx=(width*0.005,0), pady=(0,height*0.005))
+        ctk.CTkLabel(self.sales_history_frame, text=f"Sales History", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=(width*0.015,0), pady=(height*0.015, height*0.01))
+        ctk.CTkLabel(self.sales_history_frame, text=f"as of {date.today().strftime('%B %Y')}", text_color="grey", font=("DM Sans Medium",14)).grid(row=0, column=1, sticky="sw", padx=(width*0.005,0), pady=(0,height*0.01))
         self.sales_data_frame = ctk.CTkFrame(self.sales_history_frame, fg_color="transparent", corner_radius=0)
         self.sales_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",pady=(0))
 
-        self.sales_data_treeview = cctk.cctkTreeView(self.sales_data_frame, width=width*0.375, height=height*0.45,
-                                                     column_format=f'/No:{int(width*.035)}-#r/Day:x-tc/Total:{int(width*0.125)}-tr!30!30', 
+        self.sales_data_treeview = cctk.cctkTreeView(self.sales_data_frame, width=width*0.39, height=height*0.45,
+                                                     column_format=f'/No:{int(width*.0325)}-#r/Day:x-tc/Total:{int(width*0.125)}-tr!30!30', 
                                                      double_click_command=open_sale_history)
         self.sales_data_treeview.pack()
         
@@ -529,16 +579,16 @@ class dashboard_frame(ctk.CTkFrame):
 
         '''Schedule Appointments'''
         self.sched_client_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
-        self.sched_client_frame.grid(row=2, column=4, columnspan=4, padx= (width*(.005), width*.01 ), pady=(height*0.017))
+        self.sched_client_frame.grid(row=2, column=1, padx= (0, width*0.005), pady=( width*0.005),sticky='nsew')
         self.sched_client_frame.grid_propagate(0)
         self.sched_client_frame.grid_columnconfigure(1,weight=1)
         self.sched_client_frame.grid_rowconfigure(1,weight=1)
 
-        ctk.CTkLabel(self.sched_client_frame, text="Scheduled Clients Today", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=width*0.02, pady=(height*0.025, height*0.005))
-        self.sched_data_frame = ctk.CTkFrame(self.sched_client_frame)
-        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=width*0.015, pady=(0,height*0.025))
+        ctk.CTkLabel(self.sched_client_frame, text="Scheduled Clients Today", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht).grid(row=0, column=0, padx=(width*0.015,0), pady=(height*0.015, height*0.01))
+        self.sched_data_frame = ctk.CTkFrame(self.sched_client_frame,fg_color="transparent", corner_radius=0)
+        self.sched_data_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",pady=(0,width*0.01))
 
-        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.365, height=height*0.45, 
+        self.sched_data_treeview = cctk.cctkTreeView(self.sched_data_frame, width=width*0.39, height=height*0.45, 
                                                column_format=f'/No:{int(width*.03)}-#r/ClientName:x-tl/Contact:{int(width*.125)}-tc!30!30',
                                                double_click_command = open_schedule)
         self.sched_data_treeview.pack()
@@ -570,29 +620,33 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_data_treeview.update_table(data)
         self.no_sales_data.place_forget() if len(data) != 0 else self.no_sales_data.place(relx=0.5, rely=0.5, anchor='c')
 
-    def show_status_popup(self, name: str, data):
-            self.status_popup.status_label.configure(text = name)
-            self.status_popup.update_treeview(data)
-            self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
+    #def show_status_popup(self, name: str, data):
+            #self.status_popup.status_label.configure(text = name)
+            #self.status_popup.update_treeview(data)
+    #        self.status_popup.place(relx = .5, rely = .5, anchor = 'c')
 
     def show_pie(self, data: list = None):
         if(self.canvas is not None):
             self.canvas.get_tk_widget().destroy()
-        self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
-                   float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
+        #self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
+        #           float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
+        self.data = [34,49]
         data = self.data if self.data[0] + self.data[1] > 0 else [1, 0]
-
+        
         pie_figure= Figure(figsize=(self.income_frame_height*0.008,self.income_frame_height*0.008), dpi=100)
-        pie_figure.set_facecolor(Color.White_Ghost)
+        pie_figure.set_facecolor(Color.White_Lotion)
         ax =pie_figure.add_subplot(111)
-        ax.pie(data, autopct='%1.1f%%', startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Red_Tulip],
-                textprops={'fontsize':14, 'color': Color.White_Ghost, 'family':'monospace', 'weight':'bold' },)
-        pie_figure.subplots_adjust(top=1,left=0,right=1, bottom=0)
+        ax.pie(data, autopct=f"{'%0.2f%%'if self.data[0] + self.data[1] > 0 else ''}", 
+               startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Blue_Cornflower] if self.data[0] + self.data[1] > 0 else [Color.White_Platinum],
+                textprops={'fontsize':14, 'color': Color.White_Lotion, 'family':'monospace', 'weight':'bold' },)
+        pie_figure.subplots_adjust(top=1,left=0,right=1.1, bottom=0)
 
         self.canvas = FigureCanvasTkAgg(pie_figure, self.income_summary_frame)
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 6)
 
+        self.no_data = ctk.CTkLabel(self.income_summary_frame,text='No transactions yet.', font=("DM Sans Medium", 14), fg_color=Color.White_Platinum)
+        self.no_data.grid_forget() if self.data[0] + self.data[1] > 0 else self.no_data.grid(row = 0, column=1, rowspan = 6)
     def generate_DISumarry(self):
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0),
@@ -611,11 +665,17 @@ class dashboard_frame(ctk.CTkFrame):
         [self.inventory_tabs[tabs].update_data(len(data[tabs]), data[tabs]) for tabs in range(len(self.inventory_tabs))] 
 
     def grid(self, **kwargs):
+        #self.state = 1
+        #[tabs.update_state('opened') for tabs in self.inventory_tabs]
         self.load_scheduled_service()
         self.load_saled_data_treeview()
         self.generate_DISumarry()
 
         return super().grid(**kwargs)
+    
+    def grid_forget(self, **kwargs):
+        #if self.state: [tabs.update_state('closed') for tabs in self.inventory_tabs]
+        return super().grid_forget(**kwargs)
 
     def update_receiver(self, m):
         self.show_pie()
@@ -1009,6 +1069,60 @@ class payment_frame(ctk.CTkFrame):
                 temp: histlog_frame = i
                 temp.load_both()
 
+class customer_frame(ctk.CTkFrame):
+    global width, height, IP_Address
+    def __init__(self, master):
+        super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
+        
+        self.grid_columnconfigure(0,weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_forget()
+        
+
+        #region Top Frame
+        self.view_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(25,25))
+        self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+        self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+        self.cal_icon= ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(15,15))
+
+        self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
+                                       fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
+        self.date_label.grid(row=0, column=1, sticky="ns", padx=width*0.005,pady=height*0.01)
+
+        self.top_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion, height = height*0.055, corner_radius=0, bg_color=Color.White_Lotion,)
+        self.top_frame.grid(row=0, column=0 , sticky="nw",padx=width*0.005,pady=(height*0.01,0))
+
+        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
+
+        self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
+                                            )
+        self.view_record_btn.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
+        
+        self.sub_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion,corner_radius=0)
+        self.sub_frame.grid(row=1, column=0, sticky="nsew", columnspan=2, padx=(width*0.005), pady=(0, width*0.005))
+        self.sub_frame.grid_rowconfigure(1, weight=1)
+        self.sub_frame.grid_columnconfigure(1, weight=1)
+        #endregion
+        
+        self.customer_table_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, corner_radius=0)
+        self.customer_table_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(width*0.005))
+       
+        self.customer_treeview = cctk.cctkTreeView(self.customer_table_frame, data = [], width=width*0.8, height=height*0.8,
+                                               column_format=f'/No:{int(width*.025)}-#r/CustomerCode:{int(width*.125)}-tc/CustomerName:x-tl/CutomerType:{int(width*.175)}-tl/ContactNo:{int(width*.15)}-tr!30!30')
+        self.customer_treeview.pack()
+        #self.no_sales_data = ctk.CTkLabel(self.sales_table_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
+        self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum,
+                                             quary_command=sql_commands.get_sales_search_query, dp_width=width*0.275, place_height=height*0.0125, place_width=width*0.006, font=("DM Sans Medium", 14))
+        self.search_bar.grid(row=0, column=0, padx=(width*0.005), pady=(height*0.01,0))
+        
+        
+       
+    
+    
+    def grid(self, **kwargs):
+        return super().grid(**kwargs)
+        
 class services_frame(ctk.CTkFrame):
     global width, height, IP_Address
     def __init__(self, master):
@@ -1083,6 +1197,7 @@ class services_frame(ctk.CTkFrame):
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
 
+
 class sales_frame(ctk.CTkFrame):
     global width, height, IP_Address
     def __init__(self, master):
@@ -1092,10 +1207,11 @@ class sales_frame(ctk.CTkFrame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_forget()
         
-        self.page_row_count = 15
+        self.page_row_count = 14
         self.attendant_values = ['All']
         
         def set_date():
+            
             self.source = self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date,(f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
             self.attendant_sort_option.set("All")
             self.set_table()
@@ -1103,6 +1219,7 @@ class sales_frame(ctk.CTkFrame):
             self.update_table()
             
         def search_callback():
+            
             self.source = temp = list_filterer(self.search_bar.get(), self.raw_data)
             self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.search_bar.get()[0][0]) if len(self.search_bar.get()) == 1 else self.set_table(temp)
             self.attendant_sort_option.set("All")
@@ -1143,20 +1260,20 @@ class sales_frame(ctk.CTkFrame):
         self.date_frame.pack(fill='x', expand=0,  padx=(width*0.005), pady=(height*0.01,height*0.0075))
         
         '''FROM'''
-        self.from_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.05, width=width*0.17)
+        self.from_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.17)
         self.from_date_frame.pack(side="left")
         self.from_date_frame.propagate(0)
         
         ctk.CTkLabel(self.from_date_frame, text="From: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.03).pack(side="left", padx=(width*0.01,width*0.0025))
         
-        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=datetime.datetime(2023, 7, 1).strftime("%Y-%m-%d"), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
+        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(height*0.005))
-        self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=self.cal_icon, height=height*0.05,width=width*0.025, fg_color=Color.Blue_Yale,
+        self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=self.cal_icon, height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.from_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), set_date_callback=set_date))
         self.from_show_calendar.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
         
         '''TO'''
-        self.to_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.05, width=width*0.15)
+        self.to_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.15)
         self.to_date_frame.pack(side="left", padx=(width*0.0025))
         self.to_date_frame.propagate(0)
         
@@ -1167,7 +1284,7 @@ class sales_frame(ctk.CTkFrame):
         
         self.to_show_calendar = ctk.CTkButton(self.to_date_frame, text="",image=self.cal_icon, height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.to_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), 
-                                                                               min_date= datetime.datetime.strptime(str(self.from_date_select_entry._text), '%Y-%m-%d').date(), set_date_callback=set_date))
+                                                                               min_date= datetime.datetime.strptime(str(self.from_date_select_entry._text), '%Y-%m-%d').date(),set_date_callback=set_date))
         self.to_show_calendar.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
         
         self.sort_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.Platinum, height=height*0.05, width=width*0.15)
@@ -1180,88 +1297,41 @@ class sales_frame(ctk.CTkFrame):
         self.attendant_sort_option.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
         
         #endregion
-       
-        #region Sales Table
-        
-        ctk.CTkLabel(self.sort_frame, text="Cashier: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.0225).pack(side="left", padx=(width*0.01,width*0.0025))
-        self.attendant_sort_option= ctk.CTkOptionMenu(self.sort_frame, values=self.attendant_values, anchor="center", font=("DM Sans Medium", 12), width=width*0.125, height = height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=option_callback)
-        self.attendant_sort_option.pack(side="left", padx=(0, width*0.0025), pady=(height*0.005))
-        
-        #endregion
-       
-        #region Sales Table
-        
-        self.sales_table_frame = ctk.CTkFrame(self.sub_frame, fg_color="red")
-        self.sales_table_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(0,width*0.005))
-        self.sales_table_frame.grid_columnconfigure(0, weight=1)
-        self.sales_table_frame.grid_rowconfigure(0, weight=1)
-        
-        self.sales_table_style = ttk.Style()
-        self.sales_table_style.theme_use("clam")
-        self.sales_table_style.configure("Treeview", rowheight=int(height*0.055), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=5, font=("DM Sans Medium", 14) )
-        #print(int(height*0.065))
-        self.sales_table_style.configure("Treeview.Heading", font=("DM Sans Medium", 14), background=Color.Blue_Cobalt, borderwidth=0, foreground=Color.White_AntiFlash)
-        self.sales_table_style.layout("Treeview",[("Treeview.treearea",{"sticky": "nswe"})])
-        self.sales_table_style.map("Treeview", background=[("selected",Color.Blue_Steel)])
-            
-        self.columns = ("rec_no", "or_num","client","total","date","cashier")
-        self.column_names = ("No", "OR ","Client", "Total", "Date", "Cashier")
-        
-        self.sales_tree = ttk.Treeview(self.sales_table_frame, columns=self.columns, show="headings",)
-           
-        for i in range(len(self.columns)):
-            self.sales_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
-
-        self.sales_tree.column("rec_no", width=int(width*0.005),anchor="e")
-        self.sales_tree.column("or_num", width=int(width*0.02), anchor="c")
-        self.sales_tree.column("client", width=int(width*0.3), anchor="w")
-        self.sales_tree.column("total", width=int(width*0.1), anchor="e")
-        self.sales_tree.column("date", width=int(width*0.1), anchor="c")
-        self.sales_tree.column("cashier", width=int(width*0.1), anchor="w")
-            
-        self.sales_tree.tag_configure("odd",background=Color.White_AntiFlash)
-        self.sales_tree.tag_configure("even",background=Color.White_Ghost)
-        self.sales_tree.bind("<Double-1>", self.on_double_click)
-        
-        self.y_scrollbar = ttk.Scrollbar(self.sales_table_frame, orient=tk.VERTICAL, command=self.sales_tree.yview)
-        self.y_scrollbar.grid(row=0, column=1, sticky="ns", pady=(0))
-            
-        self.sales_tree.grid(row=0, column=0, sticky="nsew", pady=(0))
-        self.sales_tree.configure(yscroll=self.y_scrollbar.set)
-        
-        #endregion
-        
+ 
+        self.sales_treeview_frame = ctk.CTkFrame(self.sub_frame, corner_radius=0, fg_color=Color.White_Platinum)
+        self.sales_treeview_frame.pack(fill='both', expand=1,  padx=(width*0.005), pady=(0,width*0.005))
+        #"No", "OR ","Client", "Total", "Date", "Cashier"
+        self.sales_treeview = cctk.cctkTreeView(self.sales_treeview_frame, data = [], width= width * .805, height= height*0.665, corner_radius=0,
+                                           column_format=f'/No:{int(width*.0325)}-#r/TransactionID:{int(width*.125)}-tc/Client:x-tl/Total:{int(width*0.15)}-tr/Date:{int(width*.125)}-tc/Cashier:{int(width*.125)}-tl!30!30',)
+                                           
+        self.sales_treeview.pack()
         #region Bottom
-        self.bot_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent",height=height*0.055,)
-        self.bot_frame.pack(fill="x", expand=0, padx=(width*0.005), pady=(height*0.005))
+        self.bot_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent",height=height*0.075,)
+        self.bot_frame.pack(fill="x", expand=0, padx=(width*0.005), pady=(0,width*0.005))
         
-        self.page_counter = cctk.cctkPageNavigator(self.bot_frame,  width=width*0.115, height=height*0.05, fg_color=Color.White_Platinum, page_fg_color=Color.White_Lotion, 
-                                             font=("DM Sans Medium", 16), page_limit=1, command=page_callback)
+        self.page_counter = cctk.cctkPageNavigator(self.bot_frame,  width=width*0.125, height=height*0.0575, fg_color=Color.White_Platinum, page_fg_color=Color.White_Lotion, 
+                                             font=("DM Sans Medium", 14), page_limit=1, command=page_callback, disable_timer=100)
         self.page_counter.pack()
-        
-        
         #endregion
        
-        self.no_sales_data = ctk.CTkLabel(self.sales_table_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
+        self.no_sales_data = ctk.CTkLabel(self.sales_treeview_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
+        
         self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=search_callback,
                                              quary_command=sql_commands.get_sales_search_query, dp_width=width*0.275, place_height=height*0.0125, place_width=width*0.006, font=("DM Sans Medium", 14))
         self.search_bar.grid(row=0, column=0, padx=(width*0.005), pady=(height*0.01,0))
-        
+        #
         self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date, (f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
         self.set_table()
-        self.refresh()
-        self.source = self.raw_list
-        #region Popups
-        self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height)) 
+        
+        #region Popups   
+        self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height))
         #endregion
     
     def view_record(self):
-        item = self.sales_tree.selection()
-        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_tree.item(item, "values")[1]) if item else messagebox.showerror("Warning", "Select a record first")
+        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_treeview.get_selected_data()) if self.sales_treeview.get_selected_data() else messagebox.showerror("Warning", "Select a record first")
     
     def refresh(self):
-        #self.raw_data = database.fetch_data(sql_commands.get_sales_record_all)
+        
         self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date,(f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
         self.source = self.raw_list
         self.attendant_sort_option.configure(values = self.attendant_values + [s[0] for s in database.fetch_data(sql_commands.get_sales_attendant)])
@@ -1271,7 +1341,7 @@ class sales_frame(ctk.CTkFrame):
     def clear_table(self):
         for item in self.sales_tree.get_children():self.sales_tree.delete(item)
     
-    def set_table(self, given:Optional[list] = None):
+    def set_table(self, given:Optional[list] = None):      
         self.raw_list = given if given else self.raw_data
         self.pages, self.page_count = list_to_parted_list(self.raw_list, self.page_row_count, 1)
         self.page_counter.update_page_limit(self.page_count)
@@ -1285,13 +1355,7 @@ class sales_frame(ctk.CTkFrame):
         else:
             self.temp = []
             self.no_sales_data.place(relx=0.5, rely=0.5, anchor='c')
-        self.clear_table()
-        for i in range(len(self.temp)):
-            self.sales_tree.insert(parent='', index='end', iid=i, text="", values= (i+1,) + self.temp[i], tags= "even" if (i%2)==0 else "odd" )
-    
-    def on_double_click(self, event):
-        item = self.sales_tree.selection()[0]
-        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_tree.item(item, "values")[1])
+        self.sales_treeview.update_table(self.temp)
     
     def grid(self, **kwargs):
         self.refresh()
@@ -1672,7 +1736,7 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_refresh_btn.grid(row=0, column=1, sticky="w", padx=(0,width*0.005))
         
         self.rs_add_item_btn = ctk.CTkButton(self.restock_frame,width=width*0.1, height = height*0.05, text="Add Order",image=self.add_icon, font=("DM Sans Medium", 14),
-                                           command= lambda : self.restock_popup.place(default_data=self.data_view1.data_grid_btn_mng.active or None, relx = .5, rely = .5, anchor = 'c'))
+                                           command= lambda : self.restock_popup.place(default_data=None, relx = .5, rely = .5, anchor = 'c'))
         self.rs_add_item_btn.grid(row=0, column=2, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
 
 
@@ -1690,8 +1754,8 @@ class inventory_frame(ctk.CTkFrame):
         self.rs_data = database.fetch_data(sql_commands.get_recieving_items_state)
         
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=self.rs_data,width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.075)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!30!35',
-                                           double_click_command= _restock, bd_commands= disposal_callback, conditional_colors={2:{'Waiting':'orange', 'Pending':'red'}})
+                                           column_format=f'/No:{int(width*.03)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/QuantityPcs:{int(width*.1)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!30!35',
+                                           double_click_command= _restock, bd_commands= disposal_callback, conditional_colors={2:{'On Order':'orange', 'Partial':'red'}})
         self.rs_data_view1.configure(double_click_command = _restock)
         self.rs_data_view1.pack()
         
@@ -2821,16 +2885,20 @@ class admin_settings_frame(ctk.CTkFrame):
         self.base_frame.grid_columnconfigure(0, weight=1)
         self.base_frame.grid_rowconfigure(1, weight=1)
 
+        self.general_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
         self.service_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
         self.inventory_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
 
+        self.general_frame.grid_columnconfigure(0, weight=1)
+        self.general_frame.grid_rowconfigure(1, weight=1)
+        
         self.service_frame.grid_columnconfigure(0, weight=1)
         self.service_frame.grid_rowconfigure(1, weight=1)
         
         self.inventory_frame.grid_columnconfigure(2, weight=1)
         self.inventory_frame.grid_rowconfigure(1, weight=1)
         
-        self.report_frames=[self.service_frame, self.inventory_frame]
+        self.report_frames=[self.general_frame, self.service_frame, self.inventory_frame]
         self.active_report = None
         
         self.grid_forget()
@@ -2847,20 +2915,31 @@ class admin_settings_frame(ctk.CTkFrame):
             
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
-        self.top_frame.grid_columnconfigure(2, weight=1)
+        self.top_frame.grid_columnconfigure(3, weight=1)
 
-        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
+        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=5, sticky="nsew")
 
         self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 14),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=3, sticky="n")
+        self.date_label.grid(row=0, column=4, sticky="n")
 
+        self.general_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
+                                                       fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
+        self.general_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.general_button.configure(command=partial(load_main_frame, 0))
+        self.general_icon = ctk.CTkLabel(self.general_button, text="",image=self.service)
+        self.general_icon.pack(side="left", padx=(width*0.01,width*0.005)) 
+        self.general_label = ctk.CTkLabel(self.general_button, text="GENERAL", text_color="white", font=("DM Sans Medium", 14))
+        self.general_label.pack(side="left")
+        self.general_button.grid()
+        self.general_button.update_children()
+    
         self.service_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
                                                        fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
-        self.service_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.service_button.configure(command=partial(load_main_frame, 0))
+        self.service_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.service_button.configure(command=partial(load_main_frame, 1))
         self.service_icon = ctk.CTkLabel(self.service_button, text="",image=self.service)
         self.service_icon.pack(side="left", padx=(width*0.01,width*0.005)) 
         self.service_label = ctk.CTkLabel(self.service_button, text="SERVICE", text_color="white", font=("DM Sans Medium", 14))
@@ -2871,8 +2950,8 @@ class admin_settings_frame(ctk.CTkFrame):
         self.inventory_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
-        self.inventory_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.inventory_button.configure(command=partial(load_main_frame, 1))
+        self.inventory_button.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.inventory_button.configure(command=partial(load_main_frame, 2))
         self.inventory_icon = ctk.CTkLabel(self.inventory_button, text="",image=self.inventory)
         self.inventory_icon.pack(side="left", padx=(width*0.01,width*0.005))
         self.inventory_label = ctk.CTkLabel(self.inventory_button, text="INVENTORY", text_color="white", font=("DM Sans Medium", 14))
@@ -2880,7 +2959,7 @@ class admin_settings_frame(ctk.CTkFrame):
         self.inventory_button.grid()
         self.inventory_button.update_children()
 
-        self.button_manager = cctku.button_manager([self.service_button, self.inventory_button], selected_color, False, 0)
+        self.button_manager = cctku.button_manager([self.general_button, self.service_button, self.inventory_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
@@ -2909,7 +2988,45 @@ class admin_settings_frame(ctk.CTkFrame):
                 self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", item_info=self.inventory_data_view.get_selected_data(), item_reload_callback = refresh_item)
             else:
                 messagebox.showerror("Missing Selection", "Select a record first")
-                
+        
+        '''GENERAL FRAME - START'''
+        
+        self.top_frame = ctk.CTkFrame(self.general_frame, fg_color='transparent')
+        self.top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
+        
+                         
+        self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame.pack(side='left')
+        self.search_frame.pack_propagate(0)
+        
+        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005,)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        
+        self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.03, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh_service)
+        self.refresh_btn.pack(side='left', padx=(width*0.005, 0))
+        
+        self.view_button = ctk.CTkButton(self.top_frame, text="View", image=self.show, fg_color=Color.Blue_Tufts, height=height*0.05, width=width*0.075, font=("DM Sans Medium", 14),
+                                         command= open_service_record)
+        self.view_button.pack(side='left', padx=(width*0.005))
+        
+        
+        
+        '''TREEVIEW FRAME'''
+        
+        self.general_treeview = ctk.CTkFrame(self.general_frame, fg_color="transparent")
+        self.general_treeview.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+        
+        self.general_data_view = cctk.cctkTreeView(self.general_treeview,width= width * .805, height= height * .775, corner_radius=0,
+                                           column_format=f'/No:{int(width*.025)}-#r/ColumI:{int(width*.115)}-tc/ColumII:x-tl/ColumIII:{int(width*.165)}-tl/ColumIV:{int(width*.125)}-tr!30!30',)
+        self.general_data_view.pack()
+        
+        
+        '''GENERAL FRAME - END'''
+        
+        
         '''SERVICE FRAME - START'''
         
         self.top_frame = ctk.CTkFrame(self.service_frame, fg_color='transparent')
@@ -2988,6 +3105,7 @@ class admin_settings_frame(ctk.CTkFrame):
 
         self.show_service_info = admin_popup.show_service_info(self,(width, height))
         self.show_item_info = admin_popup.show_item_info(self,(width, height))
+        
         load_main_frame(0)
     
     def load_inventory_data(self):
@@ -3003,4 +3121,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_service_data()
         
 
-dashboard(None, 'aila', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
