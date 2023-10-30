@@ -57,6 +57,7 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
         self._master = master
+        self.notifs = []
         #self.attributes("-topmost",1)
         
         is_loading = 1
@@ -141,6 +142,7 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         print(f"Start Time: {datetime.datetime.now()}")
+        global acc_info, acc_cred, date_logged, mainframes, IP_Address
         
         """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
@@ -157,7 +159,6 @@ class dashboard(ctk.CTkToplevel):
         #for preventing security breach through python code; enable it to test it """
 
         
-        global acc_info, acc_cred, date_logged, mainframes, IP_Address
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
@@ -182,7 +183,7 @@ class dashboard(ctk.CTkToplevel):
 
         '''Main Information'''
         side_frame_w = round(width * 0.175)
-        default_menubar_width = .15
+        self.default_menubar_width = .15
         default_menubar_height = .3
         acc_menubar_width = .2
 
@@ -262,8 +263,6 @@ class dashboard(ctk.CTkToplevel):
             self.side_frame_btn.append(cctk.ctkButtonFrame(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                                            fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                                            corner_radius=0, cursor="hand2",))
-            
-            #self.db_button.configure(command=partial(change_active_event, self.db_button, 0))
             self.side_frame_btn[i].configure(command=partial(load_main_frame, self.labels[i], i))
             self.side_frame_btn[i].pack()
             wbar = ctk.CTkLabel(self.side_frame_btn[i],text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
@@ -299,7 +298,6 @@ class dashboard(ctk.CTkToplevel):
         self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= Icons.display_setting_icon,
                                               fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
                                               font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
-        #self.settings_btn.grid(row=0, column= 1, sticky='w')
 
         self.acc_btn = cctk.ctkButtonFrame(self.top_frame, round(self.top_frame.winfo_reqwidth() * .12),
                                            round(self.top_frame.winfo_reqheight()*.5), 5,
@@ -319,33 +317,15 @@ class dashboard(ctk.CTkToplevel):
         self.update()
 
         '''menubars'''
-        self.notif_menu_bar= cctk.scrollable_menubar(self, width * default_menubar_width * 1.5, height * .9,
+        self.notif_menu_bar= cctk.scrollable_menubar(self, width * self.default_menubar_width * 1.5, height * .9,
                                           corner_radius= 0, fg_color='white', border_width= 0, border_color=Color.Blue_Cobalt,
-                                          position=(1 - default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
-                                          #'''position=(self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
-                                          #          self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
-                                          #          'c'))'''
+                                          position=(1 - self.default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
         self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
                                               corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
                                               position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
                                                         self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
                                                         'c'))
         
-        out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
-        
-        low_stock = database.fetch_data(sql_commands.get_low_items_name)
-        ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
-    
-        scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
-        ntf_c3 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
-
-        past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
-        ntf_c4 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
-
-        ntf_c = ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
-        notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1],  width * default_menubar_width * 1.5 * .95, 100, Desc_lines= 3) for s in ntf_c]
-
         self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
                                                           onvalue="darkmode", offvalue="lightmode",)
         self.settings_menu_bar_dark_mode.grid(row=0, column=0)
@@ -364,9 +344,35 @@ class dashboard(ctk.CTkToplevel):
         self.loading_frame.place_forget()
         #change_active_event(self.db_button, 0)
         
-        print(f"End Time: {datetime.datetime.now()}")
+        self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], 111, self.receiver_callback)
+        self.network_receiver.start_receiving()
+        self.generate_notification()
         self.protocol("WM_DELETE_WINDOW", log_out)
         self.mainloop()
+    
+    def generate_notification(self):
+        out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
+        ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
+        
+        low_stock = database.fetch_data(sql_commands.get_low_items_name)
+        ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
+    
+        scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
+        ntf_c3 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
+
+        past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
+        ntf_c4 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+
+        ntf_c = ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
+
+        for _ntf in self.notifs:
+            _ntf.destroy()
+
+        self.notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1],  width * self.default_menubar_width * 1.5 * .95, 100, Desc_lines= 3) for s in ntf_c]
+
+    def receiver_callback(self, m):
+        if m == '1':
+            self.generate_notification()
 
 ''' 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶'''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''main frames'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -495,31 +501,6 @@ class dashboard_frame(ctk.CTkFrame):
         self.inventory_tabs = (self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button)
         #endregion
 
-        """
-        self.inventory_content_frame = ctk.CTkScrollableFrame(self.inventory_stat_frame, height=self.inventory_frame_height*0.16, fg_color=Color.White_Ghost)
-        self.inventory_content_frame.grid_propagate()
-        self.inventory_content_frame.grid_columnconfigure(1, weight=1)
-        self.inventory_content_frame.grid(row=1, column=1, sticky="news", padx=self.inventory_frame_width*0.025, pady=(0,self.inventory_frame_height*0.04))
-        
-         self.stat_tabs: list = []
-        self.generate_stat_tabs()
-
-        stat_data = [('Reorder', '#cccc00', database.fetch_data(sql_commands.get_reorder_state) or None),
-                     ('Critical', '#ff0000', database.fetch_data(sql_commands.get_critical_state) or None),
-                     ('Out-Of-Stock', '#222222', database.fetch_data(sql_commands.get_out_of_stock_state) or None),
-                     ('Near Expire', '#ff7900', database.fetch_data(sql_commands.get_near_expire_state) or None),
-                     ('Expire', '#dd0000', database.fetch_data(sql_commands.get_expired_state) or None)]
-        stat_data = [s for s in stat_data if s[-1] is not None]
-        stat_tabs_info: dict = {s[0]: s[-1] for s in stat_data}
-
-        for i in range(len(stat_data)):
-            temp = dashboard_popup.status_bar(self.inventory_content_frame, (self.inventory_frame_width, self.income_frame_height),
-                                                                             stat_data[i][0], stat_data[i][1],
-                                                                             len(stat_data[i][-1]), self.show_status_popup, stat_tabs_info)
-            self.stat_tabs.append(copy.copy(temp))
-            self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(self.inventory_frame_width*0.001 ),pady=(0,self.inventory_frame_height*0.02))
-            del temp """
-
         '''Sales History'''
         self.sales_history_frame = ctk.CTkFrame(self, width=width*.395, height=height*0.395, fg_color=Color.White_Ghost, corner_radius=5)
         self.sales_history_frame.grid(row=2, column=0, columnspan=4, padx= (width * .01, width*(.005)), pady=(height*0.017))
@@ -573,12 +554,9 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
         self.receiving_entity.start_receiving()
-        #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
-        #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))
 
 
     def load_scheduled_service(self):
-        #data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
         data= database.fetch_data(sql_commands.get_scheduled_clients_today, None)
         self.sched_data_treeview.update_table(data)
         
@@ -626,24 +604,6 @@ class dashboard_frame(ctk.CTkFrame):
         self.show_pie()
 
     def generate_stat_tabs(self):
-        """  for i in self.stat_tabs:
-            i.destroy()
-        self.stat_tabs.clear()
-        stat_data = [('Reorder', '#cccc00', database.fetch_data(sql_commands.get_reorder_state) or None),
-                     ('Critical', '#ff0000', database.fetch_data(sql_commands.get_critical_state) or None),
-                     ('Out-Of-Stock', '#222222', database.fetch_data(sql_commands.get_out_of_stock_state) or None),
-                     ('Near Expire', '#ff7900', database.fetch_data(sql_commands.get_near_expire_state) or None),
-                     ('Expire', '#dd0000', database.fetch_data(sql_commands.get_expired_state) or None)]
-        stat_data = [s for s in stat_data if s[-1] is not None]
-        stat_tabs_info: dict = {s[0]: s[-1] for s in stat_data}
-
-        for i in range(len(stat_data)):
-            temp = dashboard_popup.status_bar(self.inventory_content_frame, (self.inventory_frame_width, self.income_frame_height),
-                                                                             stat_data[i][0], stat_data[i][1],
-                                                                             len(stat_data[i][-1]), self.show_status_popup, stat_tabs_info)
-            self.stat_tabs.append(copy.copy(temp))
-            self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(self.inventory_frame_width*0.001 ),pady=(0,self.inventory_frame_height*0.02))
-            del temp """
         data= [database.fetch_data(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
                database.fetch_data(sql_commands.get_out_of_stock_state), database.fetch_data(sql_commands.get_critical_state),
                database.fetch_data(sql_commands.get_reorder_state),]
@@ -658,7 +618,6 @@ class dashboard_frame(ctk.CTkFrame):
         return super().grid(**kwargs)
 
     def update_receiver(self, m):
-        print("triggered")
         self.show_pie()
         self.generate_stat_tabs()
         self.generate_DISumarry()
