@@ -749,9 +749,9 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def item_proceed(_: any = None):
                 if self.item_treeview.data_grid_btn_mng.active:
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
-                    print(data)
+                    #print(data)
                     add_data = (data[1], data[3], data[3])
-                    print(add_data)
+                    #print(add_data)
                     if data[1] in [s[0] for s in root_treeview._data]: # if there's existing record
                         spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[1])].winfo_children()[3].winfo_children()[0]
                         spinner.change_value()
@@ -903,8 +903,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.item_frame.pack_propagate(0)
             
-            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.805,double_click_command=item_proceed, column_format=f"/No:{int(width*.035)}-#r/ItemBrand:{int(width*.085)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.115)}-tr/Price:{int(width*.115)}-tr!30!30",)
+            #self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=[], height=height*0.4, width=width*0.805,double_click_command=item_proceed, column_format=f"/No:{int(width*.035)}-#r/ItemBrand:{int(width*.085)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.115)}-tr/Price:{int(width*.115)}-tr!30!30",)
             #self.item_treeview.pack()
             
             filter_func("All")
@@ -1053,9 +1053,14 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 
                 """RECORDING THE INVOICE"""
                 if len(items)> 0:
-                    if database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A' , price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None, 0)]]):
+                    if database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'Client Name' , price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None, 0)]]):
                         for it in items:
-                            database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
+                            temp = (split_unit(it[0])+(it[1:]))
+                            #print(temp, len(temp))
+                            if len(temp) == 5: # WIth UNIT SAVING
+                                database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (temp[0], temp[1]))[0][0], f'{temp[0]} ({temp[1]})', temp[3], price_format_to_float(temp[2][1:]), 0)]])
+                            else: # WITHOUT UNIT SAVING
+                                database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid_null_unit, (temp[0],))[0][0], temp[0], temp[2], price_format_to_float(temp[1][1:]), 0)]])
                         uid_count += 1
                     #recording of item based on the invoice_id
 
@@ -1064,7 +1069,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     for svcs in formatted_svc_data:
                         for li in svcs:
                             svc_uid = uid_base + str(uid_count).zfill(2)
-                            if database.exec_nonquery([[sql_commands.insert_invoice_data, (svc_uid, self._attentdant, self.client_name_entry.get() or 'N/A', li[-5], None, datetime.now().strftime('%Y-%m-%d'), 0, None, 1)]]):
+                            if database.exec_nonquery([[sql_commands.insert_invoice_data, (svc_uid, self._attentdant, self.client_name_entry.get() or 'Client Name', li[-5], None, datetime.now().strftime('%Y-%m-%d'), 0, None, 1)]]):
                                 database.exec_nonquery([[sql_commands.insert_invoice_service_data, (svc_uid, ) + li]])
                                 uid_count += 1
                 #recording of service based on the invoice_id
@@ -1117,11 +1122,11 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                                                command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
             self.add_particulars.grid(row=1, column=2, sticky="w")
 
-            self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3])
+            self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0 )
             self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=(0))
 
             self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.685,
-                                                    column_format=f'/No:{int(width*0.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.115)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!35')
+                                                    column_format=f'/No:{int(width*0.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.1)}-tr/Quantity:{int(width*0.115)}-id/Total:{int(width*0.1)}-tr/Action:{int(width*.065)}-bD!30!35')
             self.transact_treeview.pack(pady=(0,0))
             self.transact_treeview.bd_commands = bd_commands
             
@@ -1507,8 +1512,10 @@ def show_payment_proceed(master, info:tuple,):
                 self.complete_button.configure(state="disabled")
                 self.cancel_button.configure(state="disabled")
                 
-                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
-
+                temp = [(split_unit(data[0]) + data[1:]) for data in self.items]
+                item = [(record_id, database.fetch_data(sql_commands.get_uid,(s[0], s[1]))[0][0], f'{s[0]} ({s[1]})', s[2], (price_format_to_float(s[3]) / s[2]), 0) if len(s) == 4 
+                        else (record_id, database.fetch_data(sql_commands.get_uid_null_unit,(s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in temp]
+                
                 for _service in self.services:
                     list_of_services.append(_service)
 
@@ -1604,7 +1611,7 @@ def show_payment_proceed(master, info:tuple,):
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
                 ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
-                                        title="Transaction Receipt Viewer")
+                                        title="Transaction Receipt Viewer", is_receipt=1)
             #Payment Callback
             def payment_callback(var, index, mode):
                 if self.payment_var.get().isdigit():

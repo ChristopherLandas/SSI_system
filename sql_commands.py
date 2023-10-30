@@ -1,5 +1,6 @@
 #GENERAL
-get_uid = "SELECT UID FROM item_general_info where name = ?"
+get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
+get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_service_uid = "SELECT UID FROM service_info where service_name = ?"
 
 #SHOWING INFORMATION OF ITEM IN INVENTORY

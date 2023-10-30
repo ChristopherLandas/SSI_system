@@ -19,7 +19,7 @@ from Theme import Color, Icons
 from functools import partial
 
 from datetime import datetime
-import customTkPDFViewer as pdf
+import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
     
@@ -50,10 +50,11 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     #pdfmetrics.registerFont(TTFont('Times New Roman', 'TimesNewRoman.ttf'))
     today = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    filename = f'image\\sample.pdf'
+    #newpath = f'Resources\\receipt\\{current_month}'
+    temp_filename = f'Resources\\receipt\\temp_receipt.pdf'
     
     pdf = SimpleDocTemplate(
-        filename=filename,
+        filename=temp_filename,
         pagesize=letter
     )
     #header
@@ -229,21 +230,21 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     pdf.build(elems)
     #pdf compilation
     merger = PdfWriter()
-    input2 = open(filename, "rb")
+    input2 = open(temp_filename, "rb")
     
     # add the first 3 pages of input1 document to output
     merger.append(input2)
     # Write to an output PDF document
-    output = open(filename, "wb")
+    output = open(temp_filename, "wb")
     merger.write(output)
     # Close File Descriptors
     merger.close()
     output.close()
     #add footer
-    p1 = pdfrw1(filename)
+    p1 = pdfrw1(temp_filename)
 
     writer = pdfrw2()
-    writer.write(filename, p1)
+    writer.write(temp_filename, p1)
 
     #region none sample
     
@@ -253,10 +254,10 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     newpath = f'Resources\\receipt\\{current_month}' 
     if not os.path.exists(newpath):
         os.makedirs(newpath)
-    filename = f'{newpath}\\{current_day}_{client_name}_{or_number}_receipt.pdf'
+    new_filename = f'{newpath}\\{current_day}_{client_name}_{or_number}_receipt.pdf'
     
     pdf = SimpleDocTemplate(
-        filename=filename,
+        filename=new_filename,
         pagesize=letter
     )
     #header
@@ -413,29 +414,29 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     elems.append(receipt_header)
     elems.append(receipt_header2)
     elems.append(table_content)
-
+    #print(elems)
     pdf.build(elems)
     #pdf compilation
     merger = PdfWriter()
-    input2 = open(filename, "rb")
+    input2 = open(new_filename, "rb")
     
     # add the first 3 pages of input1 document to output
     merger.append(input2)
     # Write to an output PDF document
-    output = open(filename, "wb")
+    output = open(new_filename, "wb")
     merger.write(output)
     # Close File Descriptors
     merger.close()
     output.close()
     #add footer
-    p1 = pdfrw1(filename)
+    p1 = pdfrw1(new_filename)
 
     writer = pdfrw2()
-    writer.write(filename, p1)
+    writer.write(new_filename, p1)
 
     #endregion
 
-class ShowPdf(pdf.ShowPdf):
+class ShowPdf(cpdf.ShowPdf):
     def goto(self, page):
         try:
             self.text.see(self.img_object_li[page - 1])
@@ -450,7 +451,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
                  #Custom Arguments
                  
                  receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None,
-                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None,
+                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None, is_receipt: Optional[bool] = False,
                   **kwargs,
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
@@ -506,12 +507,11 @@ class preview_pdf_popup(ctk.CTkToplevel):
             generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
         
         self.vaas2 = NONE
-        self.vaas1=pdf.ShowPdf()
+        self.vaas1=cpdf.ShowPdf()
         self.vaas1.img_object_li.clear()
         self.current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if not self.view_by_reciept is None:
-            
+        if self.view_by_reciept and is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=80,height=100,zoomDPI=self.default_dpi)
@@ -520,6 +520,10 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 self.destroy()
                 messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
+        elif not self.view_by_reciept and is_receipt:
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
+                        width=80,height=100,zoomDPI=self.default_dpi)
+            self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
         else:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
                         width=80,height=100,zoomDPI=self.default_dpi)
@@ -540,7 +544,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         if self.vaas2: # if old instance exists, destroy it first
             self.vaas2.destroy()
          # creating object of ShowPdf from tkPDFViewer. 
-        self.vaas1 = pdf.ShowPdf() 
+        self.vaas1 = cpdf.ShowPdf() 
         # clear the image list # this corrects the bug inside tkPDFViewer module
         self.vaas1.img_object_li.clear()
         # Adding pdf location and width and height. 
