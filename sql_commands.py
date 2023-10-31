@@ -995,7 +995,8 @@ get_near_scheduled_clients_names = "SELECT service_name,\
                                     patient_name,\
                                     DATEDIFF(current_date, DATE_sub(scheduled_date, INTERVAL ? DAY))\
                                     from services_transaction_content\
-                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date"
+                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date\
+                                        AND scheduled_date != current_date"
                           
 get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
                         FROM recieving_item\
