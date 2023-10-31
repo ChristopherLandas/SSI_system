@@ -222,7 +222,7 @@ show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initia
 
 
 #ADDING ITEMS THROUGH THE INVENTORY
-add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
+add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, NULL, NULL)"
 add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, state, added_date) VALUES (?, ?, ?, 1, CURRENT_DATE)"
 
 
@@ -583,7 +583,7 @@ get_invoice_info_queued = "SELECT invoice_record.invoice_uid,\
                                 ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
                             LEFT JOIN service_info_test\
                             	ON invoice_service_content.service_name = service_info_test.service_name\
-                            WHERE invoice_record.State = 3\
+                            WHERE invoice_record.State = 0\
                                 AND process_type = 1\
                             GROUP BY invoice_record.invoice_uid"
 
