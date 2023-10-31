@@ -45,6 +45,7 @@ acc_cred = ()
 date_logged = None
 mainframes = []
 IP_Address: dict = json.load(open("Resources\\network_settings.json"))
+PORT_NO: dict = json.load(open("Resources\\port_no.json"))
 SETTINGS_VAL : dict = json.load(open("Resources\\general_settings.json"))
 
 ctk.set_widget_scaling(1)
@@ -66,7 +67,7 @@ class dashboard(ctk.CTkToplevel):
         
         #[print(screen) for screen in screeninfo.get_monitors()]
         '''Global Variables'''
-        global width, height, mainframes, IP_Address, SETTINGS_VAL
+        global width, height, mainframes, IP_Address, SETTINGS_VAL, PORT_NO
         width = self.winfo_screenwidth() / scaling
         height = self.winfo_screenheight() / scaling
             
@@ -136,7 +137,7 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         print(f"Start Time: {datetime.datetime.now()}")
-        global acc_info, acc_cred, date_logged, mainframes, IP_Address
+        global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
         
         """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
@@ -339,7 +340,7 @@ class dashboard(ctk.CTkToplevel):
         self.loading_frame.place_forget()
         #change_active_event(self.db_button, 0)
         
-        self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], 111, self.receiver_callback)
+        self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], PORT_NO['Notif_gen'], self.receiver_callback)
         self.network_receiver.start_receiving()
         self.generate_notification()
         self.protocol("WM_DELETE_WINDOW", log_out)
@@ -390,7 +391,7 @@ class dashboard(ctk.CTkToplevel):
 ''' 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶'''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''main frames'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 class dashboard_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -407,7 +408,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.grid_propagate(1)
         
         self.state = None
-        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 222, self.update_receiver)
+        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['DashB_stat_ref'], self.update_receiver)
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
@@ -677,8 +678,6 @@ class dashboard_frame(ctk.CTkFrame):
         [self.inventory_tabs[tabs].update_data(len(data[tabs]), data[tabs]) for tabs in range(len(self.inventory_tabs))] 
 
     def grid(self, **kwargs):
-        #self.state = 1
-        #[tabs.update_state('opened') for tabs in self.inventory_tabs]
         self.load_scheduled_service()
         self.load_saled_data_treeview()
         self.generate_DISumarry()
@@ -689,7 +688,7 @@ class dashboard_frame(ctk.CTkFrame):
         #if self.state: [tabs.update_state('closed') for tabs in self.inventory_tabs]
         return super().grid_forget(**kwargs)
 
-    def update_receiver(self, m):
+    def update_receiver(self, _):
         self.show_pie()
         self.generate_stat_tabs()
         self.generate_DISumarry()
@@ -718,7 +717,7 @@ class reception_frame(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.loaded = [False, False, False]
 
-        self.sender_entity = nsu.network_sender(IP_Address["CASHIER_IP"], 1175, IP_Address["MY_NETWORK_IP"], 252, self.post_sent_callback)
+        self.sender_entity = nsu.network_sender(IP_Address["CASHIER_IP"], PORT_NO['Billing_Recieving'], IP_Address["MY_NETWORK_IP"], 252, self.post_sent_callback)
         selected_color = Color.Blue_Yale
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
@@ -780,7 +779,7 @@ class reception_frame(ctk.CTkFrame):
         self.item_tab.grid()
         self.item_tab.update_children()
 
-        self.service_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        '''self.service_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
         self.service_tab.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
         self.service_tab.configure(command = lambda: self.load_tab(1))
         self.account_tab_icon = ctk.CTkLabel(self.service_tab, text="",image=self.trash_icon)
@@ -788,7 +787,7 @@ class reception_frame(ctk.CTkFrame):
         self.accounts_label = ctk.CTkLabel(self.service_tab, text="SERVICES", text_color="white",font=('DM Sans Medium', 14))
         self.accounts_label.pack(side="left")
         self.service_tab.grid()
-        self.service_tab.update_children()
+        self.service_tab.update_children()'''
 
         self.scheduling_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
         self.scheduling_tab.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
@@ -800,7 +799,8 @@ class reception_frame(ctk.CTkFrame):
         self.scheduling_tab.grid()
         self.scheduling_tab.update_children()
 
-        self.tab_mng = cctku.button_manager([self.item_tab, self.service_tab, self.scheduling_tab], selected_color, False, 0)
+        #self.tab_mng = cctku.button_manager([self.item_tab, self.service_tab, self.scheduling_tab], selected_color, False, 0)
+        self.tab_mng = cctku.button_manager([self.item_tab, self.scheduling_tab], selected_color, False, 0)
         self.tab_mng.click(0)
         #endregion
 
@@ -820,7 +820,7 @@ class reception_frame(ctk.CTkFrame):
         '''INVOICE FRAME ITEMS: END'''
         
         '''INVOICE FRAME SERVICE'''
-        self.service_treeview_frame = ctk.CTkFrame(self.invoice_frame)
+        '''self.service_treeview_frame = ctk.CTkFrame(self.invoice_frame)
 
         self.service_invoice_treeview = cctk.cctkTreeView(self.service_treeview_frame, width= width * .805, height= height * .684, corner_radius=0,
                                            column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Pet:x-tl/Owner:x-tl/Service:{int(width*.15 )}-tl/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
@@ -829,7 +829,7 @@ class reception_frame(ctk.CTkFrame):
 
         self.proceed_to_schedule = ctk.CTkButton(self.service_treeview_frame, text="Make a queue", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
                                              compound="right", command = self.generate_schedule)
-        self.proceed_to_schedule.pack(padx = (0, (width*.0025)), anchor = 'e', pady = (height * .005))
+        self.proceed_to_schedule.pack(padx = (0, (width*.0025)), anchor = 'e', pady = (height * .005))'''
         '''INVOICE FRAME SERVICE: END'''
 
         '''SCHEDULING FRAME'''
@@ -849,20 +849,20 @@ class reception_frame(ctk.CTkFrame):
 
     def load_tab(self, i: int = None):
         if i == 0:
-            self.service_treeview_frame.grid_forget()
+            #self.service_treeview_frame.grid_forget()
             self.scheduling_frame.grid_forget()
             self.active = self.item_invoice_treeview
             self.item_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
         elif i == 1:
-            self.item_treeview_frame.grid_forget()
-            self.scheduling_frame.grid_forget()
-            self.active = self.service_invoice_treeview
-            self.service_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
-        elif i == 2:
-            self.service_treeview_frame.grid_forget()
+            #self.service_treeview_frame.grid_forget()
             self.item_treeview_frame.grid_forget()
             self.active = self.scheduling_invoice_treeview
             self.scheduling_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
+        '''elif i == 1:
+            self.item_treeview_frame.grid_forget()
+            self.scheduling_frame.grid_forget()
+            self.active = self.service_invoice_treeview
+            self.service_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))'''
 
         self.update_invoice_treeview()
 
@@ -879,13 +879,14 @@ class reception_frame(ctk.CTkFrame):
         if self.active is None:
             self.active = self.item_invoice_treeview
 
-        index = 0 if self.active == self.item_invoice_treeview else 1 if self.active == self.service_invoice_treeview else 2
+        #index = 0 if self.active == self.item_invoice_treeview else 1 if self.active == self.service_invoice_treeview else 2
+        index = 0 if self.active == self.item_invoice_treeview else 1 
         if not self.loaded[index]:
             if index == 0:
                 self.active.update_table(database.fetch_data(sql_commands.get_invoice_info, (index, )))
-            if index == 1:
-                self.active.update_table(database.fetch_data(sql_commands.get_invoice_info_service, (index, )))
-            elif index == 2:
+                '''if index == 1:
+                    self.active.update_table(database.fetch_data(sql_commands.get_invoice_info_service, (index, )))'''
+            elif index == 1:
                 self.scheduling_invoice_treeview.delete_all_data()
                 preceeded_services = database.fetch_data(sql_commands.get_preceeded_services)
                 queued_services = database.fetch_data(sql_commands.get_invoice_info_queued, (index, ))
@@ -917,8 +918,9 @@ class reception_frame(ctk.CTkFrame):
                 self.update_invoice_treeview(True)
 
     def load_invoice_content(self, _:any = None):
-        print(self.active == self.item_invoice_treeview, self.active == self.service_invoice_treeview)
-        if (self.active == self.item_invoice_treeview or self.active == self.service_invoice_treeview) and self.active.get_selected_data() is not None:
+        #print(self.active == self.item_invoice_treeview, self.active == self.service_invoice_treeview)
+        #if (self.active == self.item_invoice_treeview or self.active == self.service_invoice_treeview) and self.active.get_selected_data() is not None:
+        if (self.active == self.item_invoice_treeview) and self.active.get_selected_data() is not None:
             transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.active.get_selected_data()[0])
 
     def proceed_to_payment(self):
@@ -932,7 +934,7 @@ class reception_frame(ctk.CTkFrame):
                     messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")
             else:
                 if database.exec_nonquery([[sql_commands.mark_preceeding_as_done, (data[0][4:], datetime.datetime.strptime(data[-1], '%B %d, %Y'))]]):
-                    print((data[0][3:], datetime.datetime.strptime(data[-1], '%B %d, %Y')))
+                    #print((data[0][3:], datetime.datetime.strptime(data[-1], '%B %d, %Y')))
                     messagebox.showinfo("Success", "Service mark as done")
                     self.scheduling_invoice_treeview.remove_selected_data()
             #update the shit
@@ -958,7 +960,7 @@ class reception_frame(ctk.CTkFrame):
 class payment_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        global width, height, acc_cred, acc_info, mainframes, IP_Address
+        global width, height, acc_cred, acc_info, mainframes, IP_Address, PORT_NO
 
         '''PAYMENT FRAME: START'''
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
@@ -1018,7 +1020,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
-        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 1175, self.received_callback)
+        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
     
         self.grid_forget()
@@ -1082,7 +1084,7 @@ class payment_frame(ctk.CTkFrame):
                 temp.load_both()
 
 class customer_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1136,7 +1138,7 @@ class customer_frame(ctk.CTkFrame):
         return super().grid(**kwargs)
         
 class services_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1211,7 +1213,7 @@ class services_frame(ctk.CTkFrame):
 
 
 class sales_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1374,7 +1376,7 @@ class sales_frame(ctk.CTkFrame):
         return super().grid(**kwargs)
         
 class inventory_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, mainframes, IP_Address
+    global width, height, acc_cred, acc_info, mainframes, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
@@ -1930,7 +1932,7 @@ class inventory_frame(ctk.CTkFrame):
 
     
 class patient_info_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, IP_Address
+    global width, height, acc_cred, acc_info, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2059,7 +2061,7 @@ class patient_info_frame(ctk.CTkFrame):
             messagebox.showwarning('Warning','No Record is selected', master=self.sort_frame)
 
 class reports_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, IP_Address
+    global width, height, acc_cred, acc_info, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         '''constants'''
@@ -2486,7 +2488,7 @@ class reports_frame(ctk.CTkFrame):
         self.update_graphs(True)
 
 class user_setting_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2644,7 +2646,7 @@ class user_setting_frame(ctk.CTkFrame):
         load_main_frame(0)
 
 class histlog_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2887,7 +2889,7 @@ class histlog_frame(ctk.CTkFrame):
             self.log_audit_tree.insert(parent='', index='end', iid=i, text="", values= (i + 1, )+ temp[i], tags=tag )
             
 class admin_settings_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
