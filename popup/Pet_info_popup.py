@@ -520,7 +520,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
         def refresh(self):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.load_history()
-            self.refresh_btn.after(2000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
             
         def reset_entries(self):
