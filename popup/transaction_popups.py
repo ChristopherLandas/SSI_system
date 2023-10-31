@@ -302,6 +302,7 @@ from popup import preview_pdf_popup as ppdfp
     return instance(master, info, root_treeview, change_val_func)'''
 
 IP_Address = json.load(open("Resources\\network_settings.json"))
+PORT_NO: dict = json.load(open("Resources\\port_no.json"))
 
 def show_transaction_proceed(master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
@@ -317,7 +318,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.service_dict = service_dict
             #encapsulation
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             super().__init__(master, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
@@ -555,7 +556,7 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             height = info[1]
             #basic inforamtion needed; measurement
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             super().__init__(master, corner_radius= 0, fg_color="transparent")
             #the actual frame, modification on the frame itself goes here
@@ -679,7 +680,7 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -737,7 +738,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''internal data'''
             self.total_transaction_count = 0
@@ -968,7 +969,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             '''constants'''
             self.services = [s[0] for s in database.fetch_data(sql_commands.get_service_data)]
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''events'''
             def bd_commands(i):
@@ -1212,7 +1213,7 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''internal data'''
             self.total_transaction_count = 0
@@ -1290,7 +1291,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
             self._attentdant: str = attendant
             self._uid: str = uid
             self.update_callback = update_callback
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''events'''
             def bd_commands(i):
@@ -1463,10 +1464,10 @@ def show_payment_proceed(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
-            self.sender_to_receptionist = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], 222, IP_Address["MY_NETWORK_IP"], 200)
-            self.sender_to_admin = nsu.network_sender(IP_Address["ADMIN_IP"], 222, IP_Address["MY_NETWORK_IP"], 201)
+            self.sender_to_receptionist = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], PORT_NO['DashB_stat_ref'], IP_Address["MY_NETWORK_IP"], 200)
+            self.sender_to_admin = nsu.network_sender(IP_Address["ADMIN_IP"], PORT_NO['DashB_stat_ref'], IP_Address["MY_NETWORK_IP"], 201)
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
@@ -1825,7 +1826,7 @@ def payment_confirm(master, info:tuple,):
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
             
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -1853,7 +1854,7 @@ def show_invoice_record(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
             
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.cat_icon = ctk.CTkImage(light_image=Image.open("image/cat.png"), size=(28,28))
                 
@@ -1979,7 +1980,7 @@ def show_invoice_content(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
             
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
         
