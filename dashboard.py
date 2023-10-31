@@ -1016,7 +1016,7 @@ class payment_frame(ctk.CTkFrame):
         self.refresh_btn.configure(state = ctk.DISABLED)
         self.payment_treeview.update_table(database.fetch_data(sql_commands.get_payment_invoice_info))
         self.treeview_og_data = self.payment_treeview._data
-        self.refresh_btn.after(2000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+        self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
     def proceed_to_pay(self):
         data = self.payment_treeview.get_selected_data()
@@ -1115,7 +1115,7 @@ class services_frame(ctk.CTkFrame):
             #self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
             #self.services_data_for_treeview = [] if self.services_raw_data is None else [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
             self.update_table()           
-            self.refresh_btn.after(2000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
     
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -1314,7 +1314,7 @@ class sales_frame(ctk.CTkFrame):
         self.attendant_sort_option.configure(values = self.attendant_values + [s[0] for s in database.fetch_data(sql_commands.get_sales_attendant)])
         self.attendant_sort_option.set("All")
         self.set_table()
-        self.refresh_btn.after(2000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
+        self.refresh_btn.after(5000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
         
     def clear_table(self):
         for item in self.sales_tree.get_children():self.sales_tree.delete(item)
@@ -1404,7 +1404,7 @@ class inventory_frame(ctk.CTkFrame):
 
         def update_tables(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
-            self.refresh_btn.after(2000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             self.data_view1.pack_forget()
             sell_data, item_data = selling_concat_unit(database.fetch_data(sql_commands.get_selling_rate)), item_concat_unit(self.list_show)
             temp = [tuple(rate[0]) + item for item in item_data for rate in sell_data  if rate[-1] == item[1]]
@@ -1422,7 +1422,7 @@ class inventory_frame(ctk.CTkFrame):
             temp = [tuple(rate[0]) + item for item in item_data for rate in sell_data  if rate[-1] == item[1]]
             self.data_view1.update_table(temp)
             self.data_view1.pack()
-            self.refresh_btn.after(2000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
             
         def disposal_table_callback():
             sort_status_configuration_callback()
@@ -1671,7 +1671,7 @@ class inventory_frame(ctk.CTkFrame):
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
             self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not database.fetch_data(sql_commands.get_recieving_items_state) else self.no_order_data.place_forget()
-            self.refresh_btn.after(2000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
         def restocking_callback():
             self.inventory_button.response()
@@ -1771,7 +1771,7 @@ class inventory_frame(ctk.CTkFrame):
         def refresh_ds_table():
             self.ds_refresh_btn.configure(state = ctk.DISABLED)
             self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_disposal_items))
-            self.ds_refresh_btn.after(2000, lambda:self.ds_refresh_btn.configure(state = ctk.NORMAL))
+            self.ds_refresh_btn.after(5000, lambda:self.ds_refresh_btn.configure(state = ctk.NORMAL))
             
         self.disposal_frame.grid_propagate(0)
         self.disposal_frame.grid_rowconfigure(1, weight=1)
@@ -1824,7 +1824,7 @@ class inventory_frame(ctk.CTkFrame):
         def refresh_supplier_table():
             self.refresh_btn.configure(state = ctk.DISABLED)
             self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
-            self.refresh_btn.after(2000,lambda:self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000,lambda:self.refresh_btn.configure(state = ctk.NORMAL))
 
         def view_supplier_record():
                 if self.supplier_treeview.get_selected_data():
@@ -1919,7 +1919,7 @@ class patient_info_frame(ctk.CTkFrame):
         
         def update_table():
             self.refresh_btn.configure(state = "disabled")
-            self.refresh_btn.after(2000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             sort_status_callback(self.sort_type_option.get())
             
         def sort_table(sql):
@@ -2460,7 +2460,7 @@ class reports_frame(ctk.CTkFrame):
                 self.previous_year = self.year_option.get()
                 self.yearly_data_view.update_table(database.fetch_data(sql_commands.yearly_report_treeview_data, (y, )))
         #set the previous selection to avoid repeating load
-        self.refresh_btn.after(2000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
+        self.refresh_btn.after(5000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
 
 
     def graphs_need_upgrade(self):
@@ -2969,12 +2969,12 @@ class admin_settings_frame(ctk.CTkFrame):
         
         def refresh_service():
             self.refresh_btn.configure(state=ctk.DISABLED)
-            self.after(2000, lambda:  self.refresh_btn.configure(state=ctk.NORMAL))
+            self.after(5000, lambda:  self.refresh_btn.configure(state=ctk.NORMAL))
             self.load_service_data()
             
         def refresh_item():
             self.refresh_btn.configure(state=ctk.DISABLED)
-            self.after(2000, lambda:  self.refresh_btn.configure(state=ctk.NORMAL))
+            self.after(5000, lambda:  self.refresh_btn.configure(state=ctk.NORMAL))
             self.load_inventory_data()
             
             
