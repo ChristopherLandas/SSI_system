@@ -1633,12 +1633,13 @@ def show_payment_proceed(master, info:tuple,):
                 if IP_Address['MY_NETWORK_IP'] != IP_Address['ADMIN_IP']:
                     self.sender_to_admin.send("_")
                     
+                record_action(self.cashier_name._text, action.TRANSACTION_TYPE, action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
                 self._treeview_callback()
                 self.reset()
                 self.place_forget()
                 self.complete_button.configure(state="normal")
                 self.cancel_button.configure(state="normal")
-                record_action(self.cashier_name._text, action.TRANSACTION_TYPE,  action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
+                print(self.or_button._text[5:])
 
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
