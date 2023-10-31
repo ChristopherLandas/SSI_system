@@ -346,34 +346,35 @@ class dashboard(ctk.CTkToplevel):
         self.mainloop()
     
     def generate_notification(self):
+        '''ALL OF THE COMMENTED NTF_C VARIABLE PUT A NOTIFICATION IN INSTANCE RATHER THAN GROUP'''
+
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out sf stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock')]
+        ntf_c1 = [('Out sf stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock') for _ in out_of_stock]
         #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
-        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock')]
+        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock') for _ in low_stock]
         #ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
 
-        #near expiry items add here
+        near_expire = database.fetch_data(sql_commands.get_near_expired_items_name, (SETTINGS_VAL['Near_expiry_date_alert'], ))
+        #ntf_c3 = [('About to Expire', f'Item {s[0]} is about to expire in {s[2]} day{"s" if s[2] > 1 else ""}') for s in near_expire]
+        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire') for _ in near_expire]
 
         expired = database.fetch_data(sql_commands.get_expired_items_name)
-        #ntf_c3 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
-        ntf_c3 = [('Expired stock', f'{len(expired)} Item{"s" if len(low_stock) > 1 else ""} had an expired stocks')]
+        #ntf_c4 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
+        ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s" if len(low_stock) > 1 else ""} had an expired stock/s') for _ in expired]
 
         near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
-        ntf_c4 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}') for s in near_shceduled]
+        ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}') for s in near_shceduled]
 
         scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
-        ntf_c5 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
+        ntf_c6 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}') for s in scheduled_today]
 
         past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
-        ntf_c6 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment')]
-        #ntf_c6 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        #ntf_c7 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment') for _ in past_scheduled]
 
-        ntf_c = ntf_c4 + ntf_c2 + ntf_c3 + ntf_c1 + ntf_c5 + ntf_c6
-
-        #fix 0 value notifs
-
+        ntf_c = ntf_c5 + ntf_c6 + ntf_c7 + ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
         for _ntf in self.notifs:
             _ntf.destroy()
 

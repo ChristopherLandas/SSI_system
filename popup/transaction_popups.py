@@ -1552,7 +1552,6 @@ def show_payment_proceed(master, info:tuple,):
                             quantity_needed -= st[2]
                             #if the stock needed is higher than stock instance
 
-                'FIX NEEDED'
                 '''new FIFO algorithm'''
                             
                 '''for _item in item:

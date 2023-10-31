@@ -970,6 +970,18 @@ get_expired_items_name = "SELECT item_general_info.name, SUM(item_inventory_info
                           WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE\
                           GROUP BY item_general_info.UID"
 
+get_near_expired_items_name = "SELECT item_general_info.name,\
+                                      SUM(item_inventory_info.Stock),\
+                                      DATEDIFF(item_inventory_info.Expiry_Date, current_date)\
+                               FROM item_inventory_info\
+                               JOIN item_general_info\
+                                       ON item_inventory_info.UID = item_general_info.UID\
+                               JOIN item_settings\
+                                       ON item_inventory_info.UID = item_settings.UID\
+                               WHERE DATE_SUB(item_inventory_info.Expiry_Date, INTERVAL ? DAY) <= CURRENT_DATE\
+                                       AND NOT item_inventory_info.Expiry_Date <= current_date\
+                               GROUP BY item_general_info.UID"
+
 get_scheduled_clients_today_names = "SELECT service_name, patient_name from services_transaction_content\
                                      WHERE scheduled_date = current_date"
 
