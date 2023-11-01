@@ -619,6 +619,10 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
         self.receiving_entity.start_receiving()
+        
+        Sales_popup.change_order(self, (width, height, acc_cred, acc_info)).place(relx=0.5, rely=0.5, anchor='c')
+        #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
+        #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))
 
 
     def load_scheduled_service(self):
@@ -1213,7 +1217,7 @@ class services_frame(ctk.CTkFrame):
 
 
 class sales_frame(ctk.CTkFrame):
-    global width, height, IP_Address, PORT_NO
+    global width, height, acc_cred, acc_info, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1279,7 +1283,7 @@ class sales_frame(ctk.CTkFrame):
         self.from_date_frame.propagate(0)
         
         ctk.CTkLabel(self.from_date_frame, text="From: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.03).pack(side="left", padx=(width*0.01,width*0.0025))
-        
+        #date.today()
         self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(height*0.005))
         self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=self.cal_icon, height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
@@ -1338,10 +1342,11 @@ class sales_frame(ctk.CTkFrame):
         self.set_table()
         
         #region Popups   
-        self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height))
+        self.show_sale_info = Sales_popup.show_sales_record_info(self, (width, height, acc_cred, acc_info,))
         #endregion
     
     def view_record(self):
+        #print(self.sales_treeview.get_selected_data())
         self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_treeview.get_selected_data()) if self.sales_treeview.get_selected_data() else messagebox.showerror("Warning", "Select a record first")
     
     def refresh(self):

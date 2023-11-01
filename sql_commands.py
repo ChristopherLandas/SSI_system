@@ -1,7 +1,11 @@
 #GENERAL
 get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
+get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
+get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
 get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
+
 
 #SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\

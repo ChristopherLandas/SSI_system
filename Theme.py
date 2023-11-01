@@ -33,6 +33,7 @@ class Color:
     
     Red_Tulip = "#FD8A8A"
     Red_Pastel = "#FF6464"
+    Red_Pastel_Hover = "#D55A5A"
     Red_Hover = "#D45353"
     
     Green_Pistachio = "#83BD75"
