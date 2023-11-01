@@ -572,6 +572,7 @@ get_invoice_info_service = "SELECT invoice_record.invoice_uid,\
                                 AND process_type = 1\
                             GROUP BY invoice_record.invoice_uid\
                             ORDER BY invoice_service_content.scheduled_date"
+#Currently obsolete
 
 
 get_invoice_info_queued = "SELECT invoice_record.invoice_uid,\
