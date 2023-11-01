@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `log_history` (
 -- Data exporting was unselected.
 
 -- Dumping structure for procedure ssi_merged.newUser
-DELIMITER //
+/*DELIMITER //
 CREATE PROCEDURE `newUser`()
 BEGIN
     DECLARE newid INT;
@@ -270,6 +270,8 @@ BEGIN
     SELECT newid;
 END//
 DELIMITER ;
+Unecessary table
+*/
 
 -- Dumping structure for table ssi_merged.partially_recieving_item
 CREATE TABLE IF NOT EXISTS `partially_recieving_item` (
