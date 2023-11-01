@@ -758,6 +758,10 @@ class reception_frame(ctk.CTkFrame):
         self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item_btn.pack(side="left", padx=(width*0.005))
 
+        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.05, text="View Shcedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
+                                               command = lambda: self.scheduled_services_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.view_schedule_btn.pack(side="left", padx=(0, width*0.005))
+
         self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = lambda:self.update_invoice_treeview(True))
         self.refresh_btn.pack(side="left", padx=(0,width*0.005))
     
@@ -822,6 +826,7 @@ class reception_frame(ctk.CTkFrame):
         '''SCHEDULING FRAME: END'''
         
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), lambda: self.update_invoice_treeview(True), acc_cred[0][0])
+        self.scheduled_services_popup: ctk.CTkFrame = transaction_popups.scheduled_services(self, (width, height), self)
         self.update_invoice_treeview()
         self.grid_forget()
 

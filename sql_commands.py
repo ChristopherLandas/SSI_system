@@ -1012,3 +1012,34 @@ get_on_pending_items = "SELECT item_general_info.brand, recieving_item.NAME, rec
                         FROM recieving_item\
                         JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
                         WHERE state = 3"
+
+get_all_schedule = "SELECT CONCAT('TR# ', service_preceeding_schedule.transaction_uid),\
+                                                transaction_record.client_name,\
+                                                services_transaction_content.patient_name,\
+                                                CONCAT(services_transaction_content.service_name, ' ', coalesce(prefix, '')),\
+                                                'Paid',\
+                                                DATE_FORMAT(service_preceeding_schedule.scheduled_date, '%M %d, %Y') AS shceduled_date\
+                                            FROM service_preceeding_schedule\
+                                            LEFT JOIN transaction_record\
+                                                ON service_preceeding_schedule.transaction_uid = transaction_record.transaction_uid\
+                                            LEFT JOIN services_transaction_content\
+                                                ON service_preceeding_schedule.transaction_uid = services_transaction_content.transaction_uid\
+                                                AND service_preceeding_schedule.status = 0\
+                    UNION ALL\
+                    SELECT invoice_record.invoice_uid,\
+                                                    invoice_record.client_name,\
+                                                    invoice_service_content.patient_name,\
+                                                    CONCAT(invoice_service_content.service_name, case when service_info_test.duration_type != 0 then ' (Initial)' ELSE '' END),\
+                                                    CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                                    DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                                FROM invoice_record\
+                                                LEFT JOIN invoice_service_content\
+                                                    ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                                LEFT JOIN invoice_item_content\
+                                                    ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                                                LEFT JOIN service_info_test\
+                                                    ON invoice_service_content.service_name = service_info_test.service_name\
+                                                WHERE invoice_record.State = 0\
+                                                    AND process_type = 1\
+                                                GROUP BY invoice_record.invoice_uid\
+                    ORDER BY shceduled_date"

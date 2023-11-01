@@ -717,15 +717,30 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
                                             width=width*0.005)
             self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
-            self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+            self.resched_option_btn = ctk.CTkButton(self.content_frame, width * .075, height*0.05, text='Reschedule', font= ("DM Sans Medium", 14), command= self.resched_btn_callback)
+            self.resched_option_btn.grid(row=0, column=1,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
+
+            self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= self.update_treeview)
             self.refresh_btn.grid(row=0, column=2,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
 
             self.sched_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
             self.sched_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
             self.sched_treeview = cctk.cctkTreeView(self.sched_frame, data =[], width=width*0.725, height=height*0.7,
-                                               column_format=f'/No:{int(width*.025)}-#r/OR:{int(width*0.05)}-tc/ClientName:x-tl/Service:{int(width*.15)}-tr/Schedule:{int(width*.1)}-tc/Action:{int(width*.08)}-bD!30!30',)
+                                                    column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Pet:x-tl/Owner:x-tl/Service:{int(width*.12)}-tl/Total:{int(width*.1)}-tr/Date:{int(width*.12)}-tc!30!30',)
+            #                                   column_format=f'/No:{int(width*.025)}-#r/OR:{int(width*0.05)}-tc/ClientName:x-tl/Service:{int(width*.15)}-tr/Schedule:{int(width*.1)}-tc/Action:{int(width*.08)}-bD!30!30',)
+            self.update_treeview()
             self.sched_treeview.pack()
+
+        def update_treeview(self):
+            self.sched_treeview.update_table(database.fetch_data(sql_commands.get_all_schedule))
+
+        def resched_btn_callback(self):
+            if self.sched_treeview.get_selected_data():
+                pass
+                #code for reshceduling here
+            else:
+                messagebox.showerror("Unable to Proceed", "Select a service to resched")
 
     return instance(master, info, parent)
 
