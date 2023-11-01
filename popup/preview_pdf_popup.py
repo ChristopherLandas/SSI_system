@@ -585,5 +585,3 @@ class preview_pdf_popup(ctk.CTkToplevel):
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
                         width=80,height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
-    
-    

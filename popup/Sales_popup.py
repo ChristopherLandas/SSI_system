@@ -267,6 +267,5 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
                 return super().place(**kwargs)
             finally:
                 pass 
-            
-            
+                   
     return instance(master, info)
