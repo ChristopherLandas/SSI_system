@@ -3,7 +3,6 @@ import datetime
 from typing import Callable, Optional, Tuple, Union
 from customcustomtkinter import customcustomtkinter as cctk
 import customtkinter as ctk
-import re
 from util import text_overflow_ellipsis as fit_to_trim
 
 from util import Callable, Optional, Tuple, Union
@@ -102,9 +101,7 @@ def notif_info_popup(master: any, info: tuple) -> ctk.CTkFrame:
             kwargs['rely'] = .5
             kwargs['anchor'] = 'c'
             if 'text_info' in kwargs:
-                print(kwargs['text_info'])
                 self.label.configure(text = kwargs['text_info'])
-                kwargs.pop('text_info')
             return super().place(**kwargs)
         
     return instance(master= master, info=info)

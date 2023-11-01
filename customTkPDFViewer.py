@@ -80,5 +80,3 @@ class ShowPdf():
             start_pack()
 
         return self.frame
-
-    
