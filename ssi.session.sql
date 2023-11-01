@@ -1,2 +1,1 @@
-SELECT UID FROM item_general_info 
-where name = 'Test Item' and unit is NULL
+SELECT brand FROM item_general_info WHERE UID = 'I1aa81'

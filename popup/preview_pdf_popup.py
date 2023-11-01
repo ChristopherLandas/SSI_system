@@ -466,6 +466,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.zoom_counter = 0
         window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
         self.window_width = window_width
+        self.is_receipt = is_receipt
 
         toplvl_width = 600
         toplvl_height = 650
@@ -511,7 +512,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.vaas1.img_object_li.clear()
         self.current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if self.view_by_reciept and is_receipt:
+        if self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=80,height=100,zoomDPI=self.default_dpi)
@@ -520,7 +521,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 self.destroy()
                 messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
-        elif not self.view_by_reciept and is_receipt:
+        elif not self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
                         width=80,height=100,zoomDPI=self.default_dpi)
             self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
@@ -547,14 +548,18 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.vaas1 = cpdf.ShowPdf() 
         # clear the image list # this corrects the bug inside tkPDFViewer module
         self.vaas1.img_object_li.clear()
-        # Adding pdf location and width and height. 
-        if self.view_by_reciept:
+        # Adding pdf location and width and height.    
+        if self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
-                                      width=80,height=100,zoomDPI=zoom_dpi)
+                        width=80,height=100,zoomDPI=zoom_dpi)
+            self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))  
+        elif not self.view_by_reciept and self.is_receipt:
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
+                        width=80,height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
         else:
-            self.vaas2=self.vaas1.pdf_view(self.pdf_viewer_frame,pdf_location = r"image\sample.pdf", zoomDPI=zoom_dpi, width=80,height=100 ) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
-            # Placing Pdf inside gui
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
+                        width=80,height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
     
     

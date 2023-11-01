@@ -805,9 +805,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0, anchor= 'w', font=self.service_treeview.row_font,
                                                    text="  "+label_text, width = root_treeview.column_widths[1],
-                                                   command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[1] for s in self.client],
-                                                                                         proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
+                                                   command= lambda: serviceAvailing.pets(root_treeview.master.master, spinner.value, label_text, [s[1] for s in self.client],
+                                                                                         proceed_command, None, width=width, height=height,fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
                                                                                                                                                         service_dict= self._service_dict,
                                                                                                                                                         root_treeview=root_treeview,
                                                                                                                                                         change_total_val_serv_callback= self.change_total_val_serv_callback,
