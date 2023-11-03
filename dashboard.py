@@ -34,6 +34,7 @@ import ctypes
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+#scaling = 1
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -137,8 +138,8 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
-        
-        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        """ 
+        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -149,10 +150,9 @@ class dashboard(ctk.CTkToplevel):
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
-            del datakey """
-        #for preventing security breach through python code; enable it to test it """
-
-        
+            del datakey
+        #for preventing security breach through python code; enable it to test it
+        """
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
@@ -225,7 +225,7 @@ class dashboard(ctk.CTkToplevel):
             self.active_main_frame.grid(row =1, column =1, sticky = 'nsew')
         
         def log_out():
-            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?')
+            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?', parent = self)
             if b:
                 database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
                                         (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
@@ -846,9 +846,9 @@ class reception_frame(ctk.CTkFrame):
     def post_sent_callback(self, i):
         if i == 1:
             self.active.remove_selected_data()
-            messagebox.showinfo("Succeed", 'Invoice preceeded to payment')
+            messagebox.showinfo("Succeed", 'Invoice preceeded to payment', parent = self)
         else:
-            messagebox.showerror("Error", "An error occured")
+            messagebox.showerror("Error", "An error occured", parent = self)
 
     def update_invoice_treeview(self, force_load = False):
         if force_load:
@@ -884,13 +884,13 @@ class reception_frame(ctk.CTkFrame):
 
     def cancel_invoice(self, bypass_confirmation: bool = False):
         if self.active.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel")
+            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel", parent = self)
             return
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
             self.update_invoice_treeview(True)
         else:
-            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")) and self.active != self.scheduling_invoice_treeview:
+            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice", parent = self)) and self.active != self.scheduling_invoice_treeview:
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.active.get_selected_data()[0], )]])
                 self.update_invoice_treeview(True)
 
@@ -906,13 +906,13 @@ class reception_frame(ctk.CTkFrame):
                 if 0 not in stock_quan:
                     self.sender_entity.send(data[0])
                 else:
-                    messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")
+                    messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
             else:
                 if database.exec_nonquery([[sql_commands.mark_preceeding_as_done, (data[0][4:], datetime.datetime.strptime(data[-1], '%B %d, %Y'))]]):
-                    messagebox.showinfo("Success", "Service mark as done")
+                    messagebox.showinfo("Success", "Service mark as done", parent = self)
                     self.scheduling_invoice_treeview.remove_selected_data()
         else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment", parent = self)
     #obsolete
 
 class payment_frame(ctk.CTkFrame):
@@ -985,10 +985,10 @@ class payment_frame(ctk.CTkFrame):
 
     def invoice_callback(self):
         if self.payment_treeview.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment", parent = self)
             return
         else:
-            messagebox.showwarning("No function yet")    
+            messagebox.showwarning("No function yet", parent = self)    
 
     def search_callback(self):
         if self.search_entry.get() == "":
@@ -1004,7 +1004,7 @@ class payment_frame(ctk.CTkFrame):
     
     def add_item_command(self):
         if not self.payment_treeview.get_selected_data():
-            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment", parent = self)
             return 
         uid = self.payment_treeview.get_selected_data()[0]
         transaction_popups.additional_option_invoice(self, (width, height), acc_cred[0][0], uid, self.update_payment_treeview).place(relx = .5, rely = .5, anchor = 'c')
@@ -1019,7 +1019,7 @@ class payment_frame(ctk.CTkFrame):
             self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
                                             relx = .5, rely = .5, anchor = 'c')
         else:
-            messagebox.showwarning("Fail to proceed", "Select a reception record before heading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before heading into the payment", parent = self)
 
     def reset(self):
         for i in mainframes:
@@ -1300,7 +1300,7 @@ class sales_frame(ctk.CTkFrame):
     
     def view_record(self):
         #print(self.sales_treeview.get_selected_data())
-        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_treeview.get_selected_data()) if self.sales_treeview.get_selected_data() else messagebox.showerror("Warning", "Select a record first")
+        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_treeview.get_selected_data()) if self.sales_treeview.get_selected_data() else messagebox.showerror("Warning", "Select a record first", parent = self)
     
     def refresh(self):
         
@@ -1470,7 +1470,7 @@ class inventory_frame(ctk.CTkFrame):
         def dispose_expired(_: any = None):
             if self.data_view1.data_grid_btn_mng.active:
                 if self.data_view1.get_selected_data()[-1] == 'Expired':
-                    if messagebox.askyesno("Dispose Item", "Are you sure you want to dispose\nthe item?"):
+                    if messagebox.askyesno("Dispose Item", "Are you sure you want to dispose\nthe item?", parent = self):
                         data = self.data_view1.get_selected_data()
                         database.exec_nonquery([["Update state = -1 WHERE stock = ? AND Expiry_Date = ?", (data[2], data[4])]])
                         self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
@@ -1478,14 +1478,14 @@ class inventory_frame(ctk.CTkFrame):
         
         def batch_dispose():
             if self.data_view1._data:
-                if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?"):
+                if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?", parent = self):
                     
                     self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired')
                     
                 else:
                     print("Thank you for saving a trash like me")
             else:
-                messagebox.showwarning("Error", "No item to dispose")
+                messagebox.showwarning("Error", "No item to dispose", parent = self)
 
         def search(_: any = None):
             if self.search_entry.get():
@@ -1686,7 +1686,7 @@ class inventory_frame(ctk.CTkFrame):
             temp:dashboard_popup = mainframes[0]
             temp.generate_stat_tabs() """
         def show_order_info():
-            self.order_info.place(relx=0.5, rely=0.5, anchor='c', data= self.rs_data_view1.get_selected_data()) if self.rs_data_view1.get_selected_data() else messagebox.showwarning("Warning", "Please select a record first")
+            self.order_info.place(relx=0.5, rely=0.5, anchor='c', data= self.rs_data_view1.get_selected_data()) if self.rs_data_view1.get_selected_data() else messagebox.showwarning("Warning", "Please select a record first", parent = self)
                        
         self.restock_frame.grid_propagate(0)
         self.restock_frame.grid_rowconfigure(1, weight=1)
@@ -1748,7 +1748,7 @@ class inventory_frame(ctk.CTkFrame):
             database.exec_nonquery([["UPDATE disposal_history SET disposed_by = ?, full_dispose_date = CURRENT_TIMESTAMP WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (acc_cred[0][0], self.ds_data_view1._data[i][3])]])
             uid = database.fetch_data("Select item_uid from disposal_history WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (self.ds_data_view1._data[i][3], ))[0][0]
             record_action(acc_cred[0][0], action.DISPOSAL_TYPE, action.OFFICIALLY_DISPOSE % (acc_cred[0][0], uid))
-            messagebox.showinfo("Succeed", "Item has been fully disposed")
+            messagebox.showinfo("Succeed", "Item has been fully disposed", parent = self)
 
         
         def refresh_ds_table():
@@ -1809,7 +1809,7 @@ class inventory_frame(ctk.CTkFrame):
                 if self.supplier_treeview.get_selected_data():
                     self.view_supplier_popup.place(relx=0.5, rely=0.5, anchor="c", record_id = self.supplier_treeview.get_selected_data()[0])
                 else:
-                    messagebox.showwarning('Warning','No record is selected', master=self) 
+                    messagebox.showwarning('Warning','No record is selected', parent = self) 
                     
         self.main_frame = ctk.CTkFrame(self.supplier_frame, fg_color="transparent")
         self.main_frame.pack(fill="both", expand=1)
@@ -2959,13 +2959,13 @@ class admin_settings_frame(ctk.CTkFrame):
                 self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data(), service_reload_callback = refresh_service)
                 
             else:
-                messagebox.showerror("Missing Selection", "Select a record first")
+                messagebox.showerror("Missing Selection", "Select a record first", parent = self)
                 
         def open_item_record():
             if self.inventory_data_view.get_selected_data():
                 self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", item_info=self.inventory_data_view.get_selected_data(), item_reload_callback = refresh_item)
             else:
-                messagebox.showerror("Missing Selection", "Select a record first")
+                messagebox.showerror("Missing Selection", "Select a record first", parent = self)
         
         '''GENERAL FRAME - START'''
         
