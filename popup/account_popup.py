@@ -80,19 +80,19 @@ def change_password(master, info:tuple,):
 
         def place(self, username: str, **kwargs):
             if(username is None):
-                messagebox.showerror("Invalid", "Select an account to change")
+                messagebox.showerror("Invalid", "Select an account to change", parent = self)
                 return
             self.username_label.configure(text = username[0])
             return super().place(**kwargs)
         
         def update_pass(self):
             if len(self.password_entry.get() or []) < 5:
-                messagebox.showerror("Invalid", "password must atleast\n5 characters long")
+                messagebox.showerror("Invalid", "password must atleast\n5 characters long", parent = self)
                 return
             new_pass = encrypt.pass_encrypt(self.password_entry.get())
             database.exec_nonquery([["UPDATE acc_cred SET pss = ?, slt = ? WHERE usn = ?", (new_pass['pass'], new_pass['salt'],
                                                                                             self.username_label._text)]])
-            messagebox.showinfo("Success", f"{self.username_label._text}%s\nPassword is changed\nPassword: {self.password_entry.get()}" % "'" if self.username_label._text.endswith("s") else "s")
+            messagebox.showinfo("Success", f"{self.username_label._text}%s\nPassword is changed\nPassword: {self.password_entry.get()}" % "'" if self.username_label._text.endswith("s") else "s", parent = self)
             self.place_forget()
             self.pack_forget()
             self.grid_forget()

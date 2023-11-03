@@ -245,17 +245,17 @@ class pets(ctk.CTkFrame):
         def proceed_sequence():
             for fr in self.frames:
                 if fr.name.get() == "" or fr.first_date_entry._text == "Set Date":
-                    messagebox.showerror("Fail to proceed", "Fill all the required info")
+                    messagebox.showerror("Fail to proceed", "Fill all the required info", parent = self)
                     return
                 if isinstance(fr, pet_period_info_frame):
                     temp: pet_period_info_frame = fr
                     if temp.second_date_entry._text == "Set Date":
-                        messagebox.showerror("Fail to proceed", "Fill all the required info")
+                        messagebox.showerror("Fail to proceed", "Fill all the required info", parent = self)
                         return
                 elif isinstance(fr, pet_multiple_period_info_frame):
                     temp: pet_multiple_period_info_frame = fr
                     if temp.period_days.get() == "" or temp.instance_count_days.get() == "":
-                        messagebox.showerror("Fail to proceed", "Fill all the required info")
+                        messagebox.showerror("Fail to proceed", "Fill all the required info", parent = self)
                         return
             #for checking the missing informattion like patient, date, etc.
 

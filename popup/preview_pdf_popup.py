@@ -543,7 +543,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
                 self.destroy()
-                messagebox.showerror("File Missing", "The file you are trying to access is missing.")
+                messagebox.showerror("File Missing", "The file you are trying to access is missing.", parent = self)
                 
         elif not self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",

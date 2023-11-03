@@ -57,7 +57,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                     
                     #check if the item is already in the database
                     if (self.item_brand_entry.get(), self.item_name_entry.get(), unit) in database.fetch_data('SELECT brand,name, unit from item_general_info'):
-                        messagebox.showerror("Duplicate Entry", "The item is already in the inventory")
+                        messagebox.showerror("Duplicate Entry", "The item is already in the inventory", parent = self)
                     else:
                         output = database.exec_nonquery([[sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0])],
                                                 [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 5)],
@@ -66,13 +66,13 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                                                 [sql_commands.add_item_inventory, (self.item_name_id._text, self.stock_entry.get(), _date)],])
                         
                         if output:
-                            messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added in the inventory" )
+                            messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added in the inventory", parent = self)
                             reset()
                             if self.command_callback: self.command_callback()
                         else:
-                            messagebox.showwarning("Error", "Item cannot add in the inventory")
+                            messagebox.showwarning("Error", "Item cannot add in the inventory", parent = self)
                 else:
-                    messagebox.showwarning("Missing Field Entry", "Enter required fields\nAll fields with '*' is required.", )
+                    messagebox.showwarning("Missing Field Entry", "Enter required fields\nAll fields with '*' is required.", parent = self)
 
             def unit_process():
                 if self.uom_var.get() == 'on' and self.item_name_entry.get() and self.item_unit_dbox.get():
@@ -404,7 +404,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
                 
             def recieve_stock():
                 if self.item_name_entry.get() == "Select an Item" or self.item_code._text=="" or self.supplier_code._text=="":
-                    messagebox.showerror("Info Missing", "Fill the required information")
+                    messagebox.showerror("Info Missing", "Fill the required information", parent = self)
                     return
 
                 
@@ -412,7 +412,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
                 if data_view :
                     data_view.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
-                    messagebox.showinfo("Sucess", "Order process success. Check the orders tab")
+                    messagebox.showinfo("Sucess", "Order process success. Check the orders tab", parent = self)
                     record_action(acc_cred[0][0], action.ADD_ITEM_TYPE, action.ADD_ITEM % (acc_cred[0][0], self.item_uid))
                     self.command_calback()
                     self.place_forget()
@@ -533,7 +533,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             return super().place(**kwargs)
 
         def stock (self, inventory_info: Optional[Union[tuple, cctk.cctkTreeView]] = None, acc_name: str = None):
-            if not messagebox.askyesno("Restock Item", "Are you sure you want to proceed?"):
+            if not messagebox.askyesno("Restock Item", "Are you sure you want to proceed?", parent = self):
                 return
 
             if isinstance(inventory_info, cctk.cctkTreeView):
@@ -568,7 +568,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
                 inventory_info.update_table(database.fetch_data(sql_commands.get_recieving_items))
             
             self.update_cmds()
-            messagebox.showinfo('Success', 'Restocking Successful')
+            messagebox.showinfo('Success', 'Restocking Successful', parent = self)
     return restock(master, info, data_view, command_callback)
 
 def show_status(master, info:tuple,):
@@ -690,7 +690,7 @@ def supplier_list(master, info:tuple,):
                 if self.supplier_treeview.get_selected_data():
                     view_supplier(self, info, update_tables).place(relx=0.5, rely=0.5, anchor="c", record_id = self.supplier_treeview.get_selected_data()[0])
                 else:
-                    messagebox.showwarning('Warning','No record is selected', master=self) 
+                    messagebox.showwarning('Warning','No record is selected', parent=self) 
                     
                 
 
@@ -771,10 +771,10 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             def add_supplier():
                 
                 if self.supplier_name_entry.get() == "" and self.supplier_person_entry.get() == "" and self.supplier_number_entry.get() == "" and self.supplier_address_entry.get() == "":
-                    messagebox.showerror("Missing Information", "Please fill required fields", master=self)
+                    messagebox.showerror("Missing Information", "Please fill required fields", parent=self)
                     
                 elif self.supplier_email_entry.get() and not validate_email(self.supplier_email_entry.get()):
-                    messagebox.showerror("Invalid Entry", "Please enter a valid email address.", master=self)
+                    messagebox.showerror("Invalid Entry", "Please enter a valid email address.", parent=self)
                     
                 else:
                     database.exec_nonquery([[sql_commands.insert_supplier_info, (self.supplier_id._text, self.supplier_name_entry.get(),
@@ -911,16 +911,16 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
             def update_record():
                 
                 if self.supplier_name_entry.get() == "" and self.supplier_person_entry.get() == "" and self.supplier_number_entry.get() == "" and self.supplier_address_entry.get() == "":
-                    messagebox.showerror("Missing Information", "Please fill required fields", master=self)
+                    messagebox.showerror("Missing Information", "Please fill required fields", parent=self)
                     
                 elif self.supplier_email_entry.get() and not validate_email(self.supplier_email_entry.get()):
-                    messagebox.showerror("Invalid Entry", "Please enter a valid email address.", master=self)
+                    messagebox.showerror("Invalid Entry", "Please enter a valid email address.", parent=self)
                     
                 else:
                     database.exec_nonquery([[sql_commands.update_supplier_info, (self.supplier_name_entry.get(), self.supplier_tele_entry.get(), self.supplier_person_entry.get(),
                                                                                  self.supplier_number_entry.get(), self.supplier_email_entry.get(),
                                                                                  self.supplier_address_entry.get(), self.supplier_id._text)]])
-                    messagebox.showinfo("Success", f"{self.supplier_id._text} is successfully updated.",master=self)
+                    messagebox.showinfo("Success", f"{self.supplier_id._text} is successfully updated.",parent=self)
                     
                     self.set_entries()
                     
@@ -940,7 +940,7 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
                 
             def deactive_item_supplier(var):
                 database.exec_nonquery([[sql_commands.update_supplier_item_info_deactive, (self.supplier_id._text, self.raw_item_data[var][0])]])
-                messagebox.showinfo("Success", "Item is removed for this supplier.")
+                messagebox.showinfo("Success", "Item is removed for this supplier.", parent = self)
             
             self.contact_var = ctk.StringVar()
             self.tele_var = ctk.StringVar()
@@ -1105,9 +1105,9 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
                     else:
                         print("ELSE")
                         database.exec_nonquery([[sql_commands.set_supplier_items, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
-                    messagebox.showinfo("Item Added", "Item added to supplier delivery.")
+                    messagebox.showinfo("Item Added", "Item added to supplier delivery.", parent = self)
                 else:
-                    messagebox.showwarning('Warning','No record is selected')
+                    messagebox.showwarning('Warning','No record is selected', parent = self)
                 self.refresh_table()
                 if self.command_callback:
                     self.command_callback()
@@ -1190,7 +1190,7 @@ def receive_history(master, info:tuple,):
                 self.data_view1.update_table(data)
                 
             def view_details(_:any = None):
-                detail_orders(self,(width, height)).place(relx=0.5, rely=0.5, anchor='c', data=self.data_view1.get_selected_data()) if self.data_view1.get_selected_data() else messagebox.showwarning("Warning","Select a record first")
+                detail_orders(self,(width, height)).place(relx=0.5, rely=0.5, anchor='c', data=self.data_view1.get_selected_data()) if self.data_view1.get_selected_data() else messagebox.showwarning("Warning","Select a record first", parent = self)
             
             self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.datetime.now().year)]
             self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
@@ -1638,7 +1638,7 @@ def show_disabled_category(master, info:tuple, table_update_callback: callable):
                     self.refresh_table()
                     self._table_update_callback()
                 else:
-                    messagebox.showerror("Warning", "Select a record first")
+                    messagebox.showerror("Warning", "Select a record first", parent = self)
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.7)
             self.main_frame.grid(row=0, column=0)
@@ -1716,7 +1716,7 @@ def add_category(master, info:tuple, table_update_callback: callable):
                 
             def add_category():
                 if self.category_name_entry.get()=='':
-                    messagebox.showwarning("Missing Information", "Complete required fields")
+                    messagebox.showwarning("Missing Information", "Complete required fields", parent = self)
                 else:
                     database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get(),user)]])
                     reset()
@@ -1794,7 +1794,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
             def update_stock():
                 
                 if(self.stock_spinner.value == 0):
-                    messagebox.showerror("Fail to proceed", "Stock must be at least 1")
+                    messagebox.showerror("Fail to proceed", "Stock must be at least 1", parent = self)
                     return
                 self.place_forget()
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
@@ -1815,7 +1815,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
                 #disabled to change the the management of stock
                 
                 if self.does_expire and self.expiry_date_entry._text == "Set Expiry Date":
-                    messagebox.showinfo("Warning", "Please enter a valid expiry date")
+                    messagebox.showinfo("Warning", "Please enter a valid expiry date", parent = self)
                     return
                     #return none if there's no expiry
                 elif self.does_expire and (self.expiry_date_entry._text != "Set Expiry Date"):
@@ -1827,11 +1827,11 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
                 
                 if self.stock_spinner.value == self.stock_spinner._val_range[-1]:
                     database.exec_nonquery([[sql_commands.update_recieving_item, (acc_user, self.receiving_id.get())]])
-                    messagebox.showinfo("Restocking Sucess", "The item has beed restocked")
+                    messagebox.showinfo("Restocking Sucess", "The item has beed restocked", parent = self)
                 else:
                     database.exec_nonquery([[sql_commands.update_recieving_item_partially_received_with_date_receiver, (self.stock_spinner.value, acc_user, self.receiving_id.get())],
                                             [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, acc_user)]])
-                    messagebox.showinfo("Partially Restocking Success", "The item has been partially restocked")
+                    messagebox.showinfo("Partially Restocking Success", "The item has been partially restocked", parent = self)
                 expiry = self.expiry_date_entry._text if self.does_expire else None
                 database.exec_nonquery([[sql_commands.insert_receiving_history, (self.receiving_id.get(), self.stock_spinner.value, acc_user, expiry )]])
                 self.command_callback()
@@ -2020,12 +2020,12 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
                 
         def dispose_confirm(self):
             if self.combo_var.get() == "":
-                messagebox.showerror('Missing Field','Enter a reason')
+                messagebox.showerror('Missing Field','Enter a reason', parent = self)
             else:
                 item_id = database.fetch_data("Select item_uid from recieving_item where id = ?", (self.data[0], ))[0][0]
                 database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), self.data[0], item_id, self.data[2], self.data[3], f'{self.disposal_entry.get()}', self.acc_user)],
                                             ["UPDATE recieving_item SET state = -1 WHERE id = ?", (self.data[0], )]])
-                messagebox.showinfo("Succeed", "Item Disposed")
+                messagebox.showinfo("Succeed", "Item Disposed", parent = self)
                 self.reset()
         def place(self, data, **kwargs):
             self.data = data
@@ -2106,11 +2106,11 @@ def item_disposal_confirmation(master, info:tuple, command_callback: callable = 
                 print(temp)
                 [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), None, items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
                 database.exec_nonquery([[sql_commands.update_expired_items, None]])
-                messagebox.showinfo("Item Disposal", "Item is fully disposed")
+                messagebox.showinfo("Item Disposal", "Item is fully disposed", parent = self)
                 self.command_callback()
                 self.reset()
             else: 
-                messagebox.showwarning("Wrong Password","Input does not match")
+                messagebox.showwarning("Wrong Password","Input does not match", parent = self)
         def place(self, data, **kwargs):
             self.item_name.configure(text=data)
             return super().place(**kwargs)

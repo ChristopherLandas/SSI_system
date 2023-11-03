@@ -26,12 +26,12 @@ def popup_name_here(master, obj, info:tuple) -> ctk.CTkFrame:
 
             def record_acc():
                 if database.fetch_data('SELECT * FROM acc_cred where usn = ?',( self.usn_entry.get(), )):
-                    messagebox.showinfo('Can\'t Create record', 'Username already exist')
+                    messagebox.showinfo('Can\'t Create record', 'Username already exist', parent = self)
                     return
                 password = encrypt.pass_encrypt(self.pss_entry.get())
                 database.exec_nonquery([['INSERT INTO acc_cred VALUES(?, ?, ?, NULL)', (self.usn_entry.get(), password['pass'], password['salt'])],
                                         ['INSERT INTO acc_info VALUES(?, ?, ?)', (self.usn_entry.get(), self.name_entry.get(), self.job_pos.get())]])
-                messagebox.showinfo('SUCCESS', f'Acc {self.usn_entry.get()}\nhas been successfully registered')
+                messagebox.showinfo('SUCCESS', f'Acc {self.usn_entry.get()}\nhas been successfully registered', parent = self)
                 reset()
 
 

@@ -102,6 +102,7 @@ def notif_info_popup(master: any, info: tuple) -> ctk.CTkFrame:
             kwargs['anchor'] = 'c'
             if 'text_info' in kwargs:
                 self.label.configure(text = kwargs['text_info'])
+                kwargs.pop('text_info')
             return super().place(**kwargs)
         
     return instance(master= master, info=info)

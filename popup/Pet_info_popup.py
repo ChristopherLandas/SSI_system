@@ -70,7 +70,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
                 if (self.owner_name_entry.get() == '' and self.patient_name_entry.get() == '' and self.breed_option.get() == ''
                     and self.type_option.get() == '' and self.sex_option.get() == '' and self.address_entry.get() == ''
                     and self.address_entry.get() == '' and self.contact_entry.get() == '') or self.birthday_entry._text == 'Set Birthday':
-                    messagebox.showwarning('Missing Fields', 'Complete all fields')
+                    messagebox.showwarning('Missing Fields', 'Complete all fields', parent = self)
                     return
                 else:
                     ids = [s[0] for s in database.fetch_data(sql_commands.get_ids_pi)]
@@ -355,7 +355,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
                 database.exec_nonquery([[sql_commands.update_pet_record_pet_info, (self.pet_name_entry.get(), self.breed_entry.get(), self.type_entry.get(), self.sex_entry.get(), self.weight_entry.get(), self.birthday_entry.get(), self.pet_id.get())],
                                         [sql_commands.update_pet_record_pet_owner, (self.owner_name_entry.get(), self.address_entry.get(), self.contact_no_entry.get(), self.pet_id.get())]])
             
-                messagebox.showinfo(title=None, message="Info Successfully Changed!")
+                messagebox.showinfo(title=None, message="Info Successfully Changed!", parent = self)
             
             self.header_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0)
             self.header_frame.grid(row=0, column=0, sticky="ew")
