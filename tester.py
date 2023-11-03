@@ -78,6 +78,21 @@ class body(ctk.CTk):
         sender = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252)
         sender.send("Hello123123")'''
 
+
+        command = "SELECT item_general_info.UID,\
+                   avg(case when MONTH(transaction_record.transaction_date) < MONTH(CURRENT_DATE)\
+                       then (COALESCE(item_transaction_content.quantity, 0))\
+                       ELSE 0\
+                       END)\
+                   FROM item_general_info\
+                   LEFT JOIN item_transaction_content\
+                       ON item_general_info.UID = item_transaction_content.Item_uid\
+                   LEFT JOIN transaction_record\
+                       ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
+                   GROUP BY item_general_info.UID;"
+        for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
+            print(b)
+        
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))
