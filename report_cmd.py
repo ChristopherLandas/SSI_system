@@ -976,3 +976,4 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
                 writer.write(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_inventory_report.pdf", p1)
                 messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.")
                 '''
+# the file itself is currently in no use and obsolete
