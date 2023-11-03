@@ -765,7 +765,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def hide():
                 self.place_forget()
             def item_proceed(_: any = None):
-                if self.item_treeview.data_grid_btn_mng.active:
+                if self.item_treeview.get_selected_data() or self.service_treeview.get_selected_data():
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
                     #print(data)
                     add_data = (data[1], data[3], data[3])
