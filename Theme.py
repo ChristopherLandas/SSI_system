@@ -20,7 +20,7 @@ class Color:
     Blue_Yale = "#0D5794"
     Blue_Steel = "#2C74B3"
     Blue_Tufts = "#3B8ED0"
-    
+    Blue_Cornflower = "#9AD0EC"
     Blue_LapisLazuli = "#296FA7"
     Blue_LapisLazuli_1 = "#296AA3"
 
@@ -33,6 +33,7 @@ class Color:
     
     Red_Tulip = "#FD8A8A"
     Red_Pastel = "#FF6464"
+    Red_Pastel_Hover = "#D55A5A"
     Red_Hover = "#D45353"
     
     Green_Pistachio = "#83BD75"
@@ -46,18 +47,30 @@ class Color:
     
     Safe_color =  "#97DC86" #"green"
     Reorder_Color = "#FFE569"  #"yellow"
-    Critical_Color = "#FFBB5C" #"#FFA559"
-    Out_Stock_Color = "#A8A196"  #"#413F42"
-    Near_Expire_Color = "#FFA559" #"#FF9B50"
-    Expire_Color = "#FD8A8A" #"#E74646"
+    Critical_Color = "#EF8381" #"#FFA559"
+    Out_Stock_Color = "#A2BECC"  #"#413F42"
+    Near_Expire_Color = "#FFBB5C" #"#FF9B50"
+    Expire_Color = "#B8B1B1" #"#E74646"
+    Fast_Color = "#97DC86"
+    Slow_Color = "#FFE569"
+    On_Order_Color = "#A1CCD1"
+    On_Partial_Color = "#FFD89C"
     
     Hover_Safe_color =  "#85D671" #"green"
     Hover_Reorder_Color = "#FFE047"  #"yellow"
-    Hover_Critical_Color = "#FFAA33" #"#FFA559"
-    Hover_Out_Stock_Color = "#999185"  #"#413F42"
-    Hover_Near_Expire_Color = "#FF8F33" #"#FF9B50"
-    Hover_Expire_Color = "#FD7272" #"#E74646"
+    Hover_Critical_Color = "#EC716F" #"#FFA559"
+    Hover_Out_Stock_Color = "#89ACBE"  #"#413F42"
+    Hover_Near_Expire_Color = "#FFAA33" #"#FF9B50"
+    Hover_Expire_Color = "#A89F9F" #"#E74646"
+    Hover_Fast_Color = "#85D671"
+    Hover_Slow_Color = "#FFE047"
+    Hover_On_Order = "#92C4C9"
+    Hover_On_Partial = "#FFCE85"
 
+    Test_Color_Red = 'red'
+    Test_Color_Blue = 'blue'
+    Test_Color_Yellow = 'yellow'
+    Test_Color_Green = 'green'
 #TEST ONLY
 #region icons
 class Icons:
@@ -132,6 +145,24 @@ class Icons:
     zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
     zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
     zoom_reset_icon = ctk.CTkImage(light_image= Image.open("image/zoomreset.png"), size=(25,25))
->>>>>>> 036159baf0882c2705acd7f1e8119998b41cd528
+
+    admin_user_icon = ctk.CTkImage(light_image= Image.open("image/admin_icon.png"), size=(35,35))
+    other_user_icon = ctk.CTkImage(light_image= Image.open("image/other_icon.png"), size=(35,35))
     
-   
+    fast_moving_icon = ctk.CTkImage(light_image= Image.open("image/fast_moving.png"), size=(25,25))
+    slow_moving_icon = ctk.CTkImage(light_image= Image.open("image/slow_moving.png"), size=(25,25))
+    on_order_icon = ctk.CTkImage(light_image= Image.open("image/on_order.png"), size=(35,35))
+    partial_icon = ctk.CTkImage(light_image= Image.open("image/partial_icon.png"), size=(35,35))
+    
+    safe_icon = ctk.CTkImage(light_image= Image.open("image/safe_stock.png"), size=(35,35))
+    reorder_icon = ctk.CTkImage(light_image= Image.open("image/reorder_icon.png"), size=(35,35))
+    critical_icon = ctk.CTkImage(light_image= Image.open("image/ciritcal.png"), size=(35,35))
+    
+    nearly_expire_icon = ctk.CTkImage(light_image= Image.open("image/near_expire.png"), size=(35,35))
+    expired_icon = ctk.CTkImage(light_image= Image.open("image/expired.png"), size=(35,35))
+    out_of_icon = ctk.CTkImage(light_image= Image.open("image/out_of_stock.png"), size=(35,35))
+    
+    inventory_status = ctk.CTkImage(light_image= Image.open("image/inventory_flow.png"), size=(30,30)) 
+    
+    
+    

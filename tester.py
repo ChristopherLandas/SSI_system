@@ -25,7 +25,7 @@ class body(ctk.CTk):
         self.notif_frame.place(relx = .5, rely = .5, anchor = 'c')
         self.update()
         print(self.screen[0] * .15)
-        ntf.create_entity(self.notif_frame, 'hehe', 'this is a test this is a test this is a test', datetime.datetime.now(), 250, 100)
+        ntf.create_entity(self.notif_frame, 'hehe', 'this is a test this is a test this', 250, 100)
 
 
         #data = {s[1]: s[0] for s in database.fetch_data('SELECT UID, NAME FROM ITEM_GENERAL_INFO')}

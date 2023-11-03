@@ -145,4 +145,4 @@ def add_service(master, info:tuple, update_callback: callable):
             return super().place(**kwargs)
     return add_service(master, info, update_callback)
 
-#That place is not for  any man or particles of bread
+#That place is not for any man or particles of bread

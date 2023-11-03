@@ -1,6 +1,11 @@
 #GENERAL
-get_uid = "SELECT UID FROM item_general_info where name = ?"
+get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
+get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
+get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
+get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
 get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
+
 
 #SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
@@ -168,7 +173,7 @@ get_category_specific_inventory = "SELECT item_general_info.brand, item_general_
                                     ORDER BY item_general_info.UID"
 
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
-get_item_and_their_total_stock = "SELECT item_general_info.name,\
+get_item_and_their_total_stock = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                          CAST(SUM(item_inventory_info.Stock) as INT),\
                                          CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)), 2))\
                                  FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -221,7 +226,7 @@ show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initia
 
 
 #ADDING ITEMS THROUGH THE INVENTORY
-add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?)"
+add_item_general = "INSERT INTO item_general_info VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, NULL, NULL)"
 add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, state, added_date) VALUES (?, ?, ?, 1, CURRENT_DATE)"
 
 
@@ -254,7 +259,7 @@ get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT
 
 #FOR INVENTORY STATE
 
-get_safe_state = "SELECT item_general_info.name,\
+get_safe_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                             case when sum(item_inventory_info.stock) > item_settings.Reorder_factor * item_settings.Safe_stock\
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -262,7 +267,7 @@ get_safe_state = "SELECT item_general_info.name,\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock"
 
-get_reorder_state= "SELECT item_general_info.name,\
+get_reorder_state= "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                             case when sum(item_inventory_info.stock) <= item_settings.Reorder_factor * item_settings.Safe_stock\
                                     AND sum(item_inventory_info.stock) > item_settings.Crit_factor * item_settings.Safe_stock\
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
@@ -271,7 +276,7 @@ get_reorder_state= "SELECT item_general_info.name,\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
-get_critical_state = "SELECT item_general_info.name,\
+get_critical_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                             case when sum(item_inventory_info.stock) <= item_settings.Crit_factor * item_settings.Safe_stock\
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -279,7 +284,7 @@ get_critical_state = "SELECT item_general_info.name,\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
-get_out_of_stock_state = "SELECT item_general_info.name,\
+get_out_of_stock_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                  case when sum(item_inventory_info.stock) = 0\
                                            then sum(item_inventory_info.stock) ELSE -1 END AS stock\
                           FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
@@ -287,7 +292,7 @@ get_out_of_stock_state = "SELECT item_general_info.name,\
                           GROUP BY item_inventory_info.uid\
                           HAVING stock >= 0;"
 
-get_near_expire_state = "SELECT item_general_info.name,\
+get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                  item_inventory_info.Stock,\
                                  case when item_inventory_info.Expiry_Date <= DATE_ADD(CURRENT_DATE, INTERVAL 15 DAY)\
                                              AND item_inventory_info.Expiry_Date > CURRENT_DATE\
@@ -297,7 +302,7 @@ get_near_expire_state = "SELECT item_general_info.name,\
                          HAVING exp;"
 
 
-get_expired_state = "SELECT item_general_info.name,\
+get_expired_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                              item_inventory_info.Stock,\
                              case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
                                          AND item_inventory_info.Expiry_Date IS NOT NULL \
@@ -347,7 +352,7 @@ get_all_position_titles = "SELECT Title from user_level_access"
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? , NULL, ?, 1, CURRENT_TIMESTAMP, Null)"
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
 
-get_recieving_items_state = f"SELECT id, case When state = 3 then 'Pending' when state = 1 then 'Waiting' END AS stats,\
+get_recieving_items_state = f"SELECT id, case When state = 3 then 'Partial' when state = 1 then 'On Order' END AS stats,\
                                 NAME, current_stock, supplier_info.supp_name, ordered_by\
                                 FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
                                 WHERE state = 1 OR state = 3 ORDER BY state asc"
@@ -374,7 +379,7 @@ get_order_info = f"SELECT id, CAST(date_set AS DATE), item_uid, NAME,\
 
 #DISPOSAL
 get_for_disposal_items = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NULL"
-record_disposal_process = "INSERT INTO disposal_history (recieving_id, item_uid, item_name, initial_quantity, Current_quantity, date_of_disposal, reason, disposed_by) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?);"
+record_disposal_process = "INSERT INTO disposal_history (id, receive_id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by) VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, ?);" #?, ?, ?, ?, ?, ?, CURRENT_DATE, ?
 delete_disposing_items = "DELETE FROM item_inventory_info where uid = ? and stock = ? and expiry_date <= CURRENT_DATE"
 get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_FORMAT(full_dispose_date, '%m-%d-%Y at %H:%i %p'), disposed_by FROM disposal_history WHERE full_dispose_date IS NOT NULL"
 
@@ -567,6 +572,7 @@ get_invoice_info_service = "SELECT invoice_record.invoice_uid,\
                                 AND process_type = 1\
                             GROUP BY invoice_record.invoice_uid\
                             ORDER BY invoice_service_content.scheduled_date"
+#Currently obsolete
 
 
 get_invoice_info_queued = "SELECT invoice_record.invoice_uid,\
@@ -582,7 +588,7 @@ get_invoice_info_queued = "SELECT invoice_record.invoice_uid,\
                                 ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
                             LEFT JOIN service_info_test\
                             	ON invoice_service_content.service_name = service_info_test.service_name\
-                            WHERE invoice_record.State = 3\
+                            WHERE invoice_record.State = 0\
                                 AND process_type = 1\
                             GROUP BY invoice_record.invoice_uid"
 
@@ -719,7 +725,7 @@ update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transa
                                                            WHERE usn = ?"
 
 #dashboard
-get_monthly_sales_data = "SELECT transaction_date,\
+get_monthly_sales_data = "SELECT DATE_FORMAT(transaction_date, '%M %d, %Y'),\
                                CONCAT('₱', FORMAT(sum(total_amount), 2)) AS price\
                           FROM transaction_record\
                           WHERE MONTH(transaction_date) = ?\
@@ -792,7 +798,8 @@ get_pet_record_search_query=f"SELECT id, p_name, pet_owner_info.owner_name FROM 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
 
 get_item_record = "SELECT  item_name, quantity, price, ROUND((quantity*price),2) AS total FROM item_transaction_content WHERE transaction_uid = ?"
-get_service_record = "SELECT  CONCAT(service_name,' - ',  'Pet: ',patient_name) AS service, 1 AS quantity, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
+get_service_record = "SELECT CONCAT(service_name,' - ',  'Pet: ',patient_name) AS service, 1 AS quantity, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
+get_service_record_temp = "SELECT CONCAT(service_name) AS service, patient_name, scheduled_date, END_schedule, price, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
 
 
 #General Settings
@@ -905,28 +912,40 @@ get_item_does_expiry = f"SELECT item_uid, categories.does_expire From recieving_
                         JOIN categories ON item_general_info.Category = categories.categ_name\
                         WHERE id = ?"
                         
-get_supplier_items = "SELECT item_id, item_general_info.name FROM supplier_item_info\
+get_supplier_items = "SELECT supplier_item_info.item_id, item_general_info.brand, item_general_info.name, item_general_info.unit\
+                        FROM supplier_item_info\
                         JOIN item_general_info ON supplier_item_info.item_id = item_general_info.UID\
-                        WHERE supplier_id = ? "
+                        WHERE supplier_id = ?  AND active = 1"
+                        
 set_supplier_items = "INSERT INTO supplier_item_info VALUES (?,?,1)"
 
 get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
                             LEFT JOIN supplier_info ON supplier_info.supp_id = supplier_item_info.supplier_id\
                             WHERE supplier_item_info.item_id = ?"
                 
-update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date < CURRENT_DATE"
+update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date <= CURRENT_DATE"
 
 get_expired_items_to_dispose = "SELECT item_general_info.UID, item_general_info.name, item_general_info.unit,\
                                 CAST(SUM(Stock) as INT) from item_inventory_info\
                                 JOIN item_general_info ON item_general_info.UID = item_inventory_info.UID\
-                                WHERE Expiry_Date < CURRENT_DATE AND state = 1\
+                                WHERE Expiry_Date <= CURRENT_DATE AND state = 1\
                                 GROUP BY item_inventory_info.UID"
                                 
-set_expired_items_from_inventory = "INSERT INTO disposal_history (id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
-                                    VALUES (?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+set_expired_items_from_inventory = "INSERT INTO disposal_history (id, receive_id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)\
+                                    VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+                                    
+update_supplier_item_info_deactive = "UPDATE supplier_item_info SET active = 0\
+                                    WHERE supplier_id = ? and item_id = ? "
 
+update_supplier_item_info_active = "UPDATE supplier_item_info SET active = 1\
+                                    WHERE supplier_id = ? and item_id = ? "
 
-#NOTIFICATION DATA
+get_supplier_item_info_if_exist = "SELECT COUNT(1) FROM supplier_item_info\
+                                    WHERE supplier_id = ? AND item_id = ?"
+
+get_supplier_audit_trail = "SELECT created_by, CAST(date_added AS DATE), updated_by, CAST(date_modified AS DATE) FROM supplier_info\
+                            WHERE supp_id = ?"
+                            
 get_out_of_stock_names = "SELECT item_general_info.name\
                           FROM item_general_info\
                           JOIN item_inventory_info \
@@ -948,8 +967,80 @@ get_low_items_name = "SELECT item_general_info.name,\
                       GROUP BY item_general_info.UID\
                       HAVING price BETWEEN 1 AND item_settings.Safe_stock * item_settings.Reorder_factor;"
 
+get_expired_items_name = "SELECT item_general_info.name, SUM(item_inventory_info.Stock)\
+                                  FROM item_inventory_info\
+                          JOIN item_general_info \
+                                  ON item_inventory_info.UID = item_general_info.UID\
+                          JOIN item_settings\
+                                  ON item_inventory_info.UID = item_settings.UID\
+                          WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE\
+                          GROUP BY item_general_info.UID"
+
+get_near_expired_items_name = "SELECT item_general_info.name,\
+                                      SUM(item_inventory_info.Stock),\
+                                      DATEDIFF(item_inventory_info.Expiry_Date, current_date)\
+                               FROM item_inventory_info\
+                               JOIN item_general_info\
+                                       ON item_inventory_info.UID = item_general_info.UID\
+                               JOIN item_settings\
+                                       ON item_inventory_info.UID = item_settings.UID\
+                               WHERE DATE_SUB(item_inventory_info.Expiry_Date, INTERVAL ? DAY) <= CURRENT_DATE\
+                                       AND NOT item_inventory_info.Expiry_Date <= current_date\
+                               GROUP BY item_general_info.UID"
+
 get_scheduled_clients_today_names = "SELECT service_name, patient_name from services_transaction_content\
                                      WHERE scheduled_date = current_date"
 
 get_past_scheduled_clients_names = "SELECT service_name, patient_name from services_transaction_content\
                                      WHERE scheduled_date < current_date"
+
+get_past_scheduled_clients_names = "SELECT service_name, patient_name from services_transaction_content\
+                                     WHERE scheduled_date < current_date"
+
+get_near_scheduled_clients_names = "SELECT service_name,\
+                                    patient_name,\
+                                    DATEDIFF(current_date, DATE_sub(scheduled_date, INTERVAL ? DAY))\
+                                    from services_transaction_content\
+                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date\
+                                        AND scheduled_date != current_date"
+                          
+get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
+                        FROM recieving_item\
+                        JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
+                        WHERE state = 1"
+
+get_on_pending_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
+                        FROM recieving_item\
+                        JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
+                        WHERE state = 3"
+
+get_all_schedule = "SELECT CONCAT('TR# ', service_preceeding_schedule.transaction_uid),\
+                                                transaction_record.client_name,\
+                                                services_transaction_content.patient_name,\
+                                                CONCAT(services_transaction_content.service_name, ' ', coalesce(prefix, '')),\
+                                                'Paid',\
+                                                DATE_FORMAT(service_preceeding_schedule.scheduled_date, '%M %d, %Y') AS shceduled_date\
+                                            FROM service_preceeding_schedule\
+                                            LEFT JOIN transaction_record\
+                                                ON service_preceeding_schedule.transaction_uid = transaction_record.transaction_uid\
+                                            LEFT JOIN services_transaction_content\
+                                                ON service_preceeding_schedule.transaction_uid = services_transaction_content.transaction_uid\
+                                                AND service_preceeding_schedule.status = 0\
+                    UNION ALL\
+                    SELECT invoice_record.invoice_uid,\
+                                                    invoice_record.client_name,\
+                                                    invoice_service_content.patient_name,\
+                                                    CONCAT(invoice_service_content.service_name, case when service_info_test.duration_type != 0 then ' (Initial)' ELSE '' END),\
+                                                    CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
+                                                    DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                                FROM invoice_record\
+                                                LEFT JOIN invoice_service_content\
+                                                    ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
+                                                LEFT JOIN invoice_item_content\
+                                                    ON invoice_record.invoice_uid = invoice_item_content.invoice_uid\
+                                                LEFT JOIN service_info_test\
+                                                    ON invoice_service_content.service_name = service_info_test.service_name\
+                                                WHERE invoice_record.State = 0\
+                                                    AND process_type = 1\
+                                                GROUP BY invoice_record.invoice_uid\
+                    ORDER BY shceduled_date"

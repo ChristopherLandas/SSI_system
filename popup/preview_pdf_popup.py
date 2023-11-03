@@ -14,78 +14,16 @@ import ctypes
 from Theme import Color, Icons
 from functools import partial
 
+import ctypes
+from Theme import Color, Icons
+from functools import partial
+
 from datetime import datetime
-import customTkPDFViewer as pdf
+import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
-from tkPDFViewer import tkPDFViewer as pdf
-#region README
-r'''
-goto
-C:\Users\username\AppData\Local\Programs\Python\Python311\Lib\site-packages\tkPDFViewer\tkPDFViewer.py
-change def ShowPdf() to this - >
-
-class ShowPdf():
-
-    img_object_li = []
-
-    def pdf_view(self,master,width=1200,height=600,pdf_location="",bar=True,load="after",zoomDPI=72):
-
-        self.frame = Frame(master,width= width,height= height,bg="white")
-
-        scroll_y = Scrollbar(self.frame,orient="vertical")
-        scroll_x = Scrollbar(self.frame,orient="horizontal")
-
-        scroll_x.pack(fill="x",side="bottom")
-        scroll_y.pack(fill="y",side="right")
-
-        percentage_view = 0
-        percentage_load = StringVar()
-
-        if bar==True and load=="after":
-            self.display_msg = Label(textvariable=percentage_load)
-            self.display_msg.pack(pady=10)
-
-            loading = Progressbar(self.frame,orient= HORIZONTAL,length=100,mode='determinate')
-            loading.pack(side = TOP,fill=X)
-
-        self.text = Text(self.frame,yscrollcommand=scroll_y.set,xscrollcommand= scroll_x.set,width= width,height= height)
-        self.text.pack(side="left")
-
-        scroll_x.config(command=self.text.xview)
-        scroll_y.config(command=self.text.yview)
-
-
-        def add_img():
-            precentage_dicide = 0
-            open_pdf = fitz.open(pdf_location)
-
-            for page in open_pdf:
-                pix = page.get_pixmap(dpi=zoomDPI)
-                pix1 = fitz.Pixmap(pix,0) if pix.alpha else pix
-                img = pix1.tobytes("ppm")
-                timg = PhotoImage(data = img)
-                self.img_object_li.append(timg)
-                if bar==True and load=="after":
-                    precentage_dicide = precentage_dicide + 1
-                    percentage_view = (float(precentage_dicide)/float(len(open_pdf))*float(100))
-                    loading['value'] = percentage_view
-                    percentage_load.set(f"Please wait!, your pdf is loading {int(math.floor(percentage_view))}%")
-            if bar==True and load=="after":
-                loading.pack_forget()
-                self.display_msg.pack_forget()
-
-            for i in self.img_object_li:
-                self.text.image_create(END,image=i)
-                self.text.insert(END,"\n\n")
-            self.text.configure(state="disabled")
-
-for functioning 'zoom' level and preview
-'''
-
-#endregion
     
-def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid):
+def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, old_receipt_name = None):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -112,10 +50,11 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     #pdfmetrics.registerFont(TTFont('Times New Roman', 'TimesNewRoman.ttf'))
     today = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    filename = f'image\\sample.pdf'
+    #newpath = f'Resources\\receipt\\{current_month}'
+    temp_filename = f'Resources\\receipt\\temp_receipt.pdf'
     
     pdf = SimpleDocTemplate(
-        filename=filename,
+        filename=temp_filename,
         pagesize=letter
     )
     #header
@@ -187,16 +126,7 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         [f'Name of Client: {client_name}', '', '', ''],
         [f'Pet Name: {pet_name}', '', '', ''],
         ['Particulars', 'Quantity', 'Unit Price', 'Amount']]
-    ''',
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        ['Total:', '', '', f'{total_amount}'],
-        ['Amount Paid:', '', '', f'{amount_paid}']]
-    '''
+    
     if not service_particulars is None:
         for p in service_particulars:
             receipt_content.append([f'{p[0]} - {p[1]}', '1', f'P{p[6]}', f'P{p[6]}'])
@@ -206,13 +136,14 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
             #receipt_content.append([p[2], p[3], p[4], float(p[4])*float(p[3])])
             receipt_content.append([p[2], p[3], item_prc, item_total])
-
-    total_amount_price = "P{:,.2f}".format(float(total_amount))
-    amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-    change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
-    #receipt_content.append(['Total:', '', '', f'{total_amount}'])
-    #receipt_content.append(['Amount Paid:', '', '', f'{amount_paid}'])
-    #receipt_content.append(['Change:', '', '', f'{float(amount_paid)}-{float(total_amount)}'])
+    if old:
+        total_amount_price = total_amount
+        amount_paid_price = total_amount
+        change_price = 0
+    else:   
+        total_amount_price = "P{:,.2f}".format(float(total_amount))
+        amount_paid_price = "P{:,.2f}".format(float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
     receipt_content.append(['Total:', '', '', f'{total_amount_price}'])
     receipt_content.append(['Amount Paid:', '', '', f'{amount_paid_price}'])
     receipt_content.append(['Change:', '', '', f'{change_price}'])
@@ -291,41 +222,37 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     pdf.build(elems)
     #pdf compilation
     merger = PdfWriter()
-    input2 = open(filename, "rb")
+    input2 = open(temp_filename, "rb")
     
     # add the first 3 pages of input1 document to output
     merger.append(input2)
     # Write to an output PDF document
-    output = open(filename, "wb")
+    output = open(temp_filename, "wb")
     merger.write(output)
     # Close File Descriptors
     merger.close()
     output.close()
     #add footer
-    p1 = pdfrw1(filename)
+    p1 = pdfrw1(temp_filename)
 
     writer = pdfrw2()
-    writer.write(filename, p1)
+    writer.write(temp_filename, p1)
 
     #region none sample
     
     current_month = datetime.now().strftime("%m-%Y-receipts")
-    current_day = datetime.now().strftime("%Y_%m_%d_")
-    #region change for default path
-    '''
-    document_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents')
-    newpath = f'{document_path}\\receipt\\{current_month}' 
+    current_day = datetime.now().strftime("%Y_%m_%d")
+    
+    newpath = f'Resources\\receipt\\{current_month}' 
     if not os.path.exists(newpath):
         os.makedirs(newpath)
-    '''
-    #endregion
-    newpath = f'receipt\\{current_month}' 
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-    filename = f'{newpath}\\{current_day}{client_name}_{or_number}_receipt.pdf'
+    if old:
+        new_filename = f'{newpath}\\{old_receipt_name}.pdf'
+    else:
+        new_filename = f'{newpath}\\{current_day}_{client_name}_{or_number}_receipt.pdf'
     
     pdf = SimpleDocTemplate(
-        filename=filename,
+        filename=new_filename,
         pagesize=letter
     )
     #header
@@ -381,8 +308,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     
     receipt_content = [
         ['Statement of Account', '', f'Date: {today}', ''], 
-        [f'OR#: {or_number}', '', f'Cashier: {cashier_name}', ''],
-        [f'Name of Client: {client_name}', '', '', ''],
+        [f'TransactionID: {or_number}', '', f'Cashier: {cashier_name}', ''],
+        [f'Client: {client_name}', '', '', ''],
         [f'Pet Name: {pet_name}', '', '', ''],
         ['Particulars', 'Quantity', 'Unit Price', 'Amount']]
     ''',
@@ -405,9 +332,14 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
             receipt_content.append([p[2], p[3], item_prc, item_total])
 
-    total_amount_price = "P{:,.2f}".format(float(total_amount))
-    amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-    change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
+    if old:
+        total_amount_price = total_amount
+        amount_paid_price = total_amount
+        change_price = 0
+    else:   
+        total_amount_price = "P{:,.2f}".format(float(total_amount))
+        amount_paid_price = "P{:,.2f}".format(float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
     receipt_content.append(['Total:', '', '', f'{total_amount_price}'])
     receipt_content.append(['Amount Paid:', '', '', f'{amount_paid_price}'])
     receipt_content.append(['Change:', '', '', f'{change_price}'])
@@ -482,99 +414,49 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     elems.append(receipt_header)
     elems.append(receipt_header2)
     elems.append(table_content)
-
+    #print(elems)
     pdf.build(elems)
     #pdf compilation
     merger = PdfWriter()
-    input2 = open(filename, "rb")
+    input2 = open(new_filename, "rb")
     
     # add the first 3 pages of input1 document to output
     merger.append(input2)
     # Write to an output PDF document
-    output = open(filename, "wb")
+    output = open(new_filename, "wb")
     merger.write(output)
     # Close File Descriptors
     merger.close()
     output.close()
     #add footer
-    p1 = pdfrw1(filename)
+    p1 = pdfrw1(new_filename)
 
     writer = pdfrw2()
-    writer.write(filename, p1)
+    writer.write(new_filename, p1)
 
     #endregion
 
-class ShowPdf(pdf.ShowPdf):
+class ShowPdf(cpdf.ShowPdf):
     def goto(self, page):
         try:
             self.text.see(self.img_object_li[page - 1])
         except IndexError:
             if self.img_object_li:
                 self.text.see(self.img_object_li[-1])
-    
-#region Zoom Functions
-def zoom_in():
-    #global variables for the widgets
-    global vaas2, ctr, zoom_in_btn, zoom_out_btn, zoom_label, pdf_viewer_frame
-    #count how many times zoom in, if reached endpoint disable button
-    ctr += 1
-    if ctr == 5:
-        zoom_in_btn.configure(state = 'disabled')
-    if ctr == 2:
-        zoom_out_btn.configure(state = 'normal')
-    #if pdf viewer exists, destroy it
-    if vaas2:
-        vaas2.destroy()
-    zoomValue = 50 * ctr
-    if zoomValue > 250:
-        zoomValue = 250
-    # creating object of ShowPdf from tkPDFViewer. 
-    vaas1 = pdf.ShowPdf() 
-    # clear the image list # this corrects the bug inside tkPDFViewer module
-    vaas1.img_object_li.clear()
-    # Adding pdf location and width and height. 
-    zoom_label.configure(text = f'{zoomValue}%')
-    vaas2=vaas1.pdf_view(pdf_viewer_frame,pdf_location = r"image\sample.pdf",zoomDPI=zoomValue) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
-    # Placing Pdf inside gui
-    vaas2.pack()
-
-def zoom_out():
-    #global variables for the widgets
-    global vaas2, ctr, zoom_label, zoom_in_btn, zoom_out_btn, pdf_viewer_frame
-    #count how many times zoom in, if reached endpoint disable button
-    ctr -= 1
-    if ctr == 1:
-        zoom_out_btn.configure(state = 'disabled')
-    if ctr == 4:
-        zoom_in_btn.configure(state = 'normal')
-    if vaas2: # if old instance exists, destroy it first
-        vaas2.destroy()
-    zoomValue = 50 * ctr
-    if zoomValue < 50:
-        zoomValue = 50
-    zoom_label.configure(text = f'{zoomValue}%')
-    # creating object of ShowPdf from tkPDFViewer. 
-    vaas1 = pdf.ShowPdf() 
-    # clear the image list # this corrects the bug inside tkPDFViewer module
-    vaas1.img_object_li.clear()
-    # Adding pdf location and width and height. 
-    vaas2=vaas1.pdf_view(pdf_viewer_frame,pdf_location = r"image\sample.pdf",zoomDPI=zoomValue) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
-    # Placing Pdf inside gui
-    vaas2.pack()
-#endregion
-
+  
 class preview_pdf_popup(ctk.CTkToplevel):
-
+    
+    
     def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
                  #Custom Arguments
                  
                  receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None,
-                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None,
+                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None, is_receipt: Optional[bool] = False,
                   **kwargs,
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
-        self.attributes('-topmost',1)
+        '''self.attributes('-topmost',1)
         toplvl_width = 800
         toplvl_height = 600
         position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
@@ -598,16 +480,17 @@ class preview_pdf_popup(ctk.CTkToplevel):
         zoom_in_btn = ctk.CTkButton(zoom_frame, text='+', command=zoom_in, font=("DM Sans Medium", 14), width=30)
         zoom_in_btn.pack(side = 'left')
         #endregion
-        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
+        '''       
         
-        '''ALTERATION FOR THIS ^'''
-        '''self.attributes('-topmost',1)
+        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
+        self.attributes('-topmost',1)
         self.view_by_reciept = view_receipt_by_or
         self.zoom_step = 10
         self.zoom_limit = 10
         self.default_dpi=100
         self.zoom_counter = 0
         self.window_width = window_width
+        self.is_receipt = is_receipt
 
         toplvl_width = 600
         toplvl_height = 650
@@ -642,44 +525,43 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.pdf_viewer_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.pdf_viewer_frame.pack(pady=(0, window_width*0.005), )
 
-        self.pdfviewer = ShowPdf()'''
+        self.pdfviewer = ShowPdf()
         
         self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
-            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
-        
+            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 0)
+        print(1)
         self.vaas2 = NONE
-        self.vaas1=pdf.ShowPdf()
+        self.vaas1=cpdf.ShowPdf()
         self.vaas1.img_object_li.clear()
         self.current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if self.view_by_reciept:
-            
-<<<<<<< HEAD
-            if exists(f"receipt/{current_folder}/{view_receipt_by_or}.pdf"):
-                vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=f"receipt/{current_folder}/{view_receipt_by_or}.pdf",
+        if self.view_by_reciept and not self.is_receipt:
+            if exists(f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf"):
+                vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
                                       width=100,height=50, zoomDPI=100)
                 vaas2.pack()
-=======
+                print(4)
+        elif self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=80,height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
->>>>>>> 036159baf0882c2705acd7f1e8119998b41cd528
+                print(3)
             else:
-                self.destroy()
-                messagebox.showerror("File Missing", "The file you are trying to access is missing.")
+                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
+                vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
+                                      width=100,height=50, zoomDPI=100)
+                vaas2.pack()
+                print(2)
+                #self.destroy()
+                #messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
+        elif not self.view_by_reciept and self.is_receipt:
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
+                        width=80,height=100,zoomDPI=self.default_dpi)
+            self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
         else:
-<<<<<<< HEAD
-            vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
-                        width=100,height=50, zoomDPI=100)
-            vaas2.pack()
-        
-=======
-            '''vaas2=pdfviewer.pdf_view(pdf_viewer_frame, pdf_location=r"image/sample.pdf",
-                        width=100,height=50, zoomDPI=100)
-            vaas2.pack()'''
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
                         width=80,height=100,zoomDPI=self.default_dpi)
             self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
@@ -690,6 +572,8 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.zoom_state_check(zoom_dpi=max(50, ((self.zoom_counter * self.zoom_step) + self.default_dpi)))
     
     def zoom_state_check(self, zoom_dpi):
+        #self.zoom_in_btn.configure(state=)
+        
         self.zoom_in_btn.configure(state = 'disabled' if self.zoom_counter == self.zoom_limit else 'normal') 
         self.zoom_out_btn.configure(state = 'disabled' if self.zoom_counter == -self.zoom_limit else 'normal')
         self.zoom_entry.configure(text=f"{zoom_dpi}%")
@@ -697,16 +581,19 @@ class preview_pdf_popup(ctk.CTkToplevel):
         if self.vaas2: # if old instance exists, destroy it first
             self.vaas2.destroy()
          # creating object of ShowPdf from tkPDFViewer. 
-        self.vaas1 = pdf.ShowPdf() 
+        self.vaas1 = cpdf.ShowPdf() 
         # clear the image list # this corrects the bug inside tkPDFViewer module
         self.vaas1.img_object_li.clear()
-        # Adding pdf location and width and height. 
-        if self.view_by_reciept:
+        # Adding pdf location and width and height.    
+        if self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
-                                      width=80,height=100,zoomDPI=zoom_dpi)
+                        width=80,height=100,zoomDPI=zoom_dpi)
+            self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))  
+        elif not self.view_by_reciept and self.is_receipt:
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
+                        width=80,height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
         else:
-            self.vaas2=self.vaas1.pdf_view(self.pdf_viewer_frame,pdf_location = r"image\sample.pdf", zoomDPI=zoom_dpi, width=80,height=100 ) # default value for zoomDPI=72. Set higher dpi for zoom in, lower dpi for zoom out
-            # Placing Pdf inside gui
+            self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
+                        width=80,height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
->>>>>>> 036159baf0882c2705acd7f1e8119998b41cd528

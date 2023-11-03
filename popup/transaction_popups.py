@@ -302,6 +302,7 @@ from popup import preview_pdf_popup as ppdfp
     return instance(master, info, root_treeview, change_val_func)'''
 
 IP_Address = json.load(open("Resources\\network_settings.json"))
+PORT_NO: dict = json.load(open("Resources\\port_no.json"))
 
 def show_transaction_proceed(master, info:tuple, service_price, item_price, total_price, transaction_content, customer_info, parent_treeview, service_dict) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
@@ -317,7 +318,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.service_dict = service_dict
             #encapsulation
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             super().__init__(master, corner_radius= 0, fg_color='white')
             #the actual frame, modification on the frame itself goes here
@@ -555,7 +556,7 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             height = info[1]
             #basic inforamtion needed; measurement
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             super().__init__(master, corner_radius= 0, fg_color="transparent")
             #the actual frame, modification on the frame itself goes here
@@ -679,7 +680,7 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -716,17 +717,34 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
                                             width=width*0.005)
             self.search_btn.pack(side="left", padx=(0, width*0.0025))
 
-            self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+            self.resched_option_btn = ctk.CTkButton(self.content_frame, width * .075, height*0.05, text='Reschedule', font= ("DM Sans Medium", 14), command= self.resched_btn_callback)
+            self.resched_option_btn.grid(row=0, column=1,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
+
+            self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= self.update_treeview)
             self.refresh_btn.grid(row=0, column=2,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
 
             self.sched_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
             self.sched_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
             self.sched_treeview = cctk.cctkTreeView(self.sched_frame, data =[], width=width*0.725, height=height*0.7,
-                                               column_format=f'/No:{int(width*.025)}-#r/OR:{int(width*0.05)}-tc/ClientName:x-tl/Service:{int(width*.15)}-tr/Schedule:{int(width*.1)}-tc/Action:{int(width*.08)}-bD!30!30',)
+                                                    column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Pet:x-tl/Owner:x-tl/Service:{int(width*.12)}-tl/Total:{int(width*.1)}-tr/Date:{int(width*.12)}-tc!30!30',)
+            #                                   column_format=f'/No:{int(width*.025)}-#r/OR:{int(width*0.05)}-tc/ClientName:x-tl/Service:{int(width*.15)}-tr/Schedule:{int(width*.1)}-tc/Action:{int(width*.08)}-bD!30!30',)
+            self.update_treeview()
             self.sched_treeview.pack()
 
+        def update_treeview(self):
+            self.sched_treeview.update_table(database.fetch_data(sql_commands.get_all_schedule))
+
+        def resched_btn_callback(self):
+            if self.sched_treeview.get_selected_data():
+                pass
+                #code for reshceduling here
+            else:
+                messagebox.showerror("Unable to Proceed", "Select a service to resched")
+
     return instance(master, info, parent)
+
+#obsolete codes up here
 
 def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change_val_func_item, change_val_func_service, service_dict: dict, change_total_val_serv_callback: callable) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
@@ -735,7 +753,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''internal data'''
             self.total_transaction_count = 0
@@ -749,9 +767,11 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def item_proceed(_: any = None):
                 if self.item_treeview.data_grid_btn_mng.active:
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
-                    add_data = (data[0], data[2], data[2])
-                    if data[0] in [s[0] for s in root_treeview._data]: # if there's existing record
-                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[0])].winfo_children()[3].winfo_children()[0]
+                    #print(data)
+                    add_data = (data[1], data[3], data[3])
+                    #print(add_data)
+                    if data[1] in [s[0] for s in root_treeview._data]: # if there's existing record
+                        spinner:cctk.cctkSpinnerCombo = root_treeview.data_frames[[s[0] for s in root_treeview._data].index(data[1])].winfo_children()[3].winfo_children()[0]
                         spinner.change_value()
                     else: #if there's none
                         root_treeview.add_data(add_data)
@@ -761,8 +781,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         data_frames = root_treeview.data_frames[-1]
                         spinner: cctk.cctkSpinnerCombo = data_frames.winfo_children()[3].winfo_children()[0]
 
-                        spinner.configure(val_range = (1, data[1]))
-                        change_val_func_item(price_format_to_float(data[2][1:]))
+                        spinner.configure(val_range = (1, data[2]))
+                        change_val_func_item(price_format_to_float(data[3][1:]))
                         #price = price_format_to_float(data_frames.winfo_children()[2]._text[1:])
 
                         def spinner_command(_: any = None):
@@ -803,9 +823,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0, anchor= 'w', font=self.service_treeview.row_font,
                                                    text="  "+label_text, width = root_treeview.column_widths[1],
-                                                   command= lambda: serviceAvailing.pets(root_treeview.master, spinner.value, label_text, [s[1] for s in self.client],
-                                                                                         proceed_command, None, self.winfo_screenwidth() * .65,
-                                                                                         self.winfo_screenheight() * .6, fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
+                                                   command= lambda: serviceAvailing.pets(root_treeview.master.master, spinner.value, label_text, [s[1] for s in self.client],
+                                                                                         proceed_command, None, width=width, height=height,fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
                                                                                                                                                         service_dict= self._service_dict,
                                                                                                                                                         root_treeview=root_treeview,
                                                                                                                                                         change_total_val_serv_callback= self.change_total_val_serv_callback,
@@ -881,7 +900,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            ctk.CTkLabel(self.top_frame, text='Particulars', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkLabel(self.top_frame, text='PARTICULARS', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
             
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
@@ -896,13 +915,13 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.service_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.service_frame.pack_propagate(0)
             
-            self.service_treeview = cctk.cctkTreeView(self.service_frame, height=height*0.4, width=width*0.8,corner_radius=0,double_click_command=service_proceed, column_format=f"/No:{int(width*.025)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
+            self.service_treeview = cctk.cctkTreeView(self.service_frame, height=height*0.4, width=width*0.805,corner_radius=0,double_click_command=service_proceed, column_format=f"/No:{int(width*.035)}-#r/ServiceName:x-tl/Price:x-tr!30!30")
 
             self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
             self.item_frame.pack_propagate(0)
             
-            self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.8,double_click_command=item_proceed, column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:x-tr!30!30",)
+            #self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=[], height=height*0.4, width=width*0.805,double_click_command=item_proceed, column_format=f"/No:{int(width*.035)}-#r/ItemBrand:{int(width*.085)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.115)}-tr/Price:{int(width*.115)}-tr!30!30",)
             #self.item_treeview.pack()
             
             filter_func("All")
@@ -911,25 +930,28 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.place_forget()
 
         def place(self, **kwargs):
-            if('client' in kwargs):
-                self.check_client(kwargs['client'])
-                kwargs.pop('client')
-            count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
-            if count_temp != self.total_transaction_count:
-                self.update_service()
-                self.update_items_stocks()
-                self.total_transaction_count = count_temp
+            try:
+                if('client' in kwargs):
+                    self.check_client(kwargs['client'])
+                    kwargs.pop('client')
+                return super().place(**kwargs)
+            finally:
+                count_temp = database.fetch_data("SELECT COUNT(*) FROM transaction_record")[0][0]
+                if count_temp != self.total_transaction_count:
+                    self.update_service()
+                    self.update_items_stocks()
+                    self.total_transaction_count = count_temp
 
             #update the particulars if it's not been updated yet
             #update could be triggered by every invoice saved
-            return super().place(**kwargs)
+            
         
         def update_service(self):
             raw_data = database.fetch_data(sql_commands.get_services_and_their_price_test)
             self.service_treeview.update_table([(s[1], s[2]) for s in raw_data])
 
         def update_items_stocks(self):
-            data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
+            data = [(data[0], f"{data[1]} ({data[2]})", data[3], data[4]) if data[2] else (data[0], data[1], data[3], data[4]) for data in database.fetch_data(sql_commands.get_item_and_their_total_stock, None)]
             self.item_treeview.update_table(data)
         
         def check_client(self, client_name: str):
@@ -963,7 +985,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             '''constants'''
             self.services = [s[0] for s in database.fetch_data(sql_commands.get_service_data)]
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''events'''
             def bd_commands(i):
@@ -1048,9 +1070,14 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 
                 """RECORDING THE INVOICE"""
                 if len(items)> 0:
-                    if database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'N/A' , price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None, 0)]]):
+                    if database.exec_nonquery([[sql_commands.insert_invoice_data, (uid, self._attentdant, self.client_name_entry.get() or 'Client Name' , price_format_to_float(self.item_total_amount._text[1:]), None, datetime.now().strftime('%Y-%m-%d'), 0, None, 0)]]):
                         for it in items:
-                            database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (it[0], ))[0][0], it[0], it[2], price_format_to_float(it[1][1:]), 0)]])
+                            temp = (split_unit(it[0])+(it[1:]))
+                            #print(temp, len(temp))
+                            if len(temp) == 5: # WIth UNIT SAVING
+                                database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid, (temp[0], temp[1]))[0][0], f'{temp[0]} ({temp[1]})', temp[3], price_format_to_float(temp[2][1:]), 0)]])
+                            else: # WITHOUT UNIT SAVING
+                                database.exec_nonquery([[sql_commands.insert_invoice_item_data, (uid, database.fetch_data(sql_commands.get_uid_null_unit, (temp[0],))[0][0], temp[0], temp[2], price_format_to_float(temp[1][1:]), 0)]])
                         uid_count += 1
                     #recording of item based on the invoice_id
 
@@ -1059,7 +1086,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     for svcs in formatted_svc_data:
                         for li in svcs:
                             svc_uid = uid_base + str(uid_count).zfill(2)
-                            if database.exec_nonquery([[sql_commands.insert_invoice_data, (svc_uid, self._attentdant, self.client_name_entry.get() or 'N/A', li[-5], None, datetime.now().strftime('%Y-%m-%d'), 0, None, 1)]]):
+                            if database.exec_nonquery([[sql_commands.insert_invoice_data, (svc_uid, self._attentdant, self.client_name_entry.get() or 'Client Name', li[-5], None, datetime.now().strftime('%Y-%m-%d'), 0, None, 1)]]):
                                 database.exec_nonquery([[sql_commands.insert_invoice_service_data, (svc_uid, ) + li]])
                                 uid_count += 1
                 #recording of service based on the invoice_id
@@ -1089,7 +1116,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='',image=self.invoice_icon).pack(side="left", padx=(width*0.015,0))
-            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
+            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
 
             self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="__",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
@@ -1112,11 +1139,11 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                                                command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
             self.add_particulars.grid(row=1, column=2, sticky="w")
 
-            self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3])
+            self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0 )
             self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=(0))
 
             self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.685,
-                                                    column_format=f'/No:{int(width*0.025)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.085)}-tr/Quantity:{int(width*0.1)}-id/Total:{int(width*0.085)}-tr/Action:{int(width*.065)}-bD!30!30')
+                                                    column_format=f'/No:{int(width*0.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.1)}-tr/Quantity:{int(width*0.115)}-id/Total:{int(width*0.1)}-tr/Action:{int(width*.065)}-bD!30!35')
             self.transact_treeview.pack(pady=(0,0))
             self.transact_treeview.bd_commands = bd_commands
             
@@ -1202,7 +1229,7 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''internal data'''
             self.total_transaction_count = 0
@@ -1280,7 +1307,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
             self._attentdant: str = attendant
             self._uid: str = uid
             self.update_callback = update_callback
-            global IP_Address
+            global IP_Address, PORT_NO
 
             '''events'''
             def bd_commands(i):
@@ -1453,10 +1480,10 @@ def show_payment_proceed(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
 
-            global IP_Address
+            global IP_Address, PORT_NO
 
-            self.sender_to_receptionist = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], 222, IP_Address["MY_NETWORK_IP"], 200)
-            self.sender_to_admin = nsu.network_sender(IP_Address["ADMIN_IP"], 222, IP_Address["MY_NETWORK_IP"], 201)
+            self.sender_to_receptionist = nsu.network_sender(IP_Address["RECEPTIONIST_IP"], PORT_NO['DashB_stat_ref'], IP_Address["MY_NETWORK_IP"], 200)
+            self.sender_to_admin = nsu.network_sender(IP_Address["ADMIN_IP"], PORT_NO['DashB_stat_ref'], IP_Address["MY_NETWORK_IP"], 201)
             
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
@@ -1502,7 +1529,10 @@ def show_payment_proceed(master, info:tuple,):
                 self.complete_button.configure(state="disabled")
                 self.cancel_button.configure(state="disabled")
                 
-                item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in self.items]
+                print(self.items)
+                temp = [(split_unit(data[0]) + data[1:]) for data in self.items]
+                item = [(record_id, database.fetch_data(sql_commands.get_uid,(s[0], s[1]))[0][0], f'{s[0]} ({s[1]})', s[2], (price_format_to_float(s[3]) / s[2]), 0) if len(s) >= 4 
+                        else (record_id, database.fetch_data(sql_commands.get_uid_null_unit,(s[0],))[0][0], s[0], s[1], (price_format_to_float(s[2]) / s[1]), 0) for s in temp]
 
                 for _service in self.services:
                     list_of_services.append(_service)
@@ -1539,7 +1569,6 @@ def show_payment_proceed(master, info:tuple,):
                             quantity_needed -= st[2]
                             #if the stock needed is higher than stock instance
 
-                'FIX NEEDED'
                 '''new FIFO algorithm'''
                             
                 '''for _item in item:
@@ -1564,6 +1593,9 @@ def show_payment_proceed(master, info:tuple,):
                                 break
                 #modify the stock, applying the FIFO'''
 
+                for _item in item:
+                    list_of_items.append(_item)
+                    
                 for s in service:
                     if s[-1]:
                         for i in range(s[-1] - 1):
@@ -1595,8 +1627,8 @@ def show_payment_proceed(master, info:tuple,):
 
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
-                #ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
-                #                        title="Transaction Receipt Viewer")
+                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
+                                        title="Transaction Receipt Viewer", is_receipt=1)
             #Payment Callback
             def payment_callback(var, index, mode):
                 if self.payment_var.get().isdigit():
@@ -1810,7 +1842,7 @@ def payment_confirm(master, info:tuple,):
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color="transparent")
             
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -1838,7 +1870,7 @@ def show_invoice_record(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
             
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.cat_icon = ctk.CTkImage(light_image=Image.open("image/cat.png"), size=(28,28))
                 
@@ -1964,7 +1996,7 @@ def show_invoice_content(master, info:tuple,):
             height = info[1]
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
             
-            global IP_Address
+            global IP_Address, PORT_NO
 
             self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
         

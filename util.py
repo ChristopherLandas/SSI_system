@@ -250,7 +250,7 @@ def text_overflow_ellipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1,
     #add ellipsis for the word to fit
     
     for wrd in label_text.split():
-        if font_tool.measure(" ".join(txt_dvd[-1]) + wrd) > width :
+        if font_tool.measure(" ".join(txt_dvd[-1]) + wrd) > width * .95:
             if len(txt_dvd) < lines:
                 txt_dvd.append([])
         txt_dvd[-1].append(wrd)
