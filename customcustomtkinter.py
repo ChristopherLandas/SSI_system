@@ -907,13 +907,11 @@ class customcustomtkinter:
             self.page_limit = page
             self.checker()             
             
-            
-        
-
 class customcustomtkinterutil:
     class button_manager:
         def __init__(self, buttons: list, hold_color: str = 'transparent', switch: bool = False,
-                     default_active: Optional[int] = None, state: tuple = (lambda: None, lambda: None), children: Optional[list] = None):
+                     default_active: Optional[int] = None, state: tuple = (lambda: None, lambda: None), children: Optional[list] = None,
+                     active_double_click_nullified: bool = True):
             self.active = None
             self._state = state
             self._og_color =[]
@@ -922,11 +920,13 @@ class customcustomtkinterutil:
             self._buttons = buttons
             self._default_active = default_active
             self._children = children
+            self._active_double_click_nullified = active_double_click_nullified #nullified the command if the clicked button is the active
             #setup variables
 
             for i in range(len(buttons)):
                 if isinstance(buttons[i], customcustomtkinter.ctkButtonFrame):
-                    buttons[i]._command.append(partial(self.click, i))
+                    #buttons[i]._command.append(partial(self.click, i))
+                    buttons[i]._command = [partial(self.click, i, buttons[i]._command[0])]
                 elif isinstance(buttons[i], ctk.CTkButton):
                     cmd = buttons[i]._command
                     buttons[i].configure(command = partial(self.click, i, cmd))
@@ -934,6 +934,10 @@ class customcustomtkinterutil:
             #set the designated command for buttonframe and ctkbutton
 
         def click(self, i: int, button_command: callable = None, e: any = None):
+            if self._buttons[i] is self.active and self._active_double_click_nullified:
+                return
+            #cancel the command if the button itself is the active
+
             if button_command is not None:
                 button_command()
             #actual command of a button
