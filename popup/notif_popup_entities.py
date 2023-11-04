@@ -28,7 +28,6 @@ class notif_entity(cctk.ctkButtonFrame):
         super().__init__(master, width= width, height = height, corner_radius = 0, border_width = 0, bg_color = 'transparent', fg_color = fg_color,
                          border_color = None, background_corner_colors = None, overwrite_preferred_drawing_method = None, command = command, hover = hover,
                          hover_color = hover_color, double_click_command = None, **kwargs)
-        print(info_cnt)
         self.info_cnt = info_cnt
         self._notif_title = notif_title
         self._notif_desc = notif_desc
@@ -102,6 +101,7 @@ def notif_info_popup(master: any, info: tuple) -> ctk.CTkFrame:
             kwargs['anchor'] = 'c'
             if 'text_info' in kwargs:
                 self.label.configure(text = kwargs['text_info'])
+                kwargs.pop('text_info')
             return super().place(**kwargs)
         
     return instance(master= master, info=info)

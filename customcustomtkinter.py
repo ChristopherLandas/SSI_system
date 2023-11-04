@@ -268,7 +268,7 @@ class customcustomtkinter:
             lbl.configure(text = str(int(lbl.cget('text')) + val))
 
         def bd_func(self, dlt_btn: ctk.CTkButton):
-            if messagebox.askyesno('Warning', 'Are you sure you want to delete the data'):
+            if messagebox.askyesno('Warning', 'Are you sure you want to delete the data', parent = self):
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
                 if callable(self.bd_commands):
                     self.bd_commands(data_mngr_index)

@@ -333,7 +333,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
                 #return
                 record_id =  database.fetch_data(sql_commands.generate_id_transaction, (None))[0][0]
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.total_amount._text[1:]):
-                    messagebox.showinfo('Invalid', 'Pay the right amount')
+                    messagebox.showinfo('Invalid', 'Pay the right amount', parent = self)
                     return
                 #if self.service:
 
@@ -389,7 +389,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
 
                 #master.reset()
                 parent_treeview.master.master.reset()
-                messagebox.showinfo('Sucess', 'Transaction Complete')
+                messagebox.showinfo('Sucess', 'Transaction Complete', parent = self)
                 #record_action(self.acc_cred[0][0], action.TRANSACTION_TYPE, action.MAKE_TRANSACTION % (self.acc_cred[0][0], self.or))
                 self.destroy()
                 #reset into its default state """
@@ -579,7 +579,7 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             def discard():
                 if (self.pet_name.get() != self.value[0] or self.animal_breed_entry.get() != self.value[1] or
                 self.scheduled_service_val._text != self.value[2] or self.note_entry.get() != self.value[3]):
-                    if messagebox.askyesno('NOTE!', 'all changes will be discarded?'):
+                    if messagebox.askyesno('NOTE!', 'all changes will be discarded?', parent = self):
                         self.pet_name.set('')
                         self.animal_breed_entry.delete(0, ctk.END)
                         self.note_entry.delete(0, ctk.END)
@@ -740,7 +740,7 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
                 pass
                 #code for reshceduling here
             else:
-                messagebox.showerror("Unable to Proceed", "Select a service to resched")
+                messagebox.showerror("Unable to Proceed", "Select a service to resched", parent = self)
 
     return instance(master, info, parent)
 
@@ -765,7 +765,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def hide():
                 self.place_forget()
             def item_proceed(_: any = None):
-                if self.item_treeview.data_grid_btn_mng.active:
+                if self.item_treeview.get_selected_data() or self.service_treeview.get_selected_data():
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
                     #print(data)
                     add_data = (data[1], data[3], data[3])
@@ -801,7 +801,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                 
             def service_proceed(_: any = None):
                 if len(self.client) < 1:
-                    messagebox.showerror('Invalid Process', 'Assign the Client first')
+                    messagebox.showerror('Invalid Process', 'Assign the Client first', parent = self)
                 elif self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
@@ -997,7 +997,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
             def change_customer_callback(_:any):
                 if len(self.transact_treeview._data) != 0:
-                    if messagebox.askyesno('Change Customer', 'Changing customer will reset the content of treeview'):
+                    if messagebox.askyesno('Change Customer', 'Changing customer will reset the content of treeview', parent = self):
                         client = self.client_name_entry.get()
                         self.client_name_entry.set(client)
 
@@ -1019,10 +1019,10 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     if(dt[0] in self.service_dict and dt[0] in self.services_lists):
                         for li in self.service_dict[dt[0]]:
                             if li[0] == '':
-                                messagebox.showwarning("Cannot Proceed", "Fill the remaining Information")
+                                messagebox.showwarning("Cannot Proceed", "Fill the remaining Information", parent = self)
                                 return
                     elif(dt[0] not in self.service_dict and dt[0] in self.services_lists):
-                        messagebox.showwarning("Cannot Proceed", "Fill the remaining Information")
+                        messagebox.showwarning("Cannot Proceed", "Fill the remaining Information", parent = self)
                         return
                 
                 services = []
@@ -1097,7 +1097,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 self.save_invoice_btn.configure(state = ctk.DISABLED)
                 self.cancel_invoice_btn.configure(state = ctk.DISABLED)
                 record_action(self._attentdant, action.INVOICE_TYPE, action.MAKE_INVOICE % (self._attentdant, uid))
-                messagebox.showinfo('Success', 'Reception record is saved')
+                messagebox.showinfo('Success', 'Reception record is saved', parent = self)
                 self.reset(True)
 
                 
@@ -1200,7 +1200,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
 
         def reset(self, bypass_warning: bool = False):
             if self.client_name_entry.get() != "" or len(self.transact_treeview._data) > 0:
-                if bypass_warning or messagebox.askyesno("Cancel Reception", "Are you sure you want to discard the reception record"):
+                if bypass_warning or messagebox.askyesno("Cancel Reception", "Are you sure you want to discard the reception record", parent = self):
                     self.save_invoice_btn.configure(state = ctk.NORMAL)
                     self.cancel_invoice_btn.configure(state = ctk.NORMAL)
                     self.client_name_entry.set("")
@@ -1316,7 +1316,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
 
             def update_billing_callback():
                 if len(self.transact_treeview._data) == 0:
-                    messagebox.showerror('Cannot Proceed', "Cannot proceed with an empty content")
+                    messagebox.showerror('Cannot Proceed', "Cannot proceed with an empty content", parent = self)
                     return
                 for li in self.transact_treeview._data:
                     if not li[0] in self.enlisted_services:
@@ -1338,7 +1338,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
                 
 
                 self.update_callback()
-                messagebox.showinfo("Success", "Info added")
+                messagebox.showinfo("Success", "Info added", parent = self)
                 self.transact_treeview.delete_all_data()
                 self.place_forget()
 
@@ -1518,7 +1518,7 @@ def show_payment_proceed(master, info:tuple,):
                 list_of_items = []
                 list_of_services = []
                 if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
-                    messagebox.showinfo('Invalid', 'Pay the right amount')
+                    messagebox.showinfo('Invalid', 'Pay the right amount', parent = self)
                     return
 
                 record_id =  int(self.or_button._text[5:])
@@ -1611,7 +1611,7 @@ def show_payment_proceed(master, info:tuple,):
                 #jesser
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
 
-                messagebox.showinfo('Succeed', 'Transaction Recorded')
+                messagebox.showinfo('Succeed', 'Transaction Recorded', parent = self)
 
                 if IP_Address['MY_NETWORK_IP'] != IP_Address['RECEPTIONIST_IP']:
                     self.sender_to_receptionist.send("_")

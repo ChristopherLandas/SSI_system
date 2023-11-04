@@ -21,11 +21,11 @@ class body(ctk.CTk):
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
         #print(os.path.isdir("C:\\Users\\chris\\Desktop\\Devstuff\\SSI_system"))
-        self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
+        '''self.notif_frame = ctk.CTkScrollableFrame(self, self.screen[0] * .15, self.screen[1] * .35, fg_color= 'red', scrollbar_button_color='#ffaaaa');
         self.notif_frame.place(relx = .5, rely = .5, anchor = 'c')
         self.update()
         print(self.screen[0] * .15)
-        ntf.create_entity(self.notif_frame, 'hehe', 'this is a test this is a test this', 250, 100)
+        ntf.create_entity(self.notif_frame, 'hehe', 'this is a test this is a test this', 250, 100)'''
 
 
         #data = {s[1]: s[0] for s in database.fetch_data('SELECT UID, NAME FROM ITEM_GENERAL_INFO')}
@@ -77,6 +77,22 @@ class body(ctk.CTk):
 
         sender = nsu.network_sender('127.0.0.1', 250, '127.0.0.1', 252)
         sender.send("Hello123123")'''
+
+
+        command = "SELECT item_general_info.UID,\
+                   avg(case when MONTH(transaction_record.transaction_date) < MONTH(CURRENT_DATE)\
+                       then (COALESCE(item_transaction_content.quantity, 0))\
+                       ELSE 0\
+                       END)\
+                   FROM item_general_info\
+                   LEFT JOIN item_transaction_content\
+                       ON item_general_info.UID = item_transaction_content.Item_uid\
+                   LEFT JOIN transaction_record\
+                       ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
+                   GROUP BY item_general_info.UID;"
+        for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
+            print(b)
+        
         self.mainloop()
 body()
     #lbl.configure(text = ''.join(txt_dvd))

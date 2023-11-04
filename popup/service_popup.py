@@ -37,13 +37,13 @@ def add_service(master, info:tuple, update_callback: callable):
                 a = util.generateId(initial='S', length=6)
                 
                 if self.service_name_entry.get() == "" and self.price_entry.get() == "" and self.category_option.get() == "Set Category":
-                    messagebox.showerror("Missing Data", "Complete all the fields to continue")   
+                    messagebox.showerror("Missing Data", "Complete all the fields to continue", parent = self)   
                     
                 else:    
                     a = util.generateId(initial='S', length=6)
                     database.exec_nonquery([[sql_commands.insert_service_test, (a, self.service_name_entry.get(), self.price_entry.get(), 
                                                                                 self.category_option.get(), self.radio_var.get(), 1, date.today())]])
-                    messagebox.showinfo("Service Added", "New service is added")
+                    messagebox.showinfo("Service Added", "New service is added", parent = self)
                     update_callback()
                     reset()
                     

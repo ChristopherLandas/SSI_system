@@ -50,10 +50,10 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
                 self.cancel_button.pack_forget()
 
                 if database.exec_nonquery([["UPDATE service_info_test SET service_name =?, category =?, price =? WHERE UID =?", (self.service_name_entry.get(), self.service_category_entry.get(), float(self.service_price_entry.get()), self.service_id_label._text)]]):
-                    messagebox.showinfo("Success", "Service Updated\nRestart the system to apply changes")
+                    messagebox.showinfo("Success", "Service Updated\nRestart the system to apply changes", parent = self)
                     self.reload_service()
                 else:
-                    messagebox.showerror("Error", "An error occured\nfailed to change")
+                    messagebox.showerror("Error", "An error occured\nfailed to change", parent = self)
 
                 self.place_forget()
                 self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
@@ -223,11 +223,11 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
 
                 if database.exec_nonquery([["UPDATE item_general_info SET name =?, Category =? WHERE UID =?", (self.item_name_entry.get(), self.item_category_entry.get(), self.item_id_label._text)],
                                            ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, Average_monthly_selling_rate = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._text), self.item_id_label._text)]]):
-                    messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes")
+                    messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes", parent = self)
                     self.reload_item()
                     self.place_forget()
                 else:
-                    messagebox.showerror("Failed to Update", "An error occured")
+                    messagebox.showerror("Failed to Update", "An error occured", parent = self)
                 
                 self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
