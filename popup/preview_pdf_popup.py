@@ -574,16 +574,10 @@ class preview_pdf_popup(ctk.CTkToplevel):
         elif self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
                 print(7)
-                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
-                vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
-                                      width=100,height=50, zoomDPI=100)
-                vaas2.pack()
-                #remove this
-                '''
+                
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=80,height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
-                '''
             else:
                 generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
                 vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",

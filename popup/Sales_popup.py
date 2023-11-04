@@ -34,7 +34,10 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             def show_receipt():
                 global raw_items, raw_service_info, raw_transaction_info
                 #print(show_receipt)
-                or_num = f"{self.date_label._text.replace('-', '_')}_{self.client_name._text}_{self.or_label._text}_receipt"
+                if self.client_name._text in r'N/A':
+                    or_num = f"{self.date_label._text.replace('-', '_')}_noname_{self.or_label._text}_receipt"
+                else:
+                    or_num = f"{self.date_label._text.replace('-', '_')}_{self.client_name._text}_{self.or_label._text}_receipt"
                 formatted_items = []
                 for i in raw_items:
                     temp_items = [0, 1]
@@ -144,11 +147,6 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]  
                 raw_service_info = database.fetch_data(sql_commands.get_service_record_temp, (sales_info[0],))
                 raw_transaction_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]      
-                print(raw_service)  
-                print('new set')
-                print(raw_items)
-                print(raw_service_info)
-                print(self.transact_info)
                 self.set_values()
                 
                 temp = [split_unit(item[0])+(item[1:]) for item in raw_items]
