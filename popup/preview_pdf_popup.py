@@ -204,6 +204,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         )
 
     #add borders
+    #region old receipt style
+    '''
     ts = TableStyle([
         ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
         ('GRID', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
@@ -211,6 +213,20 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('BOX', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+    ])
+    table_content.setStyle(ts)
+    '''
+    #endregion
+
+    ts = TableStyle([
+        ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
+        ('BOX', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
+        #('BOX', (0, len(receipt_content)-3), (0, len(receipt_content)-1), 0.5, colors.black),
+        ('GRID', (0, 5), (0, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
+        #('GRID', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (3, 5), (3, len(receipt_content)-1), 0.5, colors.black),
     ])
     table_content.setStyle(ts)
     
@@ -399,7 +415,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             [('BACKGROUND', (0, i), (-1, i), bc)]
         )
 
-    #add borders
+    #region old receipt style
+    '''
     ts = TableStyle([
         ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
         ('GRID', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
@@ -407,6 +424,20 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('BOX', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+    ])
+    table_content.setStyle(ts)
+    '''
+    #endregion
+
+    ts = TableStyle([
+        ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
+        ('BOX', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
+        #('BOX', (0, len(receipt_content)-3), (0, len(receipt_content)-1), 0.5, colors.black),
+        ('GRID', (0, 5), (0, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
+        #('GRID', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (3, 5), (3, len(receipt_content)-1), 0.5, colors.black),
     ])
     table_content.setStyle(ts)
     
@@ -530,7 +561,6 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
             generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 0)
-        print(1)
         self.vaas2 = NONE
         self.vaas1=cpdf.ShowPdf()
         self.vaas1.img_object_li.clear()
@@ -541,19 +571,24 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
                                       width=100,height=50, zoomDPI=100)
                 vaas2.pack()
-                print(4)
         elif self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
+                print(7)
+                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
+                vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
+                                      width=100,height=50, zoomDPI=100)
+                vaas2.pack()
+                #remove this
+                '''
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=80,height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
-                print(3)
+                '''
             else:
                 generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
                 vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
                                       width=100,height=50, zoomDPI=100)
                 vaas2.pack()
-                print(2)
                 #self.destroy()
                 #messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
