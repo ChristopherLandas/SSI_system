@@ -121,6 +121,39 @@ def generate_word_num_id(reference: Optional[str] = None):
     res = pattern[0] + str(int(pattern[1])+1).zfill(len(pattern[1]))
     return res
 
+def combine_lists(lists:list, key_index:tuple):
+    result_dict = {}
+    combined_list = []
+    for l in lists:
+        combined_list.extend(l)
+
+    for item in combined_list:
+        key = tuple(item[key_index[0]:key_index[1]])
+        if key in result_dict:
+            result_dict[key].append(item)
+        else:
+            result_dict[key] = [item]
+    result_list = list(result_dict.values())
+    return result_list
+
+def count_inventory(given:list):
+    res = []
+    for item in given:
+        if len(item) == 1:
+            res.append(((item[0][0],) + split_unit(item[0][1]) + (item[0][3],)))
+        elif len(item) == 2: 
+            if item[0][-2] - item[1][-2] != 0: 
+                res.append((item[0][0],) + split_unit(item[0][1]) + (abs(item[0][-2] - item[1][-2]),))
+        else:
+            if item[2][-2] != 0:
+                if item[0][-2] - item[1][-3] == 0:
+                    res.append(((item[0][0],) + split_unit(item[0][1]) + (item[1][3] + item[2][3],)))
+                else:
+                    res.append(((item[0][0],) + split_unit(item[0][1]) + (abs((item[0][3] - item[1][3]) - item[2][3]) + item[1][-3],)) )
+            else:
+                    res.append(((item[0][0],) + split_unit(item[0][1]) + (item[1][3],)))         
+    return res
+            
 def validate_email(email:str = None):
     return True if re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email) else False
 
@@ -159,6 +192,21 @@ def convert_date(date: str | datetime.datetime | datetime.date, date_format: str
 
 def not_in_set(reference_list:list, source_list:list):
     return [element for element in reference_list if element not in source_list]
+
+def remove_special_char(word:str, list_of_char:list = ['(',')']):
+    return ''.join(filter(lambda x: x not in list_of_char, word))
+
+def sum_similar_elements(source: list):
+    element_sum = {}
+    for item in source:
+        key = item
+        price = float(item[-2].strip('₱').replace(',', '')) 
+        if key in element_sum:
+            element_sum[key][0] += price
+            element_sum[key][1] += 1
+        else:
+            element_sum[key] = [price, 1]
+    return [((key[0:3]) + (value[1],) +  (f'₱{format_price(value[0])}',)+ (key[3],)) for key, value in element_sum.items()]
      
 def record_action(usn: str, _type: str, action_code: str):
     database.exec_nonquery([["INSERT INTO action_history(usn, type, ACTION, action_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", (usn, _type,  action_code)]])

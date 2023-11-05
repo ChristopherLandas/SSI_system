@@ -1,1 +1,2 @@
-SELECT brand FROM item_general_info WHERE UID = 'I1aa81'
+INSERT INTO disposal_history (id, receive_id, item_uid, item_name, initial_quantity, reason, date_of_disposal, disposed_by)
+                    VALUES ("Test" , "Test" , "Test" , 'Test' , 1 , "Test" , CURRENT_DATE, "Test" )

@@ -388,7 +388,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.income_frame_width, self.income_frame_height = self.income_summary_frame.cget('width'), self.income_summary_frame.cget("height")
 
         '''Income summary frame contents'''
-        self.income_summary_frame.grid_columnconfigure((0,1), weight=1)
+        self.income_summary_frame.grid_columnconfigure((0), weight=1)
         self.income_summary_frame.grid_rowconfigure((2,3,4), weight=1)
         self.income_summary_label = ctk.CTkLabel(self.income_summary_frame,text="Daily Income Summary",fg_color="transparent", font=("DM Sans Medium", 17), text_color=Color.Blue_Maastricht,)
         self.income_summary_label.grid(row=0, column=0, sticky="ew", pady=(self.income_frame_height*0.04,0))
@@ -582,7 +582,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
         self.receiving_entity.start_receiving()
         
-        Sales_popup.change_order(self, (width, height, acc_cred, acc_info)).place(relx=0.5, rely=0.5, anchor='c')
+        #Sales_popup.change_order(self, (width, height, acc_cred, acc_info)).place(relx=0.5, rely=0.5, anchor='c')
         #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
         #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))
 
@@ -610,22 +610,22 @@ class dashboard_frame(ctk.CTkFrame):
     def show_pie(self, data: list = None):
         if(self.canvas is not None):
             self.canvas.get_tk_widget().destroy()
-        #self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
-        #           float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
-        self.data = [34,49]
+        self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
+                   float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
+        #self.data = [34,49]
         data = self.data if self.data[0] + self.data[1] > 0 else [1, 0]
         
-        pie_figure= Figure(figsize=(self.income_frame_height*0.008,self.income_frame_height*0.008), dpi=100)
+        pie_figure= Figure(figsize=(self.income_frame_height*0.0085,self.income_frame_height*0.0085), dpi=100)
         pie_figure.set_facecolor(Color.White_Lotion)
         ax =pie_figure.add_subplot(111)
         ax.pie(data, autopct=f"{'%0.2f%%'if self.data[0] + self.data[1] > 0 else ''}", 
                startangle=0,counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Blue_Cornflower] if self.data[0] + self.data[1] > 0 else [Color.White_Platinum],
-                textprops={'fontsize':14, 'color': Color.White_Lotion, 'family':'monospace', 'weight':'bold' },)
+                textprops={'fontsize':12, 'color': Color.White_Lotion, 'family':'monospace', 'weight':'bold' },)
         pie_figure.subplots_adjust(top=1,left=0,right=1.1, bottom=0)
 
-        self.canvas = FigureCanvasTkAgg(pie_figure, self.income_summary_frame)
+        self.canvas = FigureCanvasTkAgg(pie_figure, self.income_summary_frame, )
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 6)
+        self.canvas.get_tk_widget().grid(row = 0, column=1, rowspan = 6, sticky='ew')
 
         self.no_data = ctk.CTkLabel(self.income_summary_frame,text='No transactions yet.', font=("DM Sans Medium", 14), fg_color=Color.White_Platinum)
         self.no_data.grid_forget() if self.data[0] + self.data[1] > 0 else self.no_data.grid(row = 0, column=1, rowspan = 6)
@@ -1267,7 +1267,7 @@ class sales_frame(ctk.CTkFrame):
         
         ctk.CTkLabel(self.from_date_frame, text="From: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.03).pack(side="left", padx=(width*0.01,width*0.0025))
         #date.today()
-        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
+        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text='2023-11-04', font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(height*0.005))
         self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=self.cal_icon, height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.from_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), set_date_callback=set_date))
@@ -1619,7 +1619,7 @@ class inventory_frame(ctk.CTkFrame):
         self.search_btn.pack(side="left", padx=(0, width*0.0025))
         
         self.inv_refresh_btn = ctk.CTkButton(self.inventory_sub_frame,text="", width=width*0.0275, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
-                                             command = update_tables)
+                                             command = update_table_callback)
         self.inv_refresh_btn.grid(row=0, column=1, sticky="w")
         
         self.add_item_btn = ctk.CTkButton(self.inventory_sub_frame,width=width*0.08, height = height*0.05, text="Add Item",image=self.add_icon, font=("DM Sans Medium", 14),
@@ -2426,7 +2426,6 @@ class reports_frame(ctk.CTkFrame):
                 self.service_total.configure(text=f"Services:        {format_price(self.data[1])}")
                 self.income_total.configure(text=f"Total:        {format_price(self.data[0]+self.data[1])}")
                 #self.daily_data_view.update_table(self.data) for adding data in the bottom treeview
-
                 self.previous_date = self.date_selected_label._text
                 self.data_loading_manager[0] = True
                 self.daily_data_view.update_table(database.fetch_data(sql_commands.daily_report_treeview_data, (date, )))
@@ -2466,6 +2465,7 @@ class reports_frame(ctk.CTkFrame):
 
     def graphs_need_upgrade(self):
         self.data_loading_manager = [False for _ in range(3)]
+        print("RUNNING")
         self.update_graphs(True)
 
 class user_setting_frame(ctk.CTkFrame):
