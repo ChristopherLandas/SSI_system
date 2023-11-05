@@ -25,14 +25,15 @@ CREATE TABLE IF NOT EXISTS `account_access_level` (
   `Dashboard` int(1) NOT NULL,
   `Reception` int(1) NOT NULL,
   `Payment` int(1) NOT NULL,
+  `Customer` int(1) NOT NULL,
   `Services` int(1) NOT NULL,
   `Sales` int(1) NOT NULL,
   `Inventory` int(1) NOT NULL,
-  `Pet_Info` int(1) NOT NULL,
+  `Pet` int(1) NOT NULL,
   `Report` int(1) NOT NULL,
   `User` int(1) NOT NULL,
-  `Action` int(1) NOT NULL,
-  `Gen_Settings` int(1) NOT NULL,
+  `Settings` int(1) NOT NULL,
+  `History` int(1) NOT NULL,
   PRIMARY KEY (`usn`) USING BTREE,
   KEY `usn` (`usn`) USING BTREE,
   CONSTRAINT `account_access_level_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
@@ -75,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=151 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=235 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
 -- Data exporting was unselected.
 
@@ -100,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `disposal_history` (
   `item_uid` varchar(6) NOT NULL,
   `item_name` varchar(64) NOT NULL,
   `initial_quantity` int(11) DEFAULT NULL,
-  `Current_quantity` int(11) NOT NULL,
+  `Current_quantity` int(11) DEFAULT NULL,
   `reason` varchar(50) NOT NULL,
   `date_of_disposal` datetime NOT NULL,
   `full_dispose_date` datetime DEFAULT NULL,
@@ -192,7 +193,7 @@ CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   PRIMARY KEY (`id`),
   KEY `UID` (`UID`),
   CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 -- Data exporting was unselected.
 
@@ -231,6 +232,7 @@ CREATE TABLE IF NOT EXISTS `item_transaction_content` (
   `quantity` int(11) NOT NULL,
   `price` float NOT NULL,
   `deduction` float NOT NULL,
+  `state` int(1) NOT NULL,
   KEY `FK_item_transaction_content_transaction_record` (`transaction_uid`),
   CONSTRAINT `FK_item_transaction_content_transaction_record` FOREIGN KEY (`transaction_uid`) REFERENCES `transaction_record` (`transaction_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
@@ -359,6 +361,32 @@ CREATE TABLE IF NOT EXISTS `recieving_item` (
 
 -- Data exporting was unselected.
 
+-- Dumping structure for table ssi_merged.replacement_items
+CREATE TABLE IF NOT EXISTS `replacement_items` (
+  `rep_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `item_id` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `item_desc` varchar(256) NOT NULL,
+  `price` float NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `reason` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table ssi_merged.replacement_record
+CREATE TABLE IF NOT EXISTS `replacement_record` (
+  `rep_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `transction_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `new_total` float NOT NULL,
+  `replace_by` varchar(12) NOT NULL,
+  `replacement_date` datetime NOT NULL,
+  PRIMARY KEY (`rep_id`),
+  KEY `transction_id` (`transction_id`),
+  CONSTRAINT `FK_replacement_record_transaction_record` FOREIGN KEY (`transction_id`) REFERENCES `transaction_record` (`transaction_uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- Data exporting was unselected.
+
 -- Dumping structure for table ssi_merged.services_transaction_content
 CREATE TABLE IF NOT EXISTS `services_transaction_content` (
   `transaction_uid` varchar(8) NOT NULL,
@@ -476,6 +504,7 @@ CREATE TABLE IF NOT EXISTS `transaction_record` (
   `client_name` varchar(50) DEFAULT NULL,
   `Total_amount` float NOT NULL,
   `transaction_date` date NOT NULL,
+  `state` int(1) NOT NULL,
   PRIMARY KEY (`transaction_uid`),
   KEY `Attendant_usn` (`Attendant_usn`),
   CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)
