@@ -1,3 +1,10 @@
+-- --------------------------------------------------------
+-- Host:                         127.0.0.1
+-- Server version:               11.1.2-MariaDB - mariadb.org binary distribution
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.3.0.6589
+-- --------------------------------------------------------
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -17,6 +24,7 @@ INSERT INTO `account_access_level` (`usn`, `Dashboard`, `Reception`, `Payment`, 
 	('Jrizal', 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0),
 	('jayr', 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0);
 
+-- Dumping data for table ssi_merged.acc_cred: ~8 rows (approximately)
 INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('123123', '94bc6207156f186a77106c5c456a80017eff6f8d949265ecf515a4cb3b851eba', '3HCIZ_k8Speg-Ik3Ia2DgA==', NULL),
 	('admin', '0c149295209d5f543cf1ba14956c5c135a78b9b311ad551715899e02c27dc99d', 'rCRF4amTSEOYQjqvWYuI7A==', NULL),
@@ -27,6 +35,7 @@ INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('Jrizal', '4436a253401b8e74a80e7a9a04930e16ae6e37dbc8c36f49f871ead477044f53', '3wbtXJDmSTm98iubl13hLw==', NULL),
 	('jayr', '56a1f73718b12d1a021f12eee52d2d1bbe1e6c067698c27e98c5fdd22fb0a0dd', 'WqMM26lyQDirax7evZgFuQ==', NULL);
 
+-- Dumping data for table ssi_merged.acc_info: ~8 rows (approximately)
 INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('123123', '123123', 'Assisstant', 0),
 	('admin', 'Big Boss 1', 'Owner', 1),
@@ -37,6 +46,7 @@ INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('Jrizal', 'Jose Rizal', 'Assisstant', 0),
 	('jayr', 'jayr', 'Assisstant', 0);
 
+-- Dumping data for table ssi_merged.action_history: ~172 rows (approximately)
 INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`) VALUES
 	(1, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-09-11 23:50:11'),
 	(2, 'aila', 'invoice', 'INVM/aila/Pec804', '2023-08-23 15:11:35'),
@@ -250,19 +260,18 @@ INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`
 	(232, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-11-04 02:52:33'),
 	(233, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-11-04 02:54:00');
 
+-- Dumping data for table ssi_merged.categories: ~8 rows (approximately)
 INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date_created`, `disabled_by`, `disabled_date`) VALUES
 	('Accessories', 0, 'admin', 1, '2023-10-03 22:14:50', NULL, NULL),
 	('Food', 1, 'admin', 1, '2023-10-03 22:14:52', NULL, NULL),
 	('Leash', 0, 'admin', 1, '2023-10-04 11:56:00', 'admin', '2023-10-04 11:56:08'),
 	('Medicine', 1, 'admin', 1, '2023-10-03 22:14:53', NULL, NULL),
-	('test', 0, 'admin', 0, '2023-10-03 22:14:54', 'admin', '2023-10-04 08:37:35'),
-	('Test001', 1, 'admin', 0, '2023-10-03 22:14:53', 'admin', '2023-10-04 08:37:36'),
-	('Test002', 0, 'admin', 0, '2023-10-03 22:14:55', 'admin', '2023-10-04 08:37:37'),
 	('Test003', 0, 'admin', 0, '2023-10-03 22:14:56', 'admin', '2023-10-04 08:37:38'),
 	('Test004', 1, 'admin', 0, '2023-10-03 22:14:57', 'admin', '2023-10-04 11:40:07'),
 	('Test005', 1, 'admin', 0, '2023-10-03 22:14:57', 'admin', '2023-10-04 11:39:53'),
 	('Test006', 0, 'admin', 0, '2023-10-03 22:14:58', 'admin', '2023-10-04 11:38:29');
 
+-- Dumping data for table ssi_merged.disposal_history: ~13 rows (approximately)
 INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `initial_quantity`, `Current_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
 	('D2CBCF8C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 12, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
 	('D3843020', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 90, 0, 'Expired', '2023-10-27 00:00:00', NULL, 'admin'),
@@ -278,6 +287,7 @@ INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `in
 	('DE819159', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 247, 0, 'Expired', '2023-10-27 00:00:00', NULL, 'admin'),
 	('DF4A897C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 48, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin');
 
+-- Dumping data for table ssi_merged.invoice_item_content: ~123 rows (approximately)
 INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`) VALUES
 	('Pc9c14', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
 	('P2e8cf', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
@@ -393,6 +403,7 @@ INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `qua
 	('23110401', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0),
 	('23110402', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0);
 
+-- Dumping data for table ssi_merged.invoice_record: ~161 rows (approximately)
 INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `payment_date`, `transaction_date`, `State`, `Date_transacted`, `process_type`) VALUES
 	('08282302', 'aila', 'N/A', 1140.15, NULL, '2023-08-28', -1, NULL, 0),
 	('08282303', 'aila', 'N/A', 577.5, NULL, '2023-08-28', 2, '2023-08-29', 0),
@@ -529,21 +540,24 @@ INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `To
 	('23103024', 'admin', 'Client Name', 2612.5, '2023-10-30 23:42:24', '2023-10-30', 2, '2023-10-30', 0),
 	('23103025', 'admin', 'Client Name', 1240, '2023-10-30 23:45:16', '2023-10-30', 2, '2023-10-30', 0),
 	('23103026', 'admin', 'Client Name', 2181.78, '2023-10-30 23:54:04', '2023-10-30', 2, '2023-10-30', 0),
-	('23103100', 'admin', 'Client Name', 440, '2023-10-31 02:49:11', '2023-10-31', 2, '2023-10-31', 0),
-	('23103101', 'admin', 'Patrick Feniza', 1320, '2023-10-31 03:15:40', '2023-10-31', 2, '2023-10-31', 0),
-	('23103102', 'admin', 'Patrick Feniza', 500, '2023-10-31 03:21:52', '2023-10-31', 2, '2023-10-31', 1),
-	('23110100', 'admin', 'Patrick Feniza', 105, '2023-11-01 04:10:48', '2023-11-01', 2, '2023-11-01', 0),
-	('23110101', 'admin', 'Davin Ferrancullo', 500, '2023-11-03 18:50:14', '2023-11-01', 2, '2023-11-03', 1),
-	('23110200', 'admin', 'Client Name', 157.5, '2023-11-02 02:59:08', '2023-11-02', 2, '2023-11-02', 0),
-	('23110201', 'admin', 'Patrick Feniza', 1500, '2023-11-02 04:45:46', '2023-11-02', 2, '2023-11-02', 1),
-	('23110202', 'admin', 'Patrick Feniza', 3000, '2023-11-02 04:45:58', '2023-11-02', 2, '2023-11-02', 1),
-	('23110203', 'admin', 'Patrick Feniza', 500, '2023-11-02 19:06:50', '2023-11-02', 2, '2023-11-02', 1),
-	('23110204', 'admin', 'Patrick Feniza', 500, NULL, '2023-11-02', 0, NULL, 1),
-	('23110205', 'admin', 'Client Name', 440, '2023-11-02 19:31:01', '2023-11-02', 2, '2023-11-04', 0),
-	('23110300', 'admin', 'Client Name', 440, '2023-11-03 18:50:04', '2023-11-03', 1, NULL, 0),
-	('23110400', 'admin', 'Patrick Feniza', 880, '2023-11-04 02:44:16', '2023-11-04', 2, '2023-11-04', 0),
-	('23110401', 'admin', 'Patrick Feniza', 1320, '2023-11-04 02:48:23', '2023-11-04', 2, '2023-11-04', 0),
-	('23110402', 'admin', 'Client Name', 880, '2023-11-04 02:52:26', '2023-11-04', 2, '2023-11-04', 0),
+	('23110100', 'admin', 'James Viñas', 1270, '2023-11-01 13:02:51', '2023-11-01', 2, '2023-11-01', 0),
+	('23110101', 'admin', 'James Viñas', 1055, '2023-11-01 13:06:26', '2023-11-01', 2, '2023-11-01', 0),
+	('23110102', 'admin', 'Patrick Feniza', 254, '2023-11-01 21:07:42', '2023-11-01', 2, '2023-11-01', 0),
+	('23110103', 'admin', 'Patrick Feniza', 500, NULL, '2023-11-01', 0, NULL, 1),
+	('23110200', 'admin', 'Patrick Feniza', 310, '2023-11-02 00:01:49', '2023-11-02', 2, '2023-11-02', 0),
+	('23110201', 'admin', 'Joze Rizal', 906, '2023-11-02 00:49:17', '2023-11-02', 2, '2023-11-02', 0),
+	('23110202', 'admin', 'Client Name', 800, '2023-11-02 21:33:13', '2023-11-02', 2, '2023-11-02', 0),
+	('23110300', 'admin', 'Davin Ferrancullo', 550, '2023-11-03 00:02:44', '2023-11-03', 2, '2023-11-03', 0),
+	('23110301', 'admin', 'Client Name', 1031.6, '2023-11-03 00:26:41', '2023-11-03', 2, '2023-11-03', 0),
+	('23110400', 'admin', 'Client Name', 1759.56, '2023-11-04 15:11:54', '2023-11-04', 2, '2023-11-04', 0),
+	('23110401', 'admin', 'Client Name', 300, '2023-11-04 15:34:32', '2023-11-04', 2, '2023-11-04', 0),
+	('23110500', 'admin', 'Client Name', 2200, '2023-11-05 01:10:49', '2023-11-05', 2, '2023-11-05', 0),
+	('23110501', 'admin', 'Patrick Feniza', 2200, '2023-11-05 01:14:53', '2023-11-05', 2, '2023-11-05', 0),
+	('23110502', 'admin', 'Patrick Feniza', 500, NULL, '2023-11-05', 0, NULL, 1),
+	('23110503', 'admin', 'Client Name', 2390.85, '2023-11-05 15:29:06', '2023-11-05', 2, '2023-11-05', 0),
+	('23110504', 'admin', 'Client Name', 598, '2023-11-05 19:00:58', '2023-11-05', 2, '2023-11-05', 0),
+	('23110505', 'admin', 'Client Name', 920, '2023-11-05 19:24:47', '2023-11-05', 2, '2023-11-05', 0),
+	('23110600', 'admin', 'Client Name', 796.95, '2023-11-06 00:23:53', '2023-11-06', 2, '2023-11-06', 0),
 	('P0b8cb', 'aila', 'James V.', 2100, NULL, '2023-08-26', -1, NULL, 0),
 	('P0e4d2', 'aila', 'James V.', 500, NULL, '2023-08-20', 2, '2023-08-22', 0),
 	('P0ebe4', 'aila', 'James V.', 2280.3, NULL, '2023-08-26', 2, '2023-08-26', 0),
@@ -573,6 +587,7 @@ INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `To
 	('Pec804', 'aila', 'Christopher L.', 440, NULL, '2023-08-23', -1, NULL, 0),
 	('Pf6e9c', 'aila', 'N/A', 796.95, NULL, '2023-08-23', 2, '2023-08-23', 0);
 
+-- Dumping data for table ssi_merged.invoice_service_content: ~65 rows (approximately)
 INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
 	('P1d58d', 'S00001', 'Grooming', 'P1ec18', 'Brutus', '2023-08-19', 500, 0, NULL, NULL, NULL),
 	('P3d236', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-08-19', 500, 0, NULL, NULL, NULL),
@@ -647,6 +662,7 @@ INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_na
 	('23110204', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, NULL, NULL, NULL),
 	('23110204', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, NULL, NULL, NULL);
 
+-- Dumping data for table ssi_merged.item_general_info: ~28 rows (approximately)
 INSERT INTO `item_general_info` (`UID`, `name`, `Category`, `brand`, `unit`, `added_by`, `added_date`, `updated_by`, `updated_date`) VALUES
 	('I00001', 'MayPaw Heavy Duty Rope Dog Leash', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 10:07:46', NULL, NULL),
 	('I00002', 'Taglory Rope Dog Leash', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 10:07:46', NULL, NULL),
@@ -659,6 +675,7 @@ INSERT INTO `item_general_info` (`UID`, `name`, `Category`, `brand`, `unit`, `ad
 	('I0AF12', 'Dog Paracetamol', 'Medicine', 'Pfizer', '50mg', 'admin', '2023-11-01 00:00:00', NULL, NULL),
 	('I37837', 'Dog Paracetamol', 'Medicine', 'Pfizer', '150mg', 'admin', '2023-11-01 00:00:00', NULL, NULL);
 
+-- Dumping data for table ssi_merged.item_inventory_info: ~47 rows (approximately)
 INSERT INTO `item_inventory_info` (`id`, `UID`, `Stock`, `Expiry_Date`, `state`, `added_date`) VALUES
 	(56, 'I00002', 44, NULL, 1, '2023-10-29'),
 	(58, 'I00004', 44, NULL, 1, '2023-10-29'),
@@ -706,6 +723,7 @@ INSERT INTO `item_statistic_info` (`UID`, `month`, `monthly_average`, `rate_symb
 	('I0AF12', 10, 0, '-'),
 	('I37837', 10, 0, '-');
 
+-- Dumping data for table ssi_merged.item_supplier_info: ~27 rows (approximately)
 INSERT INTO `item_supplier_info` (`UID`, `supp_id`) VALUES
 	('I0AE71', 'SU000001'),
 	('I0AF12', 'SU000001'),
@@ -717,123 +735,142 @@ INSERT INTO `item_supplier_info` (`UID`, `supp_id`) VALUES
 	('I00005', 'SU000004'),
 	('I00006', 'SU000004');
 
-INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`) VALUES
-	('0', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0),
-	('2', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('3', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 3, 1140.15, 0),
-	('6', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 4, 796.95, 0),
-	('8', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0),
-	('9', 'I00006', 'UniLeash', 1, 144, 0),
-	('11', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('14', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0),
-	('15', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0),
-	('16', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('16', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0),
-	('17', 'I00002', 'Taglory Rope Dog Leash', 2, 880, 0),
-	('19', 'I00002', 'Taglory Rope Dog Leash', 2, 880, 0),
-	('23', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('25', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('26', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('27', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('29', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('31', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('33', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('34', 'I00004', 'Fresh Step LeightWeight Clumping Cat ', 1, 796.95, 0),
-	('36', 'I00003', 'Fresh Step Clumping Cat Litter', 4, 577.5, 0),
-	('37', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('37', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0),
-	('39', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('43', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('46', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('47', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('48', 'I00003', 'Fresh Step Clumping Cat Litter', 4, 577.5, 0),
-	('49', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('50', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('50', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('51', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('52', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('52', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('52', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0),
-	('53', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0),
-	('54', 'I00003', 'Fresh Step Clumping Cat Litter', 2, 577.5, 0),
-	('55', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('56', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('56', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 3, 796.95, 0),
-	('56', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('57', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('58', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('58', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('59', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('60', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0),
-	('75', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0),
-	('76', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0),
-	('77', 'I00006', 'UniLeash', 2, 144, 0),
-	('82', 'I0AE71', 'Test ITem 003', 10, 310, 0),
-	('84', 'I00002', 'Taglory Rope Dog Leash', 6, 440, 0),
-	('85', 'I00002', 'Taglory Rope Dog Leash', 7, 440, 0),
-	('86', 'I1aa81', 'Comedy', 10, 242.42, 0),
-	('87', 'IACBE3', 'Test Item 006', 10, 101, 0),
-	('88', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('90', 'I32CCE', 'Test 0010', 5, 101, 0),
-	('91', 'I7A986', 'TEST ITEM 004', 10, 1010, 0),
-	('92', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0),
-	('92', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('92', 'I00006', 'UniLeash', 1, 144, 0),
-	('93', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0),
-	('93', 'I0AE71', 'Test ITem 003', 3, 310, 0),
-	('94', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('95', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('96', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('97', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 1, 1140.15, 0),
-	('98', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
-	('99', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('101', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 522.5, 0),
-	('102', 'IACBE3', 'Test Item 006', 5, 101, 0),
-	('103', 'I00006', 'UniLeash', 2, 144, 0),
-	('104', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('105', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('106', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('107', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('108', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('109', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('110', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0),
-	('111', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('112', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0),
-	('113', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('113', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0),
-	('115', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0),
-	('116', 'I00003', 'Fresh Step Clumping Cat Litter', 5, 577.5, 0),
-	('117', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0),
-	('118', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 5, 796.95, 0),
-	('119', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0),
-	('120', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0),
-	('121', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0),
-	('122', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0),
-	('122', 'I00003', 'Fresh Step Clumping Cat Litter', 37, 577.5, 0),
-	('125', 'I00002', 'Taglory Rope Dog Leash (100mg)', 1, 440, 0),
-	('125', 'I2F75F', 'TESTB', 1, 120, 0),
-	('126', 'I79FD7', 'Test Item (10g)', 5, 110, 0),
-	('130', 'I00002', 'Taglory Rope Dog Leash (100mg)', 1, 440, 0),
-	('139', 'I00002', 'Taglory Rope Dog Leash (100mg)', 1, 440, 0),
-	('140', 'I1aa81', 'Comedy (100mg)', 1, 242.42, 0),
-	('141', 'I00006', 'UniLeash (100mg)', 4, 144, 0),
-	('142', 'I2F75F', 'TESTB', 7, 120, 0),
-	('143', 'I0AE71', 'Test ITem 003 (100mg)', 3, 310, 0),
-	('144', 'I00003', 'Fresh Step Clumping Cat Litter (100mg)', 5, 577.5, 0),
-	('145', 'I79FD7', 'Test Item (10g)', 5, 110, 0),
-	('146', 'I00002', 'Taglory Rope Dog Leash (100mg)', 5, 440, 0),
-	('147', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash (100mg)', 5, 522.5, 0),
-	('148', 'I0AE71', 'Test ITem 003 (100mg)', 4, 310, 0),
-	('149', 'I1aa81', 'Comedy (100mg)', 9, 242.42, 0),
-	('150', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0),
-	('151', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0),
-	('153', 'I0AF12', 'Dog Paracetamol (50mg)', 5, 21, 0),
-	('154', 'I37837', 'Dog Paracetamol (150mg)', 5, 31.5, 0),
-	('159', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0),
-	('160', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0),
-	('161', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0),
-	('162', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0);
+-- Dumping data for table ssi_merged.item_transaction_content: ~130 rows (approximately)
+INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`, `state`) VALUES
+	('0', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0, 1),
+	('2', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('3', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 3, 1140.15, 0, 1),
+	('6', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 4, 796.95, 0, 1),
+	('8', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0, 1),
+	('9', 'I00006', 'UniLeash', 1, 144, 0, 1),
+	('11', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('14', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0, 1),
+	('15', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0, 1),
+	('16', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('16', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0, 1),
+	('17', 'I00002', 'Taglory Rope Dog Leash', 2, 880, 0, 1),
+	('19', 'I00002', 'Taglory Rope Dog Leash', 2, 880, 0, 1),
+	('23', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('25', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('26', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('27', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('29', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('31', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('33', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('34', 'I00004', 'Fresh Step LeightWeight Clumping Cat ', 1, 796.95, 0, 1),
+	('36', 'I00003', 'Fresh Step Clumping Cat Litter', 4, 577.5, 0, 1),
+	('37', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('37', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 2, 796.95, 0, 1),
+	('39', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('43', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('46', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('47', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('48', 'I00003', 'Fresh Step Clumping Cat Litter', 4, 577.5, 0, 1),
+	('49', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('50', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('50', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('51', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('52', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('52', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('52', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0, 1),
+	('53', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0, 1),
+	('54', 'I00003', 'Fresh Step Clumping Cat Litter', 2, 577.5, 0, 1),
+	('55', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('56', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('56', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 3, 796.95, 0, 1),
+	('56', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('57', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('58', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('58', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('59', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('60', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0, 1),
+	('75', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0, 1),
+	('76', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0, 1),
+	('77', 'I00006', 'UniLeash', 2, 144, 0, 1),
+	('82', 'I0AE71', 'Test ITem 003', 10, 310, 0, 1),
+	('84', 'I00002', 'Taglory Rope Dog Leash', 6, 440, 0, 1),
+	('85', 'I00002', 'Taglory Rope Dog Leash', 7, 440, 0, 1),
+	('86', 'I1aa81', 'Comedy', 10, 242.42, 0, 1),
+	('87', 'IACBE3', 'Test Item 006', 10, 101, 0, 1),
+	('88', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('90', 'I32CCE', 'Test 0010', 5, 101, 0, 1),
+	('91', 'I7A986', 'TEST ITEM 004', 10, 1010, 0, 1),
+	('92', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 3, 522.5, 0, 1),
+	('92', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('92', 'I00006', 'UniLeash', 1, 144, 0, 1),
+	('93', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0, 1),
+	('93', 'I0AE71', 'Test ITem 003', 3, 310, 0, 1),
+	('94', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
+	('95', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('96', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('97', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 1, 1140.15, 0, 1),
+	('98', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
+	('99', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('101', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 15, 522.5, 0, 1),
+	('102', 'IACBE3', 'Test Item 006', 5, 101, 0, 1),
+	('103', 'I00006', 'UniLeash', 2, 144, 0, 1),
+	('104', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('105', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('106', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('107', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('108', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('109', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('110', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0, 1),
+	('111', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('112', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0, 1),
+	('113', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('113', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 5, 522.5, 0, 1),
+	('115', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0, 1),
+	('116', 'I00003', 'Fresh Step Clumping Cat Litter', 5, 577.5, 0, 1),
+	('117', 'I00003', 'Fresh Step Clumping Cat Litter', 1, 577.5, 0, 1),
+	('118', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter', 5, 796.95, 0, 1),
+	('119', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0, 1),
+	('120', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0, 1),
+	('121', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs', 2, 1140.15, 0, 1),
+	('122', 'I00002', 'Taglory Rope Dog Leash', 5, 440, 0, 1),
+	('122', 'I00003', 'Fresh Step Clumping Cat Litter', 37, 577.5, 0, 1),
+	('125', 'I00002', 'Taglory Rope Dog Leash (100mg)', 1, 440, 0, 1),
+	('125', 'I2F75F', 'TESTB', 1, 120, 0, 1),
+	('126', 'I79FD7', 'Test Item (10g)', 5, 110, 0, 1),
+	('130', 'I00002', 'Taglory Rope Dog Leash (100mg)', 1, 440, 0, 1),
+	('139', 'I00002', 'Taglory Rope Dog Leash (100mg)', 1, 440, 0, 1),
+	('140', 'I1aa81', 'Comedy (100mg)', 1, 242.42, 0, 1),
+	('141', 'I00006', 'UniLeash (100mg)', 4, 144, 0, 1),
+	('142', 'I2F75F', 'TESTB', 7, 120, 0, 1),
+	('143', 'I0AE71', 'Test ITem 003 (100mg)', 3, 310, 0, 1),
+	('144', 'I00003', 'Fresh Step Clumping Cat Litter (100mg)', 5, 577.5, 0, 1),
+	('145', 'I79FD7', 'Test Item (10g)', 5, 110, 0, 1),
+	('146', 'I00002', 'Taglory Rope Dog Leash (100mg)', 5, 440, 0, 1),
+	('147', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash (100mg)', 5, 522.5, 0, 1),
+	('148', 'I0AE71', 'Test ITem 003 (100mg)', 4, 310, 0, 1),
+	('149', 'I1aa81', 'Comedy (100mg)', 9, 242.42, 0, 1),
+	('150', 'I00006', 'UniLeash (100mg)', 5, 144, 0, 1),
+	('150', 'Iaad08', 'Test Item', 5, 110, 0, 1),
+	('151', 'Iaad08', 'Test Item', 5, 110, 0, 1),
+	('151', 'IACBE3', 'Test Item 006 (100mg)', 5, 101, 0, 1),
+	('152', 'I00006', 'UniLeash (100mg)', 1, 144, 0, 1),
+	('152', 'I8EC1F', 'TESTA', 1, 110, 0, 1),
+	('153', 'I1F3E7', '1000 (100mg)', 1, 200, 0, 1),
+	('153', 'I8EC1F', 'TESTA', 1, 110, 0, 1),
+	('154', 'I00006', 'UniLeash (100mg)', 4, 144, 0, 1),
+	('154', 'I8EC1F', 'TESTA', 3, 110, 0, 1),
+	('155', 'I1F3E7', '1000 (100mg)', 4, 200, 0, 1),
+	('156', 'Iaad08', 'Test Item', 5, 110, 0, 1),
+	('157', 'I2b993', 'Kessoku Band (100mg)', 2, 240.8, 0, 1),
+	('157', 'I8EC1F', 'TESTA', 5, 110, 0, 1),
+	('159', 'IE273F', 'Cat Leash - Green (1m)', 2, 150, 0, 1),
+	('158', 'Ia71e7', 'Kawaki wo ameku (100mg)', 2, 244.78, 0, 2),
+	('158', 'Iaad08', 'Test Item', 5, 110, 0, 2),
+	('160', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter (100mg)', 3, 796.95, 0, 1),
+	('161', 'I00002', 'Taglory Rope Dog Leash (100mg)', 5, 440, 0, 1),
+	('162', 'I00002', 'Taglory Rope Dog Leash (100mg)', 5, 440, 0, 1),
+	('163', 'I00006', 'UniLeash (100mg)', 5, 144, 0, 1),
+	('163', 'I1F3E7', '1000 (100mg)', 1, 200, 0, 1),
+	('165', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter (100mg)', 1, 796.95, 0, 1),
+	('158', 'Ia71e7', 'Kawaki wo ameku (100mg)', 3, 244.78, 0, 1),
+	('158', 'Iaad08', 'Test Item', 5, 110, 0, 1);
 
+-- Dumping data for table ssi_merged.login_report: ~4 rows (approximately)
 INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'admin', '2023-06-07 23:50:59'),
 	('admin', 'admin', '2023-06-07 23:54:09'),
@@ -841,6 +878,7 @@ INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'chris', '2023-07-05 17:36:56'),
 	(NULL, '123', '2023-11-02 19:11:55');
 
+-- Dumping data for table ssi_merged.log_history: ~33 rows (approximately)
 INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('Chris2', '2023-08-31', '00:05:36', '00:05:36'),
 	('admin', '2023-09-11', '23:28:25', '23:28:25'),
@@ -882,12 +920,14 @@ INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('admin', '2023-11-02', '05:53:46', '05:55:44');
 
 
+-- Dumping data for table ssi_merged.pet_breed: ~4 rows (approximately)
 INSERT INTO `pet_breed` (`type`, `breed`) VALUES
 	('Dog', 'Aspin'),
 	('Cat', 'Puspin'),
 	('test1', 'test'),
 	('Cat', 'Siamese');
 
+-- Dumping data for table ssi_merged.pet_info: ~20 rows (approximately)
 INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `weight`, `bday`) VALUES
 	('001431', 'Muning', 1, 'Puspin', 'Cat', 'Male', '2.5', '2023-08-16'),
 	('012633', 'Bantay', 6, 'Female', 'Dog', 'Male', '50.2', '2023-08-25'),
@@ -910,6 +950,7 @@ INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `wei
 	('Pe3b3d', 'John', 3, 'Siamese', 'Cat', 'Male', '1', '2023-09-12'),
 	('Pfcad9', 'Lina', 2, 'Short Hair', 'Cat', 'Female', '1.5', '2023-09-07');
 
+-- Dumping data for table ssi_merged.pet_owner_info: ~11 rows (approximately)
 INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_number`) VALUES
 	(1, 'Patrick Feniza', 'Diliman, Quezon City', '09874561234'),
 	(2, 'Davin Ferrancullo', 'Almar, Caloocan City', '09478056123'),
@@ -923,7 +964,77 @@ INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_numb
 	(29, 'Clarence Ugay', 'Almar, Caloocan City', '0923902397'),
 	(30, 'Tyrone Tuazon', 'STI College Fairview', '09831809378');
 
+-- Dumping data for table ssi_merged.receiving_history_info: ~66 rows (approximately)
+INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receiver`, `expiry`, `date_received`) VALUES
+	('R20205', 10, 'admin', NULL, '2023-10-08 15:11:26'),
+	('R6B64B', 5, 'admin', NULL, '2023-10-08 15:20:51'),
+	('R20205', 10, 'admin', NULL, '2023-10-08 15:23:13'),
+	('R9d3a7', 5, 'admin', NULL, '2023-10-08 16:01:26'),
+	('Ra1c30', 5, 'admin', NULL, '2023-10-08 16:01:32'),
+	('RFFE1B', 5, 'admin', NULL, '2023-10-08 16:01:38'),
+	('R13D3C', 1, 'admin', NULL, '2023-10-08 16:01:43'),
+	('R80708', 5, 'admin', NULL, '2023-10-08 16:23:08'),
+	('R20205', 30, 'admin', NULL, '2023-10-08 17:47:43'),
+	('RFBE93', 50, 'admin', NULL, '2023-10-08 18:45:55'),
+	('RFBE93', 20, 'admin', NULL, '2023-10-08 18:46:11'),
+	('RFBE93', 10, 'admin', NULL, '2023-10-08 18:46:17'),
+	('RFBE93', 20, 'admin', NULL, '2023-10-08 18:46:21'),
+	('R877EB', 50, 'admin', NULL, '2023-10-08 19:55:56'),
+	('R5652B', 10, 'admin', NULL, '2023-10-08 19:57:24'),
+	('R0A465', 50, 'admin', NULL, '2023-10-08 19:57:58'),
+	('RBE2A2', 10, 'admin', NULL, '2023-10-08 20:05:13'),
+	('R4B774', 3, 'admin', NULL, '2023-10-08 20:07:02'),
+	('R0C22D', 1, 'admin', NULL, '2023-10-08 20:17:48'),
+	('R29172', 10, 'admin', NULL, '2023-10-08 20:19:06'),
+	('RF85FE', 1, 'admin', NULL, '2023-10-08 20:22:42'),
+	('RE6362', 1, 'admin', NULL, '2023-10-08 20:23:03'),
+	('RF8D0A', 9, 'admin', NULL, '2023-10-08 20:26:11'),
+	('R9F732', 5, 'admin', NULL, '2023-10-08 20:29:39'),
+	('R3FE2D', 5, 'admin', NULL, '2023-10-08 20:31:43'),
+	('R24E82', 5, 'admin', NULL, '2023-10-08 20:37:56'),
+	('R66215', 5, 'admin', NULL, '2023-10-08 20:38:56'),
+	('RB4587', 5, 'admin', NULL, '2023-10-08 20:40:44'),
+	('R4D212', 10, 'admin', NULL, '2023-10-08 20:42:31'),
+	('RECA53', 1, 'admin', NULL, '2023-10-08 20:45:03'),
+	('RCDA5A', 5, 'admin', NULL, '2023-10-08 20:45:22'),
+	('R84D95', 5, 'admin', NULL, '2023-10-10 07:42:14'),
+	('R84D95', 5, 'admin', NULL, '2023-10-10 07:42:27'),
+	('RC0AC6', 30, 'admin', NULL, '2023-10-10 09:09:53'),
+	('RC3713', 30, 'admin', NULL, '2023-10-10 09:11:01'),
+	('RC0AC6', 10, 'admin', NULL, '2023-10-10 09:18:33'),
+	('RC0AC6', 10, 'admin', NULL, '2023-10-10 09:18:49'),
+	('RBD852', 10, 'admin', NULL, '2023-10-12 00:01:47'),
+	('R08012', 5, 'admin', NULL, '2023-10-15 00:58:04'),
+	('R08012', 2, 'admin', NULL, '2023-10-15 00:58:31'),
+	('R291BF', 10, 'admin', NULL, '2023-10-15 00:58:57'),
+	('R08012', 1, 'admin', NULL, '2023-10-15 01:02:36'),
+	('R08012', 2, 'admin', NULL, '2023-10-15 01:32:35'),
+	('R47299', 1, 'admin', '2023-11-03', '2023-10-15 01:59:31'),
+	('R47299', 4, 'admin', '2023-10-27', '2023-10-15 01:59:59'),
+	('RE2198', 5, 'admin', NULL, '2023-10-15 02:01:35'),
+	('RC3713', 15, 'admin', '2023-12-31', '2023-10-15 09:07:36'),
+	('RC3713', 5, 'admin', '2023-11-04', '2023-10-15 09:07:47'),
+	('RE2198', 5, 'admin', NULL, '2023-10-22 11:45:26'),
+	('RE966E', 4, 'admin', NULL, '2023-10-22 11:45:49'),
+	('RC0730', 4, 'admin', NULL, '2023-10-22 11:47:16'),
+	('R8CB43', 4, 'admin', NULL, '2023-10-22 12:06:34'),
+	('R661CB', 6, 'admin', NULL, '2023-10-22 12:06:55'),
+	('R380EA', 4, 'admin', NULL, '2023-10-22 12:07:22'),
+	('R4C5B1', 10, 'admin', NULL, '2023-10-22 12:10:14'),
+	('RE010B', 10, 'admin', NULL, '2023-10-22 12:10:43'),
+	('R90FFC', 5, 'admin', NULL, '2023-10-22 12:49:06'),
+	('R86C3C', 5, 'admin', NULL, '2023-10-22 12:49:55'),
+	('RE3D4D', 10, 'admin', NULL, '2023-10-22 13:07:58'),
+	('R6668D', 1, 'admin', NULL, '2023-10-22 14:02:23'),
+	('R57F67', 10, 'admin', NULL, '2023-10-22 20:24:10'),
+	('R0C860', 10, 'admin', NULL, '2023-10-22 20:30:30'),
+	('R4A553', 50, 'admin', NULL, '2023-10-22 20:32:21'),
+	('R535AC', 20, 'admin', NULL, '2023-10-22 20:36:05'),
+	('R64855', 4, 'admin', NULL, '2023-10-22 20:37:02'),
+	('R443FA', 10, 'admin', NULL, '2023-10-22 21:22:25'),
+	('RF6EC1', 5, 'admin', NULL, '2023-10-29 19:33:51');
 
+-- Dumping data for table ssi_merged.recieving_item: ~89 rows (approximately)
 INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_stock`, `current_stock`, `supp_id`, `exp_date`, `reciever`, `state`, `date_set`, `date_recieved`) VALUES
 	('1', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 15, 0, 'SU000001', '2023-10-26', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:49:18'),
 	('2', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 25, 25, 'SU000001', '2023-08-03', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:57:52'),
@@ -947,6 +1058,8 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('R38FF5', 'Taglory Rope Dog Leash', 'I00002', 'admin', 1, 1, 'SU000004', NULL, 'admin', 2, '2023-10-15 01:53:55', '2023-10-15 01:54:02'),
 	('R40675', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 50, 50, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 09:50:16'),
 	('R43417', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 50, 41, 'SU000001', NULL, 'acc_name', 2, '2023-08-23 15:36:20', '2023-08-30 14:57:18'),
+	('R443FA', 'Test Item 006 (100mg)', 'IACBE3', 'admin', 10, 10, 'SU000001', NULL, 'admin', 2, '2023-10-22 21:22:04', '2023-10-22 21:22:23'),
+	('R469D2', 'Kessoku Band (100mg)', 'I2b993', 'admin', 10, 10, 'SU000004', NULL, NULL, 1, '2023-10-30 17:16:16', NULL),
 	('R47299', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 4, 'SU000004', NULL, 'admin', 2, '2023-10-15 01:33:04', '2023-10-15 01:59:58'),
 	('R513E9', 'Test ITem 003', 'I0AE71', 'admin', 50, 10, 'SU000001', NULL, 'acc_name', 2, '2023-09-16 15:22:47', '2023-10-01 17:35:21'),
 	('R59c25', 'Fresh Step LeightWeight Clumping Cat Litter', 'I00004', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 03:08:22'),
@@ -977,22 +1090,32 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('RE2198', 'Taglory Rope Dog Leash', 'I00002', 'admin', 10, 5, 'SU000004', NULL, 'admin', 2, '2023-10-15 02:01:29', '2023-10-22 11:45:25'),
 	('Rf166d', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 03:08:47');
 
-INSERT INTO `services_transaction_content` (`transaction_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `status`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
-	('80', 'S00001', 'Grooming', '143436', 'Gabi', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('81', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('81', 'S00005', 'Canine Castration Surgery', '001431', 'Muning', '2023-11-13', 1700, 0, 0, NULL, NULL, NULL),
-	('83', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('89', 'S00001', 'Grooming', '012633', 'Bantay', '2023-11-13', 500, 0, 0, NULL, NULL, NULL),
-	('93', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('100', 'S00001', 'Grooming', '143436', 'Gabi', '2023-11-01', 500, 0, 0, NULL, NULL, NULL),
-	('100', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-11-01', 500, 0, 0, NULL, NULL, NULL),
-	('114', 'S00001', 'Grooming', 'P482dc', 'Whitey', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('152', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('155', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-02', 3000, 0, 0, NULL, 12, 2),
-	('156', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, 0, NULL, NULL, NULL),
-	('157', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-02', 1500, 0, 0, NULL, NULL, NULL),
-	('158', 'S00001', 'Grooming', '143436', 'Gabi', '2023-11-01', 500, 0, 0, NULL, NULL, NULL);
+-- Dumping data for table ssi_merged.replacement_items: ~5 rows (approximately)
+INSERT INTO `replacement_items` (`rep_id`, `item_id`, `item_desc`, `price`, `quantity`, `reason`) VALUES
+	('REP0090A1750', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged'),
+	('REP0090A1750', 'I00006', 'UniLeash (100mg)', 144, 1, 'Defective/Damaged'),
+	('REP0090A1750', 'Iaad08', 'Test Item', 110, 1, 'Defective/Damaged'),
+	('REP007F09FD4', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged'),
+	('REP002D3C86B', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged'),
+	('REP007F93945', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged');
 
+-- Dumping data for table ssi_merged.replacement_record: ~0 rows (approximately)
+INSERT INTO `replacement_record` (`rep_id`, `transction_id`, `new_total`, `replace_by`, `replacement_date`) VALUES
+	('REP007F93945', '158', 1284.34, 'admin', '2023-11-06 01:22:25');
+
+-- Dumping data for table ssi_merged.services_transaction_content: ~9 rows (approximately)
+INSERT INTO `services_transaction_content` (`transaction_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `status`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
+	('80', 'S00001', 'Grooming', '143436', 'Gabi', '2023-09-29', 500, 0, 0, NULL, NULL, NULL),
+	('81', 'S00001', 'Grooming', '001431', 'Muning', '2023-09-29', 500, 0, 0, NULL, NULL, NULL),
+	('81', 'S00005', 'Canine Castration Surgery', '001431', 'Muning', '2023-09-29', 1700, 0, 0, NULL, NULL, NULL),
+	('83', 'S00001', 'Grooming', '001431', 'Muning', '2023-09-03', 500, 0, 0, NULL, NULL, NULL),
+	('89', 'S00001', 'Grooming', '012633', 'Bantay', '2023-09-08', 500, 0, 0, NULL, NULL, NULL),
+	('93', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-05', 500, 0, 0, NULL, NULL, NULL),
+	('100', 'S00001', 'Grooming', '143436', 'Gabi', '2023-10-18', 500, 0, 0, NULL, NULL, NULL),
+	('100', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-18', 500, 0, 0, NULL, NULL, NULL),
+	('159', 'S00001', 'Grooming', 'P482dc', 'Whitey', '2023-10-18', 500, 0, 0, NULL, NULL, NULL);
+
+-- Dumping data for table ssi_merged.service_category_test: ~5 rows (approximately)
 INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Grooming', 1),
 	('Pet Care', 1),
@@ -1000,6 +1123,7 @@ INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Test', 1),
 	('Vaccination', 1);
 
+-- Dumping data for table ssi_merged.service_info: ~8 rows (approximately)
 INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 'test', 500, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 'test', 1500, 1, '2023-05-29'),
@@ -1010,19 +1134,19 @@ INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `stat
 	('S00007', 'Euthanasion', 'test', 900, 1, '2023-05-29'),
 	('S00008', 'Feline Castration Srugery', 'test', 500, 1, '2023-05-29');
 
+-- Dumping data for table ssi_merged.service_info_test: ~7 rows (approximately)
 INSERT INTO `service_info_test` (`UID`, `service_name`, `price`, `category`, `duration_type`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 500, 'Grooming', 0, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 1500, 'Vaccination', 2, 1, '2023-05-29'),
 	('S00003', 'Papiloma Vaccine', 2500, 'Vaccination', 0, 1, '2023-05-29'),
 	('S00004', 'Yeast Infection Treatment', 2100, 'Pet Care', 0, 1, '2023-05-29'),
-	('S00005', 'Canine Castration Surgery', 1700, 'Surgery', 0, 1, '2023-05-29'),
 	('S00006', 'Confinement', 200, 'Pet Care', 1, 1, '2023-05-29'),
-	('S00008', 'Feline Castration Srugery', 500, 'Surgery', 0, 1, '2023-05-29'),
 	('Se7c43', 'Canine Diagnostic', 1200, 'Pet Care', 0, 1, '2023-08-31');
 
 INSERT INTO `service_preceeding_schedule` (`id`, `transaction_uid`, `service_uid`, `service_name`, `prefix`, `scheduled_date`, `status`) VALUES
 	(43, '155', 'S00002', '5-in-1 Vaccine', 'Dose 2', '2023-11-14', 0);
 
+-- Dumping data for table ssi_merged.supplier_info: ~9 rows (approximately)
 INSERT INTO `supplier_info` (`supp_id`, `supp_name`, `telephone`, `contact_person`, `contact_number`, `contact_email`, `address`, `created_by`, `date_added`, `updated_by`, `date_modified`) VALUES
 	('SU000001', 'ABC Corporation', '0054-7941-5674', 'James Vinas', '09457891234', 'jamesvinas@abc.net', 'Quezon City', 'admin', '2023-09-15 00:00:00', 'admin', '2023-10-15 11:13:11'),
 	('SU000002', 'XYZ Corporation', '000000000', 'Ryan Gosling', '01234567890', 'ryangosling@gmail.com', 'Quezon City', 'admin', '2023-09-15 20:40:22', 'admin', '2023-10-15 11:12:26'),
@@ -1034,12 +1158,21 @@ INSERT INTO `supplier_info` (`supp_id`, `supp_name`, `telephone`, `contact_perso
 	('SU000008', 'DK Corporation', '000000000', 'Kajo Baldismo', '0213549870', 'kajo.bald@dkcorp.net', 'Quezon City', 'admin', '2023-10-08 02:14:19', NULL, NULL),
 	('SU000009', 'John and Carlo Supplier', '000000000', 'Carlo Almero', '09807502958', 'HELLOW@gmail.com', 'Quezon City', 'admin', '2023-10-10 07:48:01', 'admin', '2023-10-22 15:17:11');
 
+-- Dumping data for table ssi_merged.supplier_item_info: ~49 rows (approximately)
 INSERT INTO `supplier_item_info` (`supplier_id`, `item_id`, `active`) VALUES
+	('SU000001', 'I39DC8', 0),
 	('SU000001', 'I00002', 1),
 	('SU000001', 'I00006', 1),
+	('SU000001', 'I1aa81', 1),
+	('SU000001', 'Ia71e7', 1),
+	('SU000001', 'IACBE3', 1),
 	('SU000002', 'I00004', 0),
+	('SU000003', 'I2b993', 1),
+	('SU000004', 'I2b993', 1),
 	('SU000004', 'I00005', 1),
+	('SU000004', 'I1aa81', 1),
 	('SU000002', 'I00001', 0),
+	('SU000002', 'I7A986', 1),
 	('SU000005', 'I00005', 1),
 	('SU000002', 'I00007', 1),
 	('SU000002', 'I00006', 0),
@@ -1220,6 +1353,7 @@ INSERT INTO `transaction_record` (`transaction_uid`, `Attendant_usn`, `client_na
 	('98', 'admin', 'James ViÃ±as', 440, '2023-10-18'),
 	('99', 'admin', 'James Rubiales', 577.5, '2023-10-18');
 
+-- Dumping data for table ssi_merged.user_level_access: ~2 rows (approximately)
 INSERT INTO `user_level_access` (`Title`, `add_item`, `Dashboard`, `Reception`, `Payment`, `Services`, `Sales`, `Inventory`, `Pet_Info`, `Report`, `User`, `Action`, `Gen_Settings`) VALUES
 	('Assisstant', 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0),
 	('Owner', 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0);

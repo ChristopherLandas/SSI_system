@@ -71,7 +71,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                             reset()
                             if self.command_callback: self.command_callback()
                         else:
-                            messagebox.showwarning("Error", "Item cannot add in the inventory", parent = self)
+                            messagebox.showwarning("Error", "There is an error in inserting an inventory.", parent = self)
                 else:
                     messagebox.showwarning("Missing Field Entry", "Enter required fields\nAll fields with '*' is required.", parent = self)
 
@@ -156,8 +156,11 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                     self.item_unit_dbox.configure(state='normal')
             
             def is_digit_valid(var, mode, index):
-                if not self.unit_var.get().isdigit():
-                    self.item_num_unit_entry.delete(0, "end")
+                if (re.search(r'[0-9\.]$', self.unit_var.get() or "") is None):
+                    l = len(self.item_num_unit_entry.get())
+                    self.item_num_unit_entry.delete(l-1, l)
+                # if not self.unit_var.get().isdigit():
+                #    self.item_num_unit_entry.delete(0, "end")
             
             self.command_callback = command_callback
             self.grid_columnconfigure(0, weight=1)
@@ -180,7 +183,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='', image=self.add_item, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
-            ctk.CTkLabel(self.top_frame, text='ADD ITEM', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            ctk.CTkLabel(self.top_frame, text='ADD ITEM', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=reset).pack(side="right", padx=(0,width*0.01))
 
             '''Item Frame'''
@@ -343,7 +346,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             for entries in self.supplier_entries: entries.configure(fg_color = color, border_width = width ,state = state)
             
         def set_categories(self):
-            self.data = database.fetch_data("SELECT * FROM categories where does_expire = 1")
+            self.data = database.fetch_data("SELECT * FROM categories where state = 1")
             self.supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info")
             
             self.supplier_option = [data[1] for data in self.supplier_data]
@@ -2326,11 +2329,9 @@ def order_info_screen(master, info:tuple):
             self.place_forget()
         
         def set_label(self):
-            [self.labels[label].configure(text = f"{self.raw_data[label]}") for label in range(len(self.raw_data))]
+            pass
                 
-        def place(self, data, **kwargs):
-            self.raw_data = database.fetch_data(sql_commands.get_order_info, (data[0],))[0]
-            self.set_label()
+        def place(self, **kwargs):
             return super().place(**kwargs)
             
     return order_info_screen(master, info)
