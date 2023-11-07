@@ -1093,3 +1093,39 @@ update_statistics_info = "UPDATE item_statistic_info\
                               monthly_average = ?,\
                               rate_symbol = ?\
                           WHERE UID = ?"
+
+get_rescheduling_info_invoice_by_id = "SELECT invoice_service_content.invoice_uid,\
+                                               invoice_service_content.patient_name,\
+                                               invoice_service_content.service_name,\
+                                               CONCAT('₱', FORMAT(invoice_service_content.price, 2)),\
+                                               pet_owner_info.owner_name,\
+                                               pet_owner_info.contact_number,\
+                                               DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y'),\
+                                               invoice_service_content.scheduled_date\
+                                       FROM invoice_service_content\
+                                       JOIN invoice_record\
+                                           ON invoice_service_content.invoice_uid = invoice_record.invoice_uid\
+                                       INNER JOIN pet_info\
+                                           ON invoice_service_content.pet_uid = pet_info.id\
+                                       INNER JOIN pet_owner_info\
+                                           ON pet_info.owner_id = pet_owner_info.owner_id\
+                                       WHERE invoice_service_content.invoice_uid = ?"
+
+get_rescheduling_info_preceeding_by_id = "SELECT service_preceeding_schedule.transaction_uid,\
+                                                  pet_info.p_name,\
+                                                  CONCAT(service_preceeding_schedule.service_name, ' (', service_preceeding_schedule.prefix, ')'),\
+                                                  'Paid',\
+                                                  pet_owner_info.owner_name,\
+                                              pet_owner_info.contact_number,\
+                                              DATE_FORMAT(transaction_record.transaction_date, '%M %d, %Y'),\
+                                              service_preceeding_schedule.scheduled_date\
+                                          FROM service_preceeding_schedule\
+                                          JOIN services_transaction_content\
+                                              ON service_preceeding_schedule.transaction_uid = services_transaction_content.transaction_uid\
+                                          INNER JOIN transaction_record\
+                                              ON service_preceeding_schedule.transaction_uid = transaction_record.transaction_uid\
+                                          INNER JOIN pet_info\
+                                              ON services_transaction_content.pet_uid = pet_info.id\
+                                          INNER JOIN pet_owner_info\
+                                              ON pet_info.owner_id = pet_owner_info.owner_id\
+                                          WHERE service_preceeding_schedule.transaction_uid = ?"
