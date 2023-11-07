@@ -17,6 +17,7 @@ from PIL import Image
 import copy
 import network_socket_util as nsu
 import json
+from popup import dashboard_popup
 
 from popup import preview_pdf_popup as ppdfp
 
@@ -681,12 +682,15 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
             global IP_Address, PORT_NO
-
+            self.width = self.winfo_screenwidth()
+            self.height = self.winfo_screenheight()
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
 
             def hide():
                 self.place_forget()
+
+            self._master = master
 
             self.main_frame = ctk.CTkFrame(self, width=width*0.75, height=height*0.75, corner_radius=0)
             self.main_frame.pack()
@@ -735,9 +739,10 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
         def update_treeview(self):
             self.sched_treeview.update_table(database.fetch_data(sql_commands.get_all_schedule))
 
-        def resched_btn_callback(self):
+        def resched_btn_callback(self, _: any = None):
             if self.sched_treeview.get_selected_data():
-                pass
+                print(self.sched_treeview.get_selected_data())
+                dashboard_popup.rescheduling_service_info(self  , (self.width, self.height)).place(relx = .5, rely = .5, anchor = 'c', uid= self.sched_treeview.get_selected_data()[0])
                 #code for reshceduling here
             else:
                 messagebox.showerror("Unable to Proceed", "Select a service to resched", parent = self)
