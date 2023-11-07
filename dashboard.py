@@ -331,7 +331,7 @@ class dashboard(ctk.CTkToplevel):
                                                     'c'))
 
         self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
-                                                          children=[self.notif_menu_bar, self.acc_menu_bar])
+                                                          children=[self.notif_menu_bar, self.acc_menu_bar], active_double_click_nullified= False)
 
         '''setting default events'''
         
