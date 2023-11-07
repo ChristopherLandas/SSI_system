@@ -350,10 +350,10 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 reset()
 
             def preview_pdf_popup():
-                daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
+                daily_date_select_temp = datetime.datetime.now()
                 generate_inventory_report(self.user, 'sample.pdf', self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
-                                          self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
-                                          'image', 0, self)
+                                          daily_date_select_temp, daily_date_select_temp.month, daily_date_select_temp.year,
+                                          'image', 0)
                 ppdfp.preview_pdf_popup(receipt=0, title="Inventory Viewer")
 
    

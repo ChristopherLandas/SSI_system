@@ -139,6 +139,8 @@ class Icons:
     view_icon = ctk.CTkImage(light_image= Image.open("image/view.png"), size=(25,25))
     
 #endregion
+<<<<<<< HEAD
+=======
     
     zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
     zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
@@ -161,7 +163,6 @@ class Icons:
     out_of_icon = ctk.CTkImage(light_image= Image.open("image/out_of_stock.png"), size=(35,35))
     
     inventory_status = ctk.CTkImage(light_image= Image.open("image/inventory_flow.png"), size=(30,30)) 
-    
     
     
     
