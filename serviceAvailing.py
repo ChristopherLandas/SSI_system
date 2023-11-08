@@ -54,7 +54,7 @@ class pet_info_frame(ctk.CTkFrame):
         self.first_date_entry.grid(row=1, column=1, sticky="nsew", pady=(width*0.005,0)) 
         
         self.first_date_btn = ctk.CTkButton(self.sub_frame, text="", image=self.calendar, height=height*0.055, width=height*0.055,
-                                            command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
+                                            command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="word", min_date=datetime.datetime.now()))
         self.first_date_btn.grid(row=1,column=2, sticky="w", pady=(width*0.005,0))
         #enable this part when service requires multiple days
         
@@ -63,7 +63,7 @@ class pet_info_frame(ctk.CTkFrame):
         if data_format == 'metadata':
             return {'name': self.name.get(), 'schedule': self.date.get()}
         elif data_format == 'tuple':
-            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
+            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%B %d, %Y").strftime('%Y-%m-%d')
             return (self.name.get(), d_temp)
         
 class pet_period_info_frame(ctk.CTkFrame):
@@ -295,7 +295,6 @@ class pets(ctk.CTkFrame):
 
                 frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback = decrease_callback, increase_callback = increase_callback)
                         
-                #frame_spinner.configure(command = new_frame_spn_cmd)
                 total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
@@ -379,12 +378,12 @@ class pets(ctk.CTkFrame):
             for i in range(len(service_dict[self._title])):
                 self.frames[i].name.set(service_dict[self._title][i][0])
                 self.frames[i].name_select_callback(self.frames[i], self.frames[i].name.get())
-                d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime("%m-%d-%Y")
+                d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime('%B %d, %Y')
                 self.frames[i].first_date_entry.configure(text =  d_temp)
 
                 if self._type == 1:
                     temp: pet_period_info_frame = self.frames[i]
-                    snd_temp = "Set Date" if service_dict[self._title][i][2] is None else datetime.datetime.strptime(service_dict[self._title][i][2], "%Y-%m-%d").strftime("%m-%d-%Y")
+                    snd_temp = "Set Date" if service_dict[self._title][i][2] is None else datetime.datetime.strptime(service_dict[self._title][i][2], "%Y-%m-%d").strftime('%B %d, %Y')
                     temp.second_date_entry.configure(text = snd_temp)
                 elif self._type == 2:
                     temp: pet_multiple_period_info_frame = self.frames[i]
