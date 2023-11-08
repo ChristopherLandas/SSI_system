@@ -90,8 +90,11 @@ class body(ctk.CTk):
                    LEFT JOIN transaction_record\
                        ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
                    GROUP BY item_general_info.UID;"
-        for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
-            print(b)
+        '''for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
+            print(b)'''
+        
+        temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', ('admin', ))[0][1:])
+        print(temp_user_lvl_access)
         
         self.mainloop()
 body()
