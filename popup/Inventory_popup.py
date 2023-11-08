@@ -1,5 +1,3 @@
-import datetime
-import datetime
 import tkinter as tk
 import re
 import customtkinter as ctk
@@ -1196,7 +1194,7 @@ def receive_history(master, info:tuple,):
             def view_details(_:any = None):
                 detail_orders(self,(width, height)).place(relx=0.5, rely=0.5, anchor='c', data=self.data_view1.get_selected_data()) if self.data_view1.get_selected_data() else messagebox.showwarning("Warning","Select a record first", parent = self)
             
-            self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.datetime.now().year)]
+            self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.now().year)]
             self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
 
 
@@ -1305,7 +1303,7 @@ def receive_report(master, info:tuple,):
                 self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not data else self.no_order_data.place_forget()
                 self.data_view1.update_table(data)
                 
-            self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.datetime.now().year)]
+            self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.now().year)]
             self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
 
 
