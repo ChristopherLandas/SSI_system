@@ -3105,4 +3105,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'Admin', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)
