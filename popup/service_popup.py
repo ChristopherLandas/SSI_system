@@ -1,19 +1,22 @@
 import customtkinter as ctk
-from customcustomtkinter import customcustomtkinter as cctk
+import json
 import sql_commands
 import tkcalendar
+import tkinter as tk
+from customcustomtkinter import customcustomtkinter as cctk
 from Theme import Color
-from util import database, generateId
 from tkinter import messagebox
 from constants import action
-import datetime
 from PIL import Image
 import datetime
 from functools import partial
 from typing import *
-import tkinter as tk
-import util
-from datetime import date
+from util import *
+from datetime import date, datetime as dt, timedelta
+from Theme import Icons
+from tkcalendar import Calendar
+
+SETTINGS_VAL : dict = json.load(open("Resources\\general_settings.json"))
 
 def add_service(master, info:tuple, update_callback: callable):
     class add_service(ctk.CTkFrame):
@@ -34,13 +37,13 @@ def add_service(master, info:tuple, update_callback: callable):
                 self.category_option.set("Set Category")
                 
             def new_service():
-                a = util.generateId(initial='S', length=6)
+                a = generateId(initial='S', length=6)
                 
                 if self.service_name_entry.get() == "" and self.price_entry.get() == "" and self.category_option.get() == "Set Category":
                     messagebox.showerror("Missing Data", "Complete all the fields to continue", parent = self)   
                     
                 else:    
-                    a = util.generateId(initial='S', length=6)
+                    a = generateId(initial='S', length=6)
                     database.exec_nonquery([[sql_commands.insert_service_test, (a, self.service_name_entry.get(), self.price_entry.get(), 
                                                                                 self.category_option.get(), self.radio_var.get(), 1, date.today())]])
                     messagebox.showinfo("Service Added", "New service is added", parent = self)
@@ -145,4 +148,90 @@ def add_service(master, info:tuple, update_callback: callable):
             return super().place(**kwargs)
     return add_service(master, info, update_callback)
 
+def calendar_with_scheduling(master, info:tuple, parent_ui: ctk.CTkLabel | ctk.CTkEntry = None, date_format = 'numerical', min_date = None, command: callable = None):
+    class add_service(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, parent_ui: ctk.CTkLabel | ctk.CTkEntry = None, date_format = 'numerical', min_date = None, command: callable = None):
+            width = info[0]
+            height = info[1]
+            global SETTINGS_VAL
+            super().__init__(master, width=width * .5, height=height * .4, corner_radius= 0, fg_color='white')
+
+            self.parent_ui = parent_ui
+            self.date_format = date_format
+            self._min_date = min_date or dt.today().date()
+            self._command = command
+            self.pack_propagate(0)
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(1, weight=1)
+            self.grid_propagate(0)
+
+            self.top_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.04)
+            self.top_frame.grid(row=0, column=0, sticky="ew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.schedule_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="Calendar", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.place_forget)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[0])
+            self.main_frame.pack_propagate(0)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid(row=1, column=0, sticky="nsew")
+
+            date = datetime.datetime.now()
+            self.cal = cctk.tkc(self.main_frame, year=date.year, month=date.month, day=date.day, showweeknumbers=False, date_pattern="mm-dd-yyyy",
+                                normalbackground="#EAEAEA", weekendbackground="#F3EFE0", state = ctk.NORMAL,
+                                select_callback= self.get_data_schedule, mindate = self._min_date)
+            self.cal.pack(expand=True, padx=5, pady=5, anchor = 'w')
+
+            self.treeview_data = cctk.cctkTreeView(self, width= width *.5 * .5, height= height * .4 * .8, column_format='/Client:x-tl/Name:x-tl!50!30')
+            self.treeview_data.pack(expand=True, padx=5, pady=5, anchor = 'e')
+
+            self.btn = ctk.CTkButton(self, text='set', command= self.set_date_ui)
+            self.btn.pack()
+
+            self.get_data_schedule()
+            
+        def get_data_schedule(self, m = None):
+            selected_date = dt.now().strftime('%Y-%m-%d') if m is None else dt.strptime(m, '%m-%d-%Y').strftime('%Y-%m-%d')
+            self.treeview_data.update_table(database.fetch_data(sql_commands.get_today_schedule_basic_info, (selected_date, selected_date)))
+
+        def set_date_ui(self):
+
+            if "numerical" in self.date_format:
+                #label.configure(text= ( format % (self.cal.get_date())))
+                date_text = str(self.cal.get_date())
+            elif "raw" in self.date_format:
+                date_text = self.cal.selection_get()
+            elif "word" in self.date_format:
+                #label.configure(text= f"{date_to_words(str(self.cal.get_date()))}")
+                date_text = str(date_to_words(str(self.cal.get_date())))
+            else:
+                date_text = "Invalid Format"
+
+            if len(self.treeview_data._data) >= SETTINGS_VAL['Daily_queue_max']:
+                if not messagebox.askokcancel("Date over scheduled", "The date exceeds the schedule limit per day\nDo you want to proceed?", parent = self):
+                    return
+            #ask for over scheduling
+
+            if isinstance(self.parent_ui, ctk.CTkLabel):
+                self.parent_ui.configure(text = date_text)
+            elif isinstance(self.parent_ui, ctk.CTkEntry):
+                self.parent_ui.delete(0, ctk.END)
+                self.parent_ui.insert(0, date_text)
+            else:
+                return date_text
+            if self._command is not None:
+                self._command()
+
+            self.place_forget()
+        
+        def place(self, date = None, **kwargs):
+            if date is not None:
+                date = dt.strptime(date, '%m-%d-%Y').date()
+                self.cal.configure(mindate = date)
+            return super().place(**kwargs)
+
+    return add_service(master, info, parent_ui, date_format, min_date)
 #That place is not for any man or particles of bread
