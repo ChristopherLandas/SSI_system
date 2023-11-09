@@ -916,8 +916,23 @@ class customcustomtkinter:
             if self.page_count > page: self.page_count = 1
             self.page_counter.configure(text=self.page_count)
             self.page_limit = page
-            self.checker()             
-            
+            self.checker()       
+
+    class tkc(Calendar):
+        def __init__(self, master=None, select_callback: callable = None, date_format: str ="numerical", **kw,):
+            super().__init__(master, **kw)
+            self.select_callback = select_callback
+            self.date_format = date_format
+            #self.selected_date = self.get_date()
+
+        def _on_click(self, event):
+            super()._on_click(event)     
+            if self.select_callback is not None:
+                self.select_callback(self.get_date())
+            #self.selected_date = self.get_date()
+            #return temp
+        
+                
 class customcustomtkinterutil:
     class button_manager:
         def __init__(self, buttons: list, hold_color: str = 'transparent', switch: bool = False,
