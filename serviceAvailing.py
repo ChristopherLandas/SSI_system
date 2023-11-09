@@ -376,11 +376,12 @@ class pets(ctk.CTkFrame):
             data.append(i.get_data(data_format='tuple'))
         return data
     
-    def place(self, service_dict: dict, root_treeview: tuple, change_total_val_serv_callback: callable, master_frame: any, **kwargs):
+    def place(self, service_dict: dict, root_treeview: tuple, change_total_val_serv_callback: callable, master_frame: any, master_btn: ctk.CTkButton, **kwargs):
         self.parent_frame_tab = master_frame
         self._root_treeview = root_treeview
         self.parent_service_dict = service_dict
         self.change_total_val_serv_callback = change_total_val_serv_callback
+        self.master_btn = master_btn
         frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
         temp_cmd = frame_spinner._command
 
@@ -411,6 +412,10 @@ class pets(ctk.CTkFrame):
                     temp.instance_count_days.insert(0, service_dict[self._title][i][3])
         #for reentring the elements based on the type of service
         return super().place(**kwargs)
+    
+    def place_forget(self):
+        self.master_btn.configure(state = ctk.NORMAL)
+        return super().place_forget()
     
 """ class body(ctk.CTk):
     def __init__(self):

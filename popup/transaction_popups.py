@@ -825,15 +825,19 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         import serviceAvailing
                         def proceed_command(data):
                             self._service_dict[label_text] = data
-                        
+
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0, anchor= 'w', font=self.service_treeview.row_font,
-                                                   text="  "+label_text, width = root_treeview.column_widths[1],
-                                                   command= lambda: serviceAvailing.pets(root_treeview.master.master, spinner.value, label_text, [s[1] for s in self.client],
-                                                                                         proceed_command, None, width=width, height=height,fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
+                                                   text="  "+label_text, width = root_treeview.column_widths[1])
+                        def temp_command():
+                            new_button.configure(state = ctk.DISABLED)
+                            serviceAvailing.pets(root_treeview.master.master, spinner.value, label_text, [s[1] for s in self.client],
+                                                 proceed_command, None, width=width, height=height,fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
                                                                                                                                                         service_dict= self._service_dict,
                                                                                                                                                         root_treeview=root_treeview,
                                                                                                                                                         change_total_val_serv_callback= self.change_total_val_serv_callback,
-                                                                                                                                                        master_frame= data_frames))
+                                                                                                                                                        master_frame= data_frames,
+                                                                                                                                                        master_btn= new_button)
+                        new_button.configure(command = temp_command)
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
