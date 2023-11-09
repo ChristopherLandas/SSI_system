@@ -1145,3 +1145,14 @@ get_item_total_by_id = "SELECT CAST(SUM(item_transaction_content.price * item_tr
 get_service_total_by_id = "SELECT Cast(SUM(price) AS FLOAT) FROM services_transaction_content WHERE transaction_uid = ?"
 get_transaction_total_by_id = "SELECT Total_amount FROM transaction_record WHERE transaction_uid = ? and state = 1"
     
+get_today_schedule_basic_info = "SELECT patient_name,\
+                                         service_name\
+                                 FROM invoice_service_content\
+                                 WHERE scheduled_date = ?\
+                                 UNION ALL\
+                                 SELECT services_transaction_content.patient_name,\
+                                         service_preceeding_schedule.service_name\
+                                 FROM services_transaction_content\
+                                 JOIN service_preceeding_schedule\
+                                     ON services_transaction_content.transaction_uid = service_preceeding_schedule.transaction_uid\
+                                 WHERE service_preceeding_schedule.scheduled_date = ?"

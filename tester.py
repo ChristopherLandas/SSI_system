@@ -1,7 +1,7 @@
 #from typing import Callable, Optional, Tuple, Union
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import notif_popup_entities as ntf
+from popup import notif_popup_entities as ntf, service_popup as svc_p
 #from decimal import Decimal
 from util import *
 #import sql_commands
@@ -93,8 +93,8 @@ class body(ctk.CTk):
         '''for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
             print(b)'''
         
-        temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', ('admin', ))[0][1:])
-        print(temp_user_lvl_access)
+        test = svc_p.calendar_with_scheduling(self, self.screen)
+        test.place(relx = .5, rely = .5, anchor = 'c')
         
         self.mainloop()
 body()
