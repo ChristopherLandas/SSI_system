@@ -305,11 +305,11 @@ class accounts_frame(ctk.CTkFrame):
 
     def deactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:
-            messagebox.showerror("Invalid", "Select an account to Deactivate")
+            messagebox.showerror("Invalid", "Select an account to Deactivate", parent = self)
         else:
-            if messagebox.askyesno("Warning", f"Are you sure you want to deactivate {self.account_treeview.get_selected_data()[0]}"):
+            if messagebox.askyesno("Warning", f"Are you sure you want to deactivate {self.account_treeview.get_selected_data()[0]}", parent = self):
                 database.exec_nonquery([[sql_commands.update_deactivate_account, (self.account_treeview.get_selected_data()[0], )]])
-                messagebox.showwarning("Success ", "Account Deactivated")
+                messagebox.showwarning("Success ", "Account Deactivated", parent = self)
                 self.refresh_table()
      
 
@@ -402,7 +402,7 @@ class creation_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
+        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Customer', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
@@ -452,13 +452,13 @@ class creation_frame(ctk.CTkFrame):
 
     def create_acc(self, _: any = None):
         if self.fullname_entry.get() == "" or self.position_selection.get() == "_" or self.username_entry.get() == "" or self.password_entry.get() == "":
-            messagebox.showwarning("Fail to create", "Fill all the fields")
+            messagebox.showwarning("Fail to create", "Fill all the fields", parent = self)
             return
         if database.fetch_data("SELECT COUNT(*) FROM acc_cred WHERE usn = ?", (self.username_entry.get(), ))[0][0] != 0:
-            messagebox.showwarning("Fail to create", "Username already Exist")
+            messagebox.showwarning("Fail to create", "Username already Exist", parent = self)
             return
         if len(self.password_entry.get()) < 5:
-            messagebox.showwarning("Fail to create", "Password must at least 5 characters")
+            messagebox.showwarning("Fail to create", "Password must at least 5 characters", parent = self)
             return
         pss = encrypt.pass_encrypt(self.password_entry.get())
         val = (self.username_entry.get(), )+ tuple(self.values[k] for k in self.values.keys())
@@ -467,7 +467,7 @@ class creation_frame(ctk.CTkFrame):
                                 [sql_commands.create_acc_info, (self.username_entry.get(), self.fullname_entry.get(), self.position_selection.get())],
                                 [sql_commands.create_acc_access_level, val]])
         
-        messagebox.showinfo("Success", f"{self.username_entry.get()} created")
+        messagebox.showinfo("Success", f"{self.username_entry.get()} created", parent = self)
         self.reset_acc_creation()
 
 
@@ -544,7 +544,7 @@ class roles_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
+        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Customer', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
@@ -596,7 +596,7 @@ class roles_frame(ctk.CTkFrame):
         val = tuple(self.check_boxes[k].get() for k in self.check_boxes.keys())
         database.exec_nonquery([[sql_commands.update_acc_access_level, val + (self.usn_option.get(), )],
                                 ["UPDATE acc_info SET full_name = ? WHERE USN = ?", (self.fullname_entry.get(), self.usn_option.get())]])
-        messagebox.showinfo("Success", f"{self.fullname_entry.get()} Updated")
+        messagebox.showinfo("Success", f"{self.fullname_entry.get()} Updated", parent = self)
         self.reset()
         
 
@@ -649,11 +649,11 @@ class deactivated_frame(ctk.CTkFrame):
 
     def reactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:
-            messagebox.showerror("Invalid", "Select an account to Reactivate")
+            messagebox.showerror("Invalid", "Select an account to Reactivate", parent = self)
             return
-        if messagebox.askyesno("Notice!", f"Are you sure you\nwant to reactivate {self.account_treeview.get_selected_data()[0]}"):
+        if messagebox.askyesno("Notice!", f"Are you sure you\nwant to reactivate {self.account_treeview.get_selected_data()[0]}", parent = self):
             database.exec_nonquery([["UPDATE acc_info SET state = 1 WHERE usn = ?", (self.account_treeview.get_selected_data()[0], )]])
-            messagebox.showinfo("Success", "Account Reactivated")
+            messagebox.showinfo("Success", "Account Reactivated", parent = self)
             print(self.account_treeview.get_selected_data()[0])
         self.load_deactivated_acc()
 

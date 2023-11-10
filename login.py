@@ -41,7 +41,7 @@ class loginUI(ctk.CTk):
             _usn = database.fetch_data(sql_commands.get_usn, (self.user_entry.get(),))
             _usn = None if len(_usn) == 0 else _usn[0][0]
             database.exec_nonquery([[sql_commands.record_login_report, (_usn, self.user_entry.get())]])
-            messagebox.showwarning('Login Error', 'Login Attempts Exceeds 3 times\nIt will be reported to the owner')
+            messagebox.showwarning('Login Error', 'Login Attempts Exceeds 3 times\nIt will be reported to the owner', parent = self)
             self.destroy()
 
         def login(_):
@@ -54,7 +54,7 @@ class loginUI(ctk.CTk):
                     report_exceed_attempt()
                     return
                 self.password_entry.delete(0, ctk.END)
-                messagebox.showinfo('Error', 'Username Or Password Incorrect')
+                messagebox.showinfo('Error', 'Username Or Password Incorrect', parent = self)
                 return
             count = database.fetch_data(f'SELECT COUNT(*) FROM {db.ACC_CRED} WHERE {db.USERNAME} COLLATE LATIN1_GENERAL_CS = ? AND {db.acc_cred.PASSWORD} = ?',
                                         (self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
@@ -65,10 +65,10 @@ class loginUI(ctk.CTk):
                 if self.attempt == 3:
                     report_exceed_attempt()
                     return
-                messagebox.showinfo('Error', 'Username Or Password Incorrect')
+                messagebox.showinfo('Error', 'Username Or Password Incorrect', parent = self)
             else:
                 if database.fetch_data('SELECT state FROM acc_info WHERE usn = ?', (self.user_entry.get(), ))[0][0] == 0:
-                    messagebox.showerror("Failed to Login", "The Account you're been\nlogged has been deactivated.\nInquire to the admin")
+                    messagebox.showerror("Failed to Login", "The Account you're been\nlogged has been deactivated.\nInquire to the admin", parent = self)
                     return
                 current_datetime = datetime.datetime.now();
                 data_key = encrypt.pass_encrypt(self.password_entry.get(), datetime.datetime.now())['pass']
@@ -102,11 +102,9 @@ class loginUI(ctk.CTk):
         #print(set_scale((width, height)))
         
         
-        ctk.set_widget_scaling(set_scale((width, height)))
-        ctk.set_window_scaling(set_scale((width, height)))
+        #ctk.set_widget_scaling(set_scale((width, height)))
+        #ctk.set_window_scaling(set_scale((width, height)))
         #print( width, height, '|', set_scale((width, height)))
-        
-        
         
         root_w = 500
         root_h = 600

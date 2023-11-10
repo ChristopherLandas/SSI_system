@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 import datetime;
 import _tkinter
 import sql_commands
-import notif_popup_entities as ntf
 import numpy as np
+from popup import notif_popup_entities as ntf
 from tkinter import messagebox
 from util import *
 from functools import partial
@@ -33,7 +33,8 @@ import screeninfo
 import ctypes
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
-#scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+#scaling = 1
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -45,6 +46,7 @@ acc_cred = ()
 date_logged = None
 mainframes = []
 IP_Address: dict = json.load(open("Resources\\network_settings.json"))
+PORT_NO: dict = json.load(open("Resources\\port_no.json"))
 SETTINGS_VAL : dict = json.load(open("Resources\\general_settings.json"))
 
 ctk.set_widget_scaling(1)
@@ -57,6 +59,7 @@ class dashboard(ctk.CTkToplevel):
         self.update()
         self.attributes("-fullscreen", True)
         self._master = master
+        self.notifs: List[cctk.ctkButtonFrame] = []
         #self.attributes("-topmost",1)
         self._fg_color=Color.White_Platinum
         
@@ -65,9 +68,9 @@ class dashboard(ctk.CTkToplevel):
         
         #[print(screen) for screen in screeninfo.get_monitors()]
         '''Global Variables'''
-        global width, height, mainframes, IP_Address
-        width = self.winfo_screenwidth() #/ scaling
-        height = self.winfo_screenheight() #/ scaling
+        global width, height, mainframes, IP_Address, SETTINGS_VAL, PORT_NO
+        width = self.winfo_screenwidth() / scaling
+        height = self.winfo_screenheight() / scaling
             
         title_name = "J.Z. Angeles Veterinary Clinic"
         
@@ -134,9 +137,9 @@ class dashboard(ctk.CTkToplevel):
         self.progress_bar.configure(determinate_speed = determinate_speed)
         update_frame(0)
         
-        print(f"Start Time: {datetime.datetime.now()}")
-        
-        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+        global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
+        """ 
+        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -147,11 +150,9 @@ class dashboard(ctk.CTkToplevel):
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
-            del datakey """
-        #for preventing security breach through python code; enable it to test it """
-
-        
-        global acc_info, acc_cred, date_logged, mainframes, IP_Address
+            del datakey
+        #for preventing security breach through python code; enable it to test it
+        """
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
@@ -176,7 +177,7 @@ class dashboard(ctk.CTkToplevel):
 
         '''Main Information'''
         side_frame_w = round(width * 0.175)
-        default_menubar_width = .15
+        self.default_menubar_width = .15
         default_menubar_height = .3
         acc_menubar_width = .2
 
@@ -224,7 +225,7 @@ class dashboard(ctk.CTkToplevel):
             self.active_main_frame.grid(row =1, column =1, sticky = 'nsew')
         
         def log_out():
-            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?')
+            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?', parent = self)
             if b:
                 database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
                                         (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
@@ -255,8 +256,6 @@ class dashboard(ctk.CTkToplevel):
             self.side_frame_btn.append(cctk.ctkButtonFrame(self.side_frame, width=side_frame_w, height=round(height * 0.07),
                                                            fg_color=unselected_btn_color, hover_color=Color.Blue_LapisLazuli_1,
                                                            corner_radius=0, cursor="hand2",))
-            
-            #self.db_button.configure(command=partial(change_active_event, self.db_button, 0))
             self.side_frame_btn[i].configure(command=partial(load_main_frame, self.labels[i], i))
             self.side_frame_btn[i].pack()
             wbar = ctk.CTkLabel(self.side_frame_btn[i],text="",fg_color="transparent", width=side_frame_w*0.02,height=round(height * 0.07))
@@ -313,24 +312,18 @@ class dashboard(ctk.CTkToplevel):
         self.update()
 
         '''menubars'''
-        self.notif_menu_bar= cctk.menubar(self, width * default_menubar_width, height * default_menubar_height,
-                                          corner_radius= 0, fg_color='black', border_width= 0, border_color=Color.Blue_Cobalt,
-                                          position=(self.notif_btn.winfo_rootx() / self.winfo_width() + default_menubar_width/2,
-                                                    self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
-                                                    'c'))
-        #self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
-        #                                      corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
-        #                                      position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
-        #                                                self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
-        #                                                'c'))
+        self.notif_menu_bar= cctk.scrollable_menubar(self, width * self.default_menubar_width * 1.5, height * .9,
+                                          corner_radius= 0, fg_color='white', border_width= 0, border_color=Color.Blue_Cobalt,
+                                          position=(1 - self.default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
+        '''self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
+                                              corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
+                                              position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
+                                                        self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
+                                                        'c'))'''
         
-        out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c = [('Out Of Stock', f'Item {s} is currently out of stock', datetime.datetime.now()) for s in out_of_stock]
-        notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1], s[2],  width * default_menubar_width * .95, 100) for s in ntf_c]
-
-        #self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
-        #                                                  onvalue="darkmode", offvalue="lightmode",)
-        #self.settings_menu_bar_dark_mode.grid(row=0, column=0)
+        '''self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
+                                                          onvalue="darkmode", offvalue="lightmode",)
+        self.settings_menu_bar_dark_mode.grid(row=0, column=0)'''
         
         self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost,
                                          position= (1 - acc_menubar_width/2,
@@ -338,7 +331,7 @@ class dashboard(ctk.CTkToplevel):
                                                     'c'))
 
         self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
-                                                          children=[self.notif_menu_bar, self.acc_menu_bar])
+                                                          children=[self.notif_menu_bar, self.acc_menu_bar], active_double_click_nullified= False)
 
         '''setting default events'''
         
@@ -346,14 +339,58 @@ class dashboard(ctk.CTkToplevel):
         self.loading_frame.place_forget()
         #change_active_event(self.db_button, 0)
         
-        print(f"End Time: {datetime.datetime.now()}")
+        self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], PORT_NO['Notif_gen'], self.receiver_callback)
+        self.network_receiver.start_receiving()
+        self.generate_notification()
         self.protocol("WM_DELETE_WINDOW", log_out)
         self.mainloop()
+    
+    def generate_notification(self):
+        '''ALL OF THE COMMENTED NTF_C VARIABLE PUT A NOTIFICATION IN INSTANCE RATHER THAN GROUP'''
+
+        out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
+        ntf_c1 = [('Out sf stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock) for _ in out_of_stock]
+        #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
+        
+        low_stock = database.fetch_data(sql_commands.get_low_items_name)
+        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock', low_stock) for _ in low_stock]
+        #ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
+
+        near_expire = database.fetch_data(sql_commands.get_near_expired_items_name, (SETTINGS_VAL['Near_expiry_date_alert'], ))
+        #ntf_c3 = [('About to Expire', f'Item {s[0]} is about to expire in {s[2]} day{"s" if s[2] > 1 else ""}') for s in near_expire]
+        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire) for _ in near_expire]
+
+        expired = database.fetch_data(sql_commands.get_expired_items_name)
+        #ntf_c4 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
+        ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s" if len(low_stock) > 1 else ""} had an expired stock/s', expired) for _ in expired]
+
+        near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
+        ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
+
+        scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
+        ntf_c6 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}', [s]) for s in scheduled_today]
+
+        past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
+        #ntf_c7 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment', past_scheduled) for _ in past_scheduled]
+
+        ntf_c = ntf_c5 + ntf_c6 + ntf_c7 + ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
+        for _ntf in self.notifs:
+            _ntf.destroy()
+
+        self.notifs = [ntf.create_entity(self.notif_menu_bar, s[0], s[1],  width * self.default_menubar_width * 1.5 * .95, 100, Desc_lines= 3, info_cnt = (self, width, height, s[2])) for s in ntf_c]
+        
+    def receiver_callback(self, m):
+        if m == '1':
+            self.generate_notification()
+
+    def popup_command(self,info):
+        print(info)
 
 ''' 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶'''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''main frames'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 class dashboard_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -370,7 +407,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.grid_propagate(1)
         
         self.state = None
-        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 222, self.update_receiver)
+        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['DashB_stat_ref'], self.update_receiver)
         self.canvas = None
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
@@ -588,7 +625,6 @@ class dashboard_frame(ctk.CTkFrame):
 
 
     def load_scheduled_service(self):
-        #data = database.fetch_data("SELECT patient_name, service_name, 'TEST' FROM services_transaction_content WHERE scheduled_date = CURRENT_DATE")
         data= database.fetch_data(sql_commands.get_scheduled_clients_today, None)
         self.sched_data_treeview.update_table(data)
         
@@ -610,10 +646,7 @@ class dashboard_frame(ctk.CTkFrame):
     def show_pie(self, data: list = None):
         if(self.canvas is not None):
             self.canvas.get_tk_widget().destroy()
-        self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
-                   float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0)]
-        #self.data = [34,49]
-        data = self.data if self.data[0] + self.data[1] > 0 else [1, 0]
+        data = [self.data[0], self.data[1]] if self.data[0] + self.data[1] > 0 else [1, 0]
         
         pie_figure= Figure(figsize=(width*0.003,width*0.00285), dpi=100)
         pie_figure.set_facecolor(Color.White_Lotion)
@@ -629,6 +662,7 @@ class dashboard_frame(ctk.CTkFrame):
 
         self.no_data = ctk.CTkLabel(self.income_summary_frame,text='No transactions yet.', font=("DM Sans Medium", 14), fg_color=Color.White_Platinum)
         self.no_data.grid_forget() if self.data[0] + self.data[1] > 0 else self.no_data.grid(row = 0, column=1, rowspan = 6)
+
     def generate_DISumarry(self):
         self.data =[float(database.fetch_data(sql_commands.get_items_daily_sales)[0][0] or 0),
                     float(database.fetch_data(sql_commands.get_services_daily_sales)[0][0] or 0),
@@ -640,24 +674,6 @@ class dashboard_frame(ctk.CTkFrame):
         self.show_pie()
 
     def generate_stat_tabs(self):
-        """  for i in self.stat_tabs:
-            i.destroy()
-        self.stat_tabs.clear()
-        stat_data = [('Reorder', '#cccc00', database.fetch_data(sql_commands.get_reorder_state) or None),
-                     ('Critical', '#ff0000', database.fetch_data(sql_commands.get_critical_state) or None),
-                     ('Out-Of-Stock', '#222222', database.fetch_data(sql_commands.get_out_of_stock_state) or None),
-                     ('Near Expire', '#ff7900', database.fetch_data(sql_commands.get_near_expire_state) or None),
-                     ('Expire', '#dd0000', database.fetch_data(sql_commands.get_expired_state) or None)]
-        stat_data = [s for s in stat_data if s[-1] is not None]
-        stat_tabs_info: dict = {s[0]: s[-1] for s in stat_data}
-
-        for i in range(len(stat_data)):
-            temp = dashboard_popup.status_bar(self.inventory_content_frame, (self.inventory_frame_width, self.income_frame_height),
-                                                                             stat_data[i][0], stat_data[i][1],
-                                                                             len(stat_data[i][-1]), self.show_status_popup, stat_tabs_info)
-            self.stat_tabs.append(copy.copy(temp))
-            self.stat_tabs[-1].grid(row = i, column = 1, sticky = 'nsew', padx=(self.inventory_frame_width*0.001 ),pady=(0,self.inventory_frame_height*0.02))
-            del temp """
         data= [database.fetch_data(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
                database.fetch_data(sql_commands.get_out_of_stock_state), database.fetch_data(sql_commands.get_critical_state),
                database.fetch_data(sql_commands.get_reorder_state),]
@@ -665,8 +681,6 @@ class dashboard_frame(ctk.CTkFrame):
         [self.inventory_tabs[tabs].update_data(len(data[tabs]), data[tabs]) for tabs in range(len(self.inventory_tabs))] 
 
     def grid(self, **kwargs):
-        #self.state = 1
-        #[tabs.update_state('opened') for tabs in self.inventory_tabs]
         self.load_scheduled_service()
         self.load_saled_data_treeview()
         self.generate_DISumarry()
@@ -677,8 +691,7 @@ class dashboard_frame(ctk.CTkFrame):
         #if self.state: [tabs.update_state('closed') for tabs in self.inventory_tabs]
         return super().grid_forget(**kwargs)
 
-    def update_receiver(self, m):
-        print("triggered")
+    def update_receiver(self, _):
         self.show_pie()
         self.generate_stat_tabs()
         self.generate_DISumarry()
@@ -696,8 +709,7 @@ class dashboard_frame(ctk.CTkFrame):
                 temp.update_table()
             if isinstance(i, histlog_frame):
                 temp: histlog_frame = i
-                #temp.load_both()
-        
+                #temp.load_both()     
 
 class reception_frame(ctk.CTkFrame):
     def __init__(self, master):
@@ -705,9 +717,9 @@ class reception_frame(ctk.CTkFrame):
         global width, height, acc_cred, acc_info, mainframes, IP_Address, SETTINGS_VAL
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.loaded = [False, False, False]
+        self.loaded = [False, False]
 
-        self.sender_entity = nsu.network_sender(IP_Address["CASHIER_IP"], 1175, IP_Address["MY_NETWORK_IP"], 252, self.post_sent_callback)
+        self.sender_entity = nsu.network_sender(IP_Address["CASHIER_IP"], PORT_NO['Billing_Recieving'], IP_Address["MY_NETWORK_IP"], 252, self.post_sent_callback)
         selected_color = Color.Blue_Yale
 
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
@@ -746,6 +758,10 @@ class reception_frame(ctk.CTkFrame):
         self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item_btn.pack(side="left", padx=(width*0.005))
 
+        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.05, text="View Shcedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
+                                               command = lambda: self.scheduled_services_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.view_schedule_btn.pack(side="left", padx=(0, width*0.005))
+
         self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = lambda:self.update_invoice_treeview(True))
         self.refresh_btn.pack(side="left", padx=(0,width*0.005))
     
@@ -769,19 +785,9 @@ class reception_frame(ctk.CTkFrame):
         self.item_tab.grid()
         self.item_tab.update_children()
 
-        self.service_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
-        self.service_tab.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.service_tab.configure(command = lambda: self.load_tab(1))
-        self.account_tab_icon = ctk.CTkLabel(self.service_tab, text="",image=self.trash_icon)
-        self.account_tab_icon.pack(side="left", padx=(width*0.01,width*0.0025))
-        self.accounts_label = ctk.CTkLabel(self.service_tab, text="SERVICES", text_color="white",font=('DM Sans Medium', 14))
-        self.accounts_label.pack(side="left")
-        self.service_tab.grid()
-        self.service_tab.update_children()
-
         self.scheduling_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
         self.scheduling_tab.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.scheduling_tab.configure(command = lambda: self.load_tab(2))
+        self.scheduling_tab.configure(command = lambda: self.load_tab(1))
         self.account_tab_icon = ctk.CTkLabel(self.scheduling_tab, text="",image=self.trash_icon)
         self.account_tab_icon.pack(side="left", padx=(width*0.01,width*0.0025))
         self.accounts_label = ctk.CTkLabel(self.scheduling_tab, text="QUEUE", text_color="white",font=('DM Sans Medium', 14))
@@ -789,7 +795,7 @@ class reception_frame(ctk.CTkFrame):
         self.scheduling_tab.grid()
         self.scheduling_tab.update_children()
 
-        self.tab_mng = cctku.button_manager([self.item_tab, self.service_tab, self.scheduling_tab], selected_color, False, 0)
+        self.tab_mng = cctku.button_manager([self.item_tab, self.scheduling_tab], selected_color, False, 0)
         self.tab_mng.click(0)
         #endregion
 
@@ -808,19 +814,6 @@ class reception_frame(ctk.CTkFrame):
         self.proceeed_button.pack(padx = (0, (width*.0025)), anchor = 'e', pady = (height * .005))
         '''INVOICE FRAME ITEMS: END'''
         
-        '''INVOICE FRAME SERVICE'''
-        self.service_treeview_frame = ctk.CTkFrame(self.invoice_frame)
-
-        self.service_invoice_treeview = cctk.cctkTreeView(self.service_treeview_frame, width= width * .805, height= height * .684, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Pet:x-tl/Owner:x-tl/Service:{int(width*.15 )}-tl/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
-                                           double_click_command= self.load_invoice_content)
-        self.service_invoice_treeview.pack()
-
-        self.proceed_to_schedule = ctk.CTkButton(self.service_treeview_frame, text="Make a queue", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
-                                             compound="right", command = self.generate_schedule)
-        self.proceed_to_schedule.pack(padx = (0, (width*.0025)), anchor = 'e', pady = (height * .005))
-        '''INVOICE FRAME SERVICE: END'''
-
         '''SCHEDULING FRAME'''
         self.scheduling_frame = ctk.CTkFrame(self.invoice_frame)
 
@@ -833,48 +826,43 @@ class reception_frame(ctk.CTkFrame):
         '''SCHEDULING FRAME: END'''
         
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), lambda: self.update_invoice_treeview(True), acc_cred[0][0])
+        self.scheduled_services_popup: ctk.CTkFrame = transaction_popups.scheduled_services(self, (width, height), self)
         self.update_invoice_treeview()
         self.grid_forget()
 
     def load_tab(self, i: int = None):
         if i == 0:
-            self.service_treeview_frame.grid_forget()
+            #self.service_treeview_frame.grid_forget()
             self.scheduling_frame.grid_forget()
             self.active = self.item_invoice_treeview
             self.item_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
         elif i == 1:
-            self.item_treeview_frame.grid_forget()
-            self.scheduling_frame.grid_forget()
-            self.active = self.service_invoice_treeview
-            self.service_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
-        elif i == 2:
-            self.service_treeview_frame.grid_forget()
+            #self.service_treeview_frame.grid_forget()
             self.item_treeview_frame.grid_forget()
             self.active = self.scheduling_invoice_treeview
             self.scheduling_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
-
         self.update_invoice_treeview()
 
     def post_sent_callback(self, i):
         if i == 1:
             self.active.remove_selected_data()
-            messagebox.showinfo("Succeed", 'Invoice preceeded to payment')
+            messagebox.showinfo("Succeed", 'Invoice preceeded to payment', parent = self)
         else:
-            messagebox.showerror("Error", "An error occured")
+            messagebox.showerror("Error", "An error occured", parent = self)
 
     def update_invoice_treeview(self, force_load = False):
         if force_load:
-            self.loaded = [False, False, False]
+            self.loaded = [False, False]
+
         if self.active is None:
             self.active = self.item_invoice_treeview
 
-        index = 0 if self.active == self.item_invoice_treeview else 1 if self.active == self.service_invoice_treeview else 2
+        index = 0 if self.active == self.item_invoice_treeview else 1 
         if not self.loaded[index]:
             if index == 0:
                 self.active.update_table(database.fetch_data(sql_commands.get_invoice_info, (index, )))
-            if index == 1:
-                self.active.update_table(database.fetch_data(sql_commands.get_invoice_info_service, (index, )))
-            elif index == 2:
+                # load the item content treeview
+            elif index == 1:
                 self.scheduling_invoice_treeview.delete_all_data()
                 preceeded_services = database.fetch_data(sql_commands.get_preceeded_services)
                 queued_services = database.fetch_data(sql_commands.get_invoice_info_queued, (index, ))
@@ -887,27 +875,27 @@ class reception_frame(ctk.CTkFrame):
                 
                 for li in queued_services:
                     self.scheduling_invoice_treeview.add_data(li)
-
                 self.scheduling_invoice_treeview.data_grid_btn_mng.update_buttons()
+
                 #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info_queued, (index, )))
                 #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info, (index, )))
+                # load the queued service treeview
             self.loaded[index] = True
 
     def cancel_invoice(self, bypass_confirmation: bool = False):
         if self.active.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel")
+            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel", parent = self)
             return
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
             self.update_invoice_treeview(True)
         else:
-            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice")) and self.active != self.scheduling_invoice_treeview:
+            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice", parent = self)) and self.active != self.scheduling_invoice_treeview:
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.active.get_selected_data()[0], )]])
                 self.update_invoice_treeview(True)
 
     def load_invoice_content(self, _:any = None):
-        print(self.active == self.item_invoice_treeview, self.active == self.service_invoice_treeview)
-        if (self.active == self.item_invoice_treeview or self.active == self.service_invoice_treeview) and self.active.get_selected_data() is not None:
+        if (self.active == self.item_invoice_treeview) and self.active.get_selected_data() is not None:
             transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.active.get_selected_data()[0])
 
     def proceed_to_payment(self):
@@ -918,36 +906,19 @@ class reception_frame(ctk.CTkFrame):
                 if 0 not in stock_quan:
                     self.sender_entity.send(data[0])
                 else:
-                    messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction")
+                    messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
             else:
                 if database.exec_nonquery([[sql_commands.mark_preceeding_as_done, (data[0][4:], datetime.datetime.strptime(data[-1], '%B %d, %Y'))]]):
-                    print((data[0][3:], datetime.datetime.strptime(data[-1], '%B %d, %Y')))
-                    messagebox.showinfo("Success", "Service mark as done")
+                    messagebox.showinfo("Success", "Service mark as done", parent = self)
                     self.scheduling_invoice_treeview.remove_selected_data()
-            #update the shit
         else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment")
-
-    def generate_schedule(self):
-        data = self.service_invoice_treeview.get_selected_data()
-        if data:
-            if (datetime.datetime.strptime(data[-1], '%B %d, %Y') - datetime.datetime.now()).days <= 0:
-                if database.fetch_data(sql_commands.check_todays_accomodated_sched)[0][0] < SETTINGS_VAL["Daily_queue_max"]:
-                    database.exec_nonquery([[sql_commands.set_invoice_transaction_to_queue, (data[0], )]])
-                    self.service_invoice_treeview.remove_selected_data()
-                    self.scheduling_tab.response()
-                    self.update_invoice_treeview(True)
-                else:
-                    messagebox.showwarning("Fail to proceed", f"Daily queue reach max limit ({SETTINGS_VAL['Daily_queue_max']})")
-            else:
-                messagebox.showwarning("Fail to proceed", "Cannot queue\ntoo early")
-        else:
-            messagebox.showwarning("Fail to proceed", "Select an reception record before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment", parent = self)
+    #obsolete
 
 class payment_frame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
-        global width, height, acc_cred, acc_info, mainframes, IP_Address
+        global width, height, acc_cred, acc_info, mainframes, IP_Address, PORT_NO
 
         '''PAYMENT FRAME: START'''
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
@@ -1007,17 +978,17 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
         self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
 
-        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], 1175, self.received_callback)
+        self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
     
         self.grid_forget()
 
     def invoice_callback(self):
         if self.payment_treeview.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment", parent = self)
             return
         else:
-            messagebox.showwarning("No function yet")    
+            messagebox.showwarning("No function yet", parent = self)    
 
     def search_callback(self):
         if self.search_entry.get() == "":
@@ -1033,7 +1004,7 @@ class payment_frame(ctk.CTkFrame):
     
     def add_item_command(self):
         if not self.payment_treeview.get_selected_data():
-            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment", parent = self)
             return 
         uid = self.payment_treeview.get_selected_data()[0]
         transaction_popups.additional_option_invoice(self, (width, height), acc_cred[0][0], uid, self.update_payment_treeview).place(relx = .5, rely = .5, anchor = 'c')
@@ -1048,7 +1019,7 @@ class payment_frame(ctk.CTkFrame):
             self.show_payment_proceed.place(invoice_data= data, cashier= acc_cred[0][0], treeview_callback= self.update_payment_treeview,
                                             relx = .5, rely = .5, anchor = 'c')
         else:
-            messagebox.showwarning("Fail to proceed", "Select a reception record before heading into the payment")
+            messagebox.showwarning("Fail to proceed", "Select a reception record before heading into the payment", parent = self)
 
     def reset(self):
         for i in mainframes:
@@ -1071,7 +1042,7 @@ class payment_frame(ctk.CTkFrame):
                 temp.load_both()
 
 class customer_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1125,7 +1096,7 @@ class customer_frame(ctk.CTkFrame):
         return super().grid(**kwargs)
         
 class services_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1198,9 +1169,8 @@ class services_frame(ctk.CTkFrame):
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
 
-
 class sales_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, IP_Address
+    global width, height, acc_cred, acc_info, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -1328,7 +1298,7 @@ class sales_frame(ctk.CTkFrame):
     
     def view_record(self):
         #print(self.sales_treeview.get_selected_data())
-        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_treeview.get_selected_data()) if self.sales_treeview.get_selected_data() else messagebox.showerror("Warning", "Select a record first")
+        self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.sales_treeview.get_selected_data()) if self.sales_treeview.get_selected_data() else messagebox.showerror("Warning", "Select a record first", parent = self)
     
     def refresh(self):
         self.raw_data = database.fetch_data(sql_commands.get_sales_record_by_date,(f'{self.from_date_select_entry._text}',f'{self.to_date_select_entry._text}'))
@@ -1358,8 +1328,15 @@ class sales_frame(ctk.CTkFrame):
         return super().grid(**kwargs)
         
 class inventory_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, mainframes, IP_Address
+    global width, height, acc_cred, acc_info, mainframes, IP_Address, PORT_NO
     def __init__(self, master):
+        current_month = datetime.datetime.now().month
+
+        #if it is the end of the month
+        if (datetime.datetime.now() + datetime.timedelta(days= 1)).month != current_month:
+            item_statistics = database.fetch_data(sql_commands.get_updated_avg_of_old_statistics, (current_month, ))
+            database.exec_nonquery([[sql_commands.update_statistics_info, (s[1], s[2], s[0])] for s in item_statistics])
+
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(18,18))
@@ -1516,7 +1493,7 @@ class inventory_frame(ctk.CTkFrame):
         def dispose_expired(_: any = None):
             if self.data_view1.data_grid_btn_mng.active:
                 if self.data_view1.get_selected_data()[-1] == 'Expired':
-                    if messagebox.askyesno("Dispose Item", "Are you sure you want to dispose\nthe item?"):
+                    if messagebox.askyesno("Dispose Item", "Are you sure you want to dispose\nthe item?", parent = self):
                         data = self.data_view1.get_selected_data()
                         database.exec_nonquery([["Update state = -1 WHERE stock = ? AND Expiry_Date = ?", (data[2], data[4])]])
                         self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
@@ -1524,14 +1501,24 @@ class inventory_frame(ctk.CTkFrame):
         
         def batch_dispose():
             if self.data_view1._data:
-                if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?"):
+                if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?", parent = self):
+                    
                     self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired')
                 else:
                     print("Thank you for saving a trash like me")
             else:
-                messagebox.showwarning("Error", "No item to dispose")
+                messagebox.showwarning("Error", "No item to dispose", parent = self)
 
+        def search(_: any = None):
+            if self.search_entry.get():
+                temp = [s for s in self.list_show if self.search_entry.get().lower() in s[0].lower()]
+                self.data_view1.update_table(temp)
+                del temp
+            else:
+                update_tables()
                 
+                
+
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
             self.data_view1.update_table(self.data1)
@@ -1713,7 +1700,7 @@ class inventory_frame(ctk.CTkFrame):
             rs_page_update_table()
         
         def show_order_info():
-            self.order_info.place(relx=0.5, rely=0.5, anchor='c', data= self.rs_data_view1.get_selected_data()) if self.rs_data_view1.get_selected_data() else messagebox.showwarning("Warning", "Please select a record first")
+            self.order_info.place(relx=0.5, rely=0.5, anchor='c', data= self.rs_data_view1.get_selected_data()) if self.rs_data_view1.get_selected_data() else messagebox.showwarning("Warning", "Please select a record first", parent = self)
 
         def rs_search_callback():
             rs_set_table(list_filterer(self.rs_search_bar.get(), self.rs_raw_data))
@@ -1792,7 +1779,7 @@ class inventory_frame(ctk.CTkFrame):
             database.exec_nonquery([["UPDATE disposal_history SET disposed_by = ?, full_dispose_date = CURRENT_TIMESTAMP WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (acc_cred[0][0], self.ds_data_view1._data[i][3])]])
             uid = database.fetch_data("Select item_uid from disposal_history WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (self.ds_data_view1._data[i][3], ))[0][0]
             record_action(acc_cred[0][0], action.DISPOSAL_TYPE, action.OFFICIALLY_DISPOSE % (acc_cred[0][0], uid))
-            messagebox.showinfo("Succeed", "Item has been fully disposed")
+            messagebox.showinfo("Succeed", "Item has been fully disposed", parent = self)
 
         
         def refresh_ds_table():
@@ -1853,7 +1840,7 @@ class inventory_frame(ctk.CTkFrame):
                 if self.supplier_treeview.get_selected_data():
                     self.view_supplier_popup.place(relx=0.5, rely=0.5, anchor="c", record_id = self.supplier_treeview.get_selected_data()[0])
                 else:
-                    messagebox.showwarning('Warning','No record is selected', master=self) 
+                    messagebox.showwarning('Warning','No record is selected', parent = self) 
                     
         self.main_frame = ctk.CTkFrame(self.supplier_frame, fg_color="transparent")
         self.main_frame.pack(fill="both", expand=1)
@@ -1930,10 +1917,9 @@ class inventory_frame(ctk.CTkFrame):
             if isinstance(i, histlog_frame):
                 temp: histlog_frame = i
                 temp.load_both()
-
-    
+  
 class patient_info_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, IP_Address
+    global width, height, acc_cred, acc_info, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2062,7 +2048,7 @@ class patient_info_frame(ctk.CTkFrame):
             messagebox.showwarning('Warning','No Record is selected', master=self.sort_frame)
 
 class reports_frame(ctk.CTkFrame):
-    global width, height, acc_cred, acc_info, IP_Address
+    global width, height, acc_cred, acc_info, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         '''constants'''
@@ -2131,6 +2117,7 @@ class reports_frame(ctk.CTkFrame):
 
         def report_menu_callback(report_type):
             if "Daily" in report_type:
+                self.refresh_btn.pack_forget()
                 self.monthly_graph.grid_forget()
                 self.month_option.pack_forget()
                 self.year_option.pack_forget()
@@ -2141,8 +2128,10 @@ class reports_frame(ctk.CTkFrame):
                 self.daily_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.date_selected_label.pack(side="left", padx=(0, width*0.005))
                 self.show_calendar.pack(side="left",  padx=(0, width*0.005))
+                self.refresh_btn.pack(side="left",  padx=(0, width*0.0025))
 
             elif "Monthly" in report_type:
+                self.refresh_btn.pack_forget()
                 self.date_selected_label.pack_forget()
                 self.show_calendar.pack_forget()
                 self.daily_graph.pack_forget()
@@ -2154,8 +2143,10 @@ class reports_frame(ctk.CTkFrame):
                 self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.month_option.pack(side="left", padx=(0, width*0.005))
                 self.year_option.pack(side="left", padx=(0, width*0.005))
+                self.refresh_btn.pack(side="left",  padx=(0, width*0.0025))
 
             elif "Yearly" in report_type:
+                self.refresh_btn.pack_forget()
                 self.date_selected_label.pack_forget()
                 self.show_calendar.pack_forget()
                 self.month_option.pack_forget()
@@ -2165,6 +2156,8 @@ class reports_frame(ctk.CTkFrame):
                 self.yearly_data_view.pack()
                 self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
                 self.year_option.pack(side="left", padx=(0, width*0.005))
+                self.refresh_btn.pack(side="left",  padx=(0, width*0.0025))
+
             self.update_graphs()
 
         def set_date():
@@ -2241,8 +2234,8 @@ class reports_frame(ctk.CTkFrame):
         self.show_calendar = ctk.CTkButton(self.sales_report_top, text="", image=self.calendar_icon, height=height*0.045, width=width*0.025, command=set_date)
         self.show_calendar.pack(side="left",  padx=(0, width*0.0025))
 
-        """ self.refresh_btn = ctk.CTkButton(self.sales_report_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
-        self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0)) """
+        self.refresh_btn = ctk.CTkButton(self.sales_report_top, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= lambda: self.update_graphs(True))
+        #self.refresh_btn.grid(row=0, column=1, sticky="w",  padx=(width*0.0025), pady=(height*0.005,0))
         
         self.show_gen_report = ctk.CTkButton(self.top_con_frame, image=self.generate_report_icon, width=width*0.125,  text="Generate Report", height=height*0.0575, font=("DM Sans Medium", 14),
                                              command = lambda: self.save_as_popup.place(daily_selected_date = self.date_selected_label._text, month_selected_date = self.month_option.get(),year_selected_date = self.year_option.get(), relx = .5, rely = .5, anchor = 'c', default_config = self.report_type_menu.get()))
@@ -2482,7 +2475,7 @@ class reports_frame(ctk.CTkFrame):
         self.update_graphs(True)
 
 class user_setting_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2640,7 +2633,7 @@ class user_setting_frame(ctk.CTkFrame):
         load_main_frame(0)
 
 class histlog_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2883,7 +2876,7 @@ class histlog_frame(ctk.CTkFrame):
             self.log_audit_tree.insert(parent='', index='end', iid=i, text="", values= (i + 1, )+ temp[i], tags=tag )
             
 class admin_settings_frame(ctk.CTkFrame):
-    global width, height, IP_Address
+    global width, height, IP_Address, PORT_NO
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
@@ -2996,13 +2989,13 @@ class admin_settings_frame(ctk.CTkFrame):
                 self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data(), service_reload_callback = refresh_service)
                 
             else:
-                messagebox.showerror("Missing Selection", "Select a record first")
+                messagebox.showerror("Missing Selection", "Select a record first", parent = self)
                 
         def open_item_record():
             if self.inventory_data_view.get_selected_data():
                 self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", item_info=self.inventory_data_view.get_selected_data(), item_reload_callback = refresh_item)
             else:
-                messagebox.showerror("Missing Selection", "Select a record first")
+                messagebox.showerror("Missing Selection", "Select a record first", parent = self)
         
         '''GENERAL FRAME - START'''
         
@@ -3133,7 +3126,6 @@ class admin_settings_frame(ctk.CTkFrame):
 
     def load_both(self):
         self.load_inventory_data()
-        self.load_service_data()
-        
+        self.load_service_data()    
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'jayr', datetime.datetime.now)

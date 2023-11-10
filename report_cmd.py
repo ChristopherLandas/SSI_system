@@ -6,7 +6,7 @@ from constants import *
 import datetime
 
 
-def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int):
+def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, master: any):
             from reportlab.graphics.shapes import Drawing, Rect, String
             from reportlab.graphics.charts.piecharts import Pie
             from reportlab.pdfgen.canvas import Canvas
@@ -288,7 +288,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
 
                 writer = pdfrw2()
                 writer.write(f"{desktop}\{y_temp}_yearly_report.pdf", p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
+                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.", parent = master)
             
             #monthly
             if 'Monthly' == report_type:
@@ -559,7 +559,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
 
                 writer = pdfrw2()
                 writer.write(f"{desktop}\{full_date_temp}_{y_temp}_monthly_report.pdf", p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.")
+                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.", parent = master)
 
             #daily
             if 'Daily' == report_type:
@@ -809,7 +809,7 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
                 writer = pdfrw2()
                 #writer.write(f"{desktop}\{month_date_temp}_{day_date_temp}_{y_temp}_daily_report.pdf", p1)
                 writer.write(filename, p1)
-                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
+                messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.", parent = master)
 
                 #Inventory Report
                 '''
@@ -976,3 +976,4 @@ def generate_report(report_type: str, acc_name_preparator: str, date_creation: s
                 writer.write(f"{desktop}/{month_date_temp}_{day_date_temp}_{y_temp}_inventory_report.pdf", p1)
                 messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.")
                 '''
+# the file itself is currently in no use and obsolete

@@ -1,3 +1,5 @@
 {
-    "Daily_queue_max": 5
+    "Daily_queue_max": 5,
+    "Appointment_Alert": 2,
+    "Near_expiry_date_alert": 14
 }

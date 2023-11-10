@@ -23,7 +23,7 @@ import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
     
-def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid):
+def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, old_receipt_name = None):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -126,16 +126,7 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         [f'Name of Client: {client_name}', '', '', ''],
         [f'Pet Name: {pet_name}', '', '', ''],
         ['Particulars', 'Quantity', 'Unit Price', 'Amount']]
-    ''',
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        [' ', '', '', ''],
-        ['Total:', '', '', f'{total_amount}'],
-        ['Amount Paid:', '', '', f'{amount_paid}']]
-    '''
+    
     if not service_particulars is None:
         for p in service_particulars:
             receipt_content.append([f'{p[0]} - {p[1]}', '1', f'P{p[6]}', f'P{p[6]}'])
@@ -145,13 +136,14 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
             #receipt_content.append([p[2], p[3], p[4], float(p[4])*float(p[3])])
             receipt_content.append([p[2], p[3], item_prc, item_total])
-
-    total_amount_price = "P{:,.2f}".format(float(total_amount))
-    amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-    change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
-    #receipt_content.append(['Total:', '', '', f'{total_amount}'])
-    #receipt_content.append(['Amount Paid:', '', '', f'{amount_paid}'])
-    #receipt_content.append(['Change:', '', '', f'{float(amount_paid)}-{float(total_amount)}'])
+    if old:
+        total_amount_price = total_amount
+        amount_paid_price = total_amount
+        change_price = 0
+    else:   
+        total_amount_price = "P{:,.2f}".format(float(total_amount))
+        amount_paid_price = "P{:,.2f}".format(float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
     receipt_content.append(['Total:', '', '', f'{total_amount_price}'])
     receipt_content.append(['Amount Paid:', '', '', f'{amount_paid_price}'])
     receipt_content.append(['Change:', '', '', f'{change_price}'])
@@ -212,6 +204,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         )
 
     #add borders
+    #region old receipt style
+    '''
     ts = TableStyle([
         ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
         ('GRID', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
@@ -219,6 +213,20 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('BOX', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+    ])
+    table_content.setStyle(ts)
+    '''
+    #endregion
+
+    ts = TableStyle([
+        ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
+        ('BOX', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
+        #('BOX', (0, len(receipt_content)-3), (0, len(receipt_content)-1), 0.5, colors.black),
+        ('GRID', (0, 5), (0, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
+        #('GRID', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (3, 5), (3, len(receipt_content)-1), 0.5, colors.black),
     ])
     table_content.setStyle(ts)
     
@@ -254,7 +262,10 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     newpath = f'Resources\\receipt\\{current_month}' 
     if not os.path.exists(newpath):
         os.makedirs(newpath)
-    new_filename = f'{newpath}\\{current_day}_{client_name}_{or_number}_receipt.pdf'
+    if old:
+        new_filename = f'{newpath}\\{old_receipt_name}.pdf'
+    else:
+        new_filename = f'{newpath}\\{current_day}_{client_name}_{or_number}_receipt.pdf'
     
     pdf = SimpleDocTemplate(
         filename=new_filename,
@@ -337,9 +348,14 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
             receipt_content.append([p[2], p[3], item_prc, item_total])
 
-    total_amount_price = "P{:,.2f}".format(float(total_amount))
-    amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-    change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
+    if old:
+        total_amount_price = total_amount
+        amount_paid_price = total_amount
+        change_price = 0
+    else:   
+        total_amount_price = "P{:,.2f}".format(float(total_amount))
+        amount_paid_price = "P{:,.2f}".format(float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
     receipt_content.append(['Total:', '', '', f'{total_amount_price}'])
     receipt_content.append(['Amount Paid:', '', '', f'{amount_paid_price}'])
     receipt_content.append(['Change:', '', '', f'{change_price}'])
@@ -399,7 +415,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             [('BACKGROUND', (0, i), (-1, i), bc)]
         )
 
-    #add borders
+    #region old receipt style
+    '''
     ts = TableStyle([
         ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
         ('GRID', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
@@ -407,6 +424,20 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('BOX', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
         ('BOX', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+    ])
+    table_content.setStyle(ts)
+    '''
+    #endregion
+
+    ts = TableStyle([
+        ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
+        ('BOX', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
+        #('BOX', (0, len(receipt_content)-3), (0, len(receipt_content)-1), 0.5, colors.black),
+        ('GRID', (0, 5), (0, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
+        #('GRID', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
+        ('GRID', (3, 5), (3, len(receipt_content)-1), 0.5, colors.black),
     ])
     table_content.setStyle(ts)
     
@@ -456,8 +487,33 @@ class preview_pdf_popup(ctk.CTkToplevel):
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
+        '''self.attributes('-topmost',1)
+        toplvl_width = 800
+        toplvl_height = 600
+        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
+        position_Y = (self.winfo_screenheight()/2) - (toplvl_height/2)
+
+
+        self.title(title)
+        self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
+        print(position_X)
+        print(position_Y)
+        self.configure(bg='white')
+        global zoom_out_btn, zoom_in_btn, zoom_label, vaas2, ctr, pdf_viewer_frame
+        ctr = 2
+        #region add zooming function widgets
+        zoom_frame = ctk.CTkFrame(self)
+        zoom_frame.pack()
+        zoom_out_btn = ctk.CTkButton(zoom_frame, text='-', command=zoom_out, font = ("DM Sans Medium", 14), width=30)
+        zoom_out_btn.pack(side = 'left')
+        zoom_label = ctk.CTkLabel(zoom_frame, fg_color='#ffffff', text = '100%', corner_radius=5)
+        zoom_label.pack(side = 'left', padx = 5)
+        zoom_in_btn = ctk.CTkButton(zoom_frame, text='+', command=zoom_in, font=("DM Sans Medium", 14), width=30)
+        zoom_in_btn.pack(side = 'left')
+        #endregion
+        '''       
         
-        
+        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
         self.attributes('-topmost',1)
         self.view_by_reciept = view_receipt_by_or
         self.zoom_step = 10
@@ -505,21 +561,31 @@ class preview_pdf_popup(ctk.CTkToplevel):
         
         self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
-            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid)
-        
+            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 0)
         self.vaas2 = NONE
         self.vaas1=cpdf.ShowPdf()
         self.vaas1.img_object_li.clear()
         self.current_folder = datetime.now().strftime("%m-%Y-receipts")
         
-        if self.view_by_reciept and self.is_receipt:
+        if self.view_by_reciept and not self.is_receipt:
+            if exists(f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf"):
+                vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
+                                      width=100,height=50, zoomDPI=100)
+                vaas2.pack()
+        elif self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
+                print(7)
+                
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=100, height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
-                self.destroy()
-                messagebox.showerror("File Missing", "The file you are trying to access is missing.")
+                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
+                vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
+                                      width=100,height=50, zoomDPI=100)
+                vaas2.pack()
+                #self.destroy()
+                #messagebox.showerror("File Missing", "The file you are trying to access is missing.")
                 
         elif not self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",

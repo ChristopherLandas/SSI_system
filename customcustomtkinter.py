@@ -135,6 +135,34 @@ class customcustomtkinter:
             self.place_forget()
         #hide the menubar
 
+    class scrollable_menubar(ctk.CTkScrollableFrame):
+        def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
+                     border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
+                     fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None,
+                     background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
+                     overwrite_preferred_drawing_method: Union[str, None] = None, position: tuple = (0, 0, 'c'), **kwargs):
+            super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors,
+                             overwrite_preferred_drawing_method, **kwargs)
+
+            self._position = position
+            self._shadow = ctk.CTkFrame(master, 0, 0)
+
+        def place(self):
+            #place shadow here
+            return super().place(relx = self._position[0], rely = self._position[1], anchor = self._position[2])
+        #override the place to place a shadow first
+
+        def update_pos(self,  position: tuple = (0, 0, 'c')):
+            self.deiconify()
+            self._position = position
+            self.place()
+        #update the position, including the shadow
+
+        def deiconify(self):
+            self._shadow.place_forget()
+            self.place_forget()
+        #hide the menubar
+
     class cctkTreeView(ctk.CTkFrame):
         def __init__(self, master: any, data: Union [Union[tuple, list], None] = None, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None,
                      border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent",
@@ -242,7 +270,7 @@ class customcustomtkinter:
             lbl.configure(text = str(int(lbl.cget('text')) + val))
 
         def bd_func(self, dlt_btn: ctk.CTkButton):
-            if messagebox.askyesno('Warning', self._bd_message):
+            if messagebox.askyesno('Warning', self._bd_message, parent = self):
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
                 if callable(self.bd_commands):
                     self.bd_commands(data_mngr_index)
@@ -302,7 +330,7 @@ class customcustomtkinter:
                         temp_lbl._label.grid(row = 0, column=0, sticky='nsew', padx=(12, 12))
                         temp_lbl._label.configure(anchor= 'w' if self.column_types[j][1] == 'l' else 'e' if self.column_types[j][1] == 'r' else 'c')
                         temp_lbl.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
-                        text_overflow_elipsis(temp_lbl, self.column_widths[j] * .9)
+                        text_overflow_ellipsis(temp_lbl, self.column_widths[j] * .9)
                     #for info tab column
                     elif self.column_types[j] == 'iT':
                         temp:customcustomtkinter.info_tab = customcustomtkinter.info_tab(frm, width= self.column_widths[j], corner_radius= 0,
@@ -891,15 +919,28 @@ class customcustomtkinter:
             if self.page_count > page: self.page_count = 1
             self.page_counter.configure(text=self.page_count)
             self.page_limit = page
-            self.checker()             
-            
-            
-        
+            self.checker()       
 
+    class tkc(Calendar):
+        def __init__(self, master=None, select_callback: callable = None, date_format: str ="numerical", **kw,):
+            super().__init__(master, **kw)
+            self.select_callback = select_callback
+            self.date_format = date_format
+            #self.selected_date = self.get_date()
+
+        def _on_click(self, event):
+            super()._on_click(event)     
+            if self.select_callback is not None:
+                self.select_callback(self.get_date())
+            #self.selected_date = self.get_date()
+            #return temp
+        
+                
 class customcustomtkinterutil:
     class button_manager:
         def __init__(self, buttons: list, hold_color: str = 'transparent', switch: bool = False,
-                     default_active: Optional[int] = None, state: tuple = (lambda: None, lambda: None), children: Optional[list] = None):
+                     default_active: Optional[int] = None, state: tuple = (lambda: None, lambda: None), children: Optional[list] = None,
+                     active_double_click_nullified: bool = True):
             self.active = None
             self._state = state
             self._og_color =[]
@@ -908,11 +949,13 @@ class customcustomtkinterutil:
             self._buttons = buttons
             self._default_active = default_active
             self._children = children
+            self._active_double_click_nullified = active_double_click_nullified #nullified the command if the clicked button is the active
             #setup variables
 
             for i in range(len(buttons)):
                 if isinstance(buttons[i], customcustomtkinter.ctkButtonFrame):
-                    buttons[i]._command.append(partial(self.click, i))
+                    #buttons[i]._command.append(partial(self.click, i))
+                    buttons[i]._command = [partial(self.click, i, buttons[i]._command[0])]
                 elif isinstance(buttons[i], ctk.CTkButton):
                     cmd = buttons[i]._command
                     buttons[i].configure(command = partial(self.click, i, cmd))
@@ -920,6 +963,10 @@ class customcustomtkinterutil:
             #set the designated command for buttonframe and ctkbutton
 
         def click(self, i: int, button_command: callable = None, e: any = None):
+            if self._buttons[i] is self.active and self._active_double_click_nullified:
+                return
+            #cancel the command if the button itself is the active
+
             if button_command is not None:
                 button_command()
             #actual command of a button

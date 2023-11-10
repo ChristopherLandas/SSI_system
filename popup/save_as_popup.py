@@ -43,13 +43,13 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                 else:
                     temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}.pdf'
                 if self.file_name_entry.get() == "":
-                    messagebox.showwarning('Invalid', 'Fill the name of the report')
+                    messagebox.showwarning('Invalid', 'Fill the name of the report', parent = self)
                     return
                 elif not os.path.isdir(self.path_entry.get()):
                     messagebox.showwarning('Invalid', 'Invalid File Path')
                     return
                 elif os.path.isfile(temp_f_path):
-                    question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?')
+                    question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?', parent = self)
                     if question == False:
                         ctr = 1
                         change_name_entry(self.file_name_entry.get()+f'({ctr})')
@@ -65,13 +65,13 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
                         return
                 generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get(), self.file_name_entry.get(), 1)
+                                self.path_entry.get(), annual_date_text_var.get(), self.include_graphs_checkbox.get(), self.file_name_entry.get(), 1, self)
                 reset()
                 
             def preview_pdf_popup():
                 generate_report(self.report_type_option.get(), self.user, self.full_name, self.position, self.CURRENT_DAY.strftime('%B %d, %Y'),
                                 monthly_date_text_var.get(), annual_date_text_var.get(), self.CURRENT_DAY.strftime('%B %d, %Y'),
-                                'image', annual_date_text_var.get(), self.include_graphs_checkbox.get(), 'sample.pdf', 0)
+                                'image', annual_date_text_var.get(), self.include_graphs_checkbox.get(), 'sample.pdf', 0, self)
                 #ppdfp.preview_pdf_popup(0)
                 ppdfp.preview_pdf_popup(receipt=0, title="Report Viewer")
 
@@ -322,13 +322,13 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 else:
                     temp_f_path = f'{self.path_entry.get()}\\{self.file_name_entry.get()}.pdf'
                 if self.file_name_entry.get() == "":
-                    messagebox.showwarning('Invalid', 'Fill the name of the report')
+                    messagebox.showwarning('Invalid', 'Fill the name of the report', parent = self)
                     return
                 elif not os.path.isdir(self.path_entry.get()):
                     messagebox.showwarning('Invalid', 'Invalid File Path')
                     return
                 elif os.path.isfile(temp_f_path):
-                    question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?')
+                    question = messagebox.askyesnocancel('Warning!', 'File already exist! do you want to replace it?', parent = self)
                     if question == False:
                         ctr = 1
                         change_name_entry(self.file_name_entry.get()+f'({ctr})')
@@ -346,13 +346,13 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 generate_inventory_report(self.user, self.file_name_entry.get(), self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
                                           #self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
                                           daily_date_select_temp, daily_date_select_temp.month, daily_date_select_temp.year,
-                                          self.path_entry.get(), 1)
+                                          self.path_entry.get(), 1, self)
                 reset()
 
             def preview_pdf_popup():
-                daily_date_select_temp = datetime.datetime.strptime(self.daily_date_entry._text, '%B %d, %Y')
+                daily_date_select_temp = datetime.datetime.now()
                 generate_inventory_report(self.user, 'sample.pdf', self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
-                                          self.daily_date_entry._text, daily_date_select_temp.month, daily_date_select_temp.year,
+                                          daily_date_select_temp, daily_date_select_temp.month, daily_date_select_temp.year,
                                           'image', 0)
                 ppdfp.preview_pdf_popup(receipt=0, title="Inventory Viewer")
 
@@ -526,8 +526,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
 
     return add_item(master, info, user)
 
-
-def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int, file_name: str, finish_alerts: int):
+def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: str, acc_pos: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, include_graphs: int, file_name: str, finish_alerts: int, master: any):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -894,7 +893,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         writer = pdfrw2()
         writer.write(filename, p1)
         if finish_alerts:
-            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.")
+            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Yearly Report.", parent = master)
     
     #monthly
     if 'Monthly' == report_type:
@@ -1055,7 +1054,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         writer = pdfrw2()
         writer.write(filename, p1)
         if finish_alerts:
-            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.")
+            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Monthly Report.", parent = master)
 
     #daily
     if 'Daily' == report_type:
@@ -1234,11 +1233,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         writer = pdfrw2()
         writer.write(filename, p1)
         if finish_alerts:
-            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.")
+            messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.", parent = master)
 
         #Inventory Report
         
-def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full_name: str, acc_pos: str, date_num: str, date_txt: str, month: int|str, year: int|str, path: str, finish_alerts: int):
+def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full_name: str, acc_pos: str, date_num: str, date_txt: str, month: int|str, year: int|str, path: str, finish_alerts: int, master: any):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -1509,4 +1508,4 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     writer = pdfrw2()
     writer.write(filename, p1)
     if finish_alerts:
-        messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.")
+        messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.", parent = master)
