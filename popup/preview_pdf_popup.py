@@ -464,19 +464,19 @@ class preview_pdf_popup(ctk.CTkToplevel):
         self.zoom_limit = 10
         self.default_dpi=100
         self.zoom_counter = 0
-        window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
+        window_height, window_width = self.winfo_screenheight(), self.winfo_screenwidth()
         self.window_width = window_width
         self.is_receipt = is_receipt
 
-        toplvl_width = 600
+        toplvl_width = window_width*0.425
         toplvl_height = 650
-        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
+        position_X = (self.winfo_screenwidth()/2)
         position_Y = (window_height/2) - (toplvl_height/2)
 
         self.title(title)
         self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
         
-        self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum, width=window_width*0.5)
+        self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum)
         self.main_frame.pack(pady=window_width*0.005, padx=window_width*0.005)
         
         
@@ -515,7 +515,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         if self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
-                                      width=80,height=100,zoomDPI=self.default_dpi)
+                                      width=100, height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
                 self.destroy()
@@ -523,18 +523,26 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 
         elif not self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
-                        width=80,height=100,zoomDPI=self.default_dpi)
+                        width=100, height=100,zoomDPI=self.default_dpi)
             self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
         else:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
-                        width=80,height=100,zoomDPI=self.default_dpi)
+                        width=100, height=100,zoomDPI=self.default_dpi)
             self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
+    
+    def button_state(self, state):
+        self.zoom_out_btn.configure(state = state)
+        self.zoom_in_btn.configure(state = state)
+        self.zoom_reset.configure(state = state)
             
     def zoom_function(self, value):
+        self.button_state("disabled")
+        
         self.zoom_counter += value
         if value == 0: self.zoom_counter = 0 
         self.zoom_state_check(zoom_dpi=max(50, ((self.zoom_counter * self.zoom_step) + self.default_dpi)))
     
+        #self.after(1000, self.button_state("normal"))
     def zoom_state_check(self, zoom_dpi):
         #self.zoom_in_btn.configure(state=)
         
@@ -551,15 +559,16 @@ class preview_pdf_popup(ctk.CTkToplevel):
         # Adding pdf location and width and height.    
         if self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
-                        width=80,height=100,zoomDPI=zoom_dpi)
+                        width=100, height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))  
         elif not self.view_by_reciept and self.is_receipt:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"Resources/receipt/temp_receipt.pdf",
-                        width=80,height=100,zoomDPI=zoom_dpi)
+                        width=100, height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
         else:
             self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=r"image/sample.pdf",
-                        width=80,height=100,zoomDPI=zoom_dpi)
+                        width=100, height=100,zoomDPI=zoom_dpi)
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
-    
+
+        self.after(200, self.button_state("normal"))
     

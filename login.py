@@ -99,7 +99,7 @@ class loginUI(ctk.CTk):
         title_name = "J.Z. Angeles Veterinary Clinic"
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
-        print(set_scale((width, height)))
+        #print(set_scale((width, height)))
         
         
         ctk.set_widget_scaling(set_scale((width, height)))

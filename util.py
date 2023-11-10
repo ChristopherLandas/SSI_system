@@ -170,6 +170,11 @@ def list_filterer(source: list, reference: list):
 def remove_unit(source: str,):
     return re.sub(r'\([^)]*\)', '', source).strip()
 
+def custom_sort(data, key):
+    #def custom_sort_key(item):
+    #    return (key.get(item[-1], float('inf')), item[-1])
+    return sorted(data, key=lambda item : (key.get(item[-1], float('inf')), item[-1]))
+
 def split_unit(source: str):
     res = re.match(r'^(.*?)\s*(\((.*?)\))?$', source)
     return (res.group(1), res.group(3)) if res.group(3) else (res.group(1),)
