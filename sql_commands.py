@@ -168,9 +168,15 @@ get_category_specific_inventory = "SELECT item_general_info.brand, item_general_
                                     FROM item_general_info\
                                     JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                                     INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                    WHERE item_general_info.Category = ?\
+                                    WHERE item_general_info.Category = ? AND\
+                                        (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                                        AND item_inventory_info.state = 1\
                                     GROUP BY item_general_info.name, item_general_info.unit\
-                                    ORDER BY item_general_info.UID"
+                                    ORDER BY CASE\
+                                    WHEN SUM(item_inventory_info.Stock) < 1 THEN 1\
+                                    WHEN SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Crit_factor THEN 2\
+                                    WHEN SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Reorder_factor THEN 3\
+                                        ELSE 4 End ASC"
 
 #FOR CREATING A LIST OF ITEM AND/OR SERVICES FOR TRANSACTION
 get_item_and_their_total_stock = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
@@ -222,6 +228,14 @@ show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initia
                                 FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
                                 WHERE (state = 2 OR state = 3 OR state = -1)\
                                 AND DATE_FORMAT(date_recieved, '%M %Y') = ?\
+                                ORDER BY date_recieved DESC"
+                                
+show_receiving_history = f"SELECT id, NAME, CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
+                                WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock\
+                                END AS received_stock,\
+                                supplier_info.supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+                                WHERE (state = 2 OR state = 3 OR state = -1)\
                                 ORDER BY date_recieved DESC"
 
 
@@ -307,10 +321,10 @@ get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name,
 get_expired_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                              item_inventory_info.Stock,\
                              case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
-                                         AND item_inventory_info.Expiry_Date IS NOT NULL \
+                                         AND item_inventory_info.Expiry_Date IS NOT NULL\
                                          then item_inventory_info.Expiry_Date ELSE NULL END AS EXP\
                      FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                     HAVING exp;"
+                     WHERE item_inventory_info.state = 1 HAVING exp;"
 
 #FOR DAILY SALES
 get_todays_transaction_count = "SELECT COUNT(*)  FROM transaction_record WHERE transaction_date = CURRENT_DATE"
@@ -357,7 +371,7 @@ get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id fr
 get_recieving_items_state = f"SELECT id, case When state = 3 then 'Partial' when state = 1 then 'On Order' END AS stats,\
                                 NAME, current_stock, supplier_info.supp_name, ordered_by\
                                 FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
-                                WHERE state = 1 OR state = 3 ORDER BY state asc"
+                                WHERE state = 1 OR state = 3 ORDER BY date_set DESC, state ASC"
 
 get_supplier = "SELECT * from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
@@ -371,9 +385,9 @@ update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving
 
 get_pending_items = f"SELECT id, recieving_item.NAME, current_stock, CAST(date_set AS DATE) AS date_set, supp_name FROM recieving_item where state = 3 AND DATE_FORMAT(date_set, '%M %Y') = ?"
 
-get_order_info = f"SELECT id, CAST(date_set AS DATE), item_uid, NAME,\
-                    CASE WHEN state = 1 THEN 'Waiting' WHEN state = 3 THEN 'Pending' END as state,\
-                    initial_stock, current_stock, ordered_by,\
+get_order_info = f"SELECT id, CAST(date_set AS DATE), ordered_by, item_uid, NAME,\
+                    CASE WHEN state = 1 THEN 'On Order' WHEN state = 3 THEN 'Partial' END as state,\
+                    initial_stock, current_stock,\
                     supplier_info.supp_id, supplier_info.supp_name,\
                     supplier_info.contact_person, supplier_info.contact_number\
                     FROM recieving_item LEFT JOIN supplier_info\
@@ -387,7 +401,7 @@ get_disposal_hist = "SELECT item_name, initial_quantity, current_quantity, DATE_
 
 
 get_disposal_items = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by\
-                        FROM disposal_history ORDER BY item_name ASC"
+                        FROM disposal_history ORDER BY date_of_disposal DESC"
 
 #ACCOUNT CREATION
 
@@ -853,7 +867,7 @@ get_invoice_item_content_by_id
 
 '''SUPPLIER INFO SQL'''
 #SET
-insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL)"
+insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL)"
 
 #GET
 get_last_supplier_id = "SELECT supp_id FROM supplier_info ORDER BY supp_id DESC LIMIT 1"
@@ -1156,3 +1170,29 @@ get_today_schedule_basic_info = "SELECT patient_name,\
                                  JOIN service_preceeding_schedule\
                                      ON services_transaction_content.transaction_uid = service_preceeding_schedule.transaction_uid\
                                  WHERE service_preceeding_schedule.scheduled_date = ?"
+
+get_replaced_items_by_id = "SELECT brand, NAME, unit, price, quantity, CAST((quantity*price) AS FLOAT) AS total_price, reason\
+                            FROM replacement_items\
+                            JOIN replacement_record ON replacement_items.rep_id = replacement_record.rep_id\
+                            JOIN item_general_info ON replacement_items.item_id = item_general_info.UID\
+                            WHERE replacement_record.transction_id = ?"
+                        
+get_stocks_by_id = "SELECT CAST(SUM(item_inventory_info.Stock) as INT)\
+                    FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                    INNER	JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                    WHERE item_inventory_info.Stock != 0 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null)\
+                    AND item_general_info.UID = ?"
+                    
+get_item_id_by_name_null_unit = "SELECT UID from item_general_info where Name = ? and unit is NULL"
+get_item_id_by_name_unit = "SELECT UID from item_general_info where Name = ? and unit = ?"
+
+get_item_search_query = "SELECT UID, CASE WHEN unit is NULL THEN name ELSE CONCAT(name, ' (', unit, ')') END\
+                        FROM item_general_info WHERE UID LIKE '%?%' OR name LIKE '%?%' ORDER BY name"
+                        
+get_item_brand_name_unit = "SELECT brand, CASE WHEN unit IS NULL THEN name ELSE CONCAT(name, ' (', unit, ')') END\
+                            FROM item_general_info WHERE UID = ?"
+                            
+get_order_search_query = "SELECT id, NAME, CASE WHEN state = 1 THEN 'On Order'ELSE 'Partial' END\
+                            FROM recieving_item WHERE (state = 3 or state = 1) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
+                            
+get_order_history_search_query = "SELECT id, NAME FROM recieving_item WHERE (state = 2) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"

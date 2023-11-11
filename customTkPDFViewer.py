@@ -32,8 +32,8 @@ class ShowPdf():
             #self.display_msg = Label(textvariable=self.percentage_load)
             #self.display_msg.pack(pady=10)
 
-            self.loading = ctk.CTkProgressBar(self.frame,orientation= HORIZONTAL,mode='determinate')
-            self.loading.pack(side = ctk.TOP,fill='x')
+            #self.loading = ctk.CTkProgressBar(self.frame,orientation= HORIZONTAL,mode='determinate')
+            #self.loading.pack(side = ctk.TOP,fill='x')
             pass
 
         self.text = Text(self.frame,yscrollcommand=self.scroll_y.set,xscrollcommand= self.scroll_x.set,width= width,height= height,
@@ -58,7 +58,7 @@ class ShowPdf():
                     precentage_dicide = precentage_dicide + 1
                     self.percentage_view = (float(precentage_dicide)/float(len(open_pdf))*float(100))
             if bar==True and load=="after":
-                self.loading.pack_forget()
+                #self.loading.pack_forget()
                 pass
 
             

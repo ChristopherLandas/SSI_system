@@ -2,8 +2,8 @@ import customtkinter as ctk
 from PIL import Image
 import screeninfo
 import copy
-
 [print(screen) for screen in screeninfo.get_monitors()]
+
 class Color:
     White_Lotion = "#FCFCFC"
     White_Milk = "#FFFDF6"
@@ -39,6 +39,7 @@ class Color:
     Red_Hover = "#D45353"
     
     Green_Pistachio = "#83BD75"
+    Green_Button_Hover_Color = "#599749"
     Green_Aparagus = "#6E9D62"
     
     Orange_Dandelion = "#FFD966"
@@ -118,7 +119,7 @@ class Icons:
     pholder_icon = ctk.CTkImage(light_image=Image.open("image/pholder.png"), size=(25,25))
     plus_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
     add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
-    view_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(25,25))
+    view_receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(25,25))
     refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
     report_icon = ctk.CTkImage(light_image=Image.open("image/report.png"),size=(22,22))
     restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
@@ -164,7 +165,8 @@ class Icons:
     out_of_icon = ctk.CTkImage(light_image= Image.open("image/out_of_stock.png"), size=(35,35))
     
     inventory_status = ctk.CTkImage(light_image= Image.open("image/inventory_flow.png"), size=(30,30)) 
-    
+    replaced_icon = ctk.CTkImage(light_image=Image.open("image/replace_icon.png"), size=(30,30))
+    receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt.png"), size=(30,30))
     
     @classmethod
     def get_image(cls, image_name:str, size:tuple=None):

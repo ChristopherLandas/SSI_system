@@ -745,6 +745,7 @@ class customcustomtkinter:
                     dp_width:int = 200,
                     quary_command: str = None,
                     command_callback:callable = None,
+                    close_command_callback: Optional[callable] = None,
                     placeholder: str = None,
                     
                     **kwargs):
@@ -756,6 +757,7 @@ class customcustomtkinter:
             self.m_height = m_height
             self.m_width = m_width
             self.command_callback = command_callback
+            self.close_command_callback = close_command_callback
             #temp for storing previous restult
             self.content = []
             self.answer = None
@@ -776,24 +778,26 @@ class customcustomtkinter:
             def add_results(results):
                 if results:
                     for i in range(len(results)):
-                        self.content.append(ctk.CTkButton(self.results, text=results[i], font=self._font, corner_radius=0, width=dp_width,
+                        self.content.append(ctk.CTkButton(self.results, text=f'{results[i]}  ', font=self._font, corner_radius=0, width=dp_width,
                                                         height=self._current_height*0.85,fg_color=Color.White_Ghost,
                                                         border_width=1,border_color=Color.White_Platinum, hover_color=Color.White_SilverSand,
                                                         text_color=Color.Blue_Maastricht, anchor='w'))
                         self.content[i].configure(command=partial(command_call, i))
-                        self.content[i].pack()
+                        self.content[i].pack(fill='x', expand=1)
                         
             def clear_results():
                 [s.pack_forget() for s in self.content]
                 
             def close_search():
                 self.search_var.set("")
+                if self.close_command_callback: self.close_command_callback()
 
             def search_callback(var, index, mode):
                 self.current_data =[]
                 
                 if self.search_var.get() != "" and quary_command != None:
                     raw_data = database.fetch_data(quary_command.replace("?", self.search_var.get()))
+                    #print()
                     data = [(f"  {' - '.join(s)}") for s in raw_data]
                     self.current_data=data
                     
@@ -836,8 +840,7 @@ class customcustomtkinter:
             
             self.search_var.trace_add('write', search_callback)
     
-            self.results = ctk.CTkFrame(self.master.master, fg_color=fg_color, height=m_height*0.5, corner_radius=0, border_width=2, border_color="light grey")
-            
+            self.results = ctk.CTkFrame(self.master.master, fg_color=fg_color, height=m_height*0.75, corner_radius=0, border_width=2, border_color="light grey")
             
         def get(self):
             return self.answer
