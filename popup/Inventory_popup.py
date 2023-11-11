@@ -681,7 +681,7 @@ def supplier_list(master, info:tuple,):
 
             def update_tables(_ :any = None):
                 self.refresh_btn.configure(state = ctk.DISABLED)
-                self.refresh_btn.after(1000, self.refresh_btn.configure(state = ctk.NORMAL))
+                self.refresh_btn.after(5000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
                 
                 self.supplier_treeview.pack_forget()
                 data = database.fetch_data(sql_commands.get_supplier_info)
@@ -1338,9 +1338,11 @@ def receive_report(master, info:tuple,):
                 refresh()
             
             def refresh():
+                self.refresh_btn.configure(state = ctk.DISABLED)
                 data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (f'{str(self.month_option.get())} {str(self.year_option.get())}',))
                 self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not data else self.no_order_data.place_forget()
                 self.data_view1.update_table(data)
+                self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
                 
             self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.now().year)]
             self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
@@ -1707,7 +1709,9 @@ def show_disabled_category(master, info:tuple, table_update_callback: callable):
             self.data_view1.pack()
             
         def refresh_table(self):
+            self.refresh_btn.configure(state = ctk.DISABLED)
             self.conv_data()
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
             
         def place(self, **kwargs):
             self.conv_data()
