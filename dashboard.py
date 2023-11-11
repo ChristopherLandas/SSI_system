@@ -1538,7 +1538,6 @@ class inventory_frame(ctk.CTkFrame):
             temp = [database.fetch_data(sql_commands.get_item_brand_name_unit, (data[0],))[0] for data in self.inv_search_bar.get()]
             set_table(custom_sort((list_filterer(source=temp, reference=self.raw_data)), self.sort_key))
             
-            
         #endregion
         
         #region Tab Setup 
