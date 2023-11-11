@@ -51,7 +51,7 @@ def add_service(master, info:tuple, update_callback: callable):
                     database.exec_nonquery([[sql_commands.insert_service_test, (a, self.service_name_entry.get(), self.price_entry.get(), 
                                                                                 self.category_option.get(), self.radio_var.get(), 1, date.today())]])
                     messagebox.showinfo("Service Added", "New service is added", parent = self)
-                    record_action(acc, action.ADD_SERVICE, action.ADD_SVC % (a, acc))
+                    record_action(acc, action.ADD_SERVICE, action.ADD_SVC % (acc, a))
                     update_callback()
                     reset()
                     
