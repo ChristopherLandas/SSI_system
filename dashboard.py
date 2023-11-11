@@ -2759,9 +2759,9 @@ class histlog_frame(ctk.CTkFrame):
         for i in range(len(self.columns)):
             self.action_tree.heading(f"{self.columns[i]}", text=f"{self.column_names[i]}")
 
-        self.action_tree.column("rec_no", width=int(width*0.001),anchor="w")
+        self.action_tree.column("rec_no", width=int(width*0.01),anchor="w")
         self.action_tree.column("username", width=int(width*0.15), anchor="w")
-        self.action_tree.column("role", width=int(width*0.1), anchor="w")
+        self.action_tree.column("role", width=int(width*0.18), anchor="w")
         self.action_tree.column("action", width=int(width*0.45), anchor="w")
         self.action_tree.column("time", width=int(width*0.15), anchor="c")
             
@@ -2848,7 +2848,7 @@ class histlog_frame(ctk.CTkFrame):
         for i in self.action_tree.get_children():
             self.action_tree.delete(i)
         temp = database.fetch_data(sql_commands.get_raw_action_history, (datetime.datetime.strptime(self.date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'), self.sort_role_option.get()))
-        modified_data = [(temp.index(s) + 1, s[1], s[1].capitalize(), decode_action(s[3]), s[4].strftime("%m/%d/%Y at %I:%M %p")) for s in temp]
+        modified_data = [(temp.index(s) + 1, s[1], s[2].capitalize(), decode_action(s[3]), s[4].strftime("%I:%M %p")) for s in temp]
         for i in range(len(modified_data)):
             if (i % 2) == 0:
                 tag = "even"
@@ -3122,4 +3122,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'jayr', datetime.datetime.now)
