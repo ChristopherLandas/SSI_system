@@ -251,7 +251,7 @@ add_item_statistic = "INSERT INTO item_statistic_info VALUES(?, MONTH(CURRENT_DA
 
 #RECORDING ANY TRANSACTION
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
-record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, CURRENT_DATE, 1, ?)"
+record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, ?, CURRENT_DATE, 1, ?)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?, 1)"
 record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
@@ -407,6 +407,8 @@ get_disposal_items = "SELECT id, item_name, initial_quantity, reason, CAST(date_
 
 #PET INFO
 get_owners = "SELECT owner_name, address, contact_number FROM pet_owner_info"
+check_owner_if_exist = owners = "SELECT COUNT(*) FROM pet_owner_info WHERE owner_name = ? "
+get_id_owner = "SELECT owner_id FROM pet_owner_info WHERE owner_name = ?"
 
 get_pet_name = "SELECT id, p_name FROM pet_info"
 
@@ -425,7 +427,7 @@ get_pet_record=f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name,
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
 insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
 
-insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (? , ?, ?)"
+insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (?, ?, ?)"
 
 insert_new_pet_breed = f"INSERT INTO pet_breed VALUES(?,?)"
 #PET INFO SORT
@@ -1209,3 +1211,14 @@ get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
                         WHERE item_general_info.Category = ? AND reason = ?\
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
+
+get_customers_information = "SELECT pet_owner_info.owner_id,\
+                                     pet_owner_info.owner_name,\
+                                     case when COUNT(transaction_record.transaction_uid) > ?\
+                                         then 'Regular'\
+                                         ELSE 'Non-Regular' END,\
+                                     COALESCE(pet_owner_info.contact_number, 'N/A')\
+                             FROM pet_owner_info\
+                             LEFT JOIN transaction_record\
+                                 ON pet_owner_info.owner_id = transaction_record.Client_id\
+                             GROUP BY owner_id"
