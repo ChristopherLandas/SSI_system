@@ -354,8 +354,8 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
                 if(len(item) > 0):
                     item = [(record_id, database.fetch_data(sql_commands.get_uid, (s[0], ))[0][0], s[0], s[2], price_format_to_float(s[1][1:]), 0) for s in item]
                 #making a modification through the old process
-
-                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0][0], self._customer_info, price_format_to_float(self.total_amount._text[1:]))]])
+                
+                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.acc_cred[0][0], self._customer_info, price_format_to_float(self.total_amount._text[1:])), self.dis]])
                 #record the transaction
 
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in item])
@@ -1531,7 +1531,7 @@ def show_payment_proceed(master, info:tuple,):
                 client_pet_name = None
                 list_of_items = []
                 list_of_services = []
-                if (float(self.payment_entry.get() or '0')) < price_format_to_float(self.grand_total._text[1:]):
+                if (float(self.payment_entry.get() or '0') + float(self.deduction_entry.get() or 0)) < price_format_to_float(self.grand_total._text[1:]):
                     messagebox.showinfo('Invalid', 'Pay the right amount', parent = self)
                     return
 
@@ -1555,7 +1555,7 @@ def show_payment_proceed(master, info:tuple,):
                             s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND owner_id = ?", (s[1], owner_id))[0][0],
                             s[1], s[2], price_format_to_float(s[-1 ]), 0, 0, s[3], s[4], s[5]) for s in self.services]
 
-                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]))]])
+                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]), self.deduction_entry.get() or 0)]])
                 #record the transaction
 
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in item])
@@ -1584,30 +1584,6 @@ def show_payment_proceed(master, info:tuple,):
                             quantity_needed -= st[2]
                             #if the stock needed is higher than stock instance
 
-                '''new FIFO algorithm'''
-                            
-                '''for _item in item:
-                    list_of_items.append(_item)
-                    stocks = database.fetch_data(sql_commands.get_specific_stock, (_item[1], ))
-                    if stocks[0][2] is None:
-                        database.exec_nonquery([[sql_commands.update_non_expiry_stock, (-_item[3], _item[1])]])
-                    else:
-                        quan = _item[3]
-                        for st in stocks:
-                            if st[1] < quan:
-                                quan -= st[1]
-                                database.exec_nonquery([['DELETE FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?', (st[0], st[2])]])
-                            elif st[1] > quan:
-                                database.exec_nonquery([[sql_commands.update_expiry_stock, (-quan, _item[1], st[2])]])
-                                break
-                            else:
-                                if stocks[-1] == st:
-                                    database.exec_nonquery([[sql_commands.update_expiry_stock, (-quan, _item[1], st[2])]])
-                                else:
-                                    database.exec_nonquery([['DELETE FROM item_inventory_info WHERE UID = ? AND Expiry_Date = ?', (st[0], st[2])]])
-                                break
-                #modify the stock, applying the FIFO'''
-
                 for _item in item:
                     list_of_items.append(_item)
                     
@@ -1621,9 +1597,7 @@ def show_payment_proceed(master, info:tuple,):
                 #generating a preeceding schedules for multiple instance services
 
                 payment = float(self.payment_entry.get())
-                self.change_total.configure(text = '₱' + format_price(payment - price_format_to_float(self.grand_total._text[1:])))
                 #calculate and show the change
-                #jesser
                 database.exec_nonquery([[sql_commands.set_invoice_transaction_to_recorded, (datetime.now(), self._invoice_id)]])
 
                 messagebox.showinfo('Succeed', 'Transaction Recorded', parent = self)
@@ -1643,20 +1617,42 @@ def show_payment_proceed(master, info:tuple,):
 
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
-                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment,
+                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment, deduction= self.deduction_entry.get() or 0,
                                         title="Transaction Receipt Viewer", is_receipt=1)
             #Payment Callback
             def payment_callback(var, index, mode):
                 if re.search(r'[0-9\.]$', self.payment_entry.get() or "") is None and self.payment_entry._is_focused and self.payment_entry.get():
                         l = len(self.payment_entry.get())
                         self.payment_entry.delete(l-1, l)
-                        
+                
                 payment = 0 if self.payment_entry.get() == '' else self.payment_entry.get()
                 
                 self.payment_total.configure(text=f"{'₱{:0,.2f}'.format(float(payment))}")
-                self.change_total.configure(text=f"₱0.00") if float(payment) - price_format_to_float(self.grand_total._text[1:]) <= 0 else self.change_total.configure(text=f"{'₱{:0,.2f}'.format(float(payment) - price_format_to_float(self.grand_total._text[1:]))}")
+
+                total_change = float(payment) - price_format_to_float(self.grand_total_second._text[1:])
+                self.change_total.configure(text = "Invalid" if total_change < 0 else f'₱{  format_price(total_change)}')
                     
             self.payment_var = ctk.StringVar()
+
+            def deduction_callback(var, index, mode):
+                if re.search(r'[0-9\.]$', self.deduction_entry.get() or "") is None and self.deduction_entry._is_focused and self.deduction_entry.get():
+                        l = len(self.deduction_entry.get())
+                        self.deduction_entry.delete(l-1, l)
+
+                _payment = 0 if self.payment_entry.get() == '' else self.payment_entry.get()
+                _deduction = 0 if self.deduction_entry.get() == '' else self.deduction_entry.get()
+
+                if float(_deduction) >= price_format_to_float(self.grand_total._text[1:]):
+                    self.deduction_entry.delete(0, ctk.END)
+                    self.deduction_entry.insert(0, price_format_to_float(self.grand_total._text[1:]) - 1)
+                    self.grand_total_second.configure(text = f'₱{format_price(1)}')
+                    return
+
+                self.grand_total_second.configure(text = f'₱{format_price(price_format_to_float(self.grand_total._text[1:]) - float(_deduction))}')
+                total_change = (float(_payment) + float(_deduction)) - price_format_to_float(self.grand_total._text[1:])
+                self.change_total.configure(text = "Invalid" if total_change < 0 else f'₱{  format_price(total_change)}')
+                    
+            self.deduction_var = ctk.StringVar()
             
             '''Transaction Info'''
             self.client_info_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Platinum)
@@ -1764,7 +1760,7 @@ def show_payment_proceed(master, info:tuple,):
             
             ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=2, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
             
-            ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=3, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
+            ctk.CTkLabel(self.pay_frame, text="Sub-total: ", font=("DM Sans Medium",16),).grid(row=3, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
             self.grand_total = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
             self.grand_total.grid(row=3, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
             
@@ -1772,24 +1768,29 @@ def show_payment_proceed(master, info:tuple,):
             self.payment_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055, textvariable=self.payment_var)
             self.payment_entry.grid(row=4, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
             
-            ctk.CTkLabel(self.pay_frame, text="Discount: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
-            self.discount_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055)
-            self.discount_entry.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
+            ctk.CTkLabel(self.pay_frame, text="Deduction: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
+            self.deduction_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055, textvariable=self.deduction_var)
+            self.deduction_entry.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
 
             self.payment_var.trace_add("write", callback=payment_callback)
+            self.deduction_var.trace_add("write", callback=deduction_callback)
                         
-            ctk.CTkLabel(self.pay_frame, text="Payment: ", font=("DM Sans Medium",16),).grid(row=6, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
+            ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=6, column=0, padx=(width*0.01), pady=(0), sticky="w")
+            self.grand_total_second = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e', text_color='green')
+            self.grand_total_second.grid(row=6, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
+
+            ctk.CTkLabel(self.pay_frame, text="Payment: ", font=("DM Sans Medium",16),).grid(row=7, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
             self.payment_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",16), anchor='e')
-            self.payment_total.grid(row=6, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
-            
-            ctk.CTkLabel(self.pay_frame, text="Total: ", font=("DM Sans Medium",16),).grid(row=8, column=0, padx=(width*0.01), pady=(0), sticky="w")
-            self.grand_total_second = ctk.CTkLabel(self.pay_frame, text="₱ 0.00", font=("DM Sans Medium",16), anchor='e')
-            self.grand_total_second.grid(row=8, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
+            self.payment_total.grid(row=7, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')
+
+            '''ctk.CTkLabel(self.pay_frame, text="Deduction: ", font=("DM Sans Medium",16),).grid(row=7, column=0, padx=(width*0.01), pady=(height*0.01,0), sticky="w")
+            self.deduction_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",16), anchor='e')
+            self.deduction_total.grid(row=7, column=2, padx=(width*0.01), pady=(height*0.01,height*0.01), sticky = 'e')'''
             
             ctk.CTkFrame(self.pay_frame, fg_color="black", height=height*0.005).grid(row=9, column=0, columnspan=3, sticky="ew", padx=(width*0.01),pady=(height*0.01,0))
             
             ctk.CTkLabel(self.pay_frame, text="Change: ", font=("DM Sans Medium",16),).grid(row=10, column=0, padx=(width*0.01), pady=(height*0.01,height*0.1), sticky="w")
-            self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",18))
+            self.change_total = ctk.CTkLabel(self.pay_frame, text="₱ --.--", font=("DM Sans Medium",18), text_color= 'red')
             self.change_total.grid(row=10, column=2, padx=(width*0.01), pady=(height*0.005, height*0.1), sticky = 'e')
             self.change_total.focus()
             

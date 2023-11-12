@@ -23,7 +23,7 @@ import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
     
-def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, old_receipt_name = None):
+def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, deduction: int, old_receipt_name = None):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -142,9 +142,13 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         change_price = 0
     else:   
         total_amount_price = "P{:,.2f}".format(float(total_amount))
+        deduction_price = "P{:,.2f}".format(float(deduction))
+        deducted_price = "P{:,.2f}".format(float(total_amount) - float(deduction))
         amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-        change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
-    receipt_content.append(['Total:', '', '', f'{total_amount_price}'])
+        change_price = "P{:,.2f}".format(float(total_amount) - float(deduction) - float(amount_paid))
+    receipt_content.append(['Subtotal:', '', '', f'{total_amount_price}'])
+    receipt_content.append(['Deduction:', '', '', f'{deduction_price}'])
+    receipt_content.append(['Total:', '', '', f'{deducted_price}'])
     receipt_content.append(['Amount Paid:', '', '', f'{amount_paid_price}'])
     receipt_content.append(['Change:', '', '', f'{change_price}'])
 
@@ -162,6 +166,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('SPAN', (2, 1), (-1, 1)),
         ('SPAN', (0, 2), (-1, 2)),
         ('SPAN', (0, 3), (-1, 3)),
+        ('SPAN', (0, len(receipt_content)-5), (2, len(receipt_content)-5)),
+        ('SPAN', (0, len(receipt_content)-4), (2, len(receipt_content)-4)),
         ('SPAN', (0, len(receipt_content)-3), (2, len(receipt_content)-3)),
         ('SPAN', (0, len(receipt_content)-2), (2, len(receipt_content)-2)),
         ('SPAN', (0, len(receipt_content)-1), (2, len(receipt_content)-1)),
@@ -170,6 +176,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('ALIGN', (0, len(receipt_content)-1), (0, len(receipt_content)-1), 'RIGHT'),
         ('ALIGN', (0, len(receipt_content)-2), (0, len(receipt_content)-2), 'RIGHT'),
         ('ALIGN', (0, len(receipt_content)-3), (0, len(receipt_content)-3), 'RIGHT'),
+        ('ALIGN', (0, len(receipt_content)-4), (0, len(receipt_content)-4), 'RIGHT'),
+        ('ALIGN', (0, len(receipt_content)-5), (0, len(receipt_content)-5), 'RIGHT'),
         ('ALIGN', (1, 5), (3, len(receipt_content)-1), 'RIGHT'),
         #font style
         ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
@@ -320,7 +328,6 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             else:
                 pet_name = p[1]
                 ctr += 1
-            
     
     receipt_content = [
         ['Statement of Account', '', f'Date: {today}', ''], 
@@ -354,9 +361,13 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         change_price = 0
     else:   
         total_amount_price = "P{:,.2f}".format(float(total_amount))
+        deduction_price = "P{:,.2f}".format(float(deduction))
+        deducted_price = "P{:,.2f}".format(float(total_amount) - float(deduction))
         amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-        change_price = "P{:,.2f}".format(float(amount_paid)-float(total_amount))
-    receipt_content.append(['Total:', '', '', f'{total_amount_price}'])
+        change_price = "P{:,.2f}".format(float(total_amount) - float(deduction) - float(amount_paid))
+    receipt_content.append(['Subtotal:', '', '', f'{total_amount_price}'])
+    receipt_content.append(['Deduction:', '', '', f'{deduction_price}'])
+    receipt_content.append(['Total:', '', '', f'{deducted_price}'])
     receipt_content.append(['Amount Paid:', '', '', f'{amount_paid_price}'])
     receipt_content.append(['Change:', '', '', f'{change_price}'])
 
@@ -374,6 +385,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('SPAN', (2, 1), (-1, 1)),
         ('SPAN', (0, 2), (-1, 2)),
         ('SPAN', (0, 3), (-1, 3)),
+        ('SPAN', (0, len(receipt_content)-5), (2, len(receipt_content)-5)),
+        ('SPAN', (0, len(receipt_content)-4), (2, len(receipt_content)-4)),
         ('SPAN', (0, len(receipt_content)-3), (2, len(receipt_content)-3)),
         ('SPAN', (0, len(receipt_content)-2), (2, len(receipt_content)-2)),
         ('SPAN', (0, len(receipt_content)-1), (2, len(receipt_content)-1)),
@@ -382,6 +395,8 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         ('ALIGN', (0, len(receipt_content)-1), (0, len(receipt_content)-1), 'RIGHT'),
         ('ALIGN', (0, len(receipt_content)-2), (0, len(receipt_content)-2), 'RIGHT'),
         ('ALIGN', (0, len(receipt_content)-3), (0, len(receipt_content)-3), 'RIGHT'),
+        ('ALIGN', (0, len(receipt_content)-4), (0, len(receipt_content)-4), 'RIGHT'),
+        ('ALIGN', (0, len(receipt_content)-5), (0, len(receipt_content)-5), 'RIGHT'),
         ('ALIGN', (1, 5), (3, len(receipt_content)-1), 'RIGHT'),
         #font style
         ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
@@ -476,12 +491,10 @@ class ShowPdf(cpdf.ShowPdf):
                 self.text.see(self.img_object_li[-1])
   
 class preview_pdf_popup(ctk.CTkToplevel):
-    
-    
     def __init__(self, *args, fg_color: str | Tuple[str, str] | None = None,
                  #Custom Arguments
                  
-                 receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None,
+                 receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None, deduction = None,
                  title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None, is_receipt: Optional[bool] = False,
                   **kwargs,
                  ):
@@ -561,7 +574,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         
         self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
-            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 0)
+            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, deduction = deduction, old = 0)
         self.vaas2 = NONE
         self.vaas1=cpdf.ShowPdf()
         self.vaas1.img_object_li.clear()
@@ -580,7 +593,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
                                       width=100, height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
-                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, old = 1, old_receipt_name = view_receipt_by_or)
+                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, deduction = deduction, old = 1, old_receipt_name = view_receipt_by_or)
                 vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
                                       width=100,height=50, zoomDPI=100)
                 vaas2.pack()

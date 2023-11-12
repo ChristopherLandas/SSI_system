@@ -710,9 +710,9 @@ def show_payment_proceed(master, info:tuple,):
                 required_items = self.info_list[1]
                 transact_items = self.info_list[2]
                 
-                print(replaced_items)
-                print(required_items)
-                print(transact_items)
+                #print(replaced_items)
+                #print(required_items)
+                #print(transact_items)
                 
                 #steps insert replacement record, update transaction record to replaced, update item transaction content to 2, insert new transaction content, subtract items used in inventory
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure you want to conntinue?\nThis will update the order record."):
@@ -941,6 +941,10 @@ def show_payment_proceed(master, info:tuple,):
             self.client_data = client            
             self.info_list = info_lists
             self.set_values()
+            
+            print(self.info_list[0])
+            print(self.info_list[1])
+            print(self.info_list[2])
             
             return super().place(**kwargs)
     return instance(master, info)

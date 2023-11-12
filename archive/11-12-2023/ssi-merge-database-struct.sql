@@ -7,8 +7,8 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE DATABASE IF NOT EXISTS `ssi_test` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
-USE `ssi_test`;
+CREATE DATABASE IF NOT EXISTS `ssi_merged_1` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+USE `ssi_merged_1`;
 
 CREATE TABLE IF NOT EXISTS `account_access_level` (
   `usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=234 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
 CREATE TABLE IF NOT EXISTS `categories` (
   `categ_name` varchar(50) NOT NULL,
@@ -76,14 +76,12 @@ CREATE TABLE IF NOT EXISTS `disposal_history` (
   `item_uid` varchar(6) NOT NULL,
   `item_name` varchar(64) NOT NULL,
   `initial_quantity` int(11) DEFAULT NULL,
-  `Current_quantity` int(11) DEFAULT NULL,
+  `Current_quantity` int(11) NOT NULL,
   `reason` varchar(50) NOT NULL,
   `date_of_disposal` datetime NOT NULL,
   `full_dispose_date` datetime DEFAULT NULL,
   `disposed_by` varchar(128) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `item_uid` (`item_uid`),
-  CONSTRAINT `FK_disposal_history_item_general_info` FOREIGN KEY (`item_uid`) REFERENCES `item_general_info` (`UID`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 CREATE TABLE IF NOT EXISTS `invoice_item_content` (
@@ -155,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   PRIMARY KEY (`id`),
   KEY `UID` (`UID`),
   CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 CREATE TABLE IF NOT EXISTS `item_settings` (
   `UID` varchar(6) NOT NULL,
@@ -164,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `item_settings` (
   `Reorder_factor` float NOT NULL,
   `Crit_factor` float NOT NULL,
   `Safe_stock` int(11) NOT NULL,
-  `rate_mode` int(1) NOT NULL DEFAULT 0,
+  `rate_mode` int(11) NOT NULL,
   PRIMARY KEY (`UID`),
   CONSTRAINT `item_settings_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
@@ -183,8 +181,8 @@ CREATE TABLE IF NOT EXISTS `item_supplier_info` (
   `supp_id` varchar(8) NOT NULL,
   PRIMARY KEY (`UID`),
   KEY `supplier_info_fk` (`supp_id`) USING BTREE,
-  CONSTRAINT `FK_item_supplier_info_supplier_info` FOREIGN KEY (`supp_id`) REFERENCES `supplier_info` (`supp_id`),
-  CONSTRAINT `item_supplier_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
+  CONSTRAINT `FK_item_supplier_info_item_general_info` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`),
+  CONSTRAINT `FK_item_supplier_info_supplier_info` FOREIGN KEY (`supp_id`) REFERENCES `supplier_info` (`supp_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 CREATE TABLE IF NOT EXISTS `item_transaction_content` (
@@ -194,7 +192,6 @@ CREATE TABLE IF NOT EXISTS `item_transaction_content` (
   `quantity` int(11) NOT NULL,
   `price` float NOT NULL,
   `deduction` float NOT NULL,
-  `state` int(1) NOT NULL,
   KEY `FK_item_transaction_content_transaction_record` (`transaction_uid`),
   CONSTRAINT `FK_item_transaction_content_transaction_record` FOREIGN KEY (`transaction_uid`) REFERENCES `transaction_record` (`transaction_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
@@ -224,8 +221,7 @@ CREATE TABLE IF NOT EXISTS `partially_recieving_item` (
   `exp_date` date DEFAULT NULL,
   `reciever` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
   `date_recieved` datetime DEFAULT NULL,
-  KEY `FK_partially_recieving_item_recieving_item` (`id`),
-  CONSTRAINT `FK_partially_recieving_item_recieving_item` FOREIGN KEY (`id`) REFERENCES `recieving_item` (`id`)
+  KEY `FK_partially_recieving_item_recieving_item` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 CREATE TABLE IF NOT EXISTS `pet_breed` (
@@ -262,8 +258,7 @@ CREATE TABLE IF NOT EXISTS `receiving_history_info` (
   `receiver` varchar(50) NOT NULL,
   `expiry` date DEFAULT NULL,
   `date_received` datetime NOT NULL,
-  KEY `receiving_id` (`receiving_id`),
-  CONSTRAINT `FK_receiving_history_info_recieving_item` FOREIGN KEY (`receiving_id`) REFERENCES `recieving_item` (`id`)
+  KEY `receiving_id` (`receiving_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 CREATE TABLE IF NOT EXISTS `recieving_item` (
@@ -285,26 +280,6 @@ CREATE TABLE IF NOT EXISTS `recieving_item` (
   CONSTRAINT `FK_recieving_item_item_general_info` FOREIGN KEY (`item_uid`) REFERENCES `item_general_info` (`UID`),
   CONSTRAINT `FK_recieving_item_supplier_info` FOREIGN KEY (`supp_id`) REFERENCES `supplier_info` (`supp_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
-
-CREATE TABLE IF NOT EXISTS `replacement_items` (
-  `rep_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `item_id` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `item_desc` varchar(256) NOT NULL,
-  `price` float NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `reason` varchar(256) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
-CREATE TABLE IF NOT EXISTS `replacement_record` (
-  `rep_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `transction_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `new_total` float NOT NULL,
-  `replace_by` varchar(12) NOT NULL,
-  `replacement_date` datetime NOT NULL,
-  PRIMARY KEY (`rep_id`),
-  KEY `transction_id` (`transction_id`),
-  CONSTRAINT `FK_replacement_record_transaction_record` FOREIGN KEY (`transction_id`) REFERENCES `transaction_record` (`transaction_uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 CREATE TABLE IF NOT EXISTS `services_transaction_content` (
   `transaction_uid` varchar(8) NOT NULL,
@@ -361,13 +336,13 @@ CREATE TABLE IF NOT EXISTS `service_preceeding_schedule` (
   `service_name` varchar(256) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `prefix` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
   `scheduled_date` date NOT NULL,
-  `status` int(11) DEFAULT NULL,
+  `status` int(1) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `FK__services_transaction_content` (`transaction_uid`) USING BTREE,
   KEY `FK__service_info_test` (`service_uid`) USING BTREE,
   CONSTRAINT `FK__service_info_test` FOREIGN KEY (`service_uid`) REFERENCES `service_info_test` (`UID`),
   CONSTRAINT `FK__services_transaction_content` FOREIGN KEY (`transaction_uid`) REFERENCES `services_transaction_content` (`transaction_uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 CREATE TABLE IF NOT EXISTS `supplier_info` (
   `supp_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -401,8 +376,6 @@ CREATE TABLE IF NOT EXISTS `transaction_record` (
   `client_name` varchar(50) DEFAULT NULL,
   `Total_amount` float NOT NULL,
   `transaction_date` date NOT NULL,
-  `state` int(1) NOT NULL,
-  `deduction` int(11) DEFAULT NULL,
   PRIMARY KEY (`transaction_uid`),
   KEY `Attendant_usn` (`Attendant_usn`),
   CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)

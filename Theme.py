@@ -4,6 +4,7 @@ import screeninfo
 import copy
 [print(screen) for screen in screeninfo.get_monitors()]
 
+
 class Color:
     White_Lotion = "#FCFCFC"
     White_Milk = "#FFFDF6"
