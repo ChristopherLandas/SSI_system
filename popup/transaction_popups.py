@@ -1694,7 +1694,7 @@ def show_payment_proceed(master, info:tuple,):
             
             '''TABLE SETUP'''
             
-            self.receipt_table_style = ttk.Style()
+            """ self.receipt_table_style = ttk.Style()
             self.receipt_table_style.theme_use("clam")
             self.receipt_table_style.configure("Treeview", rowheight=int(height*0.065), background=Color.White_Platinum, foreground=Color.Blue_Maastricht, bd=0,  highlightthickness=0, font=("DM Sans Medium", 16) )
             
@@ -1726,8 +1726,13 @@ def show_payment_proceed(master, info:tuple,):
             
             self.y_scrollbar = ttk.Scrollbar(self.receipt_table_frame, orient=tk.VERTICAL, command=self.receipt_tree.yview)
             self.receipt_tree.configure(yscroll=self.y_scrollbar.set)
-            self.y_scrollbar.grid(row=0, column=1, sticky="ns")
+            self.y_scrollbar.grid(row=0, column=1, sticky="ns") """
 
+            self.particulars_treeview = cctk.cctkTreeView(self.receipt_table_frame, data=[], width= width*0.515, height= height*0.625, corner_radius=0,
+                                           column_format=f'/No:{int(width*.035)}-#r/Particulars:x-tl/Quantity:{int(width*.1)}-tr/TotalPrice:{int(width*.085)}-tr!30!35',
+                                           bd_message="Are you sure want to remove this item?")
+            self.particulars_treeview.pack()
+            
             '''END TABLE SETUP'''
             self.receipt_total_frame = ctk.CTkFrame(self.receipt_frame, height=height*0.05, width=width*0.2, fg_color=Color.White_Lotion)
             self.receipt_total_frame.grid(row=2, column=2, padx=(0,width*0.005), pady= (0,height*0.007), sticky="e")
@@ -1824,8 +1829,6 @@ def show_payment_proceed(master, info:tuple,):
             self._treeview_callback = treeview_callback
             self._invoice_id = invoice_data[0]
 
-            for i in self.receipt_tree.get_children():
-                self.receipt_tree.delete(i)
             #emptied out the treeview
 
             self.services = database.fetch_data(sql_commands.get_invoice_service_content_by_id, (invoice_data[0], )) or []
@@ -1845,13 +1848,7 @@ def show_payment_proceed(master, info:tuple,):
             
             temp = modified_items + modified_services
             
-            for i in range(len(temp)):
-                if (i % 2) == 0:
-                    tag = "even"
-                else:
-                    tag ="odd"
-                self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i],tags=tag)
-                
+            self.particulars_treeview.update_table(temp)
             
             return super().place(**kwargs)
     return instance(master, info)  

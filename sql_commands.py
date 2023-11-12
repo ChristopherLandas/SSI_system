@@ -417,10 +417,8 @@ get_pet_info = f"SELECT id, p_name FROM  pet_info INNER JOIN pet_owner_info ON p
 get_pet_id_by_name_owner = f"SELECT pet_info.id FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id\
                             WHERE p_name = ? AND pet_owner_info.owner_name = ?"  
                 
-get_pet_record=f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number\
-                FROM pet_info INNER JOIN pet_owner_info\
-                ON pet_info.owner_id = pet_owner_info.owner_id\
-                ORDER BY pet_owner_info.owner_name ASC"
+get_pet_record=f"SELECT pet_info.id, pet_info.p_name, CONCAT(type, ' - ' , breed), pet_owner_info.owner_name, pet_owner_info.contact_number\
+                FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY pet_owner_info.owner_name ASC"
 
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
 insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
@@ -429,10 +427,10 @@ insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contac
 
 insert_new_pet_breed = f"INSERT INTO pet_breed VALUES(?,?)"
 #PET INFO SORT
-get_pet_info_sort_by_pet_name = f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
+get_pet_info_sort_by_pet_name = f"SELECT pet_info.id, pet_info.p_name, CONCAT(type, ' - ' , breed), pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
                             ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY p_name asc"
 
-get_pet_info_sort_by_id = f"SELECT pet_info.id, pet_info.p_name, pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
+get_pet_info_sort_by_id = f"SELECT pet_info.id, pet_info.p_name, CONCAT(type, ' - ' , breed), pet_owner_info.owner_name, pet_owner_info.contact_number FROM pet_info INNER JOIN pet_owner_info\
                             ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY id asc"
 
 #HIST LOG
@@ -745,13 +743,17 @@ update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
 
 #TESTING - James
 
-get_service_data_test = "SELECT UID, service_name, category, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
+get_service_data_test = "SELECT UID, service_name,\
+                        CASE WHEN duration_type = 0 THEN 'One day'\
+                        WHEN duration_type = 1 THEN 'Multiple days'\
+                        ELSE 'Multiple Periods' END,\
+                        CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 get_service_category_test = "SELECT category FROM service_category_test"
 
-insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?, ?)"
+#insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?, ?)"
 
 get_services_and_their_price_test = "SELECT UID, service_name, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
-insert_service_test = "INSERT INTO service_info_test VALUES( ?, ?, ?, ?, ?, ?, ?)"
+insert_service = "INSERT INTO service_info_test VALUES( ?, ?, ?, NULL, ?, ?, ?)"
 
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
@@ -1205,3 +1207,5 @@ get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
                         WHERE item_general_info.Category = ? AND reason = ?\
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
+                        
+set_pet_breed = "INSERT INTO pet_breed VALUES (?,?)"
