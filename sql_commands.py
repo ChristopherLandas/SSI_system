@@ -899,6 +899,10 @@ get_sales_search_query = f"SELECT transaction_uid, client_name FROM transaction_
 get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn, state\
                             FROM transaction_record WHERE transaction_uid = ?"
 
+#sends price but without format and deduction
+get_sales_record_info_temp = f"SELECT transaction_uid, client_name, Total_amount AS price, transaction_date, Attendant_usn, state, deduction\
+                            FROM transaction_record WHERE transaction_uid = ?"
+
 #Tentative;                          
 get_sales_attendant = f"SELECT DISTINCT Attendant_usn FROM transaction_record"
 
@@ -1197,7 +1201,7 @@ get_item_brand_name_unit = "SELECT brand, CASE WHEN unit IS NULL THEN name ELSE 
 get_order_search_query = "SELECT id, NAME, CASE WHEN state = 1 THEN 'On Order'ELSE 'Partial' END\
                             FROM recieving_item WHERE (state = 3 or state = 1) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
                             
-get_order_history_search_query = "SELECT id, NAME FROM recieving_item WHERE (state = 2 or state = 3) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
+get_order_history_search_query = "SELECT id, NAME FROM recieving_item WHERE (state = 2 or state = 3 or state = 3) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
 
 get_supplier_search_query = "SELECT supp_id, supp_name FROM supplier_info WHERE (supp_id LIKE '%?%' OR supp_name LIKE '%?%')"
 get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by FROM disposal_history\
@@ -1209,3 +1213,12 @@ get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
                         
 set_pet_breed = "INSERT INTO pet_breed VALUES (?,?)"
+
+get_supplier_search_query = "SELECT supp_id, supp_name FROM supplier_info WHERE (supp_id LIKE '%?%' OR supp_name LIKE '%?%')"
+get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by FROM disposal_history\
+                                WHERE date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
+                                
+get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+                        LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
+                        WHERE item_general_info.Category = ? AND reason = ?\
+                        AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
