@@ -182,12 +182,10 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 raw_service_info = database.fetch_data(sql_commands.get_service_record_temp, (sales_info[0],))
                 #change sql_command
                 raw_transaction_info = database.fetch_data(sql_commands.get_sales_record_info_temp, (sales_info[0],))[0]      
-                self.set_values()
                 
                 temp = [split_unit(item[0])+(item[1:]) for item in raw_items]
                 self.items = [((f'{database.fetch_data(sql_commands.get_item_brand, database.fetch_data(sql_commands.get_uid, (temp[0], temp[1]))[0])[0][0]} {temp[0]} ({temp[1]})'),) +  temp[2:] if len(temp)==5 else 
                             ((f'{database.fetch_data(sql_commands.get_item_brand, database.fetch_data(sql_commands.get_uid_null_unit, (temp[0],))[0])[0][0]} {temp[0]}'),) +  temp[1:] for temp in temp]
-                
                 raw_data =  raw_service + self.items
                 self.tree_data = [(data[0],  f"₱{format_price(data[2])}", data[1], f"₱{format_price(data[3])}") for data in raw_data]
                 self.receipt_treeview.update_table(self.tree_data) 
