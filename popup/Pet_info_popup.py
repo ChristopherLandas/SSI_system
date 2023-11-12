@@ -91,7 +91,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
                     owner_id = (database.fetch_data(f"SELECT owner_id FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'"))[0][0]
                     database.exec_nonquery([[sql_commands.insert_new_pet_info, (uid, self.patient_name_entry.get(), owner_id, self.breed_option.get(),
                                                                                     self.type_option.get(), self.sex_option.get(), self.weight_entry.get(), bday)]])
-                       
+            
                     reset()
                     self.place_forget()
                     
@@ -462,7 +462,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.service_title_label = ctk.CTkLabel(self.service_title_frame, text="Service Record", font=("DM Sans Medium", 14), height=height*0.045,corner_radius=5,
                                                     fg_color=Color.White_Color[3], text_color=Color.Blue_Maastricht)
             self.service_title_label.pack(side="left")
-            self.refresh_btn = ctk.CTkButton(self.service_title_frame, image=self.refresh_icon, text='', width=height*0.045, height=height*0.045, fg_color="#83bd75", hover_color="#82bd0b")
+            self.refresh_btn = ctk.CTkButton(self.service_title_frame, image=self.refresh_icon, text='', width=height*0.045, height=height*0.045, fg_color="#83bd75", hover_color="#82bd0b", command = self.refresh)
             self.refresh_btn.pack(side="left",  padx=(width*0.005))
             
             self.service_treeview_frame = ctk.CTkFrame(self.pet_service_frame, fg_color="transparent")
@@ -516,6 +516,12 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.entries_set_state("normal")
             self.reset_entries()
             self.callback_command()
+
+        def refresh(self):
+            self.refresh_btn.configure(state = ctk.DISABLED)
+            self.load_history()
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+
             
         def reset_entries(self):
             for i in range(len(self.entries)):

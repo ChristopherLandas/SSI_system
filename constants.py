@@ -31,11 +31,13 @@ class action:
     INVOICE_TYPE = 'invoice'
     TRANSACTION_TYPE = 'Transaction Record'
     DISPOSAL_TYPE = 'Disposal'
+    ADD_SERVICE = 'Service Encoding'
 
 
     RESTOCKED_ITEM = f'RST/%s/%s/%s' #item stocked, stocked_change, success?
     CONFIRM_RECIEVE_ITEM = f'CRI/%s/%s/%s' #item recieve and move to inventory, user, item_uid, stock
     ADD_ITEM = f'ADD/%s/%s' #UID of the item, success?
+    ADD_SVC = f'ADDS/%s/%s' #UID of the service, success?
     MAKE_INVOICE = f'INVM/%s/%s' # Invoice maked, user, uid
     MAKE_TRANSACTION = 'TRNM/%s/%s' # Transaction made, user, uid
     MOVE_TO_DISPOSAL = 'DPSM/%s/%s' #Move item to disposal, user, item_uid

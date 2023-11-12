@@ -265,15 +265,9 @@ def show_popup(master, info:tuple, user: str, full_name: str, position: str) -> 
             self.cancel_btn = ctk.CTkButton(self.bottom_frame, text='Cancel', command=reset, font=("DM Sans Medium", 14), height=height*0.055, fg_color=Color.Red_Pastel, hover_color='#ff392e')
             self.cancel_btn.pack(side="left")
 
-            
             self.generate_btn = ctk.CTkButton(self.bottom_frame, text='Generate Report', command= generate_callback,font=("DM Sans Medium", 14),height=height*0.055)
             self.generate_btn.pack(side="right")
             
-
-            
-
-        
-
         def place(self, month_selected_date, year_selected_date, daily_selected_date, **kwargs):
             if 'default_config' in kwargs:
                 txt = 'Daily' if 'Daily' in kwargs['default_config'] else 'Monthly' if 'Monthly' in kwargs['default_config'] else 'Yearly'

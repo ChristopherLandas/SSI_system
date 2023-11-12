@@ -2,7 +2,8 @@ import customtkinter as ctk
 from PIL import Image
 import screeninfo
 import copy
-#[print(screen) for screen in screeninfo.get_monitors()]
+[print(screen) for screen in screeninfo.get_monitors()]
+
 class Color:
     White_Lotion = "#FCFCFC"
     White_Milk = "#FFFDF6"
@@ -73,6 +74,8 @@ class Color:
     Test_Color_Blue = 'blue'
     Test_Color_Yellow = 'yellow'
     Test_Color_Green = 'green'
+    
+    Green_Button_Hover_Color = "#599749"
 #TEST ONLY
 #region icons
 class Icons:
