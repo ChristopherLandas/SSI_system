@@ -1407,6 +1407,7 @@ class inventory_frame(ctk.CTkFrame):
                 self.active_report.pack_forget()
             self.active_report = self.report_frames[cur_frame]
             self.active_report.pack(fill="both", expand=1)
+            [search_bar.reset() for search_bar in self.search_bars]
 
         def update_tables(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
@@ -1474,7 +1475,7 @@ class inventory_frame(ctk.CTkFrame):
                 sort_status_configuration_callback()
 
         def sort_status_configuration_callback(_: any = None):
-            self.search_entry.delete(0, ctk.END)
+            #self.search_entry.delete(0, ctk.END)
             if "Levels" in self.sort_type_option.get():
                 if "All" in self.sort_status_option.get():
                     self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
@@ -1506,14 +1507,14 @@ class inventory_frame(ctk.CTkFrame):
             
             update_tables()
 
-        def dispose_expired(_: any = None):
+        """ def dispose_expired(_: any = None):
             if self.data_view1.data_grid_btn_mng.active:
                 if self.data_view1.get_selected_data()[-1] == 'Expired':
                     if messagebox.askyesno("Dispose Item", "Are you sure you want to dispose\nthe item?", parent = self):
                         data = self.data_view1.get_selected_data()
                         database.exec_nonquery([["Update state = -1 WHERE stock = ? AND Expiry_Date = ?", (data[2], data[4])]])
                         self.list_show = database.fetch_data(sql_commands.get_inventory_by_group)
-                        update_tables()
+                        update_tables() """
         
         def batch_dispose():
             if self.data_view1._data:
@@ -1637,9 +1638,6 @@ class inventory_frame(ctk.CTkFrame):
         self.sort_frame.grid_rowconfigure(0, weight=1)
         self.sort_frame.grid_columnconfigure((1,2), weight=1)
 
-        self.rate_btn = ctk.CTkButton(self.sort_frame,text="B", width=self.sort_frame._current_height-height*0.0065,)
-        #self.rate_btn.grid(row=0, column=0, padx=(width*0.0045,0), pady=(height*0.0065), sticky="nsw")
-          
         self.sort_type_option= ctk.CTkOptionMenu(self.sort_frame, values=self.sort_status_var, anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
                                                  text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=partial(sort_status_callback))
         self.sort_type_option.grid(row=0, column=1, padx=(width*0.0045,0), pady=(height*0.0065), sticky="nsew")
@@ -1657,7 +1655,7 @@ class inventory_frame(ctk.CTkFrame):
         self.data_view1 = cctk.cctkTreeView(self.tree_view_frame, data = [], width= width*0.8, height= height*0.7, corner_radius=0,
                                            column_format=f'/No:{int(width*.035)}-#r/Rate:{int(width*.045)}-tc/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.085)}-tr/Price:{int(width*.085)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.1)}-tc!33!35',
                                            conditional_colors= {7: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'},
-                                                                1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}}, double_click_command= dispose_expired)
+                                                                1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}},)
         self.data_view1.pack()
         
         self.bot_frame = ctk.CTkFrame(self.inventory_sub_frame, fg_color=Color.White_Lotion, height=height*0.065,)
@@ -1793,21 +1791,29 @@ class inventory_frame(ctk.CTkFrame):
         
         #region Disposal 
         '''ITEM DISPOSAL: START'''
-        self.operational_year = [str(s[0]) for s in database.fetch_data(sql_commands.get_active_year_transaction)] or [str(datetime.datetime.now().year)]
-        self.months = ["January", "February", "March","April","May", "June", "July", "August","September","October", "November", "December"]
-
         
-        def full_dispose_item(i: int):
-            database.exec_nonquery([["UPDATE disposal_history SET disposed_by = ?, full_dispose_date = CURRENT_TIMESTAMP WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (acc_cred[0][0], self.ds_data_view1._data[i][3])]])
-            uid = database.fetch_data("Select item_uid from disposal_history WHERE DATE_FORMAT(date_of_disposal, '%m-%d-%Y at %H:%i %p') = ?", (self.ds_data_view1._data[i][3], ))[0][0]
-            record_action(acc_cred[0][0], action.DISPOSAL_TYPE, action.OFFICIALLY_DISPOSE % (acc_cred[0][0], uid))
-            messagebox.showinfo("Succeed", "Item has been fully disposed", parent = self)
-
-        
-        def refresh_ds_table():
+        def filter_ds_table(_:any = None):
+            data = database.fetch_data(sql_commands.get_disposed_filter, (self.ds_sort_category_option.get(), self.ds_sort_type_option.get(), self.from_date_select_entry._text, self.to_date_select_entry._text))
+            self.ds_data_view1.pack_forget()
             self.ds_refresh_btn.configure(state = ctk.DISABLED)
-            self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_disposal_items))
-            self.ds_refresh_btn.after(5000, lambda:self.ds_refresh_btn.configure(state = ctk.NORMAL))
+            self.ds_data_view1.update_table(data)
+            self.ds_data_view1.pack()
+            
+            self.no_disposal_data.place(relx=0.5, rely=0.5, anchor='c') if not data else self.no_disposal_data.place_forget()
+            self.ds_refresh_btn.after(100, lambda:self.ds_refresh_btn.configure(state = ctk.NORMAL))
+
+        def refresh_ds_table():
+            self.ds_sort_category_option.configure(values = [category[0] for category in database.fetch_data("SELECT categ_name from categories")])
+            
+            self.ds_data_view1.pack_forget()
+            self.ds_refresh_btn.configure(state = ctk.DISABLED)
+            
+            data =  database.fetch_data(sql_commands.get_disposed_filter, (self.ds_sort_category_option.get(), self.ds_sort_type_option.get(), self.from_date_select_entry._text, self.to_date_select_entry._text))
+            self.ds_data_view1.update_table(data)
+            self.ds_data_view1.pack()
+            
+            self.no_disposal_data.place(relx=0.5, rely=0.5, anchor='c') if not data else self.no_disposal_data.place_forget()
+            self.ds_refresh_btn.after(100, lambda:self.ds_refresh_btn.configure(state = ctk.NORMAL))
             
         self.disposal_frame.grid_propagate(0)
         self.disposal_frame.grid_rowconfigure(1, weight=1)
@@ -1818,31 +1824,51 @@ class inventory_frame(ctk.CTkFrame):
         self.ds_sort_frame.grid_rowconfigure(0, weight=1)
         self.ds_sort_frame.grid_columnconfigure((1,2), weight=1)
         
-        self.ds_sort_category_option= ctk.CTkOptionMenu(self.ds_sort_frame, values=["Medicine","Food","Accessories"], anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts,)
-        self.ds_sort_category_option.grid(row=0, column=1, padx=(width*0.005), pady=(width*0.005), sticky="nsew")
+        self.ds_sort_category_option= ctk.CTkOptionMenu(self.ds_sort_frame, values=[category[0] for category in database.fetch_data("SELECT categ_name from categories")], anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=filter_ds_table)
+        self.ds_sort_category_option.grid(row=0, column=1, padx=(width*0.0045), pady=(width*0.0045), sticky="nsew")
         
-        self.ds_sort_type_option= ctk.CTkOptionMenu(self.ds_sort_frame, values=["Expired"], anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts,)
-        self.ds_sort_type_option.grid(row=0, column=3, padx=(0, width*0.005), pady=(width*0.005), sticky="nsew")
+        
+        self.ds_sort_type_option= ctk.CTkOptionMenu(self.ds_sort_frame, values=["Defective/Damaged", "Expired"], anchor="center", font=("DM Sans Medium", 12), width=width*0.115, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=filter_ds_table)
+        self.ds_sort_type_option.grid(row=0, column=3, padx=(0, width*0.0045), pady=(width*0.0045), sticky="nsew")
+        
 
         self.ds_refresh_btn = ctk.CTkButton(self.disposal_frame,text="", width=width*0.03, height = width*0.03, image=self.refresh_icon, fg_color="#83BD75", command=refresh_ds_table)
         self.ds_refresh_btn.grid(row=0, column=1, sticky="nsew", padx=(0, width*0.005), pady=(height*0.01))
         
-        self.date_frame = ctk.CTkFrame(self.disposal_frame, fg_color=Color.White_Platinum)
+        self.date_frame = ctk.CTkFrame(self.disposal_frame, fg_color='transparent', height = height*0.05,)
         self.date_frame.grid(row=0, column=3, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
         self.date_frame.propagate(1)
             
-        self.month_option = ctk.CTkOptionMenu(self.date_frame, values= self.months, anchor="center", width=width*0.125, font=("DM Sans Medium",14), 
-                                                  height=height*0.045,)
-        self.month_option.pack(side="left", fill="x", expand=1,  padx=(width*0.005), pady=(width*0.005))
-        self.month_option.set(f"{date.today().strftime('%B')}")
-            
-        self.year_option = ctk.CTkOptionMenu(self.date_frame, values=self.operational_year, width=width*0.1, font=("DM Sans Medium",14), 
-                                                 height=height*0.045, anchor="center",)
-        self.year_option.pack(side="left", fill="x", expand=1,  padx=(0, width*0.005), pady=(width*0.005))
-        self.year_option.set(f"{date.today().strftime('%Y')}")
-
+        '''FROM'''
+        self.from_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.17)
+        self.from_date_frame.pack(side="left")
+        self.from_date_frame.propagate(0)
+        
+        ctk.CTkLabel(self.from_date_frame, text="From: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.03).pack(side="left", padx=(width*0.01,width*0.0025))
+        #date.today()
+        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
+        self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(width*0.0025))
+        self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=Icons.get_image("calendar_icon", (22,22)), height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
+                                               command=lambda:cctk.tk_calendar(self.from_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), set_date_callback=filter_ds_table))
+        self.from_show_calendar.pack(side="left", padx=(0, width*0.0025), pady=(width*0.0025))
+        
+        '''TO'''
+        self.to_date_frame = ctk.CTkFrame(self.date_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.15)
+        self.to_date_frame.pack(side="left", padx=(width*0.0025))
+        self.to_date_frame.propagate(0)
+        
+        ctk.CTkLabel(self.to_date_frame, text="To: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.0225).pack(side="left", padx=(width*0.005,width*0.0025))
+        
+        self.to_date_select_entry = ctk.CTkLabel(self.to_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
+        self.to_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(width*0.0025))
+        
+        self.to_show_calendar = ctk.CTkButton(self.to_date_frame, text="",image=Icons.get_image("calendar_icon", (22,22)), height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
+                                               command=lambda:cctk.tk_calendar(self.to_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), 
+                                                                               min_date= datetime.datetime.strptime(str(self.from_date_select_entry._text), '%Y-%m-%d').date(),set_date_callback=filter_ds_table))
+        self.to_show_calendar.pack(side="left", padx=(0, width*0.0015), pady=(width*0.0025))
+        
         self.ds_treeview_frame = ctk.CTkFrame(self.disposal_frame,fg_color="transparent")
         self.ds_treeview_frame.grid(row=1, column=0, columnspan=5, sticky="nsew", padx=width*0.005)
 
@@ -1850,6 +1876,7 @@ class inventory_frame(ctk.CTkFrame):
                                            column_format=f'/No:{int(width*.035)}-#r/DisposalID:{int(width*0.085)}-tc/ItemName:x-tl/QuantityPcs:{int(width*0.1)}-tr/Reason:{int(width*.135)}-tl/DisposedDate:{int(width*.1)}-tc/DisposedBy:{int(width*.1)}-tl!33!35',)
         self.ds_data_view1.pack()
         
+        self.no_disposal_data = ctk.CTkLabel(self.ds_data_view1, text="No disposal data for this filter option.", font=("DM Sans Medium", 14))
         refresh_ds_table()
 
         '''ITEM DISPOSAL: END'''
@@ -1857,10 +1884,18 @@ class inventory_frame(ctk.CTkFrame):
         
         #region Supplier
         
+        def supplier_search_callback():
+            self.refresh_btn.configure(state = ctk.DISABLED)
+            self.supplier_treeview.pack_forget()
+            self.supplier_treeview.update_table(list_filterer(self.supplier_search_bar.get(), (database.fetch_data(sql_commands.get_supplier_info))))
+            self.supplier_treeview.pack()
+            self.refresh_btn.after(100,lambda:self.refresh_btn.configure(state = ctk.NORMAL))
         def refresh_supplier_table():
             self.refresh_btn.configure(state = ctk.DISABLED)
+            self.supplier_treeview.pack_forget()
             self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
-            self.refresh_btn.after(5000,lambda:self.refresh_btn.configure(state = ctk.NORMAL))
+            self.supplier_treeview.pack()
+            self.refresh_btn.after(100,lambda:self.refresh_btn.configure(state = ctk.NORMAL))
 
         def view_supplier_record():
                 if self.supplier_treeview.get_selected_data():
@@ -1873,19 +1908,11 @@ class inventory_frame(ctk.CTkFrame):
         self.main_frame.grid_columnconfigure(3, weight=1)
         self.main_frame.grid_rowconfigure(2,weight=1) 
                
-        self.search_frame = ctk.CTkFrame(self.main_frame,width=width*0.3, height = height*0.05)
-        self.search_frame.grid(row=1, column=0,sticky="w", padx=(width*0.0075,width*0.005), pady=(height*0.01))
-
-        self.search_frame.pack_propagate(0)
-        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0, fg_color="white")
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-
         self.add_item_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Add Supplier",image=self.add_icon, font=("DM Sans Medium", 14),
                                            command=lambda: self.new_supplier_popup.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item_btn.grid(row=1, column=2, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
-        self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75",
+        self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color=Color.Green_Button_Hover_Color,
                                               command=refresh_supplier_table)
         self.refresh_btn.grid(row=1, column=1, sticky="w")
             
@@ -1900,7 +1927,17 @@ class inventory_frame(ctk.CTkFrame):
         self.supplier_treeview.pack()
         
         self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
+        
+        self.supplier_search_bar = cctk.cctkSearchBar(self.main_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=supplier_search_callback,
+                                                close_command_callback=refresh_supplier_table, 
+                                                quary_command=sql_commands.get_supplier_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
+        self.supplier_search_bar.grid(row=1, column=0,sticky="nsew", padx=(width*0.005), pady=(width*0.005))
+        
+        
+        
         #endregion
+        
+        self.search_bars = [self.inv_search_bar, self.rs_search_bar, self.supplier_search_bar]
         
         '''POP UP INITIALIZATION'''
         self.disposal_confirmation = Inventory_popup.item_disposal_confirmation(self,(width, height, acc_cred, acc_info), command_callback=disposal_table_callback)
@@ -1913,8 +1950,8 @@ class inventory_frame(ctk.CTkFrame):
         self.restock_confirm = Inventory_popup.restock_confirmation(self, (width, height, acc_cred, acc_info), command_callback=restocking_callback)
         self.disposal_confirm_popup = Inventory_popup.disposal_confirmation(self,(width, height, acc_cred, acc_info), command_callback=refresh_rs_data_view1)
         self.order_info = Inventory_popup.order_info_screen(self, (width, height))
-        self.new_supplier_popup = Inventory_popup.new_supplier(self, (width, height, acc_cred, acc_info), lambda: print("CALL"))
-        self.view_supplier_popup = Inventory_popup.view_supplier(self, (width, height, acc_cred, acc_info), lambda: print("CALL1"))
+        self.new_supplier_popup = Inventory_popup.new_supplier(self, (width, height, acc_cred, acc_info), command_callback=refresh_supplier_table)
+        self.view_supplier_popup = Inventory_popup.view_supplier(self, (width, height, acc_cred, acc_info), command_callback=refresh_supplier_table)
         
         sort_status_callback("View by Levels")
         load_main_frame(0)

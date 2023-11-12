@@ -845,7 +845,11 @@ class customcustomtkinter:
         def get(self):
             return self.answer
         
-        
+        def reset(self):
+            self.search_var.set("")
+            self.search_btn.configure(state = 'disabled')
+            self.close_btn.pack_forget()
+            self.results.place_forget()    
         
     class cctkPageNavigator(ctk.CTkFrame):
         def __init__(self, master: any, width: int = 190, height: int = 40, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", 

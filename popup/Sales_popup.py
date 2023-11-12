@@ -731,7 +731,7 @@ def show_payment_proceed(master, info:tuple,):
                     for record in replaced_items:
                         database.exec_nonquery([[sql_commands.set_replacement_items, (rep_id, record[0], record[2], price_format_to_float(record[3][1:]), record[4], record[6])],
                                                 
-                                                [sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), None, record[0], record[2], record[4],  record[6], self.cashier_name._text)]])
+                                                [sql_commands.set_expired_items_from_inventory, (generateId("DIS",6).upper(), None, record[0], record[2], record[4],  record[6], self.cashier_name._text)]])
 
                     for item in required_items:
                         does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (item[0], ))[0][0])
