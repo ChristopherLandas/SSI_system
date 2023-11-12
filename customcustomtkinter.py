@@ -180,6 +180,7 @@ class customcustomtkinter:
                      nav_text_color: Optional[Union[str, Tuple[str, str]]] = "white",
                      bd_configs: Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None] = None, bd_pop_list: list = None,
                      c_bd_configs: Optional[Tuple[str, Union[List[Tuple[int, Union[List[ctk.CTkLabel], ctk.CTkLabel]]], None]]] = None,
+                     bd_message: Optional[str] = 'Are you sure you want to delete the data',
                      bd_commands = None, spinner_config: Optional[Tuple[int, int, int, str, str, Literal['multiply', 'add']]] = None, 
                      spinner_val_range: Tuple[int, int] = None, spinner_command: callable = None, spinner_initial_val: int = 0, **kwargs):
 
@@ -222,6 +223,7 @@ class customcustomtkinter:
             self.spinner_config = spinner_config
             self.spinner_command = spinner_command
             self.spinner_initial_val = spinner_initial_val
+            self._bd_message=bd_message
             #encapsulate other arguments
 
             self.pack_propagate(0)
@@ -268,7 +270,7 @@ class customcustomtkinter:
             lbl.configure(text = str(int(lbl.cget('text')) + val))
 
         def bd_func(self, dlt_btn: ctk.CTkButton):
-            if messagebox.askyesno('Warning', 'Are you sure you want to delete the data', parent = self):
+            if messagebox.askyesno('Warning', self._bd_message, parent = self):
                 data_mngr_index = self.data_grid_btn_mng._buttons.index(dlt_btn.master.master)
                 if callable(self.bd_commands):
                     self.bd_commands(data_mngr_index)
@@ -340,7 +342,7 @@ class customcustomtkinter:
                         temp = ctk.CTkFrame(frm, width= self.column_widths[j], corner_radius= 0, border_width=0, fg_color='transparent')
                         temp.pack(side = tk.LEFT, fill = 'y', padx = (1,0))
                         if self.column_types[j] == 'bD':
-                            dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color=Color.Red_Tulip ,text='-')
+                            dlt_btn = ctk.CTkButton(temp, self._data_grid_heights * .8, self._data_grid_heights * .8, fg_color=Color.Red_Pastel, hover_color=Color.Red_Pastel_Hover ,text='-')
                             dlt_btn.configure(command = partial(self.bd_func, dlt_btn))
                             dlt_btn.place(relx = .5, rely = .5, anchor = 'c')
                             continue;
@@ -546,8 +548,8 @@ class customcustomtkinter:
                     background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                     overwrite_preferred_drawing_method: Union[str, None] = None,
                     #custom arguments
-                    button_font: Optional[Tuple[str, int, str]] = ("Lucida", 20, "bold"), button_color: Optional[Union[str, Tuple[str, str]]] = ('#EB455F', '#2C74B3'),
-                    button_hover_color:  Optional[Union[str, Tuple[str, str]]] = None, button_font_color: Optional[Union[str, Tuple[str, str]]] = ("black", "white"),
+                    button_font: Optional[Tuple[str, int, str]] = ("DM Sans Medium",14), button_color: Optional[Union[str, Tuple[str, str]]] = (Color.Red_Pastel, '#3B8ED0'),
+                    button_hover_color:  Optional[Union[str, Tuple[str, str]]] = (Color.Red_Pastel_Hover,"#36719F"), button_font_color: Optional[Union[str, Tuple[str, str]]] = ("black", "white"),
                     entry_font: Optional[Tuple[str, int, str]] = None, entry_text_color: Union[str, Tuple[str, str]] = 'black',
                     entry_fg_color:Optional[Tuple[str, int, str]] = None,
                     step_count: int = 1, val_range: Optional[Tuple[int, int]] = None, command:Callable = None,
@@ -577,17 +579,17 @@ class customcustomtkinter:
             '''events'''
 
             self.sub_button = ctk.CTkButton(self,text="-", command=partial(self.change_value, -1), text_color=button_font_color,
-                                            font=button_font, height=height, width=width*.3, fg_color= self._btn_color[0], hover_color=button_hover_color,
+                                            font=button_font, height=height, width=height, fg_color= self._btn_color[0], hover_color=self._btn_hover_color[0],
                                             state= self._state)
             self.sub_button.grid(row=0, column=0, padx=(width*0.05,0), pady=(height*0.1))
 
             self.num_entry = ctk.CTkEntry(self, height=height, width=width*.7, border_width=0, font=entry_font, text_color=entry_text_color,
-                                        justify="c", fg_color= entry_fg_color)
+                                        justify="c", fg_color='white')
             self.num_entry.configure(state= self._state)
             self.num_entry.grid(row=0, column=1, padx=(width*0.05),pady=(height*0.15))
 
             self.add_button = ctk.CTkButton(self, command=self.change_value, text_color=button_font_color,
-                                            text="+", font=button_font,height=height, width=width*.3, fg_color= self._btn_color[1], hover_color=button_hover_color,
+                                            text="+", font=button_font,height=height, width=height, fg_color= self._btn_color[1], hover_color=self._btn_hover_color[1],
                                             state= self._state)
             self.add_button.grid(row=0, column=2, padx=(0,width*0.05),pady=(height*0.1))
 
@@ -605,6 +607,15 @@ class customcustomtkinter:
                 self.num_entry.configure(textvariable = stringvar)
                 stringvar.trace_add('write', self.entry_check_on_text_change_callback)
                 #entry is editable but only num can be enter
+
+        def get_val_range(self):
+            try:
+                return self._val_range
+            except ValueError:
+                return None
+        
+        def set_entry_state(self, state:str):
+            self.num_entry.configure(state = state)
 
         def change_value(self, mul: int = 1):
             self.num_entry.configure(state = 'normal')
@@ -905,15 +916,28 @@ class customcustomtkinter:
             if self.page_count > page: self.page_count = 1
             self.page_counter.configure(text=self.page_count)
             self.page_limit = page
-            self.checker()             
-            
-            
-        
+            self.checker()       
 
+    class tkc(Calendar):
+        def __init__(self, master=None, select_callback: callable = None, date_format: str ="numerical", **kw,):
+            super().__init__(master, **kw)
+            self.select_callback = select_callback
+            self.date_format = date_format
+            #self.selected_date = self.get_date()
+
+        def _on_click(self, event):
+            super()._on_click(event)     
+            if self.select_callback is not None:
+                self.select_callback(self.get_date())
+            #self.selected_date = self.get_date()
+            #return temp
+        
+                
 class customcustomtkinterutil:
     class button_manager:
         def __init__(self, buttons: list, hold_color: str = 'transparent', switch: bool = False,
-                     default_active: Optional[int] = None, state: tuple = (lambda: None, lambda: None), children: Optional[list] = None):
+                     default_active: Optional[int] = None, state: tuple = (lambda: None, lambda: None), children: Optional[list] = None,
+                     active_double_click_nullified: bool = True):
             self.active = None
             self._state = state
             self._og_color =[]
@@ -922,11 +946,13 @@ class customcustomtkinterutil:
             self._buttons = buttons
             self._default_active = default_active
             self._children = children
+            self._active_double_click_nullified = active_double_click_nullified #nullified the command if the clicked button is the active
             #setup variables
 
             for i in range(len(buttons)):
                 if isinstance(buttons[i], customcustomtkinter.ctkButtonFrame):
-                    buttons[i]._command.append(partial(self.click, i))
+                    #buttons[i]._command.append(partial(self.click, i))
+                    buttons[i]._command = [partial(self.click, i, buttons[i]._command[0])]
                 elif isinstance(buttons[i], ctk.CTkButton):
                     cmd = buttons[i]._command
                     buttons[i].configure(command = partial(self.click, i, cmd))
@@ -934,6 +960,10 @@ class customcustomtkinterutil:
             #set the designated command for buttonframe and ctkbutton
 
         def click(self, i: int, button_command: callable = None, e: any = None):
+            if self._buttons[i] is self.active and self._active_double_click_nullified:
+                return
+            #cancel the command if the button itself is the active
+
             if button_command is not None:
                 button_command()
             #actual command of a button

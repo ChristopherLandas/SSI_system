@@ -17,6 +17,7 @@ from PIL import Image
 import copy
 import network_socket_util as nsu
 import json
+from popup import dashboard_popup
 
 from popup import preview_pdf_popup as ppdfp
 
@@ -681,12 +682,15 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             super().__init__(master, corner_radius= 0, fg_color="transparent")
 
             global IP_Address, PORT_NO
-
+            self.width = self.winfo_screenwidth()
+            self.height = self.winfo_screenheight()
             self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(15,15))
             self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
 
             def hide():
                 self.place_forget()
+
+            self._master = master
 
             self.main_frame = ctk.CTkFrame(self, width=width*0.75, height=height*0.75, corner_radius=0)
             self.main_frame.pack()
@@ -735,9 +739,10 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
         def update_treeview(self):
             self.sched_treeview.update_table(database.fetch_data(sql_commands.get_all_schedule))
 
-        def resched_btn_callback(self):
+        def resched_btn_callback(self, _: any = None):
             if self.sched_treeview.get_selected_data():
-                pass
+                print(self.sched_treeview.get_selected_data())
+                dashboard_popup.rescheduling_service_info(self  , (self.width, self.height)).place(relx = .5, rely = .5, anchor = 'c', uid= self.sched_treeview.get_selected_data()[0])
                 #code for reshceduling here
             else:
                 messagebox.showerror("Unable to Proceed", "Select a service to resched", parent = self)
@@ -767,7 +772,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def item_proceed(_: any = None):
                 if self.item_treeview.get_selected_data() or self.service_treeview.get_selected_data():
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
-                    #print(data)
+                    print(data)
                     add_data = (data[1], data[3], data[3])
                     #print(add_data)
                     if data[1] in [s[0] for s in root_treeview._data]: # if there's existing record
@@ -820,15 +825,19 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
                         import serviceAvailing
                         def proceed_command(data):
                             self._service_dict[label_text] = data
-                        
+
                         new_button = ctk.CTkButton(data_frames, corner_radius= 0, anchor= 'w', font=self.service_treeview.row_font,
-                                                   text="  "+label_text, width = root_treeview.column_widths[1],
-                                                   command= lambda: serviceAvailing.pets(root_treeview.master.master, spinner.value, label_text, [s[1] for s in self.client],
-                                                                                         proceed_command, None, width=width, height=height,fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
+                                                   text="  "+label_text, width = root_treeview.column_widths[1])
+                        def temp_command():
+                            new_button.configure(state = ctk.DISABLED)
+                            serviceAvailing.pets(root_treeview.master.master, spinner.value, label_text, [s[1] for s in self.client],
+                                                 proceed_command, None, width=width, height=height,fg_color= 'transparent').place(relx = .5, rely = .5, anchor = 'c',
                                                                                                                                                         service_dict= self._service_dict,
                                                                                                                                                         root_treeview=root_treeview,
                                                                                                                                                         change_total_val_serv_callback= self.change_total_val_serv_callback,
-                                                                                                                                                        master_frame= data_frames))
+                                                                                                                                                        master_frame= data_frames,
+                                                                                                                                                        master_btn= new_button)
+                        new_button.configure(command = temp_command)
                         #make a button
                         for i in data_frames.winfo_children():
                             i.pack_forget()
@@ -1238,16 +1247,17 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
 
             def item_proceed(_: any = None):
                 selected_item = self.item_treeview.get_selected_data()
+                #print(selected_item)
                 if selected_item:
                     items_in_billing = [s[0] for s in root_treeview._data]
-                    if selected_item[0] in items_in_billing:
-                        frame:cctk.ctkButtonFrame = root_treeview.data_frames[items_in_billing.index(selected_item[0])]
+                    if selected_item[1] in items_in_billing:
+                        frame:cctk.ctkButtonFrame = root_treeview.data_frames[items_in_billing.index(selected_item[1])]
                         spinner: cctk.cctkSpinnerCombo = frame.winfo_children()[-3].winfo_children()[0]
                         spinner.change_value()
                     else:
-                        root_treeview.add_data((selected_item[0], selected_item[2], 1))
+                        root_treeview.add_data((selected_item[1], selected_item[3], 1))
                         children_frames = root_treeview.data_frames[-1].winfo_children()
-                        children_frames[-3].winfo_children()[-1].configure(value = 1, val_range = (1, selected_item[1]))
+                        children_frames[-3].winfo_children()[-1].configure(value = 1, val_range = (1, selected_item[2]))
                     self.place_forget()
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.815, height=height*0.875, corner_radius=0,fg_color=Color.White_Color[3])
@@ -1259,20 +1269,21 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            ctk.CTkLabel(self.top_frame, text='Particulars', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
+            ctk.CTkLabel(self.top_frame, text='ADD ITEM', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=self.reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
             
-            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-            self.content_frame.grid(row=1, column=0,columnspan=2, sticky="nsew")
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.content_frame.grid(row=1, column=0,columnspan=2, sticky="nsew", padx=width*0.005, pady=width*0.005)
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_rowconfigure(0, weight=1)
                 
-            self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0)
+            self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0, fg_color=Color.White_Platinum)
             self.item_frame.pack_propagate(0)
-            self.item_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005),pady=(height * 0.005, height*0.01))
+            self.item_frame.grid(row=0, column=0, sticky="nsew",padx=width*0.005, pady=width*0.005)
             
             self.data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.4, width=width*0.8,double_click_command=item_proceed, column_format=f"/No:{int(width*.025)}-#r/ItemName:x-tl/Stocks:{int(width*.075)}-tr/Price:x-tr!30!30",)
+            self.item_treeview = cctk.cctkTreeView(self.item_frame, data=self.data, height=height*0.8, width=width*0.795,double_click_command=item_proceed, 
+                                                   column_format=f"/No:{int(width*.035)}-#r/ItemBrand:{int(width*.1)}-tl/ItemDescpription:x-tl/Stocks:{int(width*.075)}-tr/Price:{int(width*.115)}-tr!30!30",)
             self.item_treeview.pack()
             
         def reset(self):
@@ -1287,7 +1298,9 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, service_dict:
         
         def update_items_stocks(self):
             data = database.fetch_data(sql_commands.get_item_and_their_total_stock, None)
-            self.item_treeview.update_table(data)
+            self.data = [(data[0], f"{data[1]} ({data[2]})") + data[3:] if data[2] else (data[0], data[1], ) + data[3:] for data in data]
+            print(self.data)
+            self.item_treeview.update_table(self.data)
         
         def place_forget(self):
             if self.item_treeview.data_grid_btn_mng.active:
@@ -1319,6 +1332,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
                     messagebox.showerror('Cannot Proceed', "Cannot proceed with an empty content", parent = self)
                     return
                 for li in self.transact_treeview._data:
+                    #add_additional_in_invoice = "INSERT INTO invoice_item_content VALUES(?, ?, ?, ?, ?, 0)"
                     if not li[0] in self.enlisted_services:
                         if li[0] in self.enlisted_items:
                             index = self.enlisted_items.index(li[0])
@@ -1326,7 +1340,7 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
                                 database.exec_nonquery([[sql_commands.update_existing_item_in_invoice, (li[2] ,self._uid, li[0])]])
                             self.enlisted_items.pop(index)
                         else:
-                            uid = database.fetch_data(sql_commands.get_uid, (li[0], ))[0][0]
+                            uid = database.fetch_data(sql_commands.get_uid, split_unit(li[0]))[0][0] if len(split_unit(li[0])) == 2  else database.fetch_data(sql_commands.get_uid_null_unit, (li[0], ))[0][0]
                             database.exec_nonquery([[sql_commands.add_additional_in_invoice, (self._uid, uid, li[0], li[2], price_format_to_float(li[1][1:]))]])
                 #modifying the item
 
@@ -1551,6 +1565,7 @@ def show_payment_proceed(master, info:tuple,):
                 #record the services from within the transaction
 
                 for _item in item:
+                    print(_item)
                     does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (_item[1], ))[0][0])
                     quantity_needed = _item[3]
                     stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_expiry if does_expire
@@ -1631,8 +1646,14 @@ def show_payment_proceed(master, info:tuple,):
                                         title="Transaction Receipt Viewer", is_receipt=1)
             #Payment Callback
             def payment_callback(var, index, mode):
-                if self.payment_var.get().isdigit():
-                    self.payment_total.configure(text=f"{'₱{:0,.2f}'.format(int(self.payment_var.get()))}")
+                if re.search(r'[0-9\.]$', self.payment_entry.get() or "") is None and self.payment_entry._is_focused and self.payment_entry.get():
+                        l = len(self.payment_entry.get())
+                        self.payment_entry.delete(l-1, l)
+                        
+                payment = 0 if self.payment_entry.get() == '' else self.payment_entry.get()
+                
+                self.payment_total.configure(text=f"{'₱{:0,.2f}'.format(float(payment))}")
+                self.change_total.configure(text=f"₱0.00") if float(payment) - price_format_to_float(self.grand_total._text[1:]) <= 0 else self.change_total.configure(text=f"{'₱{:0,.2f}'.format(float(payment) - price_format_to_float(self.grand_total._text[1:]))}")
                     
             self.payment_var = ctk.StringVar()
             

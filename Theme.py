@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from PIL import Image
 import screeninfo
+import copy
+
 [print(screen) for screen in screeninfo.get_monitors()]
 class Color:
     White_Lotion = "#FCFCFC"
@@ -71,6 +73,8 @@ class Color:
     Test_Color_Blue = 'blue'
     Test_Color_Yellow = 'yellow'
     Test_Color_Green = 'green'
+    
+    Green_Button_Hover_Color = "#599749"
 #TEST ONLY
 #region icons
 class Icons:
@@ -139,8 +143,6 @@ class Icons:
     view_icon = ctk.CTkImage(light_image= Image.open("image/view.png"), size=(25,25))
     
 #endregion
-<<<<<<< HEAD
-=======
     
     zoom_in_icon = ctk.CTkImage(light_image= Image.open("image/zoomin.png"), size=(25,25))
     zoom_out_icon = ctk.CTkImage(light_image= Image.open("image/zoomout.png"), size=(25,25))
@@ -165,4 +167,13 @@ class Icons:
     inventory_status = ctk.CTkImage(light_image= Image.open("image/inventory_flow.png"), size=(30,30)) 
     
     
-    
+    @classmethod
+    def get_image(cls, image_name:str, size:tuple=None):
+        image = getattr(cls, image_name, None)
+        if image is not None:
+            if size is not None:
+                _image = copy.deepcopy(image)
+                _image.configure(size=(size[0], size[1]))
+            return _image
+        else:
+            return None

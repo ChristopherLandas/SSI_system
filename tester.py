@@ -1,7 +1,7 @@
 #from typing import Callable, Optional, Tuple, Union
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import notif_popup_entities as ntf
+from popup import notif_popup_entities as ntf, service_popup as svc_p
 #from decimal import Decimal
 from util import *
 #import sql_commands
@@ -90,8 +90,30 @@ class body(ctk.CTk):
                    LEFT JOIN transaction_record\
                        ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
                    GROUP BY item_general_info.UID;"
-        for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
-            print(b)
+        '''for b in[database.exec_nonquery([["INSERT INTO item_statistic_info VALUES (?, ?)", s]]) for s in database.fetch_data(command)]:
+            print(b)'''
+        
+        '''test = svc_p.calendar_with_scheduling(self, self.screen)
+        test.place(relx = .5, rely = .5, anchor = 'c')'''
+
+        import socket
+
+        def get_ethernet_ip():
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect(("8.8.8.8", 80))
+                ethernet_ip = s.getsockname()[0]
+                s.close()
+                return ethernet_ip
+            except socket.error:
+                return None
+
+        ethernet_ip = get_ethernet_ip()
+
+        if ethernet_ip:
+            print("Ethernet IP Address:", ethernet_ip)
+        else:
+            print("Unable to retrieve Ethernet IP address.")
         
         self.mainloop()
 body()

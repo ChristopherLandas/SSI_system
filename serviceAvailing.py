@@ -9,12 +9,14 @@ from tkinter import messagebox
 import re
 from util import database
 from util import *
+from popup import service_popup
 
 
 class pet_info_frame(ctk.CTkFrame):
     def __init__(self, master: any, title:str, name_select_callback: callable, name_selection:list = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
         #self.pack_propagate(0)
+        self._master = master
         self._title = title
         self._corner_radius = 0
         self._fg_color= Color.White_Lotion
@@ -53,8 +55,11 @@ class pet_info_frame(ctk.CTkFrame):
         self.first_date_entry = ctk.CTkLabel(self.sub_frame, width=width*0.185,  height=height*0.055, text="Set Date", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5)
         self.first_date_entry.grid(row=1, column=1, sticky="nsew", pady=(width*0.005,0)) 
         
+        self.first_date_scheduler = service_popup.calendar_with_scheduling(master.master.master.master.master.master, (width, height), self.first_date_entry, date_format= 'word')
+
         self.first_date_btn = ctk.CTkButton(self.sub_frame, text="", image=self.calendar, height=height*0.055, width=height*0.055,
-                                            command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
+                                            command= lambda: self.first_date_scheduler.place(relx = .5, rely = .5, anchor = 'c'))
+        #                                    command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="word", min_date=datetime.datetime.now()))
         self.first_date_btn.grid(row=1,column=2, sticky="w", pady=(width*0.005,0))
         #enable this part when service requires multiple days
         
@@ -63,7 +68,8 @@ class pet_info_frame(ctk.CTkFrame):
         if data_format == 'metadata':
             return {'name': self.name.get(), 'schedule': self.date.get()}
         elif data_format == 'tuple':
-            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
+            #d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%B %d, %Y").strftime('%Y-%m-%d')
+            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%B %d, %Y").strftime('%Y-%m-%d')
             return (self.name.get(), d_temp)
         
 class pet_period_info_frame(ctk.CTkFrame):
@@ -107,16 +113,21 @@ class pet_period_info_frame(ctk.CTkFrame):
         self.first_date_entry = ctk.CTkLabel(self.sub_frame, width=width*0.185,  height=height*0.055, text="Set Date", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5)
         self.first_date_entry.grid(row=1, column=1, sticky="nsew", pady=(width*0.005,0)) 
         
+        self.first_date_scheduler = service_popup.calendar_with_scheduling(master.master.master.master.master.master, (width, height), self.first_date_entry, date_format= 'word' ,command = self.reset_second_date)
+
         self.first_date_btn = ctk.CTkButton(self.sub_frame, text="", image=self.calendar, height=height*0.055, width=height*0.055,
-                                            command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
+                                            command= lambda: self.first_date_scheduler.place(relx = .5, rely = .5, anchor = 'c'))
+                                            #command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
         self.first_date_btn.grid(row=1,column=2, sticky="w", pady=(width*0.005,0))
         #enable this part when service requires multiple days
         ctk.CTkLabel(self.sub_frame, text ="up to", font=("DM Sans Medium",14), width=width*0.015).grid(row=2, column=1,sticky="nsew")
         self.second_date_entry = ctk.CTkLabel(self.sub_frame, width=width*.185,  height=height*0.055, text="Set Date", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5)
         self.second_date_entry.grid(row=3, column=1, sticky="nsew", pady=(width*0.005,0)) 
+        self.second_date_scheduler = service_popup.calendar_with_scheduling(master.master.master.master.master.master, (width, height), self.second_date_entry, date_format= 'word')
         
         self.second_date_btn = ctk.CTkButton(self.sub_frame, text="", image=self.calendar, height=height*0.055, width=height*0.055,
-                                            command=lambda:cctk.tk_calendar(self.second_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.strptime(self.first_date_entry._text, '%m-%d-%Y') if not self.first_date_entry._text.startswith("Set") else datetime.datetime.now()))
+                                            command= lambda: self.second_date_scheduler.place(relx = .5, rely = .5, anchor = 'c', date = self.first_date_scheduler.cal.get_date()))
+                                            #command=lambda:cctk.tk_calendar(self.second_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.strptime(self.first_date_entry._text, '%m-%d-%Y') if not self.first_date_entry._text.startswith("Set") else datetime.datetime.now()))
         self.second_date_btn.grid(row=3,column=2, sticky="w", pady=(width*0.005,0))
         
     '''functions'''
@@ -124,9 +135,12 @@ class pet_period_info_frame(ctk.CTkFrame):
         if data_format == 'metadata':
             return {'name': self.name.get(), 'schedule': self.date.get()}
         elif data_format == 'tuple':
-            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
-            dt_temp = None if self.second_date_entry._text == "Set Date" else datetime.datetime.strptime(self.second_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
+            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%B %d, %Y").strftime('%Y-%m-%d')
+            dt_temp = None if self.second_date_entry._text == "Set Date" else datetime.datetime.strptime(self.second_date_entry._text, "%B %d, %Y").strftime('%Y-%m-%d')
             return (self.name.get(), d_temp, dt_temp)
+    
+    def reset_second_date(self):
+        self.second_date_entry.configure(Text = "Set Date")
         
 class pet_multiple_period_info_frame(ctk.CTkFrame):
     def __init__(self, master: any, title:str, name_select_callback: callable, name_selection:list = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -169,8 +183,11 @@ class pet_multiple_period_info_frame(ctk.CTkFrame):
         self.first_date_entry = ctk.CTkLabel(self.sub_frame, width=width*0.185,  height=height*0.055, text="Set Date", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5)
         self.first_date_entry.grid(row=1, column=1, sticky="nsew", columnspan=4, pady=(width*0.005,0)) 
         
+        self.first_date_scheduler = service_popup.calendar_with_scheduling(master.master.master.master.master.master, (width, height), self.first_date_entry, date_format= 'word')
+
         self.first_date_btn = ctk.CTkButton(self.sub_frame, text="", image=self.calendar, height=height*0.055, width=height*0.055,
-                                            command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
+                                            command= lambda: self.first_date_scheduler.place(relx = .5, rely = .5, anchor = 'c'))
+                                            #command=lambda:cctk.tk_calendar(self.first_date_entry, "%s", date_format="numerical", min_date=datetime.datetime.now()))
         self.first_date_btn.grid(row=1,column=5, sticky="e", pady=(width*0.005,0))
         #enable this part when service requires multiple days
         ctk.CTkLabel(self.sub_frame, text ="Scheduled every", font=("DM Sans Medium",14)).grid(row=2, column=1, columnspan=5,sticky="nsew")
@@ -202,7 +219,7 @@ class pet_multiple_period_info_frame(ctk.CTkFrame):
         if data_format == 'metadata':
             return {'name': self.name.get(), 'schedule': self.date.get()}
         elif data_format == 'tuple':
-            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%m-%d-%Y").strftime('%Y-%m-%d')
+            d_temp = None if self.first_date_entry._text == "Set Date" else datetime.datetime.strptime(self.first_date_entry._text, "%B %d, %Y").strftime('%Y-%m-%d')
             prd_temp = self.period_days.get()
             ins_ct = self.instance_count_days.get()
             return (self.name.get(), d_temp, prd_temp, ins_ct)
@@ -267,6 +284,7 @@ class pets(ctk.CTkFrame):
             quan_list: list = []
             for temp_data in self.get_data():
                 if self._type == 1:
+                    print(temp_data)
                     d2 = datetime.datetime.strptime(temp_data[2], '%Y-%m-%d')
                     d1 = datetime.datetime.strptime(temp_data[1], '%Y-%m-%d')
                     quan_list.append(((d2-d1).days + 1))
@@ -295,7 +313,6 @@ class pets(ctk.CTkFrame):
 
                 frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback = decrease_callback, increase_callback = increase_callback)
                         
-                #frame_spinner.configure(command = new_frame_spn_cmd)
                 total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
@@ -359,11 +376,12 @@ class pets(ctk.CTkFrame):
             data.append(i.get_data(data_format='tuple'))
         return data
     
-    def place(self, service_dict: dict, root_treeview: tuple, change_total_val_serv_callback: callable, master_frame: any, **kwargs):
+    def place(self, service_dict: dict, root_treeview: tuple, change_total_val_serv_callback: callable, master_frame: any, master_btn: ctk.CTkButton, **kwargs):
         self.parent_frame_tab = master_frame
         self._root_treeview = root_treeview
         self.parent_service_dict = service_dict
         self.change_total_val_serv_callback = change_total_val_serv_callback
+        self.master_btn = master_btn
         frame_spinner: cctk.cctkSpinnerCombo = self.parent_frame_tab.winfo_children()[2].winfo_children()[0]
         temp_cmd = frame_spinner._command
 
@@ -379,12 +397,12 @@ class pets(ctk.CTkFrame):
             for i in range(len(service_dict[self._title])):
                 self.frames[i].name.set(service_dict[self._title][i][0])
                 self.frames[i].name_select_callback(self.frames[i], self.frames[i].name.get())
-                d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime("%m-%d-%Y")
+                d_temp = "Set Date" if service_dict[self._title][i][1] is None else datetime.datetime.strptime(service_dict[self._title][i][1], "%Y-%m-%d").strftime('%B %d, %Y')
                 self.frames[i].first_date_entry.configure(text =  d_temp)
 
                 if self._type == 1:
                     temp: pet_period_info_frame = self.frames[i]
-                    snd_temp = "Set Date" if service_dict[self._title][i][2] is None else datetime.datetime.strptime(service_dict[self._title][i][2], "%Y-%m-%d").strftime("%m-%d-%Y")
+                    snd_temp = "Set Date" if service_dict[self._title][i][2] is None else datetime.datetime.strptime(service_dict[self._title][i][2], "%Y-%m-%d").strftime('%B %d, %Y')
                     temp.second_date_entry.configure(text = snd_temp)
                 elif self._type == 2:
                     temp: pet_multiple_period_info_frame = self.frames[i]
@@ -394,6 +412,10 @@ class pets(ctk.CTkFrame):
                     temp.instance_count_days.insert(0, service_dict[self._title][i][3])
         #for reentring the elements based on the type of service
         return super().place(**kwargs)
+    
+    def place_forget(self):
+        self.master_btn.configure(state = ctk.NORMAL)
+        return super().place_forget()
     
 """ class body(ctk.CTk):
     def __init__(self):
