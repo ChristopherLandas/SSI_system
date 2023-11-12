@@ -170,6 +170,11 @@ def list_filterer(source: list, reference: list):
 def remove_unit(source: str,):
     return re.sub(r'\([^)]*\)', '', source).strip()
 
+def custom_sort(data, key):
+    #def custom_sort_key(item):
+    #    return (key.get(item[-1], float('inf')), item[-1])
+    return sorted(data, key=lambda item : (key.get(item[-1], float('inf')), item[-1]))
+
 def split_unit(source: str):
     res = re.match(r'^(.*?)\s*(\((.*?)\))?$', source)
     return (res.group(1), res.group(3)) if res.group(3) else (res.group(1),)
@@ -220,15 +225,19 @@ def decode_action(type_code: str):
         return f'Receive item {temp[-1]}'
     if type_code.startswith('TRNM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
+        return f'Cashiered the transaction {temp[-1]}'
     if type_code.startswith('DPSM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
+        return f'Move an item to the disposal, UID: {temp[-1]}'
     if type_code.startswith('DPSO'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
-
-
+        return f'Dispose an item, UID: {temp[-1]}'
+    if type_code.startswith('ADD'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Encode an item, UID: {temp[-1]}'
+    if type_code.startswith('ADDS'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Encode a service, UID: {temp[-1]}'
     
 
 '''def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):

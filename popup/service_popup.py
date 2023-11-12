@@ -23,6 +23,7 @@ def add_service(master, info:tuple, update_callback: callable):
         def __init__(self, master, info:tuple, update_callback: callable):
             width = info[0]
             height = info[1]
+            acc = info[2]
             super().__init__(master, width=width*0.4, height=height*0.55, corner_radius= 0, fg_color='transparent')
             
             self.update_callback = update_callback
@@ -37,6 +38,9 @@ def add_service(master, info:tuple, update_callback: callable):
                 self.category_option.set("Set Category")
                 
             def new_service():
+                if self.service_name_entry.get() == "" or self.category_option.get() == "Set Category" or self.price_entry.get() == "":
+                    messagebox.showerror("Unable to proceed", "Fill all the fields", parent = self)
+                    return
                 a = generateId(initial='S', length=6)
                 
                 if self.service_name_entry.get() == "" and self.price_entry.get() == "" and self.category_option.get() == "Set Category":
@@ -47,6 +51,7 @@ def add_service(master, info:tuple, update_callback: callable):
                     database.exec_nonquery([[sql_commands.insert_service_test, (a, self.service_name_entry.get(), self.price_entry.get(), 
                                                                                 self.category_option.get(), self.radio_var.get(), 1, date.today())]])
                     messagebox.showinfo("Service Added", "New service is added", parent = self)
+                    record_action(acc, action.ADD_SERVICE, action.ADD_SVC % (acc, a))
                     update_callback()
                     reset()
                     

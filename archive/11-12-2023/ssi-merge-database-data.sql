@@ -1,3 +1,10 @@
+-- --------------------------------------------------------
+-- Host:                         127.0.0.1
+-- Server version:               11.1.2-MariaDB - mariadb.org binary distribution
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.3.0.6589
+-- --------------------------------------------------------
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -15,8 +22,9 @@ INSERT INTO `account_access_level` (`usn`, `Dashboard`, `Reception`, `Payment`, 
 	('Chris', 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0),
 	('Chris2', 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0),
 	('Jrizal', 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0),
-	('jayr', 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0);
+	('jayr', 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0);
 
+-- Dumping data for table ssi_merged.acc_cred: ~8 rows (approximately)
 INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('123123', '94bc6207156f186a77106c5c456a80017eff6f8d949265ecf515a4cb3b851eba', '3HCIZ_k8Speg-Ik3Ia2DgA==', NULL),
 	('admin', '0c149295209d5f543cf1ba14956c5c135a78b9b311ad551715899e02c27dc99d', 'rCRF4amTSEOYQjqvWYuI7A==', NULL),
@@ -27,6 +35,7 @@ INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('Jrizal', '4436a253401b8e74a80e7a9a04930e16ae6e37dbc8c36f49f871ead477044f53', '3wbtXJDmSTm98iubl13hLw==', NULL),
 	('jayr', '56a1f73718b12d1a021f12eee52d2d1bbe1e6c067698c27e98c5fdd22fb0a0dd', 'WqMM26lyQDirax7evZgFuQ==', NULL);
 
+-- Dumping data for table ssi_merged.acc_info: ~8 rows (approximately)
 INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('123123', '123123', 'Assisstant', 0),
 	('admin', 'Big Boss 1', 'Owner', 1),
@@ -37,6 +46,7 @@ INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('Jrizal', 'Jose Rizal', 'Assisstant', 0),
 	('jayr', 'jayr', 'Assisstant', 0);
 
+-- Dumping data for table ssi_merged.action_history: ~172 rows (approximately)
 INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`) VALUES
 	(1, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-09-11 23:50:11'),
 	(2, 'aila', 'invoice', 'INVM/aila/Pec804', '2023-08-23 15:11:35'),
@@ -248,47 +258,9 @@ INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`
 	(230, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-11-04 02:48:29'),
 	(231, 'admin', 'invoice', 'INVM/admin/23110402', '2023-11-04 02:52:23'),
 	(232, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-11-04 02:52:33'),
-	(233, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-11-04 02:54:00'),
-	(235, 'admin', 'invoice', 'INVM/admin/23110900', '2023-11-09 00:59:29'),
-	(236, 'admin', 'Item Encoding', 'ADD/admin/I00001', '2023-11-09 01:06:21'),
-	(237, 'admin', 'Item Encoding', 'ADD/admin/I0AF12', '2023-11-09 01:06:45'),
-	(238, 'jayr', 'invoice', 'INVM/jayr/23110901', '2023-11-09 04:09:53'),
-	(239, 'jayr', 'invoice', 'INVM/jayr/23111000', '2023-11-10 02:16:21'),
-	(240, 'jayr', 'invoice', 'INVM/jayr/23111004', '2023-11-10 02:16:51'),
-	(241, 'jayr', 'invoice', 'INVM/jayr/23111100', '2023-11-11 04:11:07'),
-	(242, 'jayr', 'Transaction Record', 'TRNM/jayr/___', '2023-11-11 04:11:23'),
-	(243, 'jayr', 'invoice', 'INVM/jayr/23111101', '2023-11-11 04:12:17'),
-	(244, 'jayr', 'Transaction Record', 'TRNM/jayr/___', '2023-11-11 04:12:31'),
-	(245, 'jayr', 'invoice', 'INVM/jayr/23111102', '2023-11-11 04:13:53'),
-	(246, 'jayr', 'Transaction Record', 'TRNM/jayr/165', '2023-11-11 04:14:02'),
-	(247, 'jayr', 'Service Encoding', 'ADDS/S77146/jayr', '2023-11-11 04:23:48'),
-	(248, 'jayr', 'Service Encoding', 'ADDS/S416f4/jayr', '2023-11-11 04:25:53'),
-	(249, 'jayr', 'Service Encoding', 'ADDS/S6f6ed/jayr', '2023-11-11 04:25:58'),
-	(250, 'jayr', 'Service Encoding', 'ADDS/S6034e/jayr', '2023-11-11 04:26:22'),
-	(251, 'jayr', 'invoice', 'INVM/jayr/23111200', '2023-11-12 04:55:16'),
-	(252, 'jayr', 'Transaction Record', 'TRNM/jayr/166', '2023-11-12 04:57:13'),
-	(253, 'jayr', 'Transaction Record', 'TRNM/jayr/167', '2023-11-12 05:32:48'),
-	(254, 'jayr', 'Transaction Record', 'TRNM/jayr/168', '2023-11-12 05:56:33'),
-	(255, 'jayr', 'Transaction Record', 'TRNM/jayr/169', '2023-11-12 07:34:02'),
-	(256, 'jayr', 'Transaction Record', 'TRNM/jayr/170', '2023-11-12 07:44:47'),
-	(257, 'jayr', 'invoice', 'INVM/jayr/23111201', '2023-11-12 07:45:17'),
-	(258, 'jayr', 'Transaction Record', 'TRNM/jayr/171', '2023-11-12 07:45:38'),
-	(259, 'jayr', 'invoice', 'INVM/jayr/23111202', '2023-11-12 08:01:15'),
-	(260, 'jayr', 'Transaction Record', 'TRNM/jayr/172', '2023-11-12 08:01:24'),
-	(261, 'jayr', 'invoice', 'INVM/jayr/23111203', '2023-11-12 08:02:51'),
-	(262, 'jayr', 'Transaction Record', 'TRNM/jayr/173', '2023-11-12 08:03:08'),
-	(263, 'jayr', 'invoice', 'INVM/jayr/23111204', '2023-11-12 08:08:44'),
-	(264, 'jayr', 'Transaction Record', 'TRNM/jayr/174', '2023-11-12 08:09:05'),
-	(265, 'jayr', 'invoice', 'INVM/jayr/23111205', '2023-11-12 08:17:41'),
-	(266, 'jayr', 'Transaction Record', 'TRNM/jayr/175', '2023-11-12 08:18:09'),
-	(267, 'jayr', 'invoice', 'INVM/jayr/23111206', '2023-11-12 08:19:52'),
-	(268, 'jayr', 'Transaction Record', 'TRNM/jayr/176', '2023-11-12 08:20:10'),
-	(269, 'jayr', 'invoice', 'INVM/jayr/23111207', '2023-11-12 08:21:01'),
-	(270, 'jayr', 'invoice', 'INVM/jayr/23111208', '2023-11-12 08:21:18'),
-	(271, 'jayr', 'Transaction Record', 'TRNM/jayr/177', '2023-11-12 08:21:39'),
-	(272, 'jayr', 'Transaction Record', 'TRNM/jayr/178', '2023-11-12 08:23:03'),
-	(273, 'jayr', 'Transaction Record', 'TRNM/jayr/179', '2023-11-12 08:24:05');
+	(233, 'admin', 'Transaction Record', 'TRNM/admin/___', '2023-11-04 02:54:00');
 
+-- Dumping data for table ssi_merged.categories: ~8 rows (approximately)
 INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date_created`, `disabled_by`, `disabled_date`) VALUES
 	('Accessories', 0, 'admin', 1, '2023-10-03 22:14:50', NULL, NULL),
 	('Food', 1, 'admin', 1, '2023-10-03 22:14:52', NULL, NULL),
@@ -299,6 +271,7 @@ INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date
 	('Test005', 1, 'admin', 0, '2023-10-03 22:14:57', 'admin', '2023-10-04 11:39:53'),
 	('Test006', 0, 'admin', 0, '2023-10-03 22:14:58', 'admin', '2023-10-04 11:38:29');
 
+-- Dumping data for table ssi_merged.disposal_history: ~13 rows (approximately)
 INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `initial_quantity`, `Current_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
 	('D2CBCF8C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 12, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
 	('D3843020', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 90, 0, 'Expired', '2023-10-27 00:00:00', NULL, 'admin'),
@@ -314,6 +287,7 @@ INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `in
 	('DE819159', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 247, 0, 'Expired', '2023-10-27 00:00:00', NULL, 'admin'),
 	('DF4A897C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 48, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin');
 
+-- Dumping data for table ssi_merged.invoice_item_content: ~123 rows (approximately)
 INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`) VALUES
 	('Pc9c14', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
 	('P2e8cf', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
@@ -427,11 +401,9 @@ INSERT INTO `invoice_item_content` (`invoice_uid`, `Item_uid`, `item_name`, `qua
 	('23110300', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0),
 	('23110400', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0),
 	('23110401', 'I00002', 'Taglory Rope Dog Leash', 3, 440, 0),
-	('23110402', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0),
-	('23111100', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('23111101', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0),
-	('23111102', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0);
+	('23110402', 'I00002', 'Taglory Rope Dog Leash', 2, 440, 0);
 
+-- Dumping data for table ssi_merged.invoice_record: ~161 rows (approximately)
 INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `payment_date`, `transaction_date`, `State`, `Date_transacted`, `process_type`) VALUES
 	('08282302', 'aila', 'N/A', 1140.15, NULL, '2023-08-28', -1, NULL, 0),
 	('08282303', 'aila', 'N/A', 577.5, NULL, '2023-08-28', 2, '2023-08-29', 0),
@@ -571,7 +543,7 @@ INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `To
 	('23110100', 'admin', 'James Viñas', 1270, '2023-11-01 13:02:51', '2023-11-01', 2, '2023-11-01', 0),
 	('23110101', 'admin', 'James Viñas', 1055, '2023-11-01 13:06:26', '2023-11-01', 2, '2023-11-01', 0),
 	('23110102', 'admin', 'Patrick Feniza', 254, '2023-11-01 21:07:42', '2023-11-01', 2, '2023-11-01', 0),
-	('23110103', 'admin', 'Patrick Feniza', 500, '2023-11-12 06:35:44', '2023-11-01', 1, NULL, 1),
+	('23110103', 'admin', 'Patrick Feniza', 500, NULL, '2023-11-01', 0, NULL, 1),
 	('23110200', 'admin', 'Patrick Feniza', 310, '2023-11-02 00:01:49', '2023-11-02', 2, '2023-11-02', 0),
 	('23110201', 'admin', 'Joze Rizal', 906, '2023-11-02 00:49:17', '2023-11-02', 2, '2023-11-02', 0),
 	('23110202', 'admin', 'Client Name', 800, '2023-11-02 21:33:13', '2023-11-02', 2, '2023-11-02', 0),
@@ -586,25 +558,6 @@ INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `To
 	('23110504', 'admin', 'Client Name', 598, '2023-11-05 19:00:58', '2023-11-05', 2, '2023-11-05', 0),
 	('23110505', 'admin', 'Client Name', 920, '2023-11-05 19:24:47', '2023-11-05', 2, '2023-11-05', 0),
 	('23110600', 'admin', 'Client Name', 796.95, '2023-11-06 00:23:53', '2023-11-06', 2, '2023-11-06', 0),
-	('23110900', 'admin', 'Patrick Feniza', 6000, NULL, '2023-11-09', 0, NULL, 1),
-	('23110901', 'jayr', 'Patrick Feniza', 500, '2023-11-12 06:36:03', '2023-11-09', 2, '2023-11-12', 1),
-	('23111000', 'jayr', 'Patrick Feniza', 500, '2023-11-12 07:35:40', '2023-11-10', 2, '2023-11-12', 1),
-	('23111001', 'jayr', 'Patrick Feniza', 500, '2023-11-12 04:57:49', '2023-11-10', 2, '2023-11-12', 1),
-	('23111002', 'jayr', 'Patrick Feniza', 500, '2023-11-12 04:56:54', '2023-11-10', 2, '2023-11-12', 1),
-	('23111003', 'jayr', 'Patrick Feniza', 500, '2023-11-12 04:55:32', '2023-11-10', 2, '2023-11-12', 1),
-	('23111004', 'jayr', 'Patrick Feniza', 7500, '2023-11-12 08:23:58', '2023-11-10', 2, '2023-11-12', 1),
-	('23111100', 'jayr', 'Patrick Feniza', 522.5, '2023-11-11 04:11:09', '2023-11-11', 2, '2023-11-11', 0),
-	('23111101', 'jayr', 'Patrick Feniza', 522.5, '2023-11-11 04:12:21', '2023-11-11', 2, '2023-11-11', 0),
-	('23111102', 'jayr', 'Client Name', 440, '2023-11-11 04:13:55', '2023-11-11', 2, '2023-11-11', 0),
-	('23111200', 'jayr', 'Patrick Feniza', 3000, '2023-11-12 05:56:19', '2023-11-12', 2, '2023-11-12', 1),
-	('23111201', 'jayr', 'Patrick Feniza', 500, '2023-11-12 07:45:26', '2023-11-12', 2, '2023-11-12', 1),
-	('23111202', 'jayr', 'Patrick Feniza', 500, '2023-11-12 08:01:18', '2023-11-12', 2, '2023-11-12', 1),
-	('23111203', 'jayr', 'Patrick Feniza', 500, '2023-11-12 08:02:59', '2023-11-12', 2, '2023-11-12', 1),
-	('23111204', 'jayr', 'Patrick Feniza', 500, '2023-11-12 08:08:49', '2023-11-12', 2, '2023-11-12', 1),
-	('23111205', 'jayr', 'Patrick Feniza', 2100, '2023-11-12 08:17:50', '2023-11-12', 2, '2023-11-12', 1),
-	('23111206', 'jayr', 'Patrick Feniza', 2500, '2023-11-12 08:19:56', '2023-11-12', 2, '2023-11-12', 1),
-	('23111207', 'jayr', 'Patrick Feniza', 500, '2023-11-12 08:21:29', '2023-11-12', 2, '2023-11-12', 1),
-	('23111208', 'jayr', 'Patrick Feniza', 2500, '2023-11-12 08:21:27', '2023-11-12', 2, '2023-11-12', 1),
 	('P0b8cb', 'aila', 'James V.', 2100, NULL, '2023-08-26', -1, NULL, 0),
 	('P0e4d2', 'aila', 'James V.', 500, NULL, '2023-08-20', 2, '2023-08-22', 0),
 	('P0ebe4', 'aila', 'James V.', 2280.3, NULL, '2023-08-26', 2, '2023-08-26', 0),
@@ -634,6 +587,7 @@ INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `To
 	('Pec804', 'aila', 'Christopher L.', 440, NULL, '2023-08-23', -1, NULL, 0),
 	('Pf6e9c', 'aila', 'N/A', 796.95, NULL, '2023-08-23', 2, '2023-08-23', 0);
 
+-- Dumping data for table ssi_merged.invoice_service_content: ~65 rows (approximately)
 INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
 	('P1d58d', 'S00001', 'Grooming', 'P1ec18', 'Brutus', '2023-08-19', 500, 0, NULL, NULL, NULL),
 	('P3d236', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-08-19', 500, 0, NULL, NULL, NULL),
@@ -706,24 +660,9 @@ INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_na
 	('23110202', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-02', 3000, 0, NULL, 12, 2),
 	('23110203', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, NULL, NULL, NULL),
 	('23110204', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, NULL, NULL, NULL),
-	('23110204', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, NULL, NULL, NULL),
-	('23110900', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-09', 6000, 0, NULL, 2, 4),
-	('23110901', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-09', 500, 0, NULL, NULL, NULL),
-	('23111000', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-10', 500, 0, NULL, NULL, NULL),
-	('23111001', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-10', 500, 0, NULL, NULL, NULL),
-	('23111002', 'S00001', 'Grooming', 'P62fd9', 'Clarence', '2023-11-10', 500, 0, NULL, NULL, NULL),
-	('23111003', 'S00001', 'Grooming', 'P7b350', 'Roko', '2023-11-10', 500, 0, NULL, NULL, NULL),
-	('23111004', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-10', 7500, 0, NULL, 5, 5),
-	('23111200', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-12', 3000, 0, NULL, 1, 2),
-	('23111201', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, NULL, NULL, NULL),
-	('23111202', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-12', 500, 0, NULL, NULL, NULL),
-	('23111203', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-12', 500, 0, NULL, NULL, NULL),
-	('23111204', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-12', 500, 0, NULL, NULL, NULL),
-	('23111205', 'S00004', 'Yeast Infection Treatment', '001431', 'Muning', '2023-11-12', 2100, 0, NULL, NULL, NULL),
-	('23111206', 'S00003', 'Papiloma Vaccine', '001431', 'Muning', '2023-11-12', 2500, 0, NULL, NULL, NULL),
-	('23111207', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, NULL, NULL, NULL),
-	('23111208', 'S00003', 'Papiloma Vaccine', '001431', 'Muning', '2023-11-12', 2500, 0, NULL, NULL, NULL);
+	('23110204', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-02', 500, 0, NULL, NULL, NULL);
 
+-- Dumping data for table ssi_merged.item_general_info: ~28 rows (approximately)
 INSERT INTO `item_general_info` (`UID`, `name`, `Category`, `brand`, `unit`, `added_by`, `added_date`, `updated_by`, `updated_date`) VALUES
 	('I00001', 'MayPaw Heavy Duty Rope Dog Leash', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 10:07:46', NULL, NULL),
 	('I00002', 'Taglory Rope Dog Leash', 'Accessories', 'TEST', NULL, 'admin', '2023-10-22 10:07:46', NULL, NULL),
@@ -736,12 +675,14 @@ INSERT INTO `item_general_info` (`UID`, `name`, `Category`, `brand`, `unit`, `ad
 	('I0AF12', 'Dog Paracetamol', 'Medicine', 'Pfizer', '50mg', 'admin', '2023-11-01 00:00:00', NULL, NULL),
 	('I37837', 'Dog Paracetamol', 'Medicine', 'Pfizer', '150mg', 'admin', '2023-11-01 00:00:00', NULL, NULL);
 
+-- Dumping data for table ssi_merged.item_inventory_info: ~47 rows (approximately)
 INSERT INTO `item_inventory_info` (`id`, `UID`, `Stock`, `Expiry_Date`, `state`, `added_date`) VALUES
-	(56, 'I00002', 43, NULL, 1, '2023-10-29'),
+	(56, 'I00002', 44, NULL, 1, '2023-10-29'),
 	(58, 'I00004', 44, NULL, 1, '2023-10-29'),
 	(59, 'I00005', 132, '2023-10-26', -1, '2023-10-29'),
 	(60, 'I00005', 43, '2023-08-31', -1, '2023-10-29'),
 	(61, 'I00006', 210, NULL, 1, '2023-10-29'),
+	(65, 'I00001', 0, NULL, 1, '2023-10-29'),
 	(68, 'I00004', 5, NULL, 1, '2023-10-29'),
 	(69, 'I00004', 3, NULL, 1, '2023-10-29'),
 	(70, 'I00004', 3, NULL, 1, '2023-10-29'),
@@ -758,9 +699,7 @@ INSERT INTO `item_inventory_info` (`id`, `UID`, `Stock`, `Expiry_Date`, `state`,
 	(92, 'I00005', 13, '2023-12-31', 1, '2023-10-29'),
 	(93, 'I00005', 3, '2023-11-04', 1, '2023-10-29'),
 	(104, 'I0AF12', 70, '2028-11-08', 1, '2023-11-01'),
-	(105, 'I37837', 45, '2026-11-12', 1, '2023-11-01'),
-	(107, 'I00001', 0, NULL, 1, '2023-11-09'),
-	(108, 'I0AF12', 2, '2023-11-09', 1, '2023-11-09');
+	(105, 'I37837', 45, '2026-11-12', 1, '2023-11-01');
 
 INSERT INTO `item_settings` (`UID`, `Cost_Price`, `Markup_Factor`, `Reorder_factor`, `Crit_factor`, `Safe_stock`, `rate_mode`) VALUES
 	('I00001', 475, 0.1, 0.85, 0.5, 50, 0),
@@ -784,6 +723,7 @@ INSERT INTO `item_statistic_info` (`UID`, `month`, `monthly_average`, `rate_symb
 	('I0AF12', 10, 0, '-'),
 	('I37837', 10, 0, '-');
 
+-- Dumping data for table ssi_merged.item_supplier_info: ~27 rows (approximately)
 INSERT INTO `item_supplier_info` (`UID`, `supp_id`) VALUES
 	('I0AE71', 'SU000001'),
 	('I0AF12', 'SU000001'),
@@ -795,6 +735,7 @@ INSERT INTO `item_supplier_info` (`UID`, `supp_id`) VALUES
 	('I00005', 'SU000004'),
 	('I00006', 'SU000004');
 
+-- Dumping data for table ssi_merged.item_transaction_content: ~130 rows (approximately)
 INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_name`, `quantity`, `price`, `deduction`, `state`) VALUES
 	('0', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 2, 522.5, 0, 1),
 	('2', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1),
@@ -927,11 +868,9 @@ INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_nam
 	('163', 'I1F3E7', '1000 (100mg)', 1, 200, 0, 1),
 	('165', 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter (100mg)', 1, 796.95, 0, 1),
 	('158', 'Ia71e7', 'Kawaki wo ameku (100mg)', 3, 244.78, 0, 1),
-	('158', 'Iaad08', 'Test Item', 5, 110, 0, 1),
-	('163', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
-	('164', 'I00001', 'MayPaw Heavy Duty Rope Dog Leash', 1, 522.5, 0, 1),
-	('165', 'I00002', 'Taglory Rope Dog Leash', 1, 440, 0, 1);
+	('158', 'Iaad08', 'Test Item', 5, 110, 0, 1);
 
+-- Dumping data for table ssi_merged.login_report: ~4 rows (approximately)
 INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'admin', '2023-06-07 23:50:59'),
 	('admin', 'admin', '2023-06-07 23:54:09'),
@@ -939,6 +878,7 @@ INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'chris', '2023-07-05 17:36:56'),
 	(NULL, '123', '2023-11-02 19:11:55');
 
+-- Dumping data for table ssi_merged.log_history: ~33 rows (approximately)
 INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('Chris2', '2023-08-31', '00:05:36', '00:05:36'),
 	('admin', '2023-09-11', '23:28:25', '23:28:25'),
@@ -979,16 +919,15 @@ INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('admin', '2023-11-02', '05:50:03', '05:50:03'),
 	('admin', '2023-11-02', '05:53:46', '05:55:44');
 
-INSERT INTO `partially_recieving_item` (`id`, `NAME`, `stock`, `supp_name`, `exp_date`, `reciever`, `date_recieved`) VALUES
-	('R21FB5', 'MayPaw Heavy Duty Rope Dog Leash', 2, 'DK Corporation', NULL, 'admin', '2023-11-09 00:00:00'),
-	('RB1DC8', 'Dog Paracetamol (50mg)', 2, 'ABC Corporation', NULL, 'admin', '2023-11-09 00:00:00');
 
+-- Dumping data for table ssi_merged.pet_breed: ~4 rows (approximately)
 INSERT INTO `pet_breed` (`type`, `breed`) VALUES
 	('Dog', 'Aspin'),
 	('Cat', 'Puspin'),
 	('test1', 'test'),
 	('Cat', 'Siamese');
 
+-- Dumping data for table ssi_merged.pet_info: ~20 rows (approximately)
 INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `weight`, `bday`) VALUES
 	('001431', 'Muning', 1, 'Puspin', 'Cat', 'Male', '2.5', '2023-08-16'),
 	('012633', 'Bantay', 6, 'Female', 'Dog', 'Male', '50.2', '2023-08-25'),
@@ -996,7 +935,6 @@ INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `wei
 	('143436', 'Gabi', 2, 'Puspin', 'Cat', 'Male', '3', '2023-08-23'),
 	('234729', 'Miru', 5, 'Puspin', 'Cat', 'Female', '1.2', '2022-12-09'),
 	('234905', 'TJ', 1, 'Male', 'Dog', 'Ewan', '1', '2023-09-01'),
-	('P032e8', 'Check', 1, 'Puspin', 'Cat', 'Male', '677', '2023-11-11'),
 	('P1ec18', 'Brutus', 5, 'Mini Pin', '', 'Male', '', '2023-07-07'),
 	('P40641', 'jam', 5, 'siames', 'Cat', 'Male', '1', '2023-09-12'),
 	('P482dc', 'Whitey', 3, 'Bulldog', '', 'Female', '', '2023-06-23'),
@@ -1012,6 +950,7 @@ INSERT INTO `pet_info` (`id`, `p_name`, `owner_id`, `breed`, `type`, `sex`, `wei
 	('Pe3b3d', 'John', 3, 'Siamese', 'Cat', 'Male', '1', '2023-09-12'),
 	('Pfcad9', 'Lina', 2, 'Short Hair', 'Cat', 'Female', '1.5', '2023-09-07');
 
+-- Dumping data for table ssi_merged.pet_owner_info: ~11 rows (approximately)
 INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_number`) VALUES
 	(1, 'Patrick Feniza', 'Diliman, Quezon City', '09874561234'),
 	(2, 'Davin Ferrancullo', 'Almar, Caloocan City', '09478056123'),
@@ -1025,6 +964,7 @@ INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_numb
 	(29, 'Clarence Ugay', 'Almar, Caloocan City', '0923902397'),
 	(30, 'Tyrone Tuazon', 'STI College Fairview', '09831809378');
 
+-- Dumping data for table ssi_merged.receiving_history_info: ~66 rows (approximately)
 INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receiver`, `expiry`, `date_received`) VALUES
 	('R20205', 10, 'admin', NULL, '2023-10-08 15:11:26'),
 	('R6B64B', 5, 'admin', NULL, '2023-10-08 15:20:51'),
@@ -1092,10 +1032,9 @@ INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receive
 	('R535AC', 20, 'admin', NULL, '2023-10-22 20:36:05'),
 	('R64855', 4, 'admin', NULL, '2023-10-22 20:37:02'),
 	('R443FA', 10, 'admin', NULL, '2023-10-22 21:22:25'),
-	('RF6EC1', 5, 'admin', NULL, '2023-10-29 19:33:51'),
-	('R21FB5', 2, 'admin', NULL, '2023-11-09 01:06:52'),
-	('RB1DC8', 2, 'admin', '2023-11-09', '2023-11-09 01:07:08');
+	('RF6EC1', 5, 'admin', NULL, '2023-10-29 19:33:51');
 
+-- Dumping data for table ssi_merged.recieving_item: ~89 rows (approximately)
 INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_stock`, `current_stock`, `supp_id`, `exp_date`, `reciever`, `state`, `date_set`, `date_recieved`) VALUES
 	('1', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 15, 0, 'SU000001', '2023-10-26', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:49:18'),
 	('2', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 25, 25, 'SU000001', '2023-08-03', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:57:52'),
@@ -1103,13 +1042,12 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('R07365', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 15, 15, 'SU000003', '2023-08-31', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 02:06:53'),
 	('R08012', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 2, 'SU000004', '2023-10-27', 'admin', 2, '2023-10-14 19:11:31', '2023-10-15 01:32:34'),
 	('R0A465', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 50, 50, 'SU000004', '2023-10-08', 'admin', 2, '2023-10-08 19:57:45', '2023-10-08 19:57:56'),
-	('R11820', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 10, 10, 'SU000004', NULL, NULL, 1, '2023-11-09 01:06:19', NULL),
 	('R13022', 'Fresh Step Clumping Cat Litter', 'I00003', 'admin', 4, 4, 'SU000001', NULL, 'acc_name', 2, '2023-08-30 23:42:34', '2023-08-30 23:42:43'),
 	('R16f93', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 21, 21, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 11:42:10'),
 	('R20205', 'Taglory Rope Dog Leash', 'I00002', 'admin', 50, 10, 'SU000004', NULL, 'admin', 2, '2023-10-08 12:16:57', '2023-10-08 15:23:12'),
 	('R205d2', 'Taglory Rope Dog Leash', 'I00002', 'admin', 50, 50, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 09:41:57'),
 	('R21e64', 'UniLeash', 'I00006', 'admin', 50, 40, 'SU000001', NULL, 'acc_name', 2, '2023-09-13 07:51:08', '2023-09-16 23:22:46'),
-	('R21FB5', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 5, 3, 'SU000008', NULL, 'admin', 3, '2023-11-02 19:38:45', '2023-11-09 01:06:51'),
+	('R21FB5', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 5, 5, 'SU000008', NULL, NULL, 1, '2023-11-02 19:38:45', NULL),
 	('R275ab', 'UniLeash', 'I00006', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-14 09:50:12'),
 	('R291BF', 'Taglory Rope Dog Leash', 'I00002', 'admin', 10, 10, 'SU000004', NULL, 'admin', 2, '2023-10-14 19:08:25', '2023-10-15 00:58:56'),
 	('R2ae83', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 5, 5, 'SU000001', NULL, NULL, -1, '2023-08-30 23:07:19', NULL),
@@ -1142,7 +1080,6 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('R9d3a7', 'UniLeash', 'I00006', 'admin', 90, 5, 'SU000001', NULL, 'admin', 2, '2023-09-13 09:58:01', '2023-10-08 16:01:26'),
 	('Ra9de5', 'Taglory Rope Dog Leash', 'I00002', 'admin', 50, 50, 'SU000001', NULL, NULL, -1, '2023-08-30 20:33:34', NULL),
 	('Rae388', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 10, 10, 'SU000001', NULL, 'acc_name', 2, '2023-08-30 23:43:11', '2023-08-30 23:43:28'),
-	('RB1DC8', 'Dog Paracetamol (50mg)', 'I0AF12', 'admin', 5, 3, 'SU000001', NULL, 'admin', 3, '2023-11-09 01:06:43', '2023-11-09 01:07:05'),
 	('RBD852', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 10, 'SU000004', '2023-10-30', 'admin', 2, '2023-10-12 00:01:39', '2023-10-12 00:01:45'),
 	('Rb074c', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 10, 4, 'SU000001', '2023-09-28', 'acc_name', 2, '2023-08-30 23:43:49', '2023-08-30 23:52:33'),
 	('Rb556f', 'Taglory Rope Dog Leash', 'I00002', 'admin', 5, 5, 'SU000001', NULL, 'acc_name', 2, '2023-08-23 06:54:02', '2023-08-26 14:38:02'),
@@ -1153,6 +1090,7 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('RE2198', 'Taglory Rope Dog Leash', 'I00002', 'admin', 10, 5, 'SU000004', NULL, 'admin', 2, '2023-10-15 02:01:29', '2023-10-22 11:45:25'),
 	('Rf166d', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 03:08:47');
 
+-- Dumping data for table ssi_merged.replacement_items: ~5 rows (approximately)
 INSERT INTO `replacement_items` (`rep_id`, `item_id`, `item_desc`, `price`, `quantity`, `reason`) VALUES
 	('REP0090A1750', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged'),
 	('REP0090A1750', 'I00006', 'UniLeash (100mg)', 144, 1, 'Defective/Damaged'),
@@ -1161,9 +1099,11 @@ INSERT INTO `replacement_items` (`rep_id`, `item_id`, `item_desc`, `price`, `qua
 	('REP002D3C86B', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged'),
 	('REP007F93945', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged');
 
+-- Dumping data for table ssi_merged.replacement_record: ~0 rows (approximately)
 INSERT INTO `replacement_record` (`rep_id`, `transction_id`, `new_total`, `replace_by`, `replacement_date`) VALUES
 	('REP007F93945', '158', 1284.34, 'admin', '2023-11-06 01:22:25');
 
+-- Dumping data for table ssi_merged.services_transaction_content: ~9 rows (approximately)
 INSERT INTO `services_transaction_content` (`transaction_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `status`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
 	('80', 'S00001', 'Grooming', '143436', 'Gabi', '2023-09-29', 500, 0, 0, NULL, NULL, NULL),
 	('81', 'S00001', 'Grooming', '001431', 'Muning', '2023-09-29', 500, 0, 0, NULL, NULL, NULL),
@@ -1173,22 +1113,9 @@ INSERT INTO `services_transaction_content` (`transaction_uid`, `service_uid`, `s
 	('93', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-05', 500, 0, 0, NULL, NULL, NULL),
 	('100', 'S00001', 'Grooming', '143436', 'Gabi', '2023-10-18', 500, 0, 0, NULL, NULL, NULL),
 	('100', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-10-18', 500, 0, 0, NULL, NULL, NULL),
-	('159', 'S00001', 'Grooming', 'P482dc', 'Whitey', '2023-10-18', 500, 0, 0, NULL, NULL, NULL),
-	('166', 'S00001', 'Grooming', 'P62fd9', 'Clarence', '2023-11-10', 500, 0, 0, NULL, NULL, NULL),
-	('167', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-10', 500, 0, 0, NULL, NULL, NULL),
-	('168', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-12', 3000, 0, 0, NULL, 1, 2),
-	('169', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-09', 500, 0, 0, NULL, NULL, NULL),
-	('170', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-10', 500, 0, 0, NULL, NULL, NULL),
-	('171', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('172', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('173', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('174', 'S00001', 'Grooming', '234905', 'TJ', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('175', 'S00004', 'Yeast Infection Treatment', '001431', 'Muning', '2023-11-12', 2100, 0, 0, NULL, NULL, NULL),
-	('176', 'S00003', 'Papiloma Vaccine', '001431', 'Muning', '2023-11-12', 2500, 0, 0, NULL, NULL, NULL),
-	('177', 'S00001', 'Grooming', '001431', 'Muning', '2023-11-12', 500, 0, 0, NULL, NULL, NULL),
-	('178', 'S00003', 'Papiloma Vaccine', '001431', 'Muning', '2023-11-12', 2500, 0, 0, NULL, NULL, NULL),
-	('179', 'S00002', '5-in-1 Vaccine', '001431', 'Muning', '2023-11-10', 7500, 0, 0, NULL, 5, 5);
+	('159', 'S00001', 'Grooming', 'P482dc', 'Whitey', '2023-10-18', 500, 0, 0, NULL, NULL, NULL);
 
+-- Dumping data for table ssi_merged.service_category_test: ~5 rows (approximately)
 INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Grooming', 1),
 	('Pet Care', 1),
@@ -1196,6 +1123,7 @@ INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Test', 1),
 	('Vaccination', 1);
 
+-- Dumping data for table ssi_merged.service_info: ~8 rows (approximately)
 INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 'test', 500, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 'test', 1500, 1, '2023-05-29'),
@@ -1206,26 +1134,19 @@ INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `stat
 	('S00007', 'Euthanasion', 'test', 900, 1, '2023-05-29'),
 	('S00008', 'Feline Castration Srugery', 'test', 500, 1, '2023-05-29');
 
+-- Dumping data for table ssi_merged.service_info_test: ~7 rows (approximately)
 INSERT INTO `service_info_test` (`UID`, `service_name`, `price`, `category`, `duration_type`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 500, 'Grooming', 0, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 1500, 'Vaccination', 2, 1, '2023-05-29'),
 	('S00003', 'Papiloma Vaccine', 2500, 'Vaccination', 0, 1, '2023-05-29'),
 	('S00004', 'Yeast Infection Treatment', 2100, 'Pet Care', 0, 1, '2023-05-29'),
 	('S00006', 'Confinement', 200, 'Pet Care', 1, 1, '2023-05-29'),
-	('S416f4', '123', 12, 'Vaccination', 0, 1, '2023-11-11'),
-	('S6f6ed', '12', 123, 'Set Category', 0, 1, '2023-11-11'),
-	('S77146', 'test 002', 12, 'Grooming', 0, 1, '2023-11-11'),
-	('S93a12', 'Test123123', 500, 'Grooming', 1, 1, '2023-11-11'),
 	('Se7c43', 'Canine Diagnostic', 1200, 'Pet Care', 0, 1, '2023-08-31');
 
 INSERT INTO `service_preceeding_schedule` (`id`, `transaction_uid`, `service_uid`, `service_name`, `prefix`, `scheduled_date`, `status`) VALUES
-	(43, '155', 'S00002', '5-in-1 Vaccine', 'Dose 2', '2023-11-14', 0),
-	(44, '168', 'S00002', '5-in-1 Vaccine', 'Dose 2', '2023-11-13', 0),
-	(45, '179', 'S00002', '5-in-1 Vaccine', 'Dose 2', '2023-11-17', 0),
-	(46, '179', 'S00002', '5-in-1 Vaccine', 'Dose 3', '2023-11-22', 0),
-	(47, '179', 'S00002', '5-in-1 Vaccine', 'Dose 4', '2023-11-27', 0),
-	(48, '179', 'S00002', '5-in-1 Vaccine', 'Dose 5', '2023-12-02', 0);
+	(43, '155', 'S00002', '5-in-1 Vaccine', 'Dose 2', '2023-11-14', 0);
 
+-- Dumping data for table ssi_merged.supplier_info: ~9 rows (approximately)
 INSERT INTO `supplier_info` (`supp_id`, `supp_name`, `telephone`, `contact_person`, `contact_number`, `contact_email`, `address`, `created_by`, `date_added`, `updated_by`, `date_modified`) VALUES
 	('SU000001', 'ABC Corporation', '0054-7941-5674', 'James Vinas', '09457891234', 'jamesvinas@abc.net', 'Quezon City', 'admin', '2023-09-15 00:00:00', 'admin', '2023-10-15 11:13:11'),
 	('SU000002', 'XYZ Corporation', '000000000', 'Ryan Gosling', '01234567890', 'ryangosling@gmail.com', 'Quezon City', 'admin', '2023-09-15 20:40:22', 'admin', '2023-10-15 11:12:26'),
@@ -1237,6 +1158,7 @@ INSERT INTO `supplier_info` (`supp_id`, `supp_name`, `telephone`, `contact_perso
 	('SU000008', 'DK Corporation', '000000000', 'Kajo Baldismo', '0213549870', 'kajo.bald@dkcorp.net', 'Quezon City', 'admin', '2023-10-08 02:14:19', NULL, NULL),
 	('SU000009', 'John and Carlo Supplier', '000000000', 'Carlo Almero', '09807502958', 'HELLOW@gmail.com', 'Quezon City', 'admin', '2023-10-10 07:48:01', 'admin', '2023-10-22 15:17:11');
 
+-- Dumping data for table ssi_merged.supplier_item_info: ~49 rows (approximately)
 INSERT INTO `supplier_item_info` (`supplier_id`, `item_id`, `active`) VALUES
 	('SU000001', 'I39DC8', 0),
 	('SU000001', 'I00002', 1),
@@ -1267,187 +1189,171 @@ INSERT INTO `supplier_item_info` (`supplier_id`, `item_id`, `active`) VALUES
 	('SU000001', 'I0AF12', 1),
 	('SU000001', 'I37837', 1);
 
-INSERT INTO `transaction_record` (`transaction_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `transaction_date`, `state`, `deduction`) VALUES
-	('0', 'aila', 'N/A', 1045, '2023-07-14', 0, NULL),
-	('1', 'aila', 'James V.', 500, '2023-07-15', 0, NULL),
-	('10', 'aila', 'Jose R.', 500, '2023-08-01', 0, NULL),
-	('100', 'admin', 'Davin Ferrancullo', 1000, '2023-10-18', 0, NULL),
-	('101', 'admin', 'Joze Rizal', 7837.5, '2023-10-18', 0, NULL),
-	('102', 'admin', 'Joze Rizal', 505, '2023-10-18', 0, NULL),
-	('103', 'admin', 'James ViÃ±as', 288, '2023-10-27', 0, NULL),
-	('104', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27', 0, NULL),
-	('105', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27', 0, NULL),
-	('106', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27', 0, NULL),
-	('107', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27', 0, NULL),
-	('108', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27', 0, NULL),
-	('109', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27', 0, NULL),
-	('11', 'aila', 'N/A', 440, '2023-08-06', 0, NULL),
-	('110', 'aila', 'Joze Rizal', 2200, '2023-10-27', 0, NULL),
-	('111', 'aila', 'N/A', 2612.5, '2023-10-27', 0, NULL),
-	('112', 'aila', 'N/A', 2200, '2023-10-27', 0, NULL),
-	('113', 'aila', 'N/A', 2612.5, '2023-10-27', 0, NULL),
-	('114', 'aila', 'Joze Rizal', 500, '2023-10-27', 0, NULL),
-	('115', 'aila', 'N/A', 2200, '2023-10-27', 0, NULL),
-	('116', 'aila', 'N/A', 2887.5, '2023-10-27', 0, NULL),
-	('117', 'aila', 'N/A', 577.5, '2023-10-27', 0, NULL),
-	('118', 'aila', 'N/A', 3984.75, '2023-10-27', 0, NULL),
-	('119', 'admin', 'N/A', 2200, '2023-10-27', 0, NULL),
-	('12', 'aila', 'James V.', 900, '2023-08-06', 0, NULL),
-	('120', 'admin', 'Christopher Landas', 1320, '2023-10-27', 0, NULL),
-	('121', 'admin', 'Budjette Tan', 2280.3, '2023-10-27', 0, NULL),
-	('122', 'admin', 'James ViÃ±as', 23567.5, '2023-10-27', 0, NULL),
-	('123', 'admin', 'N/A', 2750, '2023-10-30', 0, NULL),
-	('124', 'admin', 'N/A', 550, '2023-10-30', 0, NULL),
-	('125', 'admin', 'N/A', 560, '2023-10-30', 0, NULL),
-	('126', 'admin', 'N/A', 550, '2023-10-30', 0, NULL),
-	('127', 'admin', 'N/A', 254, '2023-10-30', 0, NULL),
-	('128', 'admin', 'N/A', 1580.15, '2023-10-30', 0, NULL),
-	('129', 'admin', 'N/A', 110, '2023-10-30', 0, NULL),
-	('13', 'aila', 'James V.', 500, '2023-08-07', 0, NULL),
-	('130', 'admin', 'N/A', 440, '2023-10-30', 0, NULL),
-	('131', 'admin', 'N/A', 1100, '2023-10-30', 0, NULL),
-	('132', 'admin', 'N/A', 440, '2023-10-30', 0, NULL),
-	('133', 'admin', 'N/A', 940.95, '2023-10-30', 0, NULL),
-	('134', 'admin', 'N/A', 440, '2023-10-30', 0, NULL),
-	('135', 'admin', 'N/A', 522.5, '2023-10-30', 0, NULL),
-	('136', 'admin', 'N/A', 522.5, '2023-10-30', 0, NULL),
-	('137', 'admin', 'N/A', 440, '2023-10-30', 0, NULL),
-	('138', 'admin', 'N/A', 440, '2023-10-30', 0, NULL),
-	('139', 'admin', 'N/A', 440, '2023-10-30', 0, NULL),
-	('14', 'aila', 'N/A', 1320, '2023-08-07', 0, NULL),
-	('140', 'admin', 'N/A', 242.42, '2023-10-30', 0, NULL),
-	('141', 'admin', 'N/A', 576, '2023-10-30', 0, NULL),
-	('142', 'admin', 'N/A', 840, '2023-10-30', 0, NULL),
-	('143', 'admin', 'N/A', 930, '2023-10-30', 0, NULL),
-	('144', 'admin', 'N/A', 2887.5, '2023-10-30', 0, NULL),
-	('145', 'admin', 'Joze Rizal', 550, '2023-10-30', 0, NULL),
-	('146', 'admin', 'Client Name', 2200, '2023-10-30', 0, NULL),
-	('147', 'admin', 'Client Name', 2612.5, '2023-10-30', 0, NULL),
-	('148', 'admin', 'Client Name', 1240, '2023-10-30', 0, NULL),
-	('149', 'admin', 'Client Name', 2181.78, '2023-10-30', 0, NULL),
-	('15', 'aila', 'N/A', 880, '2023-08-14', 0, NULL),
-	('150', 'admin', 'Budjette Tan', 1593.9, '2023-10-31', 0, NULL),
-	('151', 'admin', 'Patrick Feniza', 1320, '2023-10-31', 0, NULL),
-	('152', 'admin', 'Patrick Feniza', 500, '2023-10-31', 0, NULL),
-	('153', 'admin', 'Patrick Feniza', 105, '2023-11-01', 0, NULL),
-	('154', 'admin', 'Client Name', 157.5, '2023-11-02', 0, NULL),
-	('155', 'admin', 'Patrick Feniza', 3000, '2023-11-02', 0, NULL),
-	('156', 'admin', 'Patrick Feniza', 500, '2023-11-02', 0, NULL),
-	('157', 'admin', 'Patrick Feniza', 1500, '2023-11-02', 0, NULL),
-	('158', 'admin', 'Davin Ferrancullo', 500, '2023-11-03', 0, NULL),
-	('159', 'admin', 'Patrick Feniza', 880, '2023-11-04', 0, NULL),
-	('16', 'aila', 'N/A', 2033.9, '2023-08-14', 0, NULL),
-	('160', 'admin', 'Patrick Feniza', 1320, '2023-11-04', 0, NULL),
-	('161', 'admin', 'Client Name', 880, '2023-11-04', 0, NULL),
-	('162', 'admin', 'Client Name', 440, '2023-11-04', 0, NULL),
-	('163', 'jayr', 'Patrick Feniza', 522.5, '2023-11-11', 1, NULL),
-	('164', 'jayr', 'Patrick Feniza', 522.5, '2023-11-11', 1, NULL),
-	('165', 'jayr', 'Client Name', 440, '2023-11-11', 1, NULL),
-	('166', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 50),
-	('167', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 50),
-	('168', 'jayr', 'Patrick Feniza', 3000, '2023-11-12', 1, 0),
-	('169', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 50),
-	('17', 'aila', 'James V.', 1380, '2023-08-20', 0, NULL),
-	('170', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 450),
-	('171', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 50),
-	('172', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 0),
-	('173', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 0),
-	('174', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 25),
-	('175', 'jayr', 'Patrick Feniza', 2100, '2023-11-12', 1, 50),
-	('176', 'jayr', 'Patrick Feniza', 2500, '2023-11-12', 1, 50),
-	('177', 'jayr', 'Patrick Feniza', 500, '2023-11-12', 1, 0),
-	('178', 'jayr', 'Patrick Feniza', 2500, '2023-11-12', 1, 20),
-	('179', 'jayr', 'Patrick Feniza', 7500, '2023-11-12', 1, 0),
-	('18', 'aila', 'James V.', 500, '2023-08-20', 0, NULL),
-	('19', 'aila', 'N/A', 880, '2023-08-20', 0, NULL),
-	('2', 'aila', 'N/A', 440, '2023-07-15', 0, NULL),
-	('20', 'aila', 'James V.', 1500, '2023-08-20', 0, NULL),
-	('21', 'aila', 'James V.', 500, '2023-08-22', 0, NULL),
-	('22', 'aila', 'Davin F.', 500, '2023-08-22', 0, NULL),
-	('23', 'aila', 'N/A', 440, '2023-08-22', 0, NULL),
-	('24', 'aila', 'N/A', 2200, '2023-08-22', 0, NULL),
-	('25', 'aila', 'N/A', 440, '2023-08-22', 0, NULL),
-	('26', 'aila', 'N/A', 440, '2023-08-22', 0, NULL),
-	('27', 'aila', 'N/A', 440, '2023-08-22', 0, NULL),
-	('28', 'aila', 'N/A', 1320, '2023-08-22', 0, NULL),
-	('29', 'aila', 'N/A', 440, '2023-08-22', 0, NULL),
-	('3', 'aila', 'N/A', 3420.45, '2023-07-16', 0, NULL),
-	('30', 'aila', 'N/A', 1320, '2023-08-22', 0, NULL),
-	('31', 'aila', 'N/A', 440, '2023-08-22', 0, NULL),
-	('32', 'aila', 'N/A', 1760, '2023-08-23', 0, NULL),
-	('33', 'aila', 'Jose R.', 440, '2023-08-23', 0, NULL),
-	('34', 'aila', 'N/A', 796.95, '2023-08-23', 0, NULL),
-	('35', 'aila', 'James V.', 2280.3, '2023-08-26', 0, NULL),
-	('36', 'aila', 'N/A', 2310, '2023-08-28', 0, NULL),
-	('37', 'aila', 'N/A', 2171.4, '2023-08-28', 0, NULL),
-	('38', 'aila', 'Jose R.', 0, '2023-08-28', 0, NULL),
-	('39', 'aila', 'N/A', 577.5, '2023-08-29', 0, NULL),
-	('4', 'aila', 'James V.', 500, '2023-07-16', 0, NULL),
-	('41', 'aila', 'Bud Tan', 1500, '2023-08-29', 0, NULL),
-	('42', 'aila', 'James V.', 500, '2023-08-29', 0, NULL),
-	('43', 'aila', 'Bud Tan', 500, '2023-08-29', 0, NULL),
-	('44', 'aila', 'Bud Tan', 500, '2023-08-30', 0, NULL),
-	('45', 'aila', 'James V.', 500, '2023-08-30', 0, NULL),
-	('46', 'aila', 'N/A', 577.5, '2023-08-30', 0, NULL),
-	('47', 'aila', 'N/A', 577.5, '2023-08-30', 0, NULL),
-	('48', 'aila', 'Christopher L.', 2310, '2023-08-30', 0, NULL),
-	('49', 'admin', 'N/A', 522.5, '2023-08-30', 0, NULL),
-	('5', 'aila', 'Jose R.', 1000, '2023-07-16', 0, NULL),
-	('50', 'admin', 'James V.', 1567.5, '2023-08-30', 0, NULL),
-	('51', 'admin', 'N/A', 577.5, '2023-08-30', 0, NULL),
-	('52', 'admin', 'Bud Tan', 1567.5, '2023-08-31', 0, NULL),
-	('53', 'admin', 'N/A', 1045, '2023-08-31', 0, NULL),
-	('54', 'admin', 'N/A', 1155, '2023-08-31', 0, NULL),
-	('55', 'admin', 'N/A', 522.5, '2023-08-31', 0, NULL),
-	('56', 'admin', 'N/A', 522.5, '2023-08-31', 0, NULL),
-	('57', 'admin', 'N/A', 522.5, '2023-08-31', 0, NULL),
-	('58', 'admin', 'N/A', 1567.5, '2023-08-31', 0, NULL),
-	('59', 'admin', 'N/A', 522.5, '2023-09-02', 0, NULL),
-	('6', 'aila', 'N/A', 3187.8, '2023-07-13', 0, NULL),
-	('60', 'admin', 'James V.', 2780.3, '2023-09-02', 0, NULL),
-	('61', 'admin', 'Bud Tan', 500, '2023-09-02', 0, NULL),
-	('62', 'admin', 'Patrick Feniza', 500, '2023-09-02', 0, NULL),
-	('63', 'admin', 'James V.', 1000, '2023-09-03', 0, NULL),
-	('64', 'admin', 'Davin F.', 2500, '2023-09-03', 0, NULL),
-	('65', 'admin', 'Jose R.', 1000, '2023-09-03', 0, NULL),
-	('66', 'admin', 'James V.', 500, '2023-09-03', 0, NULL),
-	('67', 'admin', 'Patrick Feniza', 500, '2023-09-03', 0, NULL),
-	('68', 'admin', 'Bud Tan', 500, '2023-09-03', 0, NULL),
-	('69', 'admin', 'Patrick Feniza', 500, '2023-09-03', 0, NULL),
-	('7', 'aila', 'Jose R.', 1000, '2023-07-13', 0, NULL),
-	('70', 'admin', 'James V.', 3000, '2023-09-03', 0, NULL),
-	('71', 'admin', 'Patrick Feniza', 2500, '2023-09-03', 0, NULL),
-	('72', 'admin', 'Davin F.', 4600, '2023-09-03', 0, NULL),
-	('73', 'admin', 'James V.', 2100, '2023-09-03', 0, NULL),
-	('74', 'admin', 'Patrick Feniza', 2000, '2023-09-03', 0, NULL),
-	('75', 'admin', 'N/A', 2280.3, '2023-09-03', 0, NULL),
-	('76', 'admin', 'N/A', 2280.3, '2023-09-03', 0, NULL),
-	('77', 'admin', 'N/A', 288, '2023-09-03', 0, NULL),
-	('78', 'Jrizal', 'Christopher L.', 2500, '2023-09-03', 0, NULL),
-	('79', 'admin', 'James ViÃ±as', 4500, '2023-09-07', 0, NULL),
-	('8', 'aila', 'N/A', 1593.9, '2023-08-01', 0, NULL),
-	('80', 'admin', 'Davin Ferrancullo', 500, '2023-09-29', 0, NULL),
-	('81', 'admin', 'Patrick Feniza', 2200, '2023-09-29', 0, NULL),
-	('82', 'admin', 'N/A', 0, '2023-09-29', 0, NULL),
-	('83', 'admin', 'Patrick Feniza', 500, '2023-10-01', 0, NULL),
-	('84', 'admin', 'N/A', 0, '2023-10-01', 0, NULL),
-	('85', 'admin', 'N/A', 0, '2023-10-01', 0, NULL),
-	('86', 'admin', 'N/A', 0, '2023-10-01', 0, NULL),
-	('87', 'admin', 'N/A', 0, '2023-10-01', 0, NULL),
-	('88', 'admin', 'N/A', 0, '2023-10-01', 0, NULL),
-	('89', 'admin', 'Budjette Tan', 500, '2023-10-01', 0, NULL),
-	('9', 'aila', 'N/A', 144, '2023-08-01', 0, NULL),
-	('90', 'admin', 'N/A', 505, '2023-10-12', 0, NULL),
-	('91', 'admin', 'N/A', 10100, '2023-10-12', 0, NULL),
-	('92', 'admin', 'N/A', 2151.5, '2023-10-17', 0, NULL),
-	('93', 'admin', 'Davin Ferrancullo', 2475, '2023-10-17', 0, NULL),
-	('94', 'admin', 'N/A', 0, '2023-10-17', 0, NULL),
-	('95', 'admin', 'N/A', 0, '2023-10-17', 0, NULL),
-	('96', 'admin', 'Patrick Feniza', 440, '2023-10-18', 0, NULL),
-	('97', 'admin', 'Joze Rizal', 1140.15, '2023-10-18', 0, NULL),
-	('98', 'admin', 'James ViÃ±as', 440, '2023-10-18', 0, NULL),
-	('99', 'admin', 'James Rubiales', 577.5, '2023-10-18', 0, NULL);
+INSERT INTO `transaction_record` (`transaction_uid`, `Attendant_usn`, `client_name`, `Total_amount`, `transaction_date`) VALUES
+	('0', 'aila', 'N/A', 1045, '2023-07-14'),
+	('1', 'aila', 'James V.', 500, '2023-07-15'),
+	('10', 'aila', 'Jose R.', 500, '2023-08-01'),
+	('100', 'admin', 'Davin Ferrancullo', 1000, '2023-10-18'),
+	('101', 'admin', 'Joze Rizal', 7837.5, '2023-10-18'),
+	('102', 'admin', 'Joze Rizal', 505, '2023-10-18'),
+	('103', 'admin', 'James ViÃ±as', 288, '2023-10-27'),
+	('104', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27'),
+	('105', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27'),
+	('106', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27'),
+	('107', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27'),
+	('108', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27'),
+	('109', 'aila', 'Patrick Feniza', 2612.5, '2023-10-27'),
+	('11', 'aila', 'N/A', 440, '2023-08-06'),
+	('110', 'aila', 'Joze Rizal', 2200, '2023-10-27'),
+	('111', 'aila', 'N/A', 2612.5, '2023-10-27'),
+	('112', 'aila', 'N/A', 2200, '2023-10-27'),
+	('113', 'aila', 'N/A', 2612.5, '2023-10-27'),
+	('114', 'aila', 'Joze Rizal', 500, '2023-10-27'),
+	('115', 'aila', 'N/A', 2200, '2023-10-27'),
+	('116', 'aila', 'N/A', 2887.5, '2023-10-27'),
+	('117', 'aila', 'N/A', 577.5, '2023-10-27'),
+	('118', 'aila', 'N/A', 3984.75, '2023-10-27'),
+	('119', 'admin', 'N/A', 2200, '2023-10-27'),
+	('12', 'aila', 'James V.', 900, '2023-08-06'),
+	('120', 'admin', 'Christopher Landas', 1320, '2023-10-27'),
+	('121', 'admin', 'Budjette Tan', 2280.3, '2023-10-27'),
+	('122', 'admin', 'James ViÃ±as', 23567.5, '2023-10-27'),
+	('123', 'admin', 'N/A', 2750, '2023-10-30'),
+	('124', 'admin', 'N/A', 550, '2023-10-30'),
+	('125', 'admin', 'N/A', 560, '2023-10-30'),
+	('126', 'admin', 'N/A', 550, '2023-10-30'),
+	('127', 'admin', 'N/A', 254, '2023-10-30'),
+	('128', 'admin', 'N/A', 1580.15, '2023-10-30'),
+	('129', 'admin', 'N/A', 110, '2023-10-30'),
+	('13', 'aila', 'James V.', 500, '2023-08-07'),
+	('130', 'admin', 'N/A', 440, '2023-10-30'),
+	('131', 'admin', 'N/A', 1100, '2023-10-30'),
+	('132', 'admin', 'N/A', 440, '2023-10-30'),
+	('133', 'admin', 'N/A', 940.95, '2023-10-30'),
+	('134', 'admin', 'N/A', 440, '2023-10-30'),
+	('135', 'admin', 'N/A', 522.5, '2023-10-30'),
+	('136', 'admin', 'N/A', 522.5, '2023-10-30'),
+	('137', 'admin', 'N/A', 440, '2023-10-30'),
+	('138', 'admin', 'N/A', 440, '2023-10-30'),
+	('139', 'admin', 'N/A', 440, '2023-10-30'),
+	('14', 'aila', 'N/A', 1320, '2023-08-07'),
+	('140', 'admin', 'N/A', 242.42, '2023-10-30'),
+	('141', 'admin', 'N/A', 576, '2023-10-30'),
+	('142', 'admin', 'N/A', 840, '2023-10-30'),
+	('143', 'admin', 'N/A', 930, '2023-10-30'),
+	('144', 'admin', 'N/A', 2887.5, '2023-10-30'),
+	('145', 'admin', 'Joze Rizal', 550, '2023-10-30'),
+	('146', 'admin', 'Client Name', 2200, '2023-10-30'),
+	('147', 'admin', 'Client Name', 2612.5, '2023-10-30'),
+	('148', 'admin', 'Client Name', 1240, '2023-10-30'),
+	('149', 'admin', 'Client Name', 2181.78, '2023-10-30'),
+	('15', 'aila', 'N/A', 880, '2023-08-14'),
+	('150', 'admin', 'Budjette Tan', 1593.9, '2023-10-31'),
+	('151', 'admin', 'Patrick Feniza', 1320, '2023-10-31'),
+	('152', 'admin', 'Patrick Feniza', 500, '2023-10-31'),
+	('153', 'admin', 'Patrick Feniza', 105, '2023-11-01'),
+	('154', 'admin', 'Client Name', 157.5, '2023-11-02'),
+	('155', 'admin', 'Patrick Feniza', 3000, '2023-11-02'),
+	('156', 'admin', 'Patrick Feniza', 500, '2023-11-02'),
+	('157', 'admin', 'Patrick Feniza', 1500, '2023-11-02'),
+	('158', 'admin', 'Davin Ferrancullo', 500, '2023-11-03'),
+	('159', 'admin', 'Patrick Feniza', 880, '2023-11-04'),
+	('16', 'aila', 'N/A', 2033.9, '2023-08-14'),
+	('160', 'admin', 'Patrick Feniza', 1320, '2023-11-04'),
+	('161', 'admin', 'Client Name', 880, '2023-11-04'),
+	('162', 'admin', 'Client Name', 440, '2023-11-04'),
+	('17', 'aila', 'James V.', 1380, '2023-08-20'),
+	('18', 'aila', 'James V.', 500, '2023-08-20'),
+	('19', 'aila', 'N/A', 880, '2023-08-20'),
+	('2', 'aila', 'N/A', 440, '2023-07-15'),
+	('20', 'aila', 'James V.', 1500, '2023-08-20'),
+	('21', 'aila', 'James V.', 500, '2023-08-22'),
+	('22', 'aila', 'Davin F.', 500, '2023-08-22'),
+	('23', 'aila', 'N/A', 440, '2023-08-22'),
+	('24', 'aila', 'N/A', 2200, '2023-08-22'),
+	('25', 'aila', 'N/A', 440, '2023-08-22'),
+	('26', 'aila', 'N/A', 440, '2023-08-22'),
+	('27', 'aila', 'N/A', 440, '2023-08-22'),
+	('28', 'aila', 'N/A', 1320, '2023-08-22'),
+	('29', 'aila', 'N/A', 440, '2023-08-22'),
+	('3', 'aila', 'N/A', 3420.45, '2023-07-16'),
+	('30', 'aila', 'N/A', 1320, '2023-08-22'),
+	('31', 'aila', 'N/A', 440, '2023-08-22'),
+	('32', 'aila', 'N/A', 1760, '2023-08-23'),
+	('33', 'aila', 'Jose R.', 440, '2023-08-23'),
+	('34', 'aila', 'N/A', 796.95, '2023-08-23'),
+	('35', 'aila', 'James V.', 2280.3, '2023-08-26'),
+	('36', 'aila', 'N/A', 2310, '2023-08-28'),
+	('37', 'aila', 'N/A', 2171.4, '2023-08-28'),
+	('38', 'aila', 'Jose R.', 0, '2023-08-28'),
+	('39', 'aila', 'N/A', 577.5, '2023-08-29'),
+	('4', 'aila', 'James V.', 500, '2023-07-16'),
+	('41', 'aila', 'Bud Tan', 1500, '2023-08-29'),
+	('42', 'aila', 'James V.', 500, '2023-08-29'),
+	('43', 'aila', 'Bud Tan', 500, '2023-08-29'),
+	('44', 'aila', 'Bud Tan', 500, '2023-08-30'),
+	('45', 'aila', 'James V.', 500, '2023-08-30'),
+	('46', 'aila', 'N/A', 577.5, '2023-08-30'),
+	('47', 'aila', 'N/A', 577.5, '2023-08-30'),
+	('48', 'aila', 'Christopher L.', 2310, '2023-08-30'),
+	('49', 'admin', 'N/A', 522.5, '2023-08-30'),
+	('5', 'aila', 'Jose R.', 1000, '2023-07-16'),
+	('50', 'admin', 'James V.', 1567.5, '2023-08-30'),
+	('51', 'admin', 'N/A', 577.5, '2023-08-30'),
+	('52', 'admin', 'Bud Tan', 1567.5, '2023-08-31'),
+	('53', 'admin', 'N/A', 1045, '2023-08-31'),
+	('54', 'admin', 'N/A', 1155, '2023-08-31'),
+	('55', 'admin', 'N/A', 522.5, '2023-08-31'),
+	('56', 'admin', 'N/A', 522.5, '2023-08-31'),
+	('57', 'admin', 'N/A', 522.5, '2023-08-31'),
+	('58', 'admin', 'N/A', 1567.5, '2023-08-31'),
+	('59', 'admin', 'N/A', 522.5, '2023-09-02'),
+	('6', 'aila', 'N/A', 3187.8, '2023-07-13'),
+	('60', 'admin', 'James V.', 2780.3, '2023-09-02'),
+	('61', 'admin', 'Bud Tan', 500, '2023-09-02'),
+	('62', 'admin', 'Patrick Feniza', 500, '2023-09-02'),
+	('63', 'admin', 'James V.', 1000, '2023-09-03'),
+	('64', 'admin', 'Davin F.', 2500, '2023-09-03'),
+	('65', 'admin', 'Jose R.', 1000, '2023-09-03'),
+	('66', 'admin', 'James V.', 500, '2023-09-03'),
+	('67', 'admin', 'Patrick Feniza', 500, '2023-09-03'),
+	('68', 'admin', 'Bud Tan', 500, '2023-09-03'),
+	('69', 'admin', 'Patrick Feniza', 500, '2023-09-03'),
+	('7', 'aila', 'Jose R.', 1000, '2023-07-13'),
+	('70', 'admin', 'James V.', 3000, '2023-09-03'),
+	('71', 'admin', 'Patrick Feniza', 2500, '2023-09-03'),
+	('72', 'admin', 'Davin F.', 4600, '2023-09-03'),
+	('73', 'admin', 'James V.', 2100, '2023-09-03'),
+	('74', 'admin', 'Patrick Feniza', 2000, '2023-09-03'),
+	('75', 'admin', 'N/A', 2280.3, '2023-09-03'),
+	('76', 'admin', 'N/A', 2280.3, '2023-09-03'),
+	('77', 'admin', 'N/A', 288, '2023-09-03'),
+	('78', 'Jrizal', 'Christopher L.', 2500, '2023-09-03'),
+	('79', 'admin', 'James ViÃ±as', 4500, '2023-09-07'),
+	('8', 'aila', 'N/A', 1593.9, '2023-08-01'),
+	('80', 'admin', 'Davin Ferrancullo', 500, '2023-09-29'),
+	('81', 'admin', 'Patrick Feniza', 2200, '2023-09-29'),
+	('82', 'admin', 'N/A', 0, '2023-09-29'),
+	('83', 'admin', 'Patrick Feniza', 500, '2023-10-01'),
+	('84', 'admin', 'N/A', 0, '2023-10-01'),
+	('85', 'admin', 'N/A', 0, '2023-10-01'),
+	('86', 'admin', 'N/A', 0, '2023-10-01'),
+	('87', 'admin', 'N/A', 0, '2023-10-01'),
+	('88', 'admin', 'N/A', 0, '2023-10-01'),
+	('89', 'admin', 'Budjette Tan', 500, '2023-10-01'),
+	('9', 'aila', 'N/A', 144, '2023-08-01'),
+	('90', 'admin', 'N/A', 505, '2023-10-12'),
+	('91', 'admin', 'N/A', 10100, '2023-10-12'),
+	('92', 'admin', 'N/A', 2151.5, '2023-10-17'),
+	('93', 'admin', 'Davin Ferrancullo', 2475, '2023-10-17'),
+	('94', 'admin', 'N/A', 0, '2023-10-17'),
+	('95', 'admin', 'N/A', 0, '2023-10-17'),
+	('96', 'admin', 'Patrick Feniza', 440, '2023-10-18'),
+	('97', 'admin', 'Joze Rizal', 1140.15, '2023-10-18'),
+	('98', 'admin', 'James ViÃ±as', 440, '2023-10-18'),
+	('99', 'admin', 'James Rubiales', 577.5, '2023-10-18');
 
+-- Dumping data for table ssi_merged.user_level_access: ~2 rows (approximately)
 INSERT INTO `user_level_access` (`Title`, `add_item`, `Dashboard`, `Reception`, `Payment`, `Services`, `Sales`, `Inventory`, `Pet_Info`, `Report`, `User`, `Action`, `Gen_Settings`) VALUES
 	('Assisstant', 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0),
 	('Owner', 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0);

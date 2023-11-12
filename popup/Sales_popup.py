@@ -28,14 +28,13 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
-            self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
+            #self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
             
             def reset():
                 self.place_forget()
             
             def show_receipt():
                 global raw_items, raw_service_info, raw_transaction_info
-                #print(show_receipt)
                 if self.client_name._text in r'N/A':
                     or_num = f"{self.date_label._text.replace('-', '_')}_noname_{self.or_label._text}_receipt"
                 else:
@@ -46,9 +45,12 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                     for it in i:
                         temp_items.append(it)
                     formatted_items.append(temp_items)
-                #print(or_num)
                 #ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer", is_receipt=1)
                 ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=raw_transaction_info[2], paid=raw_transaction_info[2], title="Transaction Receipt Viewer", is_receipt=1)
+            
+            def view_removed():
+                _temp = [(data[0],) + (f'{data[1]} ({data[2]})',) + data[3:] if data[2] else (data[0], data[1], data[3:]) for data in database.fetch_data(sql_commands.get_replaced_items_by_id, (self.or_label._text,))]
+                self.replaced.place(relx=0.5, rely=0.5, anchor='c', info=(self.or_label._text, self.client_name._text), data=_temp)
             
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Lotion)
             self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.0225)
@@ -60,7 +62,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.top_frame.grid(row=0, column=0, sticky="ew")
             self.top_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.receipt_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('view_receipt_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="SALES RECORD", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -82,7 +84,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.status.pack(side="left", padx=(0, width*0.005), pady=(width*0.005))
             ctk.CTkLabel(self.status, text="Status: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.035, anchor="e").pack(side="left", padx=(width*0.01,0))
             self.status_label = ctk.CTkLabel(self.status, text="", font=("DM Sans Medium", 14), height=height*0.05,padx=(int(width*0.01)))
-            self.status_label.pack(side="left",  fill='x', expand=1, padx=(0, width*0.01))
+            self.status_label.pack(side="left",  fill='x', expand=1, padx=(0, width*0.005))
         
             #DATE
             self.date_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.05, width=width*0.2)
@@ -109,12 +111,17 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.client_frame.grid(row=0, column=1, padx=(0,width*0.005), pady= width*0.005)
             self.client_frame.pack_propagate(0)
             
-            self.view_receipt = ctk.CTkButton(self.client_info_frame, text="View Receipt", font=("DM Sans Medium", 14), command=show_receipt)
+            self.view_receipt = ctk.CTkButton(self.client_info_frame, text="View Receipt", font=("DM Sans Medium", 14), image=Icons.get_image("receipt_icon", (25,25)),
+                                               fg_color=Color.Green_Pistachio, hover_color=Color.Green_Button_Hover_Color, text_color=Color.White_Lotion, command=show_receipt)
             self.view_receipt.grid(row=0, column=2, sticky="nse",padx=(0,width*0.005), pady= width*0.005)
             
-            self.change_order_btn = ctk.CTkButton(self.client_info_frame, text="Change Order", font=("DM Sans Medium", 14), 
+            self.change_order_btn = ctk.CTkButton(self.client_info_frame, text="Replace Item", font=("DM Sans Medium", 14), image=Icons.get_image("replaced_icon", (25,25)),
+                                                  text_color=Color.White_Lotion,
                                                   command=lambda:self.change_order.place(relx=0.5, rely=0.5, anchor='c', info=self.or_label._text, items=self.items))
             
+            self.replaced_item_btn = ctk.CTkButton(self.client_info_frame, text="Replaced Item", font=("DM Sans Medium", 14), cursor='hand2', text_color=Color.White_Lotion,
+                                                   image=Icons.get_image('replaced_icon', (25,25)), command=view_removed,
+                                                   fg_color=Color.Red_Pastel, hover_color=Color.Red_Pastel_Hover)
             
             ctk.CTkLabel(self.client_frame, text="Client: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,0))
             self.client_name = ctk.CTkLabel(self.client_frame, text="Jane Doe",  font=("DM Sans Medium", 14), fg_color="transparent")
@@ -122,31 +129,43 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             
             #TABLE
             self.receipt_table_frame = ctk.CTkFrame(self.client_info_frame)
-            self.receipt_table_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,width*0.005) )
+            self.receipt_table_frame.grid(row=1, column=0, columnspan=5, sticky="nsew", padx=width*0.005, pady=(0,width*0.005) )
            
             self.receipt_treeview = cctk.cctkTreeView(self.receipt_table_frame, width= width * .795, height= height * .7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*.125)}-tr/Quantity:{int(width*.115)}-tr/Total:{int(width*.125)}-tr!30!30')
+                                           column_format=f'/No:{int(width*.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*.1)}-tr/Quantity:{int(width*.115)}-tr/Total:{int(width*.1)}-tr!30!30')
             
             self.receipt_treeview.pack()
             '''TOTAL'''
             self.bottom_frame = ctk.CTkFrame(self.client_info_frame, fg_color="transparent")
-            self.bottom_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(width*0.005))
+            self.bottom_frame.grid(row=2, column=0, columnspan=5, sticky="nsew", padx=width*0.005, pady=(width*0.005))
             
             self.receipt_total_frame = ctk.CTkFrame(self.bottom_frame, height=height*0.05, width=width*0.2, fg_color=Color.White_Lotion)
             self.receipt_total_frame.pack(side='right')
             self.receipt_total_frame.pack_propagate(0)
+            
             ctk.CTkLabel(self.receipt_total_frame, text="Total: ", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.01,width*0.0165))
+            
             self.receipt_total_amount = ctk.CTkLabel(self.receipt_total_frame, text="₱ ---,---.--",  font=("DM Sans Medium", 16))
             self.receipt_total_amount.pack(side="right", padx=(0,width*0.01))
           
             self.labels = [self.or_label, self.client_name, self.receipt_total_amount, self.date_label, self.cashier_name_label]
         
             self.change_order = change_order(self,(width, height, acc_info, acc_cred))
+            self.replaced = view_removed_items(self,(width, height, acc_info, acc_cred))
+            
             
         def set_values(self):
             [self.labels[i].configure(text=f"{self.transact_info[i]}") for i in range(len(self.labels))]     
             self.status_label.configure(text=f"{'Paid' if self.transact_info[-1] == 1 else 'Paid and Replaced'}")
-            self.change_order_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005) if self.transact_info[-1] == 1 else self.change_order_btn.grid_forget()
+            
+            if self.transact_info[-1] == 1:
+                self.change_order_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)  
+                self.replaced_item_btn.grid_forget()
+            else:
+                self.change_order_btn.grid_forget()
+                self.replaced_item_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)                 
+        
+        
         def place(self, sales_info, **kwargs):
             try:
                 return super().place(**kwargs)
@@ -184,7 +203,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
-            self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
+            #self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
             self.replaced_items = []
             self.added_items = []
             
@@ -230,7 +249,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
             self.top_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.receipt_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('view_receipt_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="CHANGE ORDER", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -364,7 +383,9 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
             self.row_root, self.origin = event.widget.master.master.master.master, event.widget.master
             self.row_data = (self.row_root.winfo_children()[1]._text, self.row_root.winfo_children()[2]._text, self.row_root.winfo_children()[3]._text, self.row_root.winfo_children()[5]._text)
             self.row_count, self.val_range = self.row_root.winfo_children()[4].winfo_children()[0].get(), self.row_root.winfo_children()[4].winfo_children()[0].get_val_range()
-        
+            
+
+
             if self.origin.cget('state') != 'disabled' and self.origin._text == '-':
                 self.confirm_removal.place(relx=0.5, rely=0.5, anchor='c', data = self.row_data)
             elif self.origin._text == '+':
@@ -378,8 +399,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
                 self.row_root.winfo_children()[4].winfo_children()[0].winfo_children()[0].configure(state='normal')
             else:
                 self.row_root.winfo_children()[4].winfo_children()[0].winfo_children()[0].configure(state='disabled')
-                
-      
+
         def table_values(self):
             return [(data.winfo_children()[1]._text, data.winfo_children()[2]._text, data.winfo_children()[3]._text, data.winfo_children()[4].winfo_children()[0].get(), data.winfo_children()[5]._text ) for data in self.client_treeview.data_frames]
             
@@ -400,23 +420,26 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
             self.client_treeview.update_table(temp)
             #self.update_new_total()
             spinners = [spinner.winfo_children()[4].winfo_children()[0] for spinner in self.client_treeview.data_frames]
-            
+            item_ids = [database.fetch_data(sql_commands.get_item_id_by_name_unit, split_unit(item.winfo_children()[2]._text))[0][0] if len(split_unit(item.winfo_children()[2]._text)) == 2
+                    else database.fetch_data(sql_commands.get_item_id_by_name_null_unit, split_unit(item.winfo_children()[2]._text))[0][0] for item in self.client_treeview.data_frames]
+            #get_stocks_by_id
             for item in range(len(spinners)):
-                spinners[item].configure(val_range = (0,99))
+                spinners[item].configure(val_range = (0,database.fetch_data(sql_commands.get_stocks_by_id, (item_ids[item],))[0][0]))
                 spinners[item].configure(value = self.items[item][1])
             
                 spinners[item].winfo_children()[0].bind("<Button-1>", self.row_values)
                 spinners[item].winfo_children()[2].bind("<Button-1>", self.row_values)
                 
                 spinners[item].set_entry_state('disabled')
+                
         def update_table_buttons(self):
             self.update_new_total()
             spinners = [spinner.winfo_children()[4].winfo_children()[0] for spinner in self.client_treeview.data_frames]
             for item in range(len(spinners)):
                 spinners[item].winfo_children()[0].bind("<Button-1>", self.row_values)
                 spinners[item].winfo_children()[2].bind("<Button-1>", self.row_values)
-            
                 spinners[item].set_entry_state('disabled')
+                
         def place(self, info, items, **kwargs):
             self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (info,))[0]
             self.item_total = format_price(database.fetch_data(sql_commands.get_item_total_by_id, (info,))[0][0])
@@ -449,7 +472,7 @@ def confirm_removal(master, info:tuple, command_callback:callable = None) -> ctk
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
-            self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
+            #self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
             self.result = None
             self._command_callback = command_callback
             
@@ -483,7 +506,7 @@ def confirm_removal(master, info:tuple, command_callback:callable = None) -> ctk
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
             self.top_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.receipt_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('view_receipt_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="CONFIRM ITEM REPLACEMENT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -563,7 +586,7 @@ def removed_items(master, info:tuple, command_callback:callable = None) -> ctk.C
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
-            self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
+            #self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
             self.result = None
             self._command_callback = command_callback
             
@@ -582,7 +605,7 @@ def removed_items(master, info:tuple, command_callback:callable = None) -> ctk.C
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
             self.top_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.receipt_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('view_receipt_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="REPLACED ITEMS", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -612,7 +635,7 @@ def removed_items(master, info:tuple, command_callback:callable = None) -> ctk.C
             self.client_treeview_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(width*0.005))
             
             self.item_treeview = cctk.cctkTreeView(self.client_treeview_frame, data=[], width= width*0.775, height= height*0.595, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/UnitPrice:{int(width*.085)}-tr/QuantityPcs:{int(width*.1)}-tr/TotalPrice:{int(width*.085)}-tr/Reason:{int(width*.125)}-tl!30!35',
+                                           column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/UnitPrice:{int(width*.085)}-tr/QuantityPcs:{int(width*.1)}-tr/TotalPrice:{int(width*.085)}-tr/Reason:{int(width*.125)}-tl!33!35',
                                            bd_message="Are you sure want to remove this item?")
             self.item_treeview.pack()
             
@@ -635,7 +658,6 @@ def removed_items(master, info:tuple, command_callback:callable = None) -> ctk.C
             self.or_label.configure(text=self.info[0])
             self.client_name_label.configure(text=self.info[1])
             data = sum_similar_elements([(data[0], data[1], data[2], data[4]) for data in self.data])
-            #print(data)
             self.item_treeview.update_table(data)
         
           
@@ -658,7 +680,7 @@ def show_payment_proceed(master, info:tuple,):
             
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
 
-            self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
+            #self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
             self.main_frame.pack()
@@ -669,7 +691,7 @@ def show_payment_proceed(master, info:tuple,):
             self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.payment_icon).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('payment_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="PAYMENT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=lambda: self.place_forget()).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
@@ -680,7 +702,7 @@ def show_payment_proceed(master, info:tuple,):
             self.content_frame.grid_propagate(0)
             
             self.content_frame.grid_rowconfigure(1, weight=1)
-
+            
             
             def confirm():
                 #(161, 'I00002', 'Taglory Rope Dog Leash (100mg)', 5, 440.0, 0)
@@ -688,9 +710,9 @@ def show_payment_proceed(master, info:tuple,):
                 required_items = self.info_list[1]
                 transact_items = self.info_list[2]
                 
-                print(replaced_items)
-                print(required_items)
-                print(transact_items)
+                #print(replaced_items)
+                #print(required_items)
+                #print(transact_items)
                 
                 #steps insert replacement record, update transaction record to replaced, update item transaction content to 2, insert new transaction content, subtract items used in inventory
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure you want to conntinue?\nThis will update the order record."):
@@ -741,6 +763,8 @@ def show_payment_proceed(master, info:tuple,):
 
                     messagebox.showinfo("Success",f"Order {self.or_label._text} Successfully Changed.")
                     self.master.master.place_forget()
+                    self.master.place_forget()
+                    self.master.master.master.refresh()
                     self.place_forget()
                 
             
@@ -914,6 +938,7 @@ def show_payment_proceed(master, info:tuple,):
                 self.complete_button.configure(state= 'disabled')
                 self.ammount_tendered.grid(row=7, column=0, padx=(width*0.01), pady=(height*0.005,0), sticky="w")
                 self.payment_entry.grid(row=7, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
+                
         def place(self, info, items, info_lists, item_total, service_total, or_num, client, cashier, **kwargs):
             self.service_data = [(data[0], data[1], f"₱{format_price(data[3])}")for data in database.fetch_data(sql_commands.get_service_record, (info,))]
             self.original_total = database.fetch_data(sql_commands.get_transaction_total_by_id, (info,))[0][0]
@@ -925,6 +950,10 @@ def show_payment_proceed(master, info:tuple,):
             self.client_data = client            
             self.info_list = info_lists
             self.set_values()
+            
+            print(self.info_list[0])
+            print(self.info_list[1])
+            print(self.info_list[2])
             
             return super().place(**kwargs)
     return instance(master, info)
@@ -941,7 +970,7 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, command_callb
             '''internal data'''
             self.total_transaction_count = 0
             self._command_callback = command_callback
-            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            #self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
 
             def item_proceed(_: any = None):
                 selected_item = self.item_treeview.get_selected_data()
@@ -1009,3 +1038,91 @@ def add_item(master, info:tuple, root_treeview: cctk.cctkTreeView, command_callb
             return super().place_forget()
             
     return instance(master, info, root_treeview,command_callback)
+
+def view_removed_items(master, info:tuple, command_callback:callable = None) -> ctk.CTkFrame:
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback:callable):
+            width = info[0]
+            height = info[1]
+            acc_info = info[2]
+            super().__init__(master, width*0.8, height=height*0.85, corner_radius= 0, fg_color=Color.White_Platinum)
+            
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+            
+            #self.receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(28,28))
+            self.result = None
+            self._command_callback = command_callback
+            
+            def reset():
+                self.place_forget()
+            
+            self.reasons = ['Defective/Damaged', 'Expired']
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Lotion)
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
+            self.main_frame.grid_columnconfigure((0), weight=1)
+            self.main_frame.grid_rowconfigure((2), weight=1)
+            self.main_frame.grid_propagate(0)
+    
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('view_receipt_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text="REPLACED ITEMS", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+            
+            '''Client Frame'''
+            self.client_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum,)
+            self.client_frame.grid(row=1, column=0, columnspan=2, sticky='nsew', padx=width*0.005, pady=(width*0.005,0))
+            
+            self.or_label = ctk.CTkLabel(self.client_frame, text='', font=('DM Sans Medium', 14), fg_color=Color.White_Lotion, width=width*0.125, height=height*0.055, corner_radius=5)
+            self.or_label.pack(side='left',padx=(width*0.005,0), pady=(width*0.005))
+            
+            '''Client Name Frame'''
+            self.client_name_frame = ctk.CTkFrame(self.client_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.215)
+            self.client_name_frame.pack(side="right", padx=(width*0.005), pady=(width*0.005))
+            self.client_name_frame.pack_propagate(0)
+            ctk.CTkLabel(self.client_name_frame, text="Client: ", fg_color="transparent", font=("DM Sans Medium", 14), width=width*0.05, anchor="e").pack(side="left", padx=(width*0.005,0))
+            self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Juan Dela Cruz", font=("DM Sans Medium", 14))
+            self.client_name_label.pack(side="left",  fill='x', expand=1, padx=(0, width*0.005))
+           
+           
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+            self.content_frame.grid(row=2, column=0, sticky='nsew', padx=(width*0.005), pady=(width*0.005))
+            self.content_frame.grid_columnconfigure(1, weight=1)
+            
+            '''Treeview'''
+            self.client_treeview_frame = ctk.CTkFrame(self.content_frame, corner_radius=0,fg_color=Color.White_Platinum)
+            self.client_treeview_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(width*0.005))
+            
+            self.item_treeview = cctk.cctkTreeView(self.client_treeview_frame, data=[], width= width*0.775, height= height*0.595, corner_radius=0,
+                                           column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/UnitPrice:{int(width*.085)}-tr/QuantityPcs:{int(width*.1)}-tr/TotalPrice:{int(width*.085)}-tr/Reason:{int(width*.125)}-tl!33!35',
+                                           bd_message="Are you sure want to remove this item?")
+            self.item_treeview.pack()
+            
+            self.action_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum, corner_radius=5, width=width*0.215, height=height*0.065)
+            self.action_frame.grid(row=3, column=0, columnspan=1, sticky='nsew', padx=(width*0.005), pady=(0,width*0.005))
+            
+            self.cancel_btn = ctk.CTkButton(self.action_frame, width=width*0.085, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Pastel_Hover,
+                                            font=("DM Sans Medium", 16), text='Close', command=reset)
+            self.cancel_btn.pack(side="right", padx=(width*0.005), pady=(width*0.005)) 
+            
+          
+        def set_table(self):
+            self.or_label.configure(text=self.info[0])
+            self.client_name_label.configure(text=self.info[1])
+            self.item_treeview.update_table(self.data)
+        
+          
+        def place(self, info, data, **kwargs):
+            self.info = info
+            self.data = data
+            self.set_table()
+            
+            return super().place(**kwargs)
+
+    return instance(master, info, command_callback)
