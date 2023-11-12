@@ -1555,7 +1555,12 @@ def show_payment_proceed(master, info:tuple,):
                             s[0], database.fetch_data("SELECT id FROM pet_info WHERE p_name = ? AND owner_id = ?", (s[1], owner_id))[0][0],
                             s[1], s[2], price_format_to_float(s[-1 ]), 0, 0, s[3], s[4], s[5]) for s in self.services]
 
-                database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, self.client_name._text, price_format_to_float(self.grand_total._text[1:]), self.deduction_entry.get() or 0)]])
+                client_id = database.fetch_data(sql_commands.get_id_owner, (self.client_name._text, ))
+                client_id = None if len(client_id) == 0 else client_id[0][0]
+
+                if not database.exec_nonquery([[sql_commands.record_transaction, (record_id, self.cashier_name._text, client_id, self.client_name._text, price_format_to_float(self.grand_total._text[1:]), self.deduction_entry.get() or 0)]]):
+                    messagebox.showerror("Can't Proceed", "An error occurred")
+                    return
                 #record the transaction
 
                 database.exec_nonquery([[sql_commands.record_item_transaction_content, s] for s in item])
