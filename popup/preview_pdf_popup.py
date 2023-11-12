@@ -129,7 +129,7 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     
     if not service_particulars is None:
         for p in service_particulars:
-            receipt_content.append([f'{p[0]} - {p[1]}', '1', f'P{p[6]}', f'P{p[6]}'])
+            receipt_content.append([f'{p[0]} - {p[1]}', '1', "P{:,.2f}".format(float(p[6])), "P{:,.2f}".format(float(p[6]))])
     if not item_particulars is None:
         for p in item_particulars:
             item_prc = "P{:,.2f}".format(float(p[4]))
@@ -137,15 +137,27 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             #receipt_content.append([p[2], p[3], p[4], float(p[4])*float(p[3])])
             receipt_content.append([p[2], p[3], item_prc, item_total])
     if old:
+        total_amount_price = "P{:,.2f}".format(float(total_amount))
+        deduction_price = "P{:,.2f}".format(float(deduction))
+        deducted = float(total_amount) - float(deduction)
+        deducted_price = "P{:,.2f}".format(float(deducted))
+        amount_paid_price = "P{:,.2f}".format(float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid) - float(deducted))
+        '''
+        old version
         total_amount_price = total_amount
+        deduction_price = "P{:,.2f}".format(float(deduction))
+        deducted_price = "P{:,.2f}".format(float(total_amount) - float(deduction))
         amount_paid_price = total_amount
         change_price = 0
+        '''
     else:   
         total_amount_price = "P{:,.2f}".format(float(total_amount))
         deduction_price = "P{:,.2f}".format(float(deduction))
-        deducted_price = "P{:,.2f}".format(float(total_amount) - float(deduction))
+        deducted = float(total_amount) - float(deduction)
+        deducted_price = "P{:,.2f}".format(float(deducted))
         amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-        change_price = "P{:,.2f}".format(float(total_amount) - float(deduction) - float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid) - float(deducted))
     receipt_content.append(['Subtotal:', '', '', f'{total_amount_price}'])
     receipt_content.append(['Deduction:', '', '', f'{deduction_price}'])
     receipt_content.append(['Total:', '', '', f'{deducted_price}'])
@@ -228,11 +240,13 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
 
     ts = TableStyle([
         ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
-        ('BOX', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
+        #encase subtotal to change in a box
+        ('BOX', (0, len(receipt_content)-5), (-1, len(receipt_content)-1), 0.5, colors.black),
         #('BOX', (0, len(receipt_content)-3), (0, len(receipt_content)-1), 0.5, colors.black),
-        ('GRID', (0, 5), (0, len(receipt_content)-4), 0.5, colors.black),
-        ('GRID', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
-        ('GRID', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
+        #have grid at the end of the items just before subtotal
+        ('GRID', (0, 5), (0, len(receipt_content)-6), 0.5, colors.black),
+        ('GRID', (1, 5), (1, len(receipt_content)-6), 0.5, colors.black),
+        ('GRID', (2, 5), (2, len(receipt_content)-6), 0.5, colors.black),
         #('GRID', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
         ('GRID', (3, 5), (3, len(receipt_content)-1), 0.5, colors.black),
     ])
@@ -348,7 +362,7 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
     
     if not service_particulars is None:
         for p in service_particulars:
-            receipt_content.append([f'{p[0]} - {p[1]}', '1', f'P{p[6]}', f'P{p[6]}'])
+            receipt_content.append([f'{p[0]} - {p[1]}', '1', "P{:,.2f}".format(float(p[6])), "P{:,.2f}".format(float(p[6]))])
     if not item_particulars is None:
         for p in item_particulars:
             item_prc = "P{:,.2f}".format(float(p[4]))
@@ -356,15 +370,19 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             receipt_content.append([p[2], p[3], item_prc, item_total])
 
     if old:
-        total_amount_price = total_amount
-        amount_paid_price = total_amount
-        change_price = 0
+        total_amount_price = "P{:,.2f}".format(float(total_amount))
+        deduction_price = "P{:,.2f}".format(float(deduction))
+        deducted = float(total_amount) - float(deduction)
+        deducted_price = "P{:,.2f}".format(float(deducted))
+        amount_paid_price = "P{:,.2f}".format(float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid) - float(deducted))
     else:   
         total_amount_price = "P{:,.2f}".format(float(total_amount))
         deduction_price = "P{:,.2f}".format(float(deduction))
-        deducted_price = "P{:,.2f}".format(float(total_amount) - float(deduction))
+        deducted = float(total_amount) - float(deduction)
+        deducted_price = "P{:,.2f}".format(float(deducted))
         amount_paid_price = "P{:,.2f}".format(float(amount_paid))
-        change_price = "P{:,.2f}".format(float(total_amount) - float(deduction) - float(amount_paid))
+        change_price = "P{:,.2f}".format(float(amount_paid) - float(deducted))
     receipt_content.append(['Subtotal:', '', '', f'{total_amount_price}'])
     receipt_content.append(['Deduction:', '', '', f'{deduction_price}'])
     receipt_content.append(['Total:', '', '', f'{deducted_price}'])
@@ -446,11 +464,13 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
 
     ts = TableStyle([
         ('GRID', (0, 0), (-1, 4), 0.5, colors.black),
-        ('BOX', (0, len(receipt_content)-3), (-1, len(receipt_content)-1), 0.5, colors.black),
+        #encase subtotal to change in a box
+        ('BOX', (0, len(receipt_content)-5), (-1, len(receipt_content)-1), 0.5, colors.black),
         #('BOX', (0, len(receipt_content)-3), (0, len(receipt_content)-1), 0.5, colors.black),
-        ('GRID', (0, 5), (0, len(receipt_content)-4), 0.5, colors.black),
-        ('GRID', (1, 5), (1, len(receipt_content)-4), 0.5, colors.black),
-        ('GRID', (2, 5), (2, len(receipt_content)-4), 0.5, colors.black),
+        #have grid at the end of the items just before subtotal
+        ('GRID', (0, 5), (0, len(receipt_content)-6), 0.5, colors.black),
+        ('GRID', (1, 5), (1, len(receipt_content)-6), 0.5, colors.black),
+        ('GRID', (2, 5), (2, len(receipt_content)-6), 0.5, colors.black),
         #('GRID', (3, 5), (3, len(receipt_content)-4), 0.5, colors.black),
         ('GRID', (3, 5), (3, len(receipt_content)-1), 0.5, colors.black),
     ])

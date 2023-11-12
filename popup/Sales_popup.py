@@ -46,7 +46,8 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                         temp_items.append(it)
                     formatted_items.append(temp_items)
                 #ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer", is_receipt=1)
-                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=raw_transaction_info[2], paid=raw_transaction_info[2], title="Transaction Receipt Viewer", is_receipt=1)
+                #added deduction
+                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=raw_transaction_info[2], paid=raw_transaction_info[2], title="Transaction Receipt Viewer", is_receipt=1, deduction=raw_transaction_info[6])
             
             def view_removed():
                 _temp = [(data[0],) + (f'{data[1]} ({data[2]})',) + data[3:] if data[2] else (data[0], data[1], data[3:]) for data in database.fetch_data(sql_commands.get_replaced_items_by_id, (self.or_label._text,))]
@@ -175,7 +176,8 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 raw_service = database.fetch_data(sql_commands.get_service_record, (sales_info[0],))
                 self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]  
                 raw_service_info = database.fetch_data(sql_commands.get_service_record_temp, (sales_info[0],))
-                raw_transaction_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]      
+                #change sql_command
+                raw_transaction_info = database.fetch_data(sql_commands.get_sales_record_info_temp, (sales_info[0],))[0]      
                 self.set_values()
                 
                 temp = [split_unit(item[0])+(item[1:]) for item in raw_items]
