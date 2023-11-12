@@ -896,7 +896,7 @@ get_sales_record_all =f"SELECT transaction_uid, client_name , CONCAT('₱', FORM
 
 get_sales_search_query = f"SELECT transaction_uid, client_name FROM transaction_record WHERE client_name LIKE '%?%' OR transaction_uid LIKE '%?%' ORDER BY client_name"
 
-get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn, state\
+get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn, state, deduction\
                             FROM transaction_record WHERE transaction_uid = ?"
 
 #sends price but without format and deduction
