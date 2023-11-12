@@ -149,7 +149,7 @@ def count_inventory(given:list):
                 if item[0][-2] - item[1][-3] == 0:
                     res.append(((item[0][0],) + split_unit(item[0][1]) + (item[1][3] + item[2][3],)))
                 else:
-                    res.append(((item[0][0],) + split_unit(item[0][1]) + (abs((item[0][3] - item[1][3]) - item[2][3]) + item[1][-3],)) )
+                    res.append(((item[0][0],) + split_unit(item[0][1]) + (abs((item[0][3] - item[1][3]) - item[2][3]),)) ) # + item[1][-3]
             else:
                     res.append(((item[0][0],) + split_unit(item[0][1]) + (item[1][3],)))         
     return res

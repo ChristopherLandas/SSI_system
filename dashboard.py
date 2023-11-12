@@ -33,7 +33,7 @@ import screeninfo
 import ctypes
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
-scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+#scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 #scaling = 1
 
 ctk.set_appearance_mode('light')
@@ -69,8 +69,8 @@ class dashboard(ctk.CTkToplevel):
         #[print(screen) for screen in screeninfo.get_monitors()]
         '''Global Variables'''
         global width, height, mainframes, IP_Address, SETTINGS_VAL, PORT_NO
-        width = self.winfo_screenwidth() / scaling
-        height = self.winfo_screenheight() / scaling
+        width = self.winfo_screenwidth() #/ scaling
+        height = self.winfo_screenheight() #/ scaling
             
         title_name = "J.Z. Angeles Veterinary Clinic"
         
@@ -113,6 +113,7 @@ class dashboard(ctk.CTkToplevel):
         self.content_frame = ctk.CTkFrame(self.loading_frame, fg_color="transparent")
         self.content_frame.place(relx =0.5, rely=0.5, anchor='center')
         
+        ctk.CTkLabel(self.loading_frame, text='', image=Icons.get_image("python_icon", size=(50,50))).place(relx=0.995, rely=0.995, anchor='se')
         ctk.CTkLabel(self.content_frame, text=title_name, fg_color='transparent',font=("DM Sans Bold", height*0.04, 'bold'), text_color=Color.White_Lotion,).pack(pady=(height*0.05,0))
         ctk.CTkLabel(self.content_frame, text="Sales and Services System", fg_color='transparent', font=("DM Sans Medium", height*0.035), text_color=Color.White_Lotion,).pack(pady=(height*0.02,height*0.075))
         
@@ -238,6 +239,10 @@ class dashboard(ctk.CTkToplevel):
         self.side_frame.grid(rowspan=2,row = 0, column=0)
         self.side_frame.pack_propagate(False)
 
+        '''Python Logo'''
+        
+        ctk.CTkLabel(self.side_frame, text='', image=Icons.get_image("python_logo", (30,30)), height=height*0.055, width=height*0.055, fg_color=Color.Blue_Steel, corner_radius=5 ).place(relx=0.025, rely=0.995, anchor='sw')
+    
         '''Company Logo'''
         self.logo_frame = ctk.CTkFrame(self.side_frame, height=round(height * 0.1), width=side_frame_w,
                                        fg_color="transparent",corner_radius=0)
@@ -1235,7 +1240,7 @@ class sales_frame(ctk.CTkFrame):
         
         ctk.CTkLabel(self.from_date_frame, text="From: ", font=("DM Sans Medium", 14), anchor='e', width=width*0.03).pack(side="left", padx=(width*0.01,width*0.0025))
         #date.today()
-        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text='2023-11-04', font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
+        self.from_date_select_entry = ctk.CTkLabel(self.from_date_frame, text=date.today(), font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, corner_radius=5)
         self.from_date_select_entry.pack(side="left", fill="both", expand=1,  padx=(0,width*0.0025), pady=(width*0.0025))
         self.from_show_calendar = ctk.CTkButton(self.from_date_frame, text="",image=Icons.get_image("calendar_icon", (22,22)), height=height*0.05,width=height*0.05, fg_color=Color.Blue_Yale,
                                                command=lambda:cctk.tk_calendar(self.from_date_select_entry, "%s", date_format="raw", max_date=datetime.datetime.now(), set_date_callback=set_date))
@@ -1271,7 +1276,7 @@ class sales_frame(ctk.CTkFrame):
         self.sales_treeview_frame.pack(fill='both', expand=1,  padx=(width*0.005), pady=(0,width*0.005))
         #"No", "OR ","Client", "Total", "Date", "Cashier"
         self.sales_treeview = cctk.cctkTreeView(self.sales_treeview_frame, data = [], width= width * .805, height= height*0.665, corner_radius=0,
-                                           column_format=f'/No:{int(width*.0325)}-#r/TransactionID:{int(width*.125)}-tc/Client:x-tl/Total:{int(width*0.1)}-tr/Date:{int(width*.125)}-tc/Cashier:{int(width*.125)}-tl!33!35',)
+                                           column_format=f'/No:{int(width*.0325)}-#r/TransactionID:{int(width*0.1)}-tc/Status:{int(width*.1)}-tc/Client:x-tl/Total:{int(width*0.1)}-tr/Date:{int(width*0.115)}-tc/Cashier:{int(width*0.1)}-tl!33!35',)
                                            
         self.sales_treeview.pack()
         #region Bottom
@@ -3128,4 +3133,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'jayr', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)

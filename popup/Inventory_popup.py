@@ -1984,7 +1984,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
 
             self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
             
-            disp_reason = ['Expired', 'Defective', 'Damaged']
+            disp_reason = ['Expired', 'Defective/Damaged']
             
             
                     

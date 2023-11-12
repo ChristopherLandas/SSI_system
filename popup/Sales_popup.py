@@ -710,16 +710,14 @@ def show_payment_proceed(master, info:tuple,):
                 required_items = self.info_list[1]
                 transact_items = self.info_list[2]
                 
-                #print(replaced_items)
-                #print(required_items)
-                #print(transact_items)
+                print(replaced_items)
+                print(required_items)
+                print(transact_items)
                 
                 #steps insert replacement record, update transaction record to replaced, update item transaction content to 2, insert new transaction content, subtract items used in inventory
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure you want to conntinue?\nThis will update the order record."):
+                     
                     rep_id = generateId(initial='REP', length=10).upper()
-                    #print(rep_id, self.or_label._text, price_format_to_float(self.new_total._text[1:]),  self.cashier_name._text)
-                    #print((price_format_to_float(self.new_total._text[1:]), self.or_label._text))
-                    #print((self.or_label._text,))
                     database.exec_nonquery([
                             [sql_commands.set_replacement_record, (rep_id, self.or_label._text, price_format_to_float(self.new_total._text[1:]),  self.cashier_name._text)],
                             
@@ -728,26 +726,19 @@ def show_payment_proceed(master, info:tuple,):
                             [sql_commands.update_item_transaction_content_to_replaced, (self.or_label._text,)]])
                             
                     for item in transact_items:
-                        #print((self.or_label._text, item[0], item[2], item[4], price_format_to_float(item[3][1:]),0))
                         database.exec_nonquery([[sql_commands.record_item_transaction_content, (self.or_label._text, item[0], item[2], item[4], price_format_to_float(item[3][1:]),0)]])
                             
                     for record in replaced_items:
-                        #print((rep_id, record[0], record[2], price_format_to_float(record[3][1:]), record[4], record[6]))
                         database.exec_nonquery([[sql_commands.set_replacement_items, (rep_id, record[0], record[2], price_format_to_float(record[3][1:]), record[4], record[6])],
                                                 
                                                 [sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), None, record[0], record[2], record[4],  record[6], self.cashier_name._text)]])
 
                     for item in required_items:
-                        #print(item)
-                        #(165, 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter (100mg)', 1, 796.95, 0)
                         does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (item[0], ))[0][0])
                         quantity_needed = item[3]
                         stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_expiry if does_expire
                                                     else sql_commands.get_specific_stock_ordered_by_date_added, (item[0], ))
                         
-                        #print(does_expire)
-                        #print(quantity_needed)
-                        #print(stocks)
                 
                         for st in stocks:
                             if st[2] == quantity_needed and st == stocks[-1]:
@@ -914,7 +905,7 @@ def show_payment_proceed(master, info:tuple,):
         def set_values(self):
             global width, height
             total = f"₱{format_price(price_format_to_float((self.item_total[1:])) + float(self.service_total))}"
-            temp = self.service_data + self.item_data
+            temp = self.service_data + [item for item in self.item_data if item[1] > 0]
             
             self.or_label.configure(text=self.or_number)
             self.client_name.configure(text=self.client_data)
@@ -950,10 +941,6 @@ def show_payment_proceed(master, info:tuple,):
             self.client_data = client            
             self.info_list = info_lists
             self.set_values()
-            
-            print(self.info_list[0])
-            print(self.info_list[1])
-            print(self.info_list[2])
             
             return super().place(**kwargs)
     return instance(master, info)

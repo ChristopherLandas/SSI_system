@@ -165,6 +165,8 @@ class Icons:
     replaced_icon = ctk.CTkImage(light_image=Image.open("image/replace_icon.png"), size=(30,30))
     receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt.png"), size=(30,30))
     
+    python_icon = ctk.CTkImage(light_image=Image.open("image/python.png"), size=(30,30))
+    python_logo = ctk.CTkImage(light_image=Image.open("image/python_logo.png"), size=(30,30))
     
     @classmethod
     def get_image(cls, image_name:str, size:tuple=None):
