@@ -897,6 +897,10 @@ get_sales_search_query = f"SELECT transaction_uid, client_name FROM transaction_
 get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn, state\
                             FROM transaction_record WHERE transaction_uid = ?"
 
+#sends price but without format and deduction
+get_sales_record_info_temp = f"SELECT transaction_uid, client_name, Total_amount AS price, transaction_date, Attendant_usn, state, deduction\
+                            FROM transaction_record WHERE transaction_uid = ?"
+
 #Tentative;                          
 get_sales_attendant = f"SELECT DISTINCT Attendant_usn FROM transaction_record"
 
