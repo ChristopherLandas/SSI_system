@@ -2,7 +2,6 @@ import customtkinter as ctk
 from PIL import Image
 import screeninfo
 import copy
-[print(screen) for screen in screeninfo.get_monitors()]
 
 
 class Color:

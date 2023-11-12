@@ -863,8 +863,7 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             self.entries = [self.supplier_name_entry, self.supplier_person_entry, self.supplier_tele_entry, self.supplier_number_entry, self.supplier_email_entry, self.supplier_address_entry]
             
         def place(self, **kwargs):
-            last_record_id = database.fetch_data(sql_commands.get_last_supplier_id)
-            self.supplier_id.configure(text=generate_word_num_id(last_record_id[0][0]))
+            self.supplier_id.configure(text=generateId(initial = 'SUP', length = 6).upper())
             
             return super().place(**kwargs)
         
