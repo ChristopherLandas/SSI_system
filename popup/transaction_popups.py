@@ -1565,7 +1565,6 @@ def show_payment_proceed(master, info:tuple,):
                 #record the services from within the transaction
 
                 for _item in item:
-                    print(_item)
                     does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (_item[1], ))[0][0])
                     quantity_needed = _item[3]
                     stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_expiry if does_expire
@@ -1613,8 +1612,7 @@ def show_payment_proceed(master, info:tuple,):
                 self.place_forget()
                 self.complete_button.configure(state="normal")
                 self.cancel_button.configure(state="normal")
-                print(self.or_button._text[5:])
-
+                #print(self.or_button._text[5:])
                 #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
                 #update the table
                 ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment, deduction= self.deduction_entry.get() or 0,

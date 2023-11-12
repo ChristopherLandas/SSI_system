@@ -2,7 +2,7 @@ import customtkinter as ctk
 from PIL import Image
 import screeninfo
 import copy
-[print(screen) for screen in screeninfo.get_monitors()]
+
 
 class Color:
     White_Lotion = "#FCFCFC"
@@ -167,6 +167,16 @@ class Icons:
     inventory_status = ctk.CTkImage(light_image= Image.open("image/inventory_flow.png"), size=(30,30)) 
     replaced_icon = ctk.CTkImage(light_image=Image.open("image/replace_icon.png"), size=(30,30))
     receipt_icon = ctk.CTkImage(light_image=Image.open("image/receipt.png"), size=(30,30))
+    
+    python_icon = ctk.CTkImage(light_image=Image.open("image/python.png"), size=(30,30))
+    python_logo = ctk.CTkImage(light_image=Image.open("image/python_logo.png"), size=(30,30))
+    
+    
+    payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_icon.png"), size=(30,30))
+    settings_icon = ctk.CTkImage(light_image=Image.open("image/settings_icon.png"), size=(30,30))
+    reception_icon = ctk.CTkImage(light_image=Image.open("image/reception_icon.png"), size=(30,30))
+    customers_logo = ctk.CTkImage(light_image=Image.open("image/customers.png"), size=(30,30))
+    
     
     @classmethod
     def get_image(cls, image_name:str, size:tuple=None):

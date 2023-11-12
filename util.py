@@ -147,9 +147,10 @@ def count_inventory(given:list):
         else:
             if item[2][-2] != 0:
                 if item[0][-2] - item[1][-3] == 0:
-                    res.append(((item[0][0],) + split_unit(item[0][1]) + (item[1][3] + item[2][3],)))
+                    res.append(((item[0][0],) + split_unit(item[0][1]) + (item[2][3],)))
                 else:
-                    res.append(((item[0][0],) + split_unit(item[0][1]) + (abs((item[0][3] - item[1][3]) - item[2][3]) + item[1][-3],)) )
+                    #res.append(((item[0][0],) + split_unit(item[0][1]) + (abs((item[0][3] - item[1][3]) - item[2][3]) + item[1][-3],)) )  
+                    res.append(((item[0][0],) + split_unit(item[0][1]) + (abs((item[0][3] - item[1][3]) - item[2][3]),)) )  
             else:
                     res.append(((item[0][0],) + split_unit(item[0][1]) + (item[1][3],)))         
     return res
@@ -225,19 +226,15 @@ def decode_action(type_code: str):
         return f'Receive item {temp[-1]}'
     if type_code.startswith('TRNM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Cashiered the transaction {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
     if type_code.startswith('DPSM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Move an item to the disposal, UID: {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
     if type_code.startswith('DPSO'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Dispose an item, UID: {temp[-1]}'
-    if type_code.startswith('ADD'):
-        temp = re.findall(r'/(\w+)+', type_code)
-        return f'Encode an item, UID: {temp[-1]}'
-    if type_code.startswith('ADDS'):
-        temp = re.findall(r'/(\w+)+', type_code)
-        return f'Encode a service, UID: {temp[-1]}'
+        return f'Create Invoice {temp[-1]}'
+
+
     
 
 '''def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):

@@ -834,7 +834,7 @@ get_pet_record_search_query=f"SELECT id, p_name, pet_owner_info.owner_name FROM 
 #SALES 
 get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
 
-get_item_record = "SELECT  item_name, quantity, price, ROUND((quantity*price),2) AS total FROM item_transaction_content WHERE transaction_uid = ?"
+get_item_record = "SELECT  item_name, quantity, price, ROUND((quantity*price),2) AS total FROM item_transaction_content WHERE transaction_uid = ? AND STATE = 1"
 get_service_record = "SELECT CONCAT(service_name,' - ',  'Pet: ',patient_name) AS service, 1 AS quantity, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
 get_service_record_temp = "SELECT CONCAT(service_name) AS service, patient_name, scheduled_date, END_schedule, price, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
 
@@ -871,7 +871,7 @@ insert_supplier_info = "INSERT INTO supplier_info VALUES(?, ?, ?, ?, ?, ?, ?, ?,
 
 #GET
 get_last_supplier_id = "SELECT supp_id FROM supplier_info ORDER BY supp_id DESC LIMIT 1"
-get_supplier_info = "SELECT supp_id, supp_name, contact_person, contact_number, address FROM supplier_info ORDER BY supp_id ASC"
+get_supplier_info = "SELECT supp_id, supp_name, contact_person, contact_number, address FROM supplier_info ORDER BY supp_name ASC"
 get_supplier_record = f"SELECT supp_id, supp_name, telephone, contact_person, contact_number, contact_email, address, created_by, CAST(date_added AS DATE), CAST(date_modified AS DATE)\
                         FROM supplier_info WHERE supp_id = ?"
                         
@@ -887,7 +887,7 @@ update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, telephone = ?, 
 
 '''SALES'''
 
-get_sales_record_by_date = f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
+get_sales_record_by_date = f"SELECT transaction_uid, CASE  WHEN state = 1 THEN 'Paid' ElSE 'Replaced' END, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
                                 FROM transaction_record WHERE transaction_date BETWEEN ? AND ? ORDER BY transaction_date"
 
 get_sales_record_all =f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn FROM transaction_record"
@@ -1195,4 +1195,13 @@ get_item_brand_name_unit = "SELECT brand, CASE WHEN unit IS NULL THEN name ELSE 
 get_order_search_query = "SELECT id, NAME, CASE WHEN state = 1 THEN 'On Order'ELSE 'Partial' END\
                             FROM recieving_item WHERE (state = 3 or state = 1) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
                             
-get_order_history_search_query = "SELECT id, NAME FROM recieving_item WHERE (state = 2) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
+get_order_history_search_query = "SELECT id, NAME FROM recieving_item WHERE (state = 2 or state = 3) AND (id LIKE '%?%' OR NAME LIKE '%?%') ORDER BY state"
+
+get_supplier_search_query = "SELECT supp_id, supp_name FROM supplier_info WHERE (supp_id LIKE '%?%' OR supp_name LIKE '%?%')"
+get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by FROM disposal_history\
+                                WHERE date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
+                                
+get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+                        LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
+                        WHERE item_general_info.Category = ? AND reason = ?\
+                        AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"

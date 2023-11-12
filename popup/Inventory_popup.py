@@ -863,8 +863,7 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             self.entries = [self.supplier_name_entry, self.supplier_person_entry, self.supplier_tele_entry, self.supplier_number_entry, self.supplier_email_entry, self.supplier_address_entry]
             
         def place(self, **kwargs):
-            last_record_id = database.fetch_data(sql_commands.get_last_supplier_id)
-            self.supplier_id.configure(text=generate_word_num_id(last_record_id[0][0]))
+            self.supplier_id.configure(text=generateId(initial = 'SUP', length = 6).upper())
             
             return super().place(**kwargs)
         
@@ -935,7 +934,7 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
                     self.save_info_button.pack_forget()
                     
                     self.edit_info_button.pack(side="right")
-                    #self._callback()
+                self._callback()
             
             def add_item_supplier():
                 self.raw_item_data = database.fetch_data(sql_commands.get_supplier_items, (self.record_id,))
@@ -980,7 +979,7 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
             self.supplier_id = ctk.CTkLabel(self.id_frame, font=("DM Sans Medium", 14), width=width*0.115, height=height*0.05, corner_radius=5,fg_color=Color.White_Lotion)
             self.supplier_id.pack(side="left")
             
-            self.info_btn = ctk.CTkButton(self.id_frame, width=height*0.05, height = height*0.05, image=Icons.info_icon, text="", font=("DM Sans Medium", 14),
+            self.info_btn = ctk.CTkButton(self.id_frame, width=height*0.05, height = height*0.05, image=Icons.get_image("info_icon", size=(25,25)), text="", font=("DM Sans Medium", 14),
                                             command=view_audit_info)
             self.info_btn.pack(side="right", padx=(width*0.005,0))
             
@@ -1988,7 +1987,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
 
             self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
             
-            disp_reason = ['Expired', 'Defective', 'Damaged']
+            disp_reason = ['Expired', 'Defective/Damaged']
             
             
                     
@@ -2129,8 +2128,7 @@ def item_disposal_confirmation(master, info:tuple, command_callback: callable = 
         def dispose_confirm(self):
             if self.disposal_entry.get() == 'testing':
                 temp= [(data[0], f"{data[1]} ({data[2]})", data[3]) if data[2] else (data[0],data[1],data[3]) for data in (database.fetch_data(sql_commands.get_expired_items_to_dispose, None))]
-                print(temp)
-                [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), None, items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
+                [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("DIS",6).upper(), None, items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
                 database.exec_nonquery([[sql_commands.update_expired_items, None]])
                 messagebox.showinfo("Item Disposal", "Item is fully disposed", parent = self)
                 self.command_callback()

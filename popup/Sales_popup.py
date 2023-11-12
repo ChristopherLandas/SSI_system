@@ -165,6 +165,10 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.change_order_btn.grid_forget()
                 self.replaced_item_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)                 
         
+            if not self.items:
+                self.change_order_btn.grid_forget()
+            else:
+                self.change_order_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)
         
         def place(self, sales_info, **kwargs):
             try:
@@ -176,8 +180,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]  
                 raw_service_info = database.fetch_data(sql_commands.get_service_record_temp, (sales_info[0],))
                 raw_transaction_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]      
-                self.set_values()
-                
+
                 temp = [split_unit(item[0])+(item[1:]) for item in raw_items]
                 self.items = [((f'{database.fetch_data(sql_commands.get_item_brand, database.fetch_data(sql_commands.get_uid, (temp[0], temp[1]))[0])[0][0]} {temp[0]} ({temp[1]})'),) +  temp[2:] if len(temp)==5 else 
                             ((f'{database.fetch_data(sql_commands.get_item_brand, database.fetch_data(sql_commands.get_uid_null_unit, (temp[0],))[0])[0][0]} {temp[0]}'),) +  temp[1:] for temp in temp]
@@ -186,6 +189,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.tree_data = [(data[0],  f"₱{format_price(data[2])}", data[1], f"₱{format_price(data[3])}") for data in raw_data]
                 self.receipt_treeview.update_table(self.tree_data) 
             
+                self.set_values()
             
     return sales_record(master, info)
 
@@ -374,7 +378,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
             if not res[0]:
                 self.origin.master.change_value()
             else:
-                self.row_root.winfo_children()[5].configure(text=f"₱{format_price(float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
+                self.row_root.winfo_children()[5].configure(text=f"₱{format_price(price_format_to_float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
                 self.replaced_items.append(res[1])
             self.update_new_total()
             self.replace_item_btn.configure(text=f"Replaced Items ({len(self.replaced_items)})")
@@ -390,7 +394,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
                 self.confirm_removal.place(relx=0.5, rely=0.5, anchor='c', data = self.row_data)
             elif self.origin._text == '+':
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure on replacing or adding this item?"):
-                    self.row_root.winfo_children()[5].configure(text=f"₱{format_price(float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
+                    self.row_root.winfo_children()[5].configure(text=f"₱{format_price(price_format_to_float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
                     self.update_new_total()
                 else:
                     self.origin.master.change_value(-1)
@@ -682,6 +686,13 @@ def show_payment_proceed(master, info:tuple,):
 
             #self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
+            def close():
+                self.place_forget()
+                self.or_label.configure(text = '_')
+                self.payment_entry.delete(0, ctk.END)
+                self.payment_total.configure(text = "₱ --.--")
+                self.change_total.configure(text = "--.--")
+                
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
             self.main_frame.pack()
             self.main_frame.grid_columnconfigure((0), weight=1)
@@ -693,7 +704,7 @@ def show_payment_proceed(master, info:tuple,):
 
             ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('payment_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="PAYMENT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
-            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=lambda: self.place_forget()).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=close).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
             
@@ -710,16 +721,18 @@ def show_payment_proceed(master, info:tuple,):
                 required_items = self.info_list[1]
                 transact_items = self.info_list[2]
                 
-                #print(replaced_items)
-                #print(required_items)
-                #print(transact_items)
+                print(replaced_items)
+                print(required_items)
+                print(transact_items)
+                
+                
+                items = ([(self.or_label._text, item[0], item[2], item[4], price_format_to_float(item[3][1:])) for item in transact_items])
+                payment = float((self.payment_entry.get() or 0))
                 
                 #steps insert replacement record, update transaction record to replaced, update item transaction content to 2, insert new transaction content, subtract items used in inventory
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure you want to conntinue?\nThis will update the order record."):
+                     
                     rep_id = generateId(initial='REP', length=10).upper()
-                    #print(rep_id, self.or_label._text, price_format_to_float(self.new_total._text[1:]),  self.cashier_name._text)
-                    #print((price_format_to_float(self.new_total._text[1:]), self.or_label._text))
-                    #print((self.or_label._text,))
                     database.exec_nonquery([
                             [sql_commands.set_replacement_record, (rep_id, self.or_label._text, price_format_to_float(self.new_total._text[1:]),  self.cashier_name._text)],
                             
@@ -728,26 +741,19 @@ def show_payment_proceed(master, info:tuple,):
                             [sql_commands.update_item_transaction_content_to_replaced, (self.or_label._text,)]])
                             
                     for item in transact_items:
-                        #print((self.or_label._text, item[0], item[2], item[4], price_format_to_float(item[3][1:]),0))
                         database.exec_nonquery([[sql_commands.record_item_transaction_content, (self.or_label._text, item[0], item[2], item[4], price_format_to_float(item[3][1:]),0)]])
                             
                     for record in replaced_items:
-                        #print((rep_id, record[0], record[2], price_format_to_float(record[3][1:]), record[4], record[6]))
                         database.exec_nonquery([[sql_commands.set_replacement_items, (rep_id, record[0], record[2], price_format_to_float(record[3][1:]), record[4], record[6])],
                                                 
-                                                [sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), None, record[0], record[2], record[4],  record[6], self.cashier_name._text)]])
+                                                [sql_commands.set_expired_items_from_inventory, (generateId("DIS",6).upper(), None, record[0], record[2], record[4],  record[6], self.cashier_name._text)]])
 
                     for item in required_items:
-                        #print(item)
-                        #(165, 'I00004', 'Fresh Step LeightWeight Clumping Cat Litter (100mg)', 1, 796.95, 0)
                         does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (item[0], ))[0][0])
                         quantity_needed = item[3]
                         stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_expiry if does_expire
                                                     else sql_commands.get_specific_stock_ordered_by_date_added, (item[0], ))
                         
-                        #print(does_expire)
-                        #print(quantity_needed)
-                        #print(stocks)
                 
                         for st in stocks:
                             if st[2] == quantity_needed and st == stocks[-1]:
@@ -761,11 +767,13 @@ def show_payment_proceed(master, info:tuple,):
                                 quantity_needed -= st[2]
 
 
-                    messagebox.showinfo("Success",f"Order {self.or_label._text} Successfully Changed.")
+                    messagebox.showinfo("Success",f"Order {self.or_label._text} Successfully Changed.") #item_particulars, service_particulars
+                    ppdfp.preview_pdf_popup(receipt=1, ornum=self.or_label._text, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=items, service=self.service_data, total=price_format_to_float(self.new_total._text[1:]), paid=payment, deduction=0,
+                                        title="Transaction Receipt Viewer", is_receipt=1, is_replaced=True)
                     self.master.master.place_forget()
                     self.master.place_forget()
                     self.master.master.master.refresh()
-                    self.place_forget()
+                    close()
                 
             
             def payment_callback(var, index, mode):
@@ -914,7 +922,7 @@ def show_payment_proceed(master, info:tuple,):
         def set_values(self):
             global width, height
             total = f"₱{format_price(price_format_to_float((self.item_total[1:])) + float(self.service_total))}"
-            temp = self.service_data + self.item_data
+            temp = self.service_data + [item for item in self.item_data if item[1] > 0]
             
             self.or_label.configure(text=self.or_number)
             self.client_name.configure(text=self.client_data)
@@ -950,10 +958,6 @@ def show_payment_proceed(master, info:tuple,):
             self.client_data = client            
             self.info_list = info_lists
             self.set_values()
-            
-            print(self.info_list[0])
-            print(self.info_list[1])
-            print(self.info_list[2])
             
             return super().place(**kwargs)
     return instance(master, info)
