@@ -682,6 +682,13 @@ def show_payment_proceed(master, info:tuple,):
 
             #self.payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(28,28))
                 
+            def close():
+                self.place_forget()
+                self.or_label.configure(text = '_')
+                self.payment_entry.delete(0, ctk.END)
+                self.payment_total.configure(text = "₱ --.--")
+                self.change_total.configure(text = "--.--")
+                
             self.main_frame = ctk.CTkFrame(self, width=width*0.8155, height=height*0.885, corner_radius=0)
             self.main_frame.pack()
             self.main_frame.grid_columnconfigure((0), weight=1)
@@ -693,7 +700,7 @@ def show_payment_proceed(master, info:tuple,):
 
             ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.get_image('payment_icon', (28,28))).pack(side="left",padx=(width*0.01,0))
             ctk.CTkLabel(self.top_frame, text="PAYMENT", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
-            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=lambda: self.place_forget()).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+            ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=close).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
             self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
             
@@ -710,9 +717,16 @@ def show_payment_proceed(master, info:tuple,):
                 required_items = self.info_list[1]
                 transact_items = self.info_list[2]
                 
-                #print(replaced_items)
-                #print(required_items)
-                #print(transact_items)
+                print(replaced_items)
+                print(required_items)
+                print(transact_items)
+                
+                
+                items = ([item for item in self.item_data if item[1] > 0])
+                payment = float((self.payment_entry.get() or 0))
+                
+                print(items, payment)
+                return
                 
                 #steps insert replacement record, update transaction record to replaced, update item transaction content to 2, insert new transaction content, subtract items used in inventory
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure you want to conntinue?\nThis will update the order record."):
@@ -752,7 +766,9 @@ def show_payment_proceed(master, info:tuple,):
                                 quantity_needed -= st[2]
 
 
-                    messagebox.showinfo("Success",f"Order {self.or_label._text} Successfully Changed.")
+                    messagebox.showinfo("Success",f"Order {self.or_label._text} Successfully Changed.") #item_particulars, service_particulars
+                    ppdfp.preview_pdf_popup(receipt=1, ornum=self.or_label._text, cashier=self.cashier_name._text, client=f'{self.client_name._text}-Replaced', pet='s[1]', item=items, service=self.service_data, total=price_format_to_float(self.new_total._text[1:]), paid=payment, deduction=0,
+                                        title="Transaction Receipt Viewer", is_receipt=1)
                     self.master.master.place_forget()
                     self.master.place_forget()
                     self.master.master.master.refresh()
@@ -941,10 +957,6 @@ def show_payment_proceed(master, info:tuple,):
             self.client_data = client            
             self.info_list = info_lists
             self.set_values()
-            
-            print(self.info_list[0])
-            print(self.info_list[1])
-            print(self.info_list[2])
             
             return super().place(**kwargs)
     return instance(master, info)

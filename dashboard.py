@@ -20,7 +20,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from constants import db
 from constants import action
-from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup
+from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup
 from math import *
 import random
 import copy
@@ -622,8 +622,10 @@ class dashboard_frame(ctk.CTkFrame):
         
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
+        self.customer = customer_popup.new_customer(self, (width, height, ),)
         self.receiving_entity.start_receiving()
         
+        self.customer.place(relx=0.5, rely=0.5, anchor='c')
         #Sales_popup.change_order(self, (width, height, acc_cred, acc_info)).place(relx=0.5, rely=0.5, anchor='c')
         #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
         #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))
@@ -1317,7 +1319,7 @@ class sales_frame(ctk.CTkFrame):
         self.attendant_sort_option.configure(values = self.attendant_values + [s[0] for s in database.fetch_data(sql_commands.get_sales_attendant)])
         self.attendant_sort_option.set("All")
         self.set_table()
-        self.refresh_btn.after(5000, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
+        self.refresh_btn.after(100, lambda:self.refresh_btn.configure(state = ctk.NORMAL))
         
     def set_table(self, given:Optional[list] = None):      
         self.raw_list = given if given else self.raw_data
