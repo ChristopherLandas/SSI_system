@@ -168,14 +168,16 @@ class dashboard(ctk.CTkToplevel):
         self.payment_icon  = ctk.CTkImage(light_image=Image.open("image/payment_cash.png"), size=(25,25))
         self.report_icon = ctk.CTkImage(light_image=Image.open("image/report.png"),size=(22,22))
         self.notif_icon = ctk.CTkImage(light_image=Image.open("image/notif.png"),size=(22,25))
-        self.settings_icon = ctk.CTkImage(light_image=Image.open("image/setting.png"),size=(25,25))
+        self.settings_icon = Icons.get_image('settings_icon', size=(30,30))
         self.acc_icon = ctk.CTkImage(light_image=Image.open("image/acc.png"),size=(40,40))
         self.transact_icon = ctk.CTkImage(light_image=Image.open("image/transact.png"),size=(22,20))
         self.services_icon = ctk.CTkImage(light_image=Image.open("image/services.png"),size=(24,26))
         self.user_setting_icon = ctk.CTkImage(light_image=Image.open("image/usersetting.png"),size=(24,27))
         self.histlog_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"),size=(22,25))
         self.admin_icon = ctk.CTkImage(light_image=Image.open("image/admin.png"), size=(27,27))
-
+        self.reception_icon = Icons.get_image('reception_icon', size=(30,30))
+        self.payment_icon = Icons.get_image('payment_icon', size=(30,30))
+        self.customer_icon = Icons.get_image('customers_logo', size=(30,30))
         '''Main Information'''
         side_frame_w = round(width * 0.175)
         self.default_menubar_width = .15
@@ -187,7 +189,7 @@ class dashboard(ctk.CTkToplevel):
 
         #self.main_frames = [dashboard_frame(self), transaction_frame(self), services_frame(self), sales_frame(self), inventory_frame(self), patient_info_frame(self), reports_frame(self), user_setting_frame(self), histlog_frame(self)]
         temp_labels = ['Dashboard', 'Reception', 'Payment', 'Customers', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Reports', 'User Settings', 'Settings', 'History']
-        temp_icons = [self.dashboard_icon,  self.transact_icon, self.transact_icon,  self.transact_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.admin_icon, self.histlog_icon]
+        temp_icons = [self.dashboard_icon,  self.reception_icon, self.payment_icon,  self.customer_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.settings_icon, self.histlog_icon]
         temp_main_frames = [dashboard_frame, reception_frame, payment_frame, customer_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
 
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
@@ -625,7 +627,7 @@ class dashboard_frame(ctk.CTkFrame):
         self.customer = customer_popup.new_customer(self, (width, height, ),)
         self.receiving_entity.start_receiving()
         
-        self.customer.place(relx=0.5, rely=0.5, anchor='c')
+        #self.customer.place(relx=0.5, rely=0.5, anchor='c')
         #Sales_popup.change_order(self, (width, height, acc_cred, acc_info)).place(relx=0.5, rely=0.5, anchor='c')
         #dashboard_popup.sched_service_info_popup(self, (width, height)).place(relx=0.5, rely=0.5, anchor="c", sched_info=('09032300', 'TJ', 'Grooming', '₱500.00'))
         #self.sched_info.place(relx=0.5, rely=0.5, anchor='c', sched_info=("Patrick Feniza","0000000000"))

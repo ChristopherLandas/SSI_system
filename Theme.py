@@ -171,6 +171,13 @@ class Icons:
     python_icon = ctk.CTkImage(light_image=Image.open("image/python.png"), size=(30,30))
     python_logo = ctk.CTkImage(light_image=Image.open("image/python_logo.png"), size=(30,30))
     
+    
+    payment_icon = ctk.CTkImage(light_image=Image.open("image/payment_icon.png"), size=(30,30))
+    settings_icon = ctk.CTkImage(light_image=Image.open("image/settings_icon.png"), size=(30,30))
+    reception_icon = ctk.CTkImage(light_image=Image.open("image/reception_icon.png"), size=(30,30))
+    customers_logo = ctk.CTkImage(light_image=Image.open("image/customers.png"), size=(30,30))
+    
+    
     @classmethod
     def get_image(cls, image_name:str, size:tuple=None):
         image = getattr(cls, image_name, None)

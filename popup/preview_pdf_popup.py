@@ -23,7 +23,7 @@ import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
 
     
-def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, deduction: int, old_receipt_name = None):
+def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, deduction: int, old_receipt_name = None, is_replaced = False):
     from reportlab.graphics.shapes import Drawing, Rect, String
     from reportlab.graphics.charts.piecharts import Pie
     from reportlab.pdfgen.canvas import Canvas
@@ -118,11 +118,12 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             else:
                 pet_name = p
                 ctr += 1
-            
+    
+    or_num1 = f"{or_number} - Replaced" if is_replaced else or_number     
     
     receipt_content = [
         ['Statement of Account', '', f'Date: {today}', ''], 
-        [f'OR#: {or_number}', '', f'Cashier: {cashier_name}', ''],
+        [f'OR#: {or_num1}', '', f'Cashier: {cashier_name}', ''],
         [f'Name of Client: {client_name}', '', '', ''],
         [f'Pet Name: {pet_name}', '', '', ''],
         ['Particulars', 'Quantity', 'Unit Price', 'Amount']]
@@ -328,10 +329,10 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
             else:
                 pet_name = p[1]
                 ctr += 1
-    
+    or_num = f"{or_number} - Replaced" if is_replaced else or_number
     receipt_content = [
         ['Statement of Account', '', f'Date: {today}', ''], 
-        [f'TransactionID: {or_number}', '', f'Cashier: {cashier_name}', ''],
+        [f'TransactionID: {or_num}', '', f'Cashier: {cashier_name}', ''],
         [f'Client: {client_name}', '', '', ''],
         [f'Pet Name: {pet_name}', '', '', ''],
         ['Particulars', 'Quantity', 'Unit Price', 'Amount']]
@@ -495,7 +496,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
                  #Custom Arguments
                  
                  receipt: int, ornum = None, cashier = None, client = None, pet = None, item = None, service = None, total = None, paid = None, deduction = None,
-                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None, is_receipt: Optional[bool] = False,
+                 title: Optional[str] = 'Viewer', view_receipt_by_or: Optional[str] = None, is_receipt: Optional[bool] = False, is_replaced: Optional[bool] = False,
                   **kwargs,
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
@@ -574,7 +575,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
         
         self.zoom_entry.configure(text=f"{self.default_dpi}%")
         if receipt:
-            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, deduction = deduction, old = 0)
+            generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, deduction = deduction, old = 0, is_replaced= is_replaced)
         self.vaas2 = NONE
         self.vaas1=cpdf.ShowPdf()
         self.vaas1.img_object_li.clear()
@@ -587,13 +588,12 @@ class preview_pdf_popup(ctk.CTkToplevel):
                 vaas2.pack()
         elif self.view_by_reciept and self.is_receipt:
             if exists(f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf"):
-                print(7)
                 
                 self.vaas2= self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{self.view_by_reciept}.pdf",
                                       width=100, height=100,zoomDPI=self.default_dpi)
                 self.vaas2.pack(pady=window_width*0.005, padx=(window_width*0.005))
             else:
-                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, deduction = deduction, old = 1, old_receipt_name = view_receipt_by_or)
+                generate_report(or_number = ornum, cashier_name = cashier, client_name = client, pet_name = pet, item_particulars = item, service_particulars = service, total_amount = total, amount_paid = paid, deduction = deduction, old = 1, old_receipt_name = view_receipt_by_or, is_replaced= is_replaced)
                 vaas2=self.pdfviewer.pdf_view(self.pdf_viewer_frame, pdf_location=f"Resources/receipt/{self.current_folder}/{view_receipt_by_or}.pdf",
                                       width=100,height=50, zoomDPI=100)
                 vaas2.pack()

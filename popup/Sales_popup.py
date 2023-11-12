@@ -165,6 +165,10 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.change_order_btn.grid_forget()
                 self.replaced_item_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)                 
         
+            if not self.items:
+                self.change_order_btn.grid_forget()
+            else:
+                self.change_order_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)
         
         def place(self, sales_info, **kwargs):
             try:
@@ -176,8 +180,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]  
                 raw_service_info = database.fetch_data(sql_commands.get_service_record_temp, (sales_info[0],))
                 raw_transaction_info = database.fetch_data(sql_commands.get_sales_record_info, (sales_info[0],))[0]      
-                self.set_values()
-                
+
                 temp = [split_unit(item[0])+(item[1:]) for item in raw_items]
                 self.items = [((f'{database.fetch_data(sql_commands.get_item_brand, database.fetch_data(sql_commands.get_uid, (temp[0], temp[1]))[0])[0][0]} {temp[0]} ({temp[1]})'),) +  temp[2:] if len(temp)==5 else 
                             ((f'{database.fetch_data(sql_commands.get_item_brand, database.fetch_data(sql_commands.get_uid_null_unit, (temp[0],))[0])[0][0]} {temp[0]}'),) +  temp[1:] for temp in temp]
@@ -186,6 +189,7 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                 self.tree_data = [(data[0],  f"₱{format_price(data[2])}", data[1], f"₱{format_price(data[3])}") for data in raw_data]
                 self.receipt_treeview.update_table(self.tree_data) 
             
+                self.set_values()
             
     return sales_record(master, info)
 
@@ -374,7 +378,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
             if not res[0]:
                 self.origin.master.change_value()
             else:
-                self.row_root.winfo_children()[5].configure(text=f"₱{format_price(float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
+                self.row_root.winfo_children()[5].configure(text=f"₱{format_price(price_format_to_float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
                 self.replaced_items.append(res[1])
             self.update_new_total()
             self.replace_item_btn.configure(text=f"Replaced Items ({len(self.replaced_items)})")
@@ -390,7 +394,7 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
                 self.confirm_removal.place(relx=0.5, rely=0.5, anchor='c', data = self.row_data)
             elif self.origin._text == '+':
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure on replacing or adding this item?"):
-                    self.row_root.winfo_children()[5].configure(text=f"₱{format_price(float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
+                    self.row_root.winfo_children()[5].configure(text=f"₱{format_price(price_format_to_float(remove_special_char(self.row_data[2],['₱'])) * float(self.row_count))}")
                     self.update_new_total()
                 else:
                     self.origin.master.change_value(-1)
@@ -722,11 +726,8 @@ def show_payment_proceed(master, info:tuple,):
                 print(transact_items)
                 
                 
-                items = ([item for item in self.item_data if item[1] > 0])
+                items = ([(self.or_label._text, item[0], item[2], item[4], price_format_to_float(item[3][1:])) for item in transact_items])
                 payment = float((self.payment_entry.get() or 0))
-                
-                print(items, payment)
-                return
                 
                 #steps insert replacement record, update transaction record to replaced, update item transaction content to 2, insert new transaction content, subtract items used in inventory
                 if messagebox.askyesno("Replacement Confirmation", "Are you sure you want to conntinue?\nThis will update the order record."):
@@ -767,12 +768,12 @@ def show_payment_proceed(master, info:tuple,):
 
 
                     messagebox.showinfo("Success",f"Order {self.or_label._text} Successfully Changed.") #item_particulars, service_particulars
-                    ppdfp.preview_pdf_popup(receipt=1, ornum=self.or_label._text, cashier=self.cashier_name._text, client=f'{self.client_name._text}-Replaced', pet='s[1]', item=items, service=self.service_data, total=price_format_to_float(self.new_total._text[1:]), paid=payment, deduction=0,
-                                        title="Transaction Receipt Viewer", is_receipt=1)
+                    ppdfp.preview_pdf_popup(receipt=1, ornum=self.or_label._text, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=items, service=self.service_data, total=price_format_to_float(self.new_total._text[1:]), paid=payment, deduction=0,
+                                        title="Transaction Receipt Viewer", is_receipt=1, is_replaced=True)
                     self.master.master.place_forget()
                     self.master.place_forget()
                     self.master.master.master.refresh()
-                    self.place_forget()
+                    close()
                 
             
             def payment_callback(var, index, mode):
