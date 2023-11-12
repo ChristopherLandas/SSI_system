@@ -1686,11 +1686,11 @@ class inventory_frame(ctk.CTkFrame):
             
         #region Restock
         '''RESTOCK: START'''
-        def refresh_rs_data_view1():
-            self.refresh_btn.configure(state = ctk.DISABLED)
-            self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
-            self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not database.fetch_data(sql_commands.get_recieving_items_state) else self.no_order_data.place_forget()
-            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+        #def refresh_rs_data_view1():
+        #    self.refresh_btn.configure(state = ctk.DISABLED)
+        #    self.rs_data_view1.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
+        #    self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not database.fetch_data(sql_commands.get_recieving_items_state) else self.no_order_data.place_forget()
+        #    self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
         def restocking_callback():
             update_table_callback()
@@ -1956,9 +1956,10 @@ class inventory_frame(ctk.CTkFrame):
         sort_status_callback("View by Levels")
         load_main_frame(0)
 
-       
+    def update_order_treeview(self):
+        pass
     def update_disposal_treeview(self):
-        self.ds_data_view1.update_table(database.fetch_data(sql_commands.get_disposal_items))
+        self.ds_data_view1.update_table(sql_commands.get_disposed_filter, (self.ds_sort_category_option.get(), self.ds_sort_type_option.get(), self.from_date_select_entry._text, self.to_date_select_entry._text))
     
     
     def update_tables(self):
