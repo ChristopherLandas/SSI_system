@@ -71,7 +71,7 @@ class dashboard(ctk.CTkToplevel):
         global width, height, mainframes, IP_Address, SETTINGS_VAL, PORT_NO
         width = self.winfo_screenwidth() #/ scaling
         height = self.winfo_screenheight() #/ scaling
-        print(width, height)
+            
         title_name = "J.Z. Angeles Veterinary Clinic"
         
         '''Fonts'''
