@@ -24,7 +24,7 @@ def add_service(master, info:tuple, update_callback: callable):
             width = info[0]
             height = info[1]
             acc = info[2]
-            super().__init__(master, width=width*0.4, height=height*0.55, corner_radius= 0, fg_color='transparent')
+            super().__init__(master, width=width*0.4, height=height*0.55, corner_radius= 0, fg_color=Color.White_Platinum)
             
             self.update_callback = update_callback
             self.grid_columnconfigure(0, weight=1)
@@ -35,25 +35,21 @@ def add_service(master, info:tuple, update_callback: callable):
                 self.place_forget()
                 self.service_name_entry.delete(0, tk.END)
                 self.price_entry.delete(0, tk.END)
-                self.category_option.set("Set Category")
+                #self.category_option.set("Set Category")
                 
             def new_service():
-                if self.service_name_entry.get() == "" or self.category_option.get() == "Set Category" or self.price_entry.get() == "":
+                if self.service_name_entry.get() == "" or self.price_entry.get() == "":
                     messagebox.showerror("Unable to proceed", "Fill all the fields", parent = self)
                     return
-                a = generateId(initial='S', length=6)
-                
-                if self.service_name_entry.get() == "" and self.price_entry.get() == "" and self.category_option.get() == "Set Category":
+                if self.service_name_entry.get() == "" and self.price_entry.get() == "":
                     messagebox.showerror("Missing Data", "Complete all the fields to continue", parent = self)   
                     
                 else:    
-                    a = generateId(initial='S', length=6)
-                    database.exec_nonquery([[sql_commands.insert_service_test, (a, self.service_name_entry.get(), self.price_entry.get(), 
-                                                                                self.category_option.get(), self.radio_var.get(), 1, date.today())]])
+                    database.exec_nonquery([[sql_commands.insert_service, (self.id_label._text, self.service_name_entry.get(), self.price_entry.get(), self.radio_var.get(), 1, date.today())]])
                     messagebox.showinfo("Service Added", "New service is added", parent = self)
-                    record_action(acc, action.ADD_SERVICE, action.ADD_SVC % (acc, a))
-                    update_callback()
+                    record_action(acc, action.ADD_SERVICE, action.ADD_SVC % (acc, self.id_label._text))
                     reset()
+                    update_callback()
                     
             def radio_callback():
                 if self.radio_var.get() == 0:
@@ -66,7 +62,7 @@ def add_service(master, info:tuple, update_callback: callable):
             self.service_icon = ctk.CTkImage(light_image= Image.open("image/services.png"), size=(20,20))
             
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
-            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
@@ -89,32 +85,40 @@ def add_service(master, info:tuple, update_callback: callable):
             self.sub_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
             self.sub_frame.grid_columnconfigure((1), weight=1)
             
+            '''ID'''
+            self.service_id_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            self.service_id_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(width*0.005,0))
+            ctk.CTkLabel(self.service_id_frame, text="Service Code: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
+            self.id_label = ctk.CTkLabel(self.service_id_frame, fg_color=Color.White_Platinum, corner_radius=5,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.055, width=width*0.125, text="TETOMG")
+            self.id_label.pack(side='left', padx=(0, width*0.005), pady=(width*0.005,0))
+            
+            
             '''NAME'''
             self.service_name_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.service_name_frame.grid(row=0, column=0, columnspan=2, sticky="nsew", pady=(height*0.025,0))
+            self.service_name_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=(width*0.005,0))
             ctk.CTkLabel(self.service_name_frame, text="Service Name: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
-            self.service_name_entry = ctk.CTkEntry(self.service_name_frame, fg_color=Color.White_Lotion, placeholder_text="Service Name", placeholder_text_color='light grey',font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.045)
+            self.service_name_entry = ctk.CTkEntry(self.service_name_frame, fg_color=Color.White_Lotion, placeholder_text="Service Name", placeholder_text_color='light grey',font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.055)
             self.service_name_entry.pack(side='left', fill="x", expand=1, padx=(0, width*0.005), pady=(height*0.0075))
             
             '''CATEGORY'''
-            self.category_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.category_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
-            ctk.CTkLabel(self.category_frame, text="Category: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
-            self.category_option= ctk.CTkOptionMenu(self.category_frame, anchor="w", font=("DM Sans Medium", 14), width=width*0.115, height=height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Platinum,
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts)
-            self.category_option.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
-            self.category_option.set("Set Category")
+            #self.category_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
+            #self.category_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
+            #ctk.CTkLabel(self.category_frame, text="Category: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
+            #self.category_option= ctk.CTkOptionMenu(self.category_frame, anchor="w", font=("DM Sans Medium", 14), width=width*0.115, height=height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Platinum,
+            #                                     text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts)
+            #self.category_option.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
+            #self.category_option.set("Set Category")
             
             '''PRICE'''
             self.price_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.price_frame.grid(row=2, column=0, sticky="nsew", pady=(height*0.005,0))
+            self.price_frame.grid(row=3, column=0, sticky="nsew", pady=(height*0.005,0))
             ctk.CTkLabel(self.price_frame, text="Price: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
-            self.price_entry = ctk.CTkEntry(self.price_frame, fg_color=Color.White_Lotion, placeholder_text="Price", placeholder_text_color='light grey',font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.045)
+            self.price_entry = ctk.CTkEntry(self.price_frame, fg_color=Color.White_Lotion, placeholder_text="Price", placeholder_text_color='light grey',font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, height=height*0.055)
             self.price_entry.pack(side='left', fill="x", expand=1, padx=(0, width*0.005), pady=(height*0.0075))
            
             '''DURATION TYPE'''
             self.duration_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent")
-            self.duration_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
+            self.duration_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
             ctk.CTkLabel(self.duration_frame, text="Duration: ", font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, width=width*0.085, anchor="e").pack(side='left', padx=(width*0.0045,0))
             
             self.radio_var = tk.IntVar(value=0) 
@@ -128,9 +132,9 @@ def add_service(master, info:tuple, update_callback: callable):
 
             '''NOTE FRAME'''
             self.note_frame = ctk.CTkFrame(self.sub_frame, fg_color= 'transparent')
-            self.note_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
-            self.note_label = ctk.CTkLabel(self.note_frame, text= "Note here", text_color= 'blue')
-            self.note_label.pack(side = 'bottom', padx = (height * .005, 0))
+            self.note_frame.grid(row=5, column=0, columnspan=2, sticky="nsew", pady=(height*0.005,0))
+            self.note_label = ctk.CTkLabel(self.note_frame, text= "Note here", text_color=Color.Blue_Yale, font=("DM Sans Medium", 14))
+            self.note_label.pack(side = 'bottom', padx = (width*.01, 0))
             radio_callback()
             
             '''BOTTOM'''
@@ -143,13 +147,9 @@ def add_service(master, info:tuple, update_callback: callable):
             self.proceed_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, width=width*0.115, text="Add Service", font=("DM Sans Medium", 14), command=new_service)
             self.proceed_btn.pack(side='right')
             
-        def update_option(self):
-            self.data=database.fetch_data(sql_commands.get_service_category_test)
-            self.category_option.configure(values=[(s[0]) for s in self.data])
             
         def place(self, **kwargs):
-            self.update_option()
-            
+            self.id_label.configure(text=generateId('S',6).upper())
             return super().place(**kwargs)
     return add_service(master, info, update_callback)
 

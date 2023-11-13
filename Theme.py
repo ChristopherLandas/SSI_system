@@ -179,6 +179,19 @@ class Icons:
     customers_logo = ctk.CTkImage(light_image=Image.open("image/customers.png"), size=(30,30))
     
     
+    #NOITF ICONS
+    inventory_out_icon = ctk.CTkImage(light_image=Image.open("image/Out of Stock.png"), size=(30,30))
+    inventory_low_icon = ctk.CTkImage(light_image=Image.open("image/inventory_flow_low.png"), size=(30,30))
+    inventory_nxp_icon = ctk.CTkImage(light_image=Image.open("image/inventory_flow_nexp.png"), size=(30,30))
+    inventory_exp_icon = ctk.CTkImage(light_image=Image.open("image/inventory_flow_expired.png"), size=(30,30))
+    
+    sched_near_icon = ctk.CTkImage(light_image=Image.open("image/near_schedule.png"), size=(30,30))
+    sched_warning_icon = ctk.CTkImage(light_image=Image.open("image/warning_clock.png"), size=(30,30))
+    sched_today_icon = ctk.CTkImage(light_image=Image.open("image/today_sched.png"), size=(30,30))
+    
+    notif_alarm_icon = ctk.CTkImage(light_image=Image.open("image/bell_notif.png"), size=(30,30))
+    notif_none_icon = ctk.CTkImage(light_image=Image.open("image/bell_no_notif.png"), size=(30,30))
+    
     @classmethod
     def get_image(cls, image_name:str, size:tuple=None):
         image = getattr(cls, image_name, None)
