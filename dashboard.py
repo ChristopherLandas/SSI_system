@@ -291,16 +291,10 @@ class dashboard(ctk.CTkToplevel):
         self.title_label = ctk.CTkLabel(self.top_frame, text="", font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
         self.title_label.grid(row = 0, column=0,sticky='w', padx= width * 0.02)
 
-        self.notif_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()*0.5), text= "", image= Icons.notif_icon,
+        self.notif_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()*0.5), text= "", image= Icons.get_image('notif_none_icon', (35,32)),
                                               fg_color=Color.White_Lotion, height= round(self.top_frame.winfo_reqheight() *0.5), border_width=0, corner_radius=5,
                                               font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
         self.notif_btn.grid(row=0, column= 1, sticky='w')
-        #self.settings_btn = ctk.CTkButton(master= self.top_frame, width= round(self.top_frame.winfo_reqheight()* 0.5), text= "", image= Icons.display_setting_icon,
-        #                                      fg_color=Color.White_Ghost, height= round(self.top_frame.winfo_reqheight()* 0.5), border_width=0, corner_radius=5,
-        #                                      font=("DM Sans Medium", 16),hover_color=Color.White_Gray,)
-        #self.settings_btn.grid(row=0, column= 1, sticky='w')
-        #divider
-        #ctk.CTkFrame(self.top_frame, width=width*0.0025, fg_color=Color.Grey_Bright_2,corner_radius=0).grid(row=0, column=2, padx=(width*0.0025),)
 
         self.acc_btn = cctk.ctkButtonFrame(self.top_frame, width=round(self.top_frame.winfo_reqwidth() * .12),
                                            height=round(self.top_frame.winfo_reqheight()*.5), corner_radius=5,
@@ -322,15 +316,7 @@ class dashboard(ctk.CTkToplevel):
         self.notif_menu_bar= cctk.scrollable_menubar(self, width * self.default_menubar_width * 1.5, height * .9,
                                           corner_radius= 0, fg_color=Color.White_Gray, border_width= 0, border_color=Color.Blue_Cobalt,
                                           position=(1 - self.default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
-        '''self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
-                                              corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
-                                              position=(self.settings_btn.winfo_rootx() / self.winfo_width() + 0.2/2,
-                                                        self.top_frame.winfo_height() /  self.winfo_height() + 0.2/2,
-                                                        'c'))'''
         
-        '''self.settings_menu_bar_dark_mode = ctk.CTkSwitch(self.settings_menu_bar,text="Dark Mode", font=("DM Sans Medium", 16), progress_color=Color.Blue_LapisLazuli_1, text_color=Color.Blue_Maastricht,
-                                                          onvalue="darkmode", offvalue="lightmode",)
-        self.settings_menu_bar_dark_mode.grid(row=0, column=0)'''
         
         self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost,
                                          position= (1 - acc_menubar_width/2,
@@ -341,11 +327,9 @@ class dashboard(ctk.CTkToplevel):
                                                           children=[self.notif_menu_bar, self.acc_menu_bar], active_double_click_nullified= False)
 
         '''setting default events'''
-        
         load_main_frame('Dashboard', 0)
         self.loading_frame.place_forget()
-        #change_active_event(self.db_button, 0)
-        
+
         self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], PORT_NO['Notif_gen'], self.receiver_callback)
         self.network_receiver.start_receiving()
         self.generate_notification()
@@ -356,20 +340,20 @@ class dashboard(ctk.CTkToplevel):
         '''ALL OF THE COMMENTED NTF_C VARIABLE PUT A NOTIFICATION IN INSTANCE RATHER THAN GROUP'''
 
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock) for _ in out_of_stock]
+        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock)] #for _ in out_of_stock]
         #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
-        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock', low_stock) for _ in low_stock]
+        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock', low_stock)] #for _ in low_stock]
         #ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
 
         near_expire = database.fetch_data(sql_commands.get_near_expired_items_name, (SETTINGS_VAL['Near_expiry_date_alert'], ))
         #ntf_c3 = [('About to Expire', f'Item {s[0]} is about to expire in {s[2]} day{"s" if s[2] > 1 else ""}') for s in near_expire]
-        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire) for _ in near_expire]
+        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire)] #for _ in near_expire]
 
         expired = database.fetch_data(sql_commands.get_expired_items_name)
         #ntf_c4 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
-        ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s" if len(low_stock) > 1 else ""} had an expired stock/s', expired) for _ in expired]
+        ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s are" if len(low_stock) > 1 else " is"} expired', expired)]# for _ in expired]
 
         near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
         ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
@@ -379,9 +363,10 @@ class dashboard(ctk.CTkToplevel):
 
         past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
         #ntf_c7 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
-        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment', past_scheduled) for _ in past_scheduled]
+        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment', past_scheduled)] #for _ in past_scheduled]
 
         ntf_c = ntf_c5 + ntf_c6 + ntf_c7 + ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
+        self.notif_btn.configure(image=Icons.get_image("notif_none_icon", (35,35))) if not ntf_c else self.notif_btn.configure(image=Icons.get_image("notif_alarm_icon", (35,35)))
         for _ntf in self.notifs:
             _ntf.destroy()
 
