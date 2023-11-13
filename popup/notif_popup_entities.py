@@ -34,7 +34,7 @@ class notif_entity(cctk.ctkButtonFrame):
         self._notif_title = notif_title
         self._notif_desc = notif_desc
         #self._notif_date = notif_date
-        self._font_sizes = font_sizes or (18, 14, 12) #In 150 scaling it is good
+        self._font_sizes = font_sizes or (16, 14, 12) #In 150 scaling it is good
         self._fonts: ctk.CTkFont = fonts or (('DM Sans Medium', self._font_sizes[0]), ('DM Sans Medium', self._font_sizes[1]), ('DM Sans Medium', self._font_sizes[2]))
         self._text_colors = text_colors or (Color.Blue_Maastricht, Color.Blue_Maastricht, Color.Blue_Maastricht)
 
@@ -50,17 +50,17 @@ class notif_entity(cctk.ctkButtonFrame):
                         'Schedule Overdue': Icons.get_image('sched_warning_icon', (35,35)),
                         'Scheduled Today':  Icons.get_image('sched_today_icon', (35,35)),
                     }
-        self.icon = ctk.CTkLabel(self, fg_color= 'transparent', text='', image=icon_dict.get(notif_title))
-        self.icon.grid(row = 0, column = 0, sticky = 'nsew', padx=(10), pady=(8,0))
+        self.icon = ctk.CTkLabel(self, fg_color= 'transparent', text='', image=icon_dict.get(notif_title), anchor='n')
+        self.icon.grid(row = 0, column = 0, rowspan=2,sticky = 'nsew', padx=(10), pady=(8,0))
 
         self.Notif_title = ctk.CTkLabel(self, text= notif_title, fg_color='transparent', anchor='w',
                                         text_color= self._text_colors[0], font = self._fonts[0])
-        self.Notif_title.grid(row = 0, column = 1, sticky = 'we', padx = (0,3), pady = (2, 0))
+        self.Notif_title.grid(row = 0, column = 1, sticky = 'we', padx = (0,3), pady = (5, 0))
         
         self.Notif_description = ctk.CTkLabel(self, text= notif_desc, fg_color='transparent', anchor='w',
                                               text_color= self._text_colors[1], font= self._fonts[1])
         self.Notif_description._label.configure(justify= 'left')
-        self.Notif_description.grid(row = 1, column = 1, sticky = 'we', padx = (5), pady = (2, 0))
+        self.Notif_description.grid(row = 1, column = 1, sticky = 'we', padx = (10,5), pady = (2, 0))
         
         '''self.Notif_date_diff = ctk.CTkLabel(self, text= calculate_day(notif_date), fg_color='transparent', anchor= 'w',
                                             text_color= self._text_colors[2], font= self._fonts[2])

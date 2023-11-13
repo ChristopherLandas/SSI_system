@@ -36,7 +36,7 @@ def status_bar(master, info: tuple, height, width, text: str, icon_color: str, c
             self.grid_rowconfigure(0, weight=1)
             
             self.status_label = ctk.CTkLabel(self, text=text, font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color='transparent')
-            self.status_light = ctk.CTkFrame(self, height=self.height*0.15, width=self.height*0.15, corner_radius=8, border_width=1,
+            self.status_light = ctk.CTkFrame(self, height=self.height*0.25, width=self.height*0.25, corner_radius=8, border_width=1,
                                              border_color=Color.White_Ghost,fg_color=icon_color)
             self.status_count = ctk.CTkLabel(self, text=count, font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht)
             self.icon_label = ctk.CTkLabel(self, text='', image=self._icon)
@@ -47,9 +47,7 @@ def status_bar(master, info: tuple, height, width, text: str, icon_color: str, c
             else:    
                 self.icon_label.grid_forget()
                 self.status_label.grid(row = 0, column = 1, padx=(self.height*0.225, 0), sticky='ew')
-                
             
-                   
             if self._indicator_space and self._display_count:
                 self.status_light.grid(row = 0, column = 3, padx=(0,self.height*0.15))
                 self.status_count.grid(row = 0, column = 2, padx=(0, self.height*0.15))
@@ -85,7 +83,7 @@ def sales_history_popup(master, info:tuple):
         def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
-            super().__init__(master, corner_radius= 0, fg_color='transparent')
+            super().__init__(master, corner_radius= 0, fg_color=Color.White_Platinum)
 
             #self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_history.png"), size=(25,25))
 
@@ -97,7 +95,7 @@ def sales_history_popup(master, info:tuple):
                 pass
                 
             self.main_frame = ctk.CTkFrame(self, width=width*0.685, height=height*0.755, fg_color=Color.White_Color[3], corner_radius= 0)
-            self.main_frame.grid(row=0, column=0)
+            self.main_frame.grid(row=0, column=0, padx=1, pady=1)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
