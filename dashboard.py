@@ -320,7 +320,7 @@ class dashboard(ctk.CTkToplevel):
 
         '''menubars'''
         self.notif_menu_bar= cctk.scrollable_menubar(self, width * self.default_menubar_width * 1.5, height * .9,
-                                          corner_radius= 0, fg_color='white', border_width= 0, border_color=Color.Blue_Cobalt,
+                                          corner_radius= 0, fg_color=Color.White_Gray, border_width= 0, border_color=Color.Blue_Cobalt,
                                           position=(1 - self.default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
         '''self.settings_menu_bar = cctk.menubar(self, width= width * 0.25, height=height * 0.2,
                                               corner_radius=0, fg_color=Color.White_Ghost, border_width= 2, border_color=Color.White_Platinum,
@@ -356,7 +356,7 @@ class dashboard(ctk.CTkToplevel):
         '''ALL OF THE COMMENTED NTF_C VARIABLE PUT A NOTIFICATION IN INSTANCE RATHER THAN GROUP'''
 
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out sf stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock) for _ in out_of_stock]
+        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock) for _ in out_of_stock]
         #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
@@ -375,7 +375,7 @@ class dashboard(ctk.CTkToplevel):
         ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
 
         scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
-        ntf_c6 = [('Today scheduled', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}', [s]) for s in scheduled_today]
+        ntf_c6 = [('Scheduled Today', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}', [s]) for s in scheduled_today]
 
         past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
         #ntf_c7 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]

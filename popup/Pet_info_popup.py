@@ -288,6 +288,11 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.main_frame.grid_rowconfigure(2, weight=1)
             self.main_frame.grid_propagate(0)
 
+            def reset():
+                cancel_changes()
+                self.entries_set_state("normal")
+                self.reset_entries()
+                self.place_forget()
             
             def edit_entries():
                 
@@ -376,7 +381,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
             ctk.CTkLabel(self.header_frame, text='PET INFORMATION', font=("DM Sans Medium", 16), text_color=Color.White_Color[3],
                                             height = height*0.05, corner_radius=5).pack(side='left')
 
-            self.close_btn= ctk.CTkButton(self.header_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn= ctk.CTkButton(self.header_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
 
             self.pet_info_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Platinum)
@@ -497,10 +502,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
                                                command=lambda: cctk.tk_calendar(self.bday_new_entry, "%s", date_format="raw", max_date=datetime.datetime.now()))
             self.show_calendar.pack(side="left", padx=(width*0.0025), pady=(height*0.001))
         
-        def reset(self):
-            self.place_forget()
-            self.entries_set_state("normal")
-            self.reset_entries()
+        
 
         def refresh(self):
             self.refresh_btn.configure(state = ctk.DISABLED)
