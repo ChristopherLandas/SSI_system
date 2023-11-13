@@ -533,8 +533,13 @@ class customcustomtkinter:
 
             self.set_date = ctk.CTkButton(self, text="Set Date", font=("Robot", 16), command=set_date)
             self.set_date.pack(pady=10)
-
+            
+            self.grab_set()
             self.attributes('-topmost',1)
+
+        def withdraw(self):
+            self.grab_release()
+            return super().withdraw()
 
 
     class cctkSpinnerCombo(ctk.CTkFrame):
