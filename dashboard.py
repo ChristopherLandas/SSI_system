@@ -977,7 +977,6 @@ class payment_frame(ctk.CTkFrame):
 
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
-    
         self.grid_forget()
 
     def invoice_callback(self):
@@ -1041,20 +1040,20 @@ class payment_frame(ctk.CTkFrame):
                 temp.load_both()
 
 class customer_frame(ctk.CTkFrame):
-    global width, height, IP_Address, PORT_NO
+    global width, height, IP_Address, PORT_NO, SETTINGS_VAL
     def __init__(self, master):
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
         
         self.grid_columnconfigure(0,weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_forget()
-        
 
         #region Top Frame
         self.view_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(25,25))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
         self.cal_icon= ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(15,15))
+        self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
 
         self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
@@ -1063,12 +1062,15 @@ class customer_frame(ctk.CTkFrame):
         self.top_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion, height = height*0.055, corner_radius=0, bg_color=Color.White_Lotion,)
         self.top_frame.grid(row=0, column=0 , sticky="nw",padx=width*0.005,pady=(height*0.01,0))
 
-        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75")
+        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= self.refresh_treeview)
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
-        self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
-                                            )
-        self.view_record_btn.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
+        self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
+                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
+
+        self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,)
+        self.view_record_btn.grid(row=0, column=3, padx=(0, width*0.005), pady=(height*0.01,0))
         
         self.sub_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion,corner_radius=0)
         self.sub_frame.grid(row=1, column=0, sticky="nsew", columnspan=2, padx=(width*0.005), pady=(0, width*0.005))
@@ -1086,14 +1088,19 @@ class customer_frame(ctk.CTkFrame):
         self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum,
                                              quary_command=sql_commands.get_sales_search_query, dp_width=width*0.275, place_height=height*0.0125, place_width=width*0.006, font=("DM Sans Medium", 14))
         self.search_bar.grid(row=0, column=0, padx=(width*0.005), pady=(height*0.01,0))
-        
-        
-       
-    
-    
-    def grid(self, **kwargs):
-        return super().grid(**kwargs)
-        
+        self.add_customer_popup = customer_popup.new_customer(self, (width, height), self.add_callback)
+        self.refresh_treeview()
+
+    def add_callback(self):
+        self.refresh_treeview()
+        pass
+
+    def refresh_treeview(self):
+        self.refresh_btn.configure(state = ctk.DISABLED)
+        self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+        self.customer_treeview.update_table(database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] ,)))
+
+
 class services_frame(ctk.CTkFrame):
     global width, height, IP_Address, PORT_NO
     def __init__(self, master):
@@ -3181,4 +3188,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'jayr', datetime.datetime.now)

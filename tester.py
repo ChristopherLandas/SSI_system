@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Union
 import customtkinter as ctk
 from tkinter import messagebox
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import notif_popup_entities as ntf, service_popup as svc_p
+from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup
 #from decimal import Decimal
 from util import *
 #import sql_commands
@@ -11,6 +11,7 @@ from util import *
 #from tkinter import filedialog
 #import network_socket_util as nsu
 import winsound
+import sql_commands
 from datetime import datetime as dt
 
 ctk.set_appearance_mode('dark')
@@ -23,7 +24,7 @@ class body(ctk.CTk):
         self.attributes("-fullscreen", True)
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
-        self.entry = ctk.CTkEntry(self, font= ('Arial', 24))
+        '''self.entry = ctk.CTkEntry(self, font= ('Arial', 24))
         self.entry.place(relx = .5, rely = .35, anchor = 'c')
         
         self.lbl = ctk.CTkLabel(self, text = 'Timer here', font= ('Arial', 24))
@@ -36,10 +37,24 @@ class body(ctk.CTk):
         self.lbl2.place(relx = .5, rely = .5, anchor = 'c')
 
         self.button = ctk.CTkButton(self, command= self.click)
-        self.button.place(relx = .5, rely = .55, anchor = 'c')
+        self.button.place(relx = .5, rely = .55, anchor = 'c')'''
+
+        #customer_popup.new_customer(self, self.screen, lambda: None).place(relx = .5, rely = .5, anchor = 'c')
+        data = database.fetch_data('SELECT * FROM transaction_record WHERE client_name != ?', ('N/A', ))
+        data = [(s[0], s[3]) for s in data]
+        modData = []
+        for d in data:
+            ids =  database.fetch_data(sql_commands.get_id_owner, (d[1], ))
+            ids = None if len(ids) == 0 else ids[0][0]
+            modData.append((d[0], d[1], ids))
+        modData = [(s[2], s[0]) for s in modData if s[2] is not None]
+
+        for d in modData:
+            if database.exec_nonquery([["UPDATE transaction_record SET client_id = ? WHERE transaction_uid = ?", d]]):
+                print('success')
         self.mainloop()
     
-    def click(self):
+    '''def click(self):
         self.button.configure(state = ctk.DISABLED)
         self.lbl.configure(text = dt.now().time().__str__())
         self.after(int(self.entry.get()) * 1000 if self.entry.get().isdecimal() else 2000, lambda: self.button.configure(state = ctk.NORMAL))
@@ -54,7 +69,7 @@ class body(ctk.CTk):
         else:
             f1 = float(self.lbl._text.split(':')[-1])
             f2 = float(self.lbl1._text.split(':')[-1])
-            self.lbl2.configure(text = '%.3f' % (f2 - f1))
+            self.lbl2.configure(text = '%.3f' % (f2 - f1))'''
         
 body()
     #lbl.configure(text = ''.join(txt_dvd))
