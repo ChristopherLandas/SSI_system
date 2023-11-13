@@ -2946,12 +2946,12 @@ class admin_settings_frame(ctk.CTkFrame):
         self.base_frame.grid_columnconfigure(0, weight=1)
         self.base_frame.grid_rowconfigure(1, weight=1)
 
-        self.general_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
+        #self.general_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
         self.service_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
         self.inventory_frame = ctk.CTkFrame(self.base_frame, fg_color="transparent")
 
-        self.general_frame.grid_columnconfigure(0, weight=1)
-        self.general_frame.grid_rowconfigure(1, weight=1)
+        #self.general_frame.grid_columnconfigure(0, weight=1)
+        #self.general_frame.grid_rowconfigure(1, weight=1)
         
         self.service_frame.grid_columnconfigure(0, weight=1)
         self.service_frame.grid_rowconfigure(1, weight=1)
@@ -2959,7 +2959,7 @@ class admin_settings_frame(ctk.CTkFrame):
         self.inventory_frame.grid_columnconfigure(2, weight=1)
         self.inventory_frame.grid_rowconfigure(1, weight=1)
         
-        self.report_frames=[self.general_frame, self.service_frame, self.inventory_frame]
+        self.report_frames=[self.service_frame, self.inventory_frame]
         self.active_report = None
         
         self.grid_forget()
@@ -2984,7 +2984,7 @@ class admin_settings_frame(ctk.CTkFrame):
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=4, sticky="n")
 
-        self.general_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
+        """ self.general_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
                                                        fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.general_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
@@ -2994,13 +2994,13 @@ class admin_settings_frame(ctk.CTkFrame):
         self.general_label = ctk.CTkLabel(self.general_button, text="GENERAL", text_color="white", font=("DM Sans Medium", 14))
         self.general_label.pack(side="left")
         self.general_button.grid()
-        self.general_button.update_children()
+        self.general_button.update_children() """
     
         self.service_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
                                                        fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.service_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.service_button.configure(command=partial(load_main_frame, 1))
+        self.service_button.configure(command=partial(load_main_frame, 0))
         self.service_icon = ctk.CTkLabel(self.service_button, text="",image=self.service)
         self.service_icon.pack(side="left", padx=(width*0.01,width*0.005)) 
         self.service_label = ctk.CTkLabel(self.service_button, text="SERVICE", text_color="white", font=("DM Sans Medium", 14))
@@ -3012,7 +3012,7 @@ class admin_settings_frame(ctk.CTkFrame):
                                                            fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
         self.inventory_button.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.inventory_button.configure(command=partial(load_main_frame, 2))
+        self.inventory_button.configure(command=partial(load_main_frame, 1))
         self.inventory_icon = ctk.CTkLabel(self.inventory_button, text="",image=self.inventory)
         self.inventory_icon.pack(side="left", padx=(width*0.01,width*0.005))
         self.inventory_label = ctk.CTkLabel(self.inventory_button, text="INVENTORY", text_color="white", font=("DM Sans Medium", 14))
@@ -3020,7 +3020,7 @@ class admin_settings_frame(ctk.CTkFrame):
         self.inventory_button.grid()
         self.inventory_button.update_children()
 
-        self.button_manager = cctku.button_manager([self.general_button, self.service_button, self.inventory_button], selected_color, False, 0)
+        self.button_manager = cctku.button_manager([self.service_button, self.inventory_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
@@ -3050,7 +3050,7 @@ class admin_settings_frame(ctk.CTkFrame):
             else:
                 messagebox.showerror("Missing Selection", "Select a record first", parent = self)
         
-        '''GENERAL FRAME - START'''
+        """  '''GENERAL FRAME - START'''
         
         self.top_frame = ctk.CTkFrame(self.general_frame, fg_color='transparent')
         self.top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
@@ -3086,7 +3086,7 @@ class admin_settings_frame(ctk.CTkFrame):
         
         
         '''GENERAL FRAME - END'''
-        
+         """
         
         '''SERVICE FRAME - START'''
         

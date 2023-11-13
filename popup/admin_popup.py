@@ -120,7 +120,6 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
             
             #self.service_category_option = ctk.CTkOptionMenu(self.service_category_frame, values=["Male","Female"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum,)
             
-            
             '''SERVICE PRICE'''
             self.service_price_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
             self.service_price_frame.grid(row=3, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
@@ -222,7 +221,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 #self.item_category_entry.pack(side=ctk.LEFT, fill="x", expand=1, padx=(0,width*0.0025), pady=(height*0.005))
 
                 if database.exec_nonquery([["UPDATE item_general_info SET name =?, Category =? WHERE UID =?", (self.item_name_entry.get(), self.item_category_entry.get(), self.item_id_label._text)],
-                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, Average_monthly_selling_rate = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._text), self.item_id_label._text)]]):
+                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, rate_mode = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry.get()), self.item_id_label._text)]]):
                     messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes", parent = self)
                     self.reload_item()
                     self.place_forget()
@@ -356,7 +355,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.item_rate_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
             self.item_rate_frame.grid(row=11, column=0, columnspan=1, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
             ctk.CTkLabel(self.item_rate_frame, text="Selling Rate:  ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.0825, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
-            self.item_rate_entry = ctk.CTkLabel(self.item_rate_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, anchor='w')
+            self.item_rate_entry = ctk.CTkOptionMenu(self.item_rate_frame, values=["Automatic", "Low", "High"], font=("DM Sans Medium",14), fg_color=Color.White_Lotion, anchor='w', text_color=Color.Blue_Maastricht)
             self.item_rate_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
             
             #self.item_category_option = ctk.CTkOptionMenu(self.item_category_frame, values=["Male","Female"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum,)
@@ -387,7 +386,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.set_entries('normal')
 
             self.item_id_label.configure(text=raw_data[0])
-            self.item_rate_entry.configure(text = raw_data[-1])
+            #self.item_rate_entry.configure(text = raw_data[-1])
             for i in range(len(self.entries)):
                 if i == 4:
                     self.entries[i].insert(0, f"{raw_data[i+1]*100}" )
