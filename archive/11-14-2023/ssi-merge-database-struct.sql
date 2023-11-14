@@ -7,8 +7,8 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE DATABASE IF NOT EXISTS `ssi_test1` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
-USE `ssi_test1`;
+CREATE DATABASE IF NOT EXISTS `ssi_test` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+USE `ssi_test`;
 
 CREATE TABLE IF NOT EXISTS `account_access_level` (
   `usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=309 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
 CREATE TABLE IF NOT EXISTS `categories` (
   `categ_name` varchar(50) NOT NULL,
@@ -250,11 +250,11 @@ CREATE TABLE IF NOT EXISTS `pet_info` (
 CREATE TABLE IF NOT EXISTS `pet_owner_info` (
   `owner_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
   `owner_name` varchar(128) NOT NULL,
-  `address` varchar(256) DEFAULT NULL,
-  `contact_number` varchar(20) DEFAULT NULL,
+  `address` varchar(256) NOT NULL,
+  `contact_number` varchar(20) NOT NULL,
   PRIMARY KEY (`owner_id`),
   UNIQUE KEY `name` (`owner_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 CREATE TABLE IF NOT EXISTS `receiving_history_info` (
   `receiving_id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS `service_preceeding_schedule` (
   KEY `FK__service_info_test` (`service_uid`) USING BTREE,
   CONSTRAINT `FK__service_info_test` FOREIGN KEY (`service_uid`) REFERENCES `service_info_test` (`UID`),
   CONSTRAINT `FK__services_transaction_content` FOREIGN KEY (`transaction_uid`) REFERENCES `services_transaction_content` (`transaction_uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 CREATE TABLE IF NOT EXISTS `supplier_info` (
   `supp_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -398,7 +398,6 @@ CREATE TABLE IF NOT EXISTS `supplier_item_info` (
 CREATE TABLE IF NOT EXISTS `transaction_record` (
   `transaction_uid` varchar(8) NOT NULL,
   `Attendant_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-  `Client_id` int(6) unsigned DEFAULT 0,
   `client_name` varchar(50) DEFAULT NULL,
   `Total_amount` float NOT NULL,
   `transaction_date` date NOT NULL,
@@ -406,8 +405,6 @@ CREATE TABLE IF NOT EXISTS `transaction_record` (
   `deduction` int(11) DEFAULT NULL,
   PRIMARY KEY (`transaction_uid`),
   KEY `Attendant_usn` (`Attendant_usn`),
-  KEY `FK_transaction_record_pet_owner_info` (`Client_id`),
-  CONSTRAINT `FK_transaction_record_pet_owner_info` FOREIGN KEY (`Client_id`) REFERENCES `pet_owner_info` (`owner_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
