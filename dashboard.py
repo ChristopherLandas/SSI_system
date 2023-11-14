@@ -2318,9 +2318,9 @@ class reports_frame(ctk.CTkFrame):
         self.sales_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color=Color.White_Platinum)
         self.sales_daily_graph.grid(row=0, column= 0,columnspan=3, sticky="nsew",  padx=(width*0.005,0), pady=(height*0.01))
 
-        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(self.data[0])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
+        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(self.data[0])}", corner_radius=5, fg_color=Color.Light_Green,  font=("DM Sans Medium",14), height=height*0.05)
         self.items_total.grid(row=1, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.007))
-        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(self.data[1])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
+        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(self.data[1])}", corner_radius=5, fg_color=Color.Blue_Cornflower,  font=("DM Sans Medium",14), height=height*0.05)
         self.service_total.grid(row=1, column=1, sticky="nsew",padx=(width*0.005), pady=(0,height*0.007))
         self.income_total = ctk.CTkLabel(self.daily_graph,text=f"Total    {format_price(self.data[0] + self.data[1])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
         self.income_total.grid(row=1, column=2, sticky="nsew", pady=(0,height*0.007))
@@ -2425,8 +2425,12 @@ class reports_frame(ctk.CTkFrame):
         pie_figure= Figure(figsize=(width, height), dpi=100)
         pie_figure.set_facecolor(fg_color)
         ax =pie_figure.add_subplot(111)
-        ax.pie(data, labels=label, autopct='%1.1f%%', startangle=90,counterclock=0,
-                textprops={'fontsize':12, 'color':"black", 'family':'monospace'}, colors=[Color.Light_Green,Color.Red_Tulip])
+        #ax.pie(data, labels=label, autopct='%1.1f%%', startangle=90,counterclock=0, textprops={'fontsize':12, 'color':"black", 'family':'monospace'}, colors=[Color.Light_Green,Color.Blue_Cornflower])
+        
+        #pie chart copied from dashboard
+        ax.pie(data, labels=label, autopct=f"{'%1.1f%%'if self.data[0] + self.data[1] > 0 else ''}", 
+               startangle=90, counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Blue_Cornflower] if self.data[0] + self.data[1] > 0 else [Color.White_Gray],
+                textprops={'fontsize':17, 'color': Color.Blue_Maastricht, 'family':'monospace', 'weight':'bold' },)
 
         self.daily_pie_canvas = FigureCanvasTkAgg(pie_figure, self.sales_daily_graph,)
         self.daily_pie_canvas.draw()
@@ -2448,7 +2452,7 @@ class reports_frame(ctk.CTkFrame):
         bar_figure= Figure(figsize=(width, height), dpi=100)
         bar_figure.set_facecolor(fg_color)
         ax =bar_figure.add_subplot(111)
-        ax.barh(label, self.data, align='center',  color=[Color.Light_Green,Color.Red_Tulip])
+        ax.barh(label, self.data, align='center',  color=[Color.Light_Green,Color.Blue_Cornflower])
         #ax.set_xlabel("Income")
         self.daily_hbar_canvas = FigureCanvasTkAgg(bar_figure, self.bars_daily_graph)
         self.daily_hbar_canvas.draw()
@@ -2470,8 +2474,8 @@ class reports_frame(ctk.CTkFrame):
         ax = bar_figure.add_subplot(111)
 
         ax.bar(x_axis-0.2, _data_item, width=0.4, label=_label[0], color=Color.Light_Green)
-        ax.bar(x_axis+0.2, _data_service, width=0.4, label = _label[1], color= Color.Red_Tulip)
-        ax.legend(["Income", "Services"])
+        ax.bar(x_axis+0.2, _data_service, width=0.4, label = _label[1], color= Color.Blue_Cornflower)
+        ax.legend(["Item Sales", "Services"])
         ax.set_xticks(x_axis,_label)
         #ax.set_xlabel("Income")
 
@@ -3194,4 +3198,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'jayr', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now)

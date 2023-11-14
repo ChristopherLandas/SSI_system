@@ -347,7 +347,7 @@ def show_popup_inventory(master, info:tuple, user: str, full_name: str, position
                 daily_date_select_temp = datetime.datetime.now()
                 generate_inventory_report(self.user, 'sample.pdf', self.full_name, self.position, daily_date_select_temp.strftime('%Y-%m-%d'),
                                           daily_date_select_temp, daily_date_select_temp.month, daily_date_select_temp.year,
-                                          'image', 0)
+                                          'image', 0, self)
                 ppdfp.preview_pdf_popup(receipt=0, title="Inventory Viewer")
 
    
@@ -668,8 +668,9 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             bc.groupSpacing = 10
             bc.barSpacing = 1
             #change bar color
+            #changed colors
             bc.bars[0].fillColor = colors.lightgreen
-            bc.bars[1].fillColor = colors.pink
+            bc.bars[1].fillColor = colors.cornflowerblue
             bc.valueAxis.valueMin = 0
             bc.valueAxis.valueMax = data_max_val
             bc.valueAxis.valueStep = step_val or 1
@@ -684,7 +685,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             d.add(String(vbc_label_location[0],vbc_label_location[1], f'{type_of_sales} Sales Graph as of {date_for_legends}', fontName = 'Times-New-Roman', fontSize=16)),
             d.add(String(260,375, f'{type_of_sales} Sales', fontName = 'Times-New-Roman', fontSize=16))
             d.add(Rect(90, 180, 430, 220, fillColor=colors.transparent, strokeColor=colors.gray))
-            d.add(Rect(350, 440, 15, 15, fillColor=colors.pink))
+            d.add(Rect(350, 440, 15, 15, fillColor=colors.cornflowerblue))
             d.add(Rect(250, 440, 15, 15, fillColor=colors.lightgreen))
             d.add(String(370,440, 'Services', fontName = 'Times-New-Roman', fontSize=12))
             d.add(String(270,440, 'Sales', fontName = 'Times-New-Roman', fontSize=12))
@@ -729,7 +730,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             pc.labels = [f'Sales\nP{data_for_items_temp:,.2f}\n({percentage(data_for_items_temp, total_data_temp)})', f'Services\nP{data_for_services_temp:,.2f}\n({percentage(data_for_services_temp, total_data_temp)})']
 
         pc.slices[0].fillColor = colors.lightgreen
-        pc.slices[1].fillColor = colors.pink
+        pc.slices[1].fillColor = colors.cornflowerblue
         pc.slices[1].popout = 10
         #add piechart on drawing
         d.add(pc, '')
