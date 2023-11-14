@@ -995,11 +995,17 @@ class payment_frame(ctk.CTkFrame):
         self.grid_forget()
 
     def invoice_callback(self):
-        if self.payment_treeview.get_selected_data() is None:
+        data = self.payment_treeview.get_selected_data()
+        if data is None:
             messagebox.showwarning("Fail to proceed", "Select a reception record before\nheading into the payment", parent = self)
             return
+        if price_format_to_float(data[2][1:]) != 0:
+            messagebox.showwarning("Fail to proceed", "You cannot void a transaction\nwith an availed service/s", parent = self)
+            return
         else:
-            messagebox.showwarning("No function yet", parent = self)    
+            def void_callback():
+                pass    
+            #need to fix bukas
 
     def search_callback(self):
         if self.search_entry.get() == "":
