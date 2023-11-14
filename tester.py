@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Union
 import customtkinter as ctk
 from tkinter import messagebox
 from customcustomtkinter import customcustomtkinter as cctk
-from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup
+from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup, mini_popup
 #from decimal import Decimal
 from util import *
 #import sql_commands
@@ -24,6 +24,9 @@ class body(ctk.CTk):
         self.attributes("-fullscreen", True)
         self.screen = (self.winfo_screenwidth(), self.winfo_screenheight())
 
+        mini_popup.authorization(self, self.screen, lambda: None).place(relx = .5, rely = .5, anchor = 'c')
+        self.mainloop()
+
         '''self.entry = ctk.CTkEntry(self, font= ('Arial', 24))
         self.entry.place(relx = .5, rely = .35, anchor = 'c')
         
@@ -40,7 +43,7 @@ class body(ctk.CTk):
         self.button.place(relx = .5, rely = .55, anchor = 'c')'''
 
         #customer_popup.new_customer(self, self.screen, lambda: None).place(relx = .5, rely = .5, anchor = 'c')
-        data = database.fetch_data('SELECT * FROM transaction_record WHERE client_name != ?', ('N/A', ))
+        '''data = database.fetch_data('SELECT * FROM transaction_record WHERE client_name != ?', ('N/A', ))
         data = [(s[0], s[3]) for s in data]
         modData = []
         for d in data:
@@ -52,7 +55,7 @@ class body(ctk.CTk):
         for d in modData:
             if database.exec_nonquery([["UPDATE transaction_record SET client_id = ? WHERE transaction_uid = ?", d]]):
                 print('success')
-        self.mainloop()
+        self.mainloop()'''
     
     '''def click(self):
         self.button.configure(state = ctk.DISABLED)
@@ -70,6 +73,7 @@ class body(ctk.CTk):
             f1 = float(self.lbl._text.split(':')[-1])
             f2 = float(self.lbl1._text.split(':')[-1])
             self.lbl2.configure(text = '%.3f' % (f2 - f1))'''
+    
         
 body()
     #lbl.configure(text = ''.join(txt_dvd))
