@@ -1488,19 +1488,39 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     #pdf compilation
     
     #add footer
+    writer = pdfrw2()
+    Writing = PdfWriter()
+    input_file = open(f"{filename}", "rb")
+    footer_input = open(f"image/footer2.pdf", "rb")
+    stop_foot_gen2 = 0
+    if not len(inventory_report_data_temp) % 19:
+        # add the first 3 pages of input1 document to output
+        Writing.append(input_file)
+        Writing.append(footer_input)
+        # Write to an output PDF document
+        writing_output = open(filename, "wb")
+        Writing.write(writing_output)
+        # Close File Descriptors
+        Writing.close()
+        writing_output.close()
+        stop_foot_gen2 = 1
+    
     p1 = pdfrw1(filename)
+    footer_generator(len(p1.pages))
     p2 = pdfrw1("image/footer.pdf")
     footer_gen2()
     p3 = pdfrw1("image/footer2.pdf")
-
     for page in range(len(p1.pages)):
         merger = pdfrw(p1.pages[page])
+        merger.add(p2.pages[page]).render()
         if page == (len(p1.pages)-1):
-            merger.add(p3.pages[0]).render()
+            if not stop_foot_gen2:
+                merger.add(p3.pages[0]).render()
+                print('asd')
         else:
             merger.add(p2.pages[page]).render()
 
-    writer = pdfrw2()
+    
     writer.write(filename, p1)
     if finish_alerts:
         messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Inventory Report.", parent = master)
