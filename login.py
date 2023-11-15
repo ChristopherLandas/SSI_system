@@ -172,7 +172,7 @@ class loginUI(ctk.CTk):
         self.pass_icon_label.pack(side='left', padx=(5,0),pady=(5))
 
         self.password_entry = ctk.CTkEntry(self.pass_frame,height=round(height * 0.03),font=('DM Sans Medium',16),border_width=0,
-                                       fg_color=Color.White_Milk, show='*')
+                                       fg_color=Color.White_Milk, show='●')
         self.password_entry.pack(side='left', fill='x', expand=True,padx=(3),pady=(5))
         self.show_pass_btn =ctk.CTkButton(self.pass_frame,width=28,height=28, image=self.hide_icon, text="",fg_color='transparent', hover=False,
                                           command=self.show_pass)

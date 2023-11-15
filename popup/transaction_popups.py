@@ -17,7 +17,7 @@ from PIL import Image
 import copy
 import network_socket_util as nsu
 import json
-from popup import dashboard_popup
+from popup import dashboard_popup, mini_popup
 
 from popup import preview_pdf_popup as ppdfp
 
@@ -741,7 +741,6 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
 
         def resched_btn_callback(self, _: any = None):
             if self.sched_treeview.get_selected_data():
-                print(self.sched_treeview.get_selected_data())
                 dashboard_popup.rescheduling_service_info(self  , (self.width, self.height)).place(relx = .5, rely = .5, anchor = 'c', uid= self.sched_treeview.get_selected_data()[0])
                 #code for reshceduling here
             else:
@@ -772,7 +771,6 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def item_proceed(_: any = None):
                 if self.item_treeview.get_selected_data() or self.service_treeview.get_selected_data():
                     data = self.item_treeview._data[self.item_treeview.data_frames.index(self.item_treeview.data_grid_btn_mng.active)]
-                    print(data)
                     add_data = (data[1], data[3], data[3])
                     #print(add_data)
                     if data[1] in [s[0] for s in root_treeview._data]: # if there's existing record
@@ -1492,6 +1490,7 @@ def show_payment_proceed(master, info:tuple,):
         def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
+            self.screen = (width, height)
             super().__init__(master,  width=width*0.815, height=height*0.875, corner_radius= 0, fg_color="transparent")
 
             global IP_Address, PORT_NO
@@ -1612,16 +1611,22 @@ def show_payment_proceed(master, info:tuple,):
                     self.sender_to_admin.send("_")
                     
                 record_action(self.cashier_name._text, action.TRANSACTION_TYPE, action.MAKE_TRANSACTION % (self.cashier_name._text, self.or_button._text[5:]))
+                #update the table
+
+                for i in range(len(list_of_services)):
+                    li = list(list_of_services[i])
+                    li[-1] =  price_format_to_float(li[-1])
+                    list_of_services[i] = tuple(li)
+
+                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment, deduction= self.deduction_entry.get() or 0,
+                                        title="Transaction Receipt Viewer", is_receipt=1)
+
                 self._treeview_callback()
-                self.reset()
                 self.place_forget()
                 self.complete_button.configure(state="normal")
                 self.cancel_button.configure(state="normal")
-                #print(self.or_button._text[5:])
-                #ppdfp.preview_pdf_popup(1, record_id, self.cashier_name._text, self.client_name._text, 's[1]', list_of_items, list_of_services, price_format_to_float(self.grand_total._text[1:]), payment)
-                #update the table
-                ppdfp.preview_pdf_popup(receipt=1, ornum=record_id, cashier=self.cashier_name._text, client=self.client_name._text, pet='s[1]', item=list_of_items, service=list_of_services, total=price_format_to_float(self.grand_total._text[1:]), paid=payment, deduction= self.deduction_entry.get() or 0,
-                                        title="Transaction Receipt Viewer", is_receipt=1)
+                self.reset()
+
             #Payment Callback
             def payment_callback(var, index, mode):
                 if re.search(r'[0-9\.]$', self.payment_entry.get() or "") is None and self.payment_entry._is_focused and self.payment_entry.get():
@@ -1778,7 +1783,9 @@ def show_payment_proceed(master, info:tuple,):
             
             ctk.CTkLabel(self.pay_frame, text="Deduction: ", font=("DM Sans Medium",16),).grid(row=5, column=0, padx=(width*0.01), pady=(height*0.025,0), sticky="w")
             self.deduction_entry = ctk.CTkEntry(self.pay_frame, font=("DM Sans Medium",16), justify="right", height=height*0.055, textvariable=self.deduction_var)
-            self.deduction_entry.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
+
+            self.authorization_btn = ctk.CTkButton(self.pay_frame, font=("DM Sans Medium",16), height=height*0.055, text="Add")
+            self.authorization_btn.grid(row=5, column=2, padx=(width*0.01), pady=(height*0.025,height*0.01),)
 
             self.payment_var.trace_add("write", callback=payment_callback)
             self.deduction_var.trace_add("write", callback=deduction_callback)
@@ -1809,14 +1816,24 @@ def show_payment_proceed(master, info:tuple,):
                                                ,font=("DM Sans Medium",16), width=width*0.065, height=height*0.05)
             self.cancel_button.configure(command=self.reset)
             self.cancel_button.grid(row=2, column=0, sticky="nsew", padx=(width*0.005,0), pady=(height*0.007))
+
+            self.authorization_popup = mini_popup.authorization(self, (width, height), self.authorization_command)
+            self.authorization_btn.configure(command = lambda: self.authorization_popup.place(relx = .5, rely = .5, anchor = 'c'))
+
+        def authorization_command(self):
+            self.authorization_btn.grid_forget()
+            self.deduction_entry.grid(row=5, column=2, padx=(self.screen[0]*0.01), pady=(self.screen[1]*0.025,self.screen[1]*0.01),)
             
         def reset(self):
+            self.deduction_entry.grid_forget()
+            self.authorization_btn.grid(row=5, column=2, padx=(self.screen[0]*0.01), pady=(self.screen[1]*0.025,self.screen[1]*0.01),)
             self.or_button.configure(text = '_')
             self.payment_entry.delete(0, ctk.END)
             self.payment_total.configure(text = "₱ --.--")
             self.change_total.configure(text = "--.--")
             self.or_button.configure(text= "OR#: ___")
             self.place_forget()
+            self.deduction_entry.delete(0, ctk.END)
 
         def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, **kwargs):
             if self.or_button._text.endswith("_"):
