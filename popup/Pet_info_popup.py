@@ -13,6 +13,7 @@ import sql_commands
 import tkinter as tk
 from tkinter import ttk
 import datetime
+from popup import audit_popup
 
 def new_record(master, info:tuple, table_update_callback: callable):
     class instance(ctk.CTkFrame):
@@ -29,25 +30,21 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.grid_rowconfigure(0, weight=1)
 
             '''EVENTS'''
-            def automate_fields(_: any = None):
-                if  self.owner_name_entry._values.index(self.owner_name_entry.get()) != len(self.owner_name_entry._values) - 1:
+            def automate_fields(value):
+                print(value)
+                if  self.owner_name_entry.get():
                     data = database.fetch_data(f"SELECT owner_name, address, contact_number FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'")[0]
-                    self.owner_name_entry.configure(ctk.DISABLED)
+                    self.contact_entry.configure(state = ctk.NORMAL)
+                    self.address_entry.configure(state = ctk.NORMAL)
+                    self.owner_name_entry.set(f'{value}')
                     self.address_entry.delete(0, ctk.END)
                     self.address_entry.insert(0, data[1])
-                    self.address_entry.configure(state = ctk.DISABLED)
                     self.contact_entry.delete(0, ctk.END)
                     self.contact_entry.insert(0, data[2])
                     self.contact_entry.configure(state = ctk.DISABLED)
+                    self.address_entry.configure(state = ctk.DISABLED)
                 else:
-                    self.owner_name_entry.configure(state = ctk.NORMAL)
-                    self.owner_name_entry.set('')
-                    if self.address_entry._state == ctk.DISABLED:
-                        self.address_entry.configure(state = ctk.NORMAL)
-                        self.contact_entry.configure(state = ctk.NORMAL)
-                        self.address_entry.delete(0, ctk.END)
-                        self.contact_entry.delete(0, ctk.END)
-
+                    messagebox.showerror("Error", "There is an error in selecting the customer. Please try again", parent = self)
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             self.new_record = ctk.CTkImage(light_image=Image.open("image/new_record.png"),size=(22,22))
 
@@ -80,7 +77,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
                     
                     owner_id = (database.fetch_data(f"SELECT owner_id FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'"))[0][0]
                     database.exec_nonquery([[sql_commands.insert_new_pet_info, (self.pet_id._text, self.patient_name_entry.get(), owner_id, self.breed_option.get(),
-                                                                                    self.type_option.get(), self.sex_option.get(), self.weight_entry.get(), bday)]])
+                                                                                    self.type_option.get(), self.sex_option.get(), self.weight_entry.get(), bday, acc_cred[0][0])]])
             
                     reset()
                     if self._callback: self._callback()
@@ -131,7 +128,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.pet_id_frame.grid(row=0, column=0, columnspan=3, sticky="nsw", padx=(width*0.005), pady=(height*0.01,0))
             
             
-            ctk.CTkLabel(self.pet_id_frame, text="Pet Code: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.085, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(0))
+            ctk.CTkLabel(self.pet_id_frame, text="Pet ID: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.085, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(0))
             self.pet_id = ctk.CTkLabel(self.pet_id_frame, font=("DM Sans Medium", 14), fg_color=Color.White_Platinum, text="PTESTES", corner_radius=5, width=width*0.1,height=height*0.055)
             self.pet_id.pack(fill="both", expand=1, padx=(0, width*0.0025), pady=(0))
         
@@ -146,17 +143,14 @@ def new_record(master, info:tuple, table_update_callback: callable):
             
             '''OWNER NAME ENTRY'''
             self.owner_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.085)
-            self.owner_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
+            self.owner_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
             
-            ctk.CTkLabel(self.owner_frame, text="Owner's Name: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.085, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
-            self.owner_name_entry = ctk.CTkComboBox(self.owner_frame,font=("DM Sans Medium", 14), fg_color=Color.White_Platinum, border_width=0, dropdown_fg_color=Color.White_Lotion, button_color=Color.Blue_Tufts, button_hover_color=Color.Blue_Steel,
-                                                    height=height*0.05,command=automate_fields)
-            self.owner_name_entry.set('')
             self.owners = [s[0] for s in database.fetch_data(sql_commands.get_owners)] or []
-            self.owners.append('Add new')
-            self.owner_name_entry.configure(values = self.owners)
+            ctk.CTkLabel(self.owner_frame, text="Owner's Name: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.085, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
+            self.owner_name_entry = ctk.CTkOptionMenu(self.owner_frame,values=self.owners, anchor="w", font=("DM Sans Medium", 14), width=width*0.08, height=height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Platinum,
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=automate_fields)
             self.owner_name_entry.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
-
+            self.owner_name_entry.set("Select A Customer")
             '''PET TYPE ENTRY'''
             self.type_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.085)
             self.type_frame.grid(row=3, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.01))
@@ -262,6 +256,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
             height = info[1]
             acc_cred = info[2]
             acc_info = info[3]
+            #print(acc_cred,acc_info)
             super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
 
             self.callback_command=table_update_callback
@@ -296,13 +291,21 @@ def view_record(master, info:tuple, table_update_callback: callable):
             
             def edit_entries():
                 
-                self.entries_set_state("normal") 
+                self.pet_name_entry.configure(state = ctk.NORMAL)
+                self.type_entry.configure(state = ctk.NORMAL)
+                self.sex_entry.configure(state = ctk.NORMAL)
+                self.breed_entry.configure(state = ctk.NORMAL)
+                self.weight_entry.configure(state = ctk.NORMAL)
+                self.birthday_entry.configure(state = ctk.NORMAL)
+                
+                
+                
                 self.pet_id.configure(state="disabled", fg_color=Color.White_Lotion)
                 
                 self.edit_info_button.grid_forget()
-                self.save_info_button.grid(row=0, column=3, sticky="nse",  pady=(height*0.01))
+                self.save_info_button.grid(row=0, column=4, sticky="nse",  pady=(height*0.01))
                 
-                self.cancel_edit.grid(row=0, column=4, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
+                self.cancel_edit.grid(row=0, column=5, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
                 
                 self.sex_entry_option.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
                 self.type_entry_option.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
@@ -320,7 +323,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
                 self.birthday_entry.pack_forget()
                 
             def cancel_changes():
-                self.edit_info_button.grid(row=0, column=3, sticky="nse",  pady=(height*0.01),padx=(width*0.005)) 
+                self.edit_info_button.grid(row=0, column=4, sticky="nse",  pady=(height*0.01),padx=(width*0.005)) 
                 self.save_info_button.grid_forget()
                 #self.image_edit.grid_forget()
                 
@@ -339,7 +342,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
                 self.cancel_edit.grid_forget()
                 
             def save_changes():
-                self.edit_info_button.grid(row=0, column=3, sticky="nse",  pady=(height*0.01),padx=(width*0.005)) 
+                self.edit_info_button.grid(row=0, column=4, sticky="nse",  pady=(height*0.01),padx=(width*0.005)) 
                 self.save_info_button.grid_forget()
                 #self.image_edit.grid_forget()
                 
@@ -366,12 +369,20 @@ def view_record(master, info:tuple, table_update_callback: callable):
                 self.bday_frame.pack_forget()
                 self.cancel_edit.grid_forget()
                  
-                database.exec_nonquery([[sql_commands.update_pet_record_pet_info, (self.pet_name_entry.get(), self.breed_entry.get(), self.type_entry.get(), self.sex_entry.get(), self.weight_entry.get(), self.birthday_entry.get(), self.pet_id.get())],
-                                        [sql_commands.update_pet_record_pet_owner, (self.owner_name_entry.get(), self.address_entry.get(), self.contact_no_entry.get(), self.pet_id.get())]])
+                database.exec_nonquery([[sql_commands.update_pet_record_pet_info, (self.pet_name_entry.get(), self.breed_entry.get(), self.type_entry.get(), self.sex_entry.get(), self.weight_entry.get(), self.birthday_entry.get(), acc_cred[0][0], self.pet_id.get())]])
+                                        #[sql_commands.update_pet_record_pet_owner, (self.owner_name_entry.get(), self.address_entry.get(), self.contact_no_entry.get(), self.pet_id.get())]])
             
-                messagebox.showinfo(title=None, message="Info Successfully Changed!", parent = self)
+                messagebox.showinfo(title=None, message="Pet Information Successfully Changed!", parent = self)
                 self.callback_command()
-                
+            
+            def pet_type_callback(var):
+                self.values = [val[0] for val in database.fetch_data(f"SELECT breed From pet_breed WHERE pet_breed.type = '{var}'")]
+                self.breed_entry_option.configure(values = self.values)
+            
+            def open_histoy_log():
+                temp = database.fetch_data("SELECT added_by, CAST(date_added AS DATE), updated_by, CAST(updated_date AS DATE) FROM pet_info WHERE id = ?", (self.pet_id.get(),))
+                self.history_log.place(relx=0.5, rely=0.5, anchor = 'c', info=temp)
+            
             self.header_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0)
             self.header_frame.grid(row=0, column=0, sticky="ew")
             self.header_frame.grid_propagate(0)
@@ -386,7 +397,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
 
             self.pet_info_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Platinum)
             self.pet_info_frame.grid(row=1,column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-            self.pet_info_frame.grid_columnconfigure(3, weight=1)
+            self.pet_info_frame.grid_columnconfigure(4, weight=1)
 
             #self.image_edit = ctk.CTkButton(self.pet_image_frame, image=self.camera_icon, text='', width=width*0.01, height=height*0.05, fg_color="#83bd75", hover_color="#82bd0b",)
             
@@ -399,8 +410,11 @@ def view_record(master, info:tuple, table_update_callback: callable):
             self.pet_name_entry = ctk.CTkEntry(self.pet_entry_frame, border_width=0, font=("DM Sans Medium", 16), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, corner_radius=5,height=height*0.05)
             self.pet_name_entry.pack(side="left", fill='x', expand=1,  padx=(width*0.0025), pady=(height*0.0025))
             
+            self.info_log = ctk.CTkButton(self.pet_info_frame, text='', image=Icons.get_image('info_icon', (30,30)),height=height*0.05, width=height*0.05, command=open_histoy_log)
+            self.info_log.grid(row=0, column=3, sticky="nsw",  pady=(height*0.01), padx=(0,width*0.005))
+            
             self.edit_info_button = ctk.CTkButton(self.pet_info_frame, image=self.add_icon, text='Edit', font=("DM Sans Medium", 14), width=width*0.01, fg_color="#3b8dd0", command=edit_entries)
-            self.edit_info_button.grid(row=0, column=3, sticky="nse",  pady=(height*0.01), padx=(width*0.005))
+            self.edit_info_button.grid(row=0, column=4, sticky="nse",  pady=(height*0.01), padx=(width*0.005))
 
             self.save_info_button = ctk.CTkButton(self.pet_info_frame, image=self.save_icon, text='Update Record',font=("DM Sans Medium", 14), width=width*0.01, fg_color="#83bd75", hover_color=Color.Green_Button_Hover_Color, command=save_changes)
             self.cancel_edit = ctk.CTkButton(self.pet_info_frame, text="Cancel", hover_color=Color.Red_Pastel, fg_color=Color.Red_Tulip, font=("DM Sans Medium", 14), width=width*0.015, command=cancel_changes)
@@ -444,21 +458,21 @@ def view_record(master, info:tuple, table_update_callback: callable):
             
             '''Owner'''
             self.owner_name_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
-            self.owner_name_frame.grid(row=1, column=3,columnspan=2, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
+            self.owner_name_frame.grid(row=1, column=3,columnspan=3, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
             ctk.CTkLabel(self.owner_name_frame, text='Owner\'s Name:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
             self.owner_name_entry = ctk.CTkEntry(self.owner_name_frame,  border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, height=height*0.05)
             self.owner_name_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
             
             '''Address'''
             self.address_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
-            self.address_frame.grid(row=2, column=3,columnspan=2, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
+            self.address_frame.grid(row=2, column=3,columnspan=3, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
             ctk.CTkLabel(self.address_frame, text='Address:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
             self.address_entry = ctk.CTkEntry(self.address_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, height=height*0.05)
             self.address_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
             
             '''Contact'''
             self.contact_no_frame = ctk.CTkFrame(self.pet_info_frame, fg_color=Color.White_Color[3])
-            self.contact_no_frame.grid(row=3, column=3,columnspan=2, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
+            self.contact_no_frame.grid(row=3, column=3,columnspan=3, sticky="nsew", padx=(0,width*0.005),  pady=(0,height*0.01))
             ctk.CTkLabel(self.contact_no_frame, text='Contact#:', font=("DM Sans Medium", 14), width=width*0.05, anchor='e',).pack(side="left", padx=(width*0.005, width*0.001))
             self.contact_no_entry = ctk.CTkEntry(self.contact_no_frame, border_width=0,font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Lotion, height=height*0.05)
             self.contact_no_entry.pack(side="left", fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
@@ -490,7 +504,7 @@ def view_record(master, info:tuple, table_update_callback: callable):
             
             '''Replace entries with option mene when editing'''
             self.sex_entry_option = ctk.CTkOptionMenu(self.sex_frame, values=["Male","Female"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, height=height*0.05)
-            self.type_entry_option = ctk.CTkOptionMenu(self.type_frame, values=["Dog","Cat"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, height=height*0.05)
+            self.type_entry_option = ctk.CTkOptionMenu(self.type_frame, values=["Dog","Cat"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, height=height*0.05, command=pet_type_callback)
             self.breed_entry_option = ctk.CTkOptionMenu(self.breed_frame, values=["Dog","Cat"], font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color=Color.White_Platinum, height=height*0.05)
         
             self.bday_frame = ctk.CTkFrame(self.birthday_frame, fg_color="transparent", height=height*0.065)
@@ -502,11 +516,15 @@ def view_record(master, info:tuple, table_update_callback: callable):
                                                command=lambda: cctk.tk_calendar(self.bday_new_entry, "%s", date_format="raw", max_date=datetime.datetime.now()))
             self.show_calendar.pack(side="left", padx=(width*0.0025), pady=(height*0.001))
         
+            self.history_log = audit_popup.audit_info(self, (width, height))
         
+            self.no_service_data = ctk.CTkLabel(self.pet_data_view, text="No service data for this record.", font=("DM Sans Medium",14), )
 
         def refresh(self):
             self.refresh_btn.configure(state = ctk.DISABLED)
+            self.pet_data_view.pack_forget()
             self.load_history()
+            self.pet_data_view.pack()
             self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
             
@@ -544,10 +562,9 @@ def view_record(master, info:tuple, table_update_callback: callable):
             return super().place(**kwargs)
         
         def load_history(self):
-           
             svc_data = database.fetch_data(sql_commands.get_specific_pet_record, (self.pet_id.get(), ))
             self.pet_data_view.update_table(svc_data)
-
+            self.no_service_data.place(relx=0.5, rely=0.5, anchor='c') if not svc_data else self.no_service_data.place_forget()
             
             #data = '''
     return instance(master, info, table_update_callback)

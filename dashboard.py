@@ -158,7 +158,6 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
         self.dashboard_icon = Icons.get_image('dashboard_icon',size=(22,22))
@@ -607,9 +606,9 @@ class dashboard_frame(ctk.CTkFrame):
         self.load_scheduled_service()
         self.grid_forget()
         
-        self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
-        self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
-        self.customer = customer_popup.new_customer(self, (width, height, ),)
+        #self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
+        #self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
+        #self.customer = customer_popup.new_customer(self, (width, height, ),)
         self.receiving_entity.start_receiving()
         
         #self.customer.place(relx=0.5, rely=0.5, anchor='c')
@@ -1054,6 +1053,33 @@ class customer_frame(ctk.CTkFrame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_forget()
 
+        def serach_callback():
+            temp = database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count']))
+            self.customer_treeview.pack_forget()
+            self.customer_treeview.update_table(list_filterer(source=self.search_bar.get(), reference=temp))
+            self.customer_treeview.pack()
+        
+        def open_record():
+            if self.customer_treeview.get_selected_data():
+                self.view_customer_popup.place(relx=0.5, rely=0.5, anchor='c', info =self.customer_treeview.get_selected_data())
+            else:
+                messagebox.showwarning("Warning", "No record selected. Select a record first.", parent = self)
+
+        def drp_callback(var):
+            if 'Regular' == var:
+                temp = database.fetch_data(sql_commands.get_customer_record_regular, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count']))
+      
+            elif 'Non-Regular' == var:
+                temp = database.fetch_data(sql_commands.get_customer_record_non_regular, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count']))
+    
+            elif 'All' == var:
+                temp =database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count']))
+      
+            
+            self.customer_treeview.pack_forget()
+            self.customer_treeview.update_table(temp)
+            self.customer_treeview.pack()
+                
         #region Top Frame
         self.view_icon = ctk.CTkImage(light_image=Image.open("image/receipt_icon.png"), size=(25,25))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -1075,7 +1101,8 @@ class customer_frame(ctk.CTkFrame):
                                           command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
 
-        self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,)
+        self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
+                                             command=open_record)
         self.view_record_btn.grid(row=0, column=3, padx=(0, width*0.005), pady=(height*0.01,0))
         
         self.sub_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion,corner_radius=0)
@@ -1083,18 +1110,35 @@ class customer_frame(ctk.CTkFrame):
         self.sub_frame.grid_rowconfigure(1, weight=1)
         self.sub_frame.grid_columnconfigure(1, weight=1)
         #endregion
+        self.optional_frame = ctk.CTkFrame(self.sub_frame, fg_color='transparent', corner_radius=0)
+        self.optional_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(width*0.005))     
         
+        self.sort_frame = ctk.CTkFrame(self.optional_frame,  height = height*0.05, fg_color=Color.Platinum)
+        self.sort_frame.grid(row=0, column=5, padx=(0), pady=(0), sticky="nse")
+        self.sort_frame.grid_rowconfigure(0, weight=1)
+        self.sort_frame.grid_columnconfigure((1,2), weight=1)
+
+        ctk.CTkLabel(self.sort_frame, text='Type: ', font=("DM Sans Medium", 12),).grid(row=0, column=0, padx=(width*0.01,0), pady=(height*0.0065), sticky="nsew")
+        self.sort_type_option= ctk.CTkOptionMenu(self.sort_frame, values=['All','Regular', 'Non-Regular'], anchor="center", font=("DM Sans Medium", 12), width=width*0.1, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Color[3],
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, dropdown_font=("DM Sans Medium", 14), command=drp_callback)
+        self.sort_type_option.grid(row=0, column=1, padx=(width*0.005), pady=(height*0.0065), sticky="nsew")
+    
         self.customer_table_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, corner_radius=0)
-        self.customer_table_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(width*0.005))
+        self.customer_table_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(0,width*0.005))
        
-        self.customer_treeview = cctk.cctkTreeView(self.customer_table_frame, data = [], width=width*0.8, height=height*0.8,
-                                               column_format=f'/No:{int(width*.025)}-#r/CustomerCode:{int(width*.125)}-tc/CustomerName:x-tl/CutomerType:{int(width*.175)}-tl/ContactNo:{int(width*.15)}-tr!30!30')
+        self.customer_treeview = cctk.cctkTreeView(self.customer_table_frame, data = [], width=width*0.805, height=height*0.8,
+                                               column_format=f'/No:{int(width*.035)}-#r/CustomerID:{int(width*.115)}-tc/CustomerName:x-tl/CustomerType:{int(width*.115)}-tc/ContactNo:{int(width*.15)}-tr!33!35',
+                                               conditional_colors={3 : {"Non-Regular":Color.Near_Expire_Color, "Regular": "green"}})
         self.customer_treeview.pack()
         #self.no_sales_data = ctk.CTkLabel(self.sales_table_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
-        self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum,
-                                             quary_command=sql_commands.get_sales_search_query, dp_width=width*0.275, place_height=height*0.0125, place_width=width*0.006, font=("DM Sans Medium", 14))
+        self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=serach_callback,
+                                             quary_command=sql_commands.get_customer_quary_command, dp_width=width*0.275, place_height=height*0.0125, place_width=width*0.006, font=("DM Sans Medium", 14))
         self.search_bar.grid(row=0, column=0, padx=(width*0.005), pady=(height*0.01,0))
-        self.add_customer_popup = customer_popup.new_customer(self, (width, height), self.add_callback)
+        
+        
+        self.add_customer_popup = customer_popup.new_customer(self, (width, height, acc_cred, acc_info), self.add_callback)
+        self.view_customer_popup = customer_popup.view_record(self, (width, height, acc_cred, acc_info), None)
+        
         self.refresh_treeview()
 
     def add_callback(self):
@@ -1103,8 +1147,10 @@ class customer_frame(ctk.CTkFrame):
 
     def refresh_treeview(self):
         self.refresh_btn.configure(state = ctk.DISABLED)
-        self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
-        self.customer_treeview.update_table(database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] ,)))
+        self.customer_treeview.pack_forget()
+        self.customer_treeview.update_table(database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count'])))
+        self.customer_treeview.pack()
+        self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
 
 class services_frame(ctk.CTkFrame):
@@ -2009,9 +2055,9 @@ class patient_info_frame(ctk.CTkFrame):
                     for data in self.data:
                         if set(res).issubset(data):
                              matched_res.append(data)
-            
+                self.pet_data_view.pack_forget()
                 self.pet_data_view.update_table(matched_res)
-
+                self.pet_data_view.pack()
         def sort_status_callback(var):
             if self.sort_status[0] in var:
                 sort_table(sql_commands.get_pet_record)

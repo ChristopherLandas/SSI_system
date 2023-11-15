@@ -423,9 +423,9 @@ get_pet_record=f"SELECT pet_info.id, pet_info.p_name, CONCAT(type, ' - ' , breed
                 FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY pet_owner_info.owner_name ASC"
 
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
-insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL)"
 
-insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (?, ?, ?)"
+insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_id, owner_name, address, contact_number, added_by, date_added) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
 
 insert_new_pet_breed = f"INSERT INTO pet_breed VALUES(?,?)"
 #PET INFO SORT
@@ -729,7 +729,7 @@ check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity <= SUM(ite
                     
 
 #get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
-update_pet_record_pet_info = "UPDATE pet_info SET p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ? WHERE id = ?"
+update_pet_record_pet_info = "UPDATE pet_info SET p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE id = ?"
 update_pet_record_pet_owner = f"UPDATE pet_owner_info\
                                 INNER JOIN pet_info ON pet_owner_info.owner_id = pet_info.owner_id\
                                 SET owner_name = ? ,\
@@ -1234,4 +1234,38 @@ get_customers_information = "SELECT pet_owner_info.owner_id,\
                              FROM pet_owner_info\
                              LEFT JOIN transaction_record\
                                  ON pet_owner_info.owner_id = transaction_record.Client_id\
-                             GROUP BY owner_id"
+                            GROUP BY owner_id\
+                             Order BY CASE\
+                             WHEN COUNT(transaction_record.transaction_uid) > ? then 1\
+                                         ELSE 2 END, pet_owner_info.owner_name ASC"
+                                         
+get_customer_quary_command = "SELECT owner_id, owner_name FROM pet_owner_info WHERE owner_id LIKE '%?%' OR owner_name LIKE '%?%' ORDER BY owner_name"
+get_customer_view_record = "SELECT owner_id, owner_name, contact_number, address, COUNT(transaction_record.transaction_uid)\
+                    FROM pet_owner_info LEFT JOIN transaction_record ON pet_owner_info.owner_id = transaction_record.Client_id\
+                    WHERE owner_id = ?"
+                                
+get_customer_record_regular = "SELECT pet_owner_info.owner_id,\
+                                     pet_owner_info.owner_name,\
+                                     case when COUNT(transaction_record.transaction_uid) > ?\
+                                         then 'Regular'\
+                                         ELSE 'Non-Regular' END,\
+                                     pet_owner_info.contact_number\
+                             FROM pet_owner_info\
+                             LEFT JOIN transaction_record\
+                                 ON pet_owner_info.owner_id = transaction_record.Client_id\
+                            GROUP BY owner_id\
+                            HAVING COUNT(transaction_record.transaction_uid) >= ?\
+                            Order BY pet_owner_info.owner_name ASC"
+                            
+get_customer_record_non_regular = "SELECT pet_owner_info.owner_id,\
+                                     pet_owner_info.owner_name,\
+                                     case when COUNT(transaction_record.transaction_uid) > ?\
+                                         then 'Regular'\
+                                         ELSE 'Non-Regular' END,\
+                                     pet_owner_info.contact_number\
+                             FROM pet_owner_info\
+                             LEFT JOIN transaction_record\
+                                 ON pet_owner_info.owner_id = transaction_record.Client_id\
+                            GROUP BY owner_id\
+                            HAVING COUNT(transaction_record.transaction_uid) < ?\
+                            Order BY pet_owner_info.owner_name ASC"
