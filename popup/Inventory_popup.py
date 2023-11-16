@@ -5,7 +5,7 @@ import sql_commands
 import tkcalendar
 import util
 from typing import Optional, Tuple, Union
-from customcustomtkinter import customcustomtkinter as cctk
+from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
 from Theme import Color
 from util import database, generateId
 from util import *
@@ -157,6 +157,8 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                 if (re.search(r'[0-9\.]$', self.unit_var.get() or "") is None):
                     l = len(self.item_num_unit_entry.get())
                     self.item_num_unit_entry.delete(l-1, l)
+                    if len(self.item_num_unit_entry.get()) > 64:
+                        self.item_num_unit_entry.delete(64, ctk.END)
                 # if not self.unit_var.get().isdigit():
                 #    self.item_num_unit_entry.delete(0, "end")
             
@@ -334,6 +336,11 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add New Item', command= add_item_callback)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
 
+            self.item_brand_limiter = cctku.entry_limiter(64, self.item_brand_entry._entry)
+            self.desc_limiter = cctku.entry_limiter(64, self.item_name_entry)
+            
+            self.item_brand_entry._entry.configure(textvariable = self.item_brand_limiter)
+            self.item_name_entry.configure(textvariable = self.desc_limiter)
             expiry_switch_event()
             
         def change_entries_state(self, state):
@@ -769,6 +776,8 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             def validate_contact(var, mode, index):
                 if not validate_contact_num(self.contact_var.get()):
                     self.supplier_number_entry.delete(0, "end")
+                if len(self.supplier_number_entry.get()) > 20:
+                    self.supplier_number_entry.delete(20, ctk.END)
 
             def add_supplier():
                 
@@ -862,6 +871,20 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             
             self.entries = [self.supplier_name_entry, self.supplier_person_entry, self.supplier_tele_entry, self.supplier_number_entry, self.supplier_email_entry, self.supplier_address_entry]
             
+            self.supplier_name_limiter = cctku.entry_limiter(128, self.supplier_name_entry)
+            self.supplier_tele_limiter = cctku.entry_limiter(64, self.supplier_tele_entry)
+            self.supplier_person_limiter = cctku.entry_limiter(128, self.supplier_person_entry)
+            #self.supplier_number_limiter = cctku.entry_limiter(20, self.supplier_number_entry)
+            self.supplier_email_limiter = cctku.entry_limiter(128, self.supplier_email_entry)
+            self.supplier_address_limiter = cctku.entry_limiter(256, self.supplier_address_entry)
+
+            self.supplier_name_entry.configure(textvariable = self.supplier_name_limiter)
+            self.supplier_tele_entry.configure(textvariable = self.supplier_tele_limiter)
+            self.supplier_person_entry.configure(textvariable = self.supplier_person_limiter)
+            #self.supplier_number_entry.configure(textvariable = self.supplier_number_entry)
+            self.supplier_email_entry.configure(textvariable = self.supplier_email_limiter)
+            self.supplier_address_entry.configure(textvariable = self.supplier_address_limiter  )
+
         def place(self, **kwargs):
             self.supplier_id.configure(text=generateId(initial = 'SUP', length = 6).upper())
             
@@ -1789,6 +1812,9 @@ def add_category(master, info:tuple, table_update_callback: callable):
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add Category',
                                          command=add_category)
             self.add_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
+
+            self.category_limiter = cctku.entry_limiter(64, self.category_name_entry)
+            self.category_name_entry.configure(textvariable = self.category_limiter)
             
     return add_category(master, info, table_update_callback)
 
