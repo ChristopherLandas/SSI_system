@@ -20,7 +20,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from constants import db
 from constants import action
-from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup, customer_popup
+from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup, customer_popup, mini_popup
 from math import *
 import random
 import copy
@@ -752,7 +752,7 @@ class reception_frame(ctk.CTkFrame):
         self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
         self.add_item_btn.pack(side="left", padx=(width*0.005))
 
-        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.05, text="View Shcedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
+        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.05, text="View Schedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
                                                command = lambda: self.scheduled_services_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.view_schedule_btn.pack(side="left", padx=(0, width*0.005))
 
@@ -870,11 +870,9 @@ class reception_frame(ctk.CTkFrame):
                 
                 for li in queued_services:
                     self.scheduling_invoice_treeview.add_data(li)
-                self.scheduling_invoice_treeview.data_grid_btn_mng.update_buttons()
 
-                #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info_queued, (index, )))
-                #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info, (index, )))
-                # load the queued service treeview
+                self.active.data_grid_btn_mng.update_buttons()
+    
             self.loaded[index] = True
         self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
         
@@ -887,10 +885,13 @@ class reception_frame(ctk.CTkFrame):
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
             self.update_invoice_treeview(True)
         else:
-            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice", parent = self)) and self.active != self.scheduling_invoice_treeview:
+            print(self.active.get_selected_data()[0])
+            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice", parent = self)):
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.active.get_selected_data()[0], )]])
-                self.update_invoice_treeview(True)
-
+                #self.update_invoice_treeview(True)
+                self.active.remove_selected_data()
+                self.active.data_grid_btn_mng.update_buttons()
+    
     def load_invoice_content(self, _:any = None):
         if (self.active == self.item_invoice_treeview) and self.active.get_selected_data() is not None:
             transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.active.get_selected_data()[0])
@@ -899,8 +900,23 @@ class reception_frame(ctk.CTkFrame):
         data = self.active.get_selected_data()
         if(data):
             if 'TR# ' not in data[0]:
-                stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
-                if 0 not in stock_quan:
+                #stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+                items_uid_in_invoice = database.fetch_data(sql_commands.check_quan_of_invoice, (data[0], ))
+                items_about_to_pay = database.fetch_data(sql_commands.check_quan_of_paying_item)
+                current_stock = database.fetch_data(sql_commands.check_feasible_items)
+                current_stock = {s[0]: s[1] for s in current_stock}
+
+                for li in items_about_to_pay:
+                    if li[0] in current_stock:
+                        current_stock[li[0]] = current_stock[li[0]] - li[1]
+
+                can_accomodate = True
+                for li in items_uid_in_invoice:
+                    if li[1] > current_stock[li[0]]:
+                        can_accomodate = False
+                        break 
+
+                if can_accomodate:
                     self.sender_entity.send(data[0])
                 else:
                     messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
@@ -977,6 +993,13 @@ class payment_frame(ctk.CTkFrame):
 
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
+
+        def void_invoice():
+            record_action(acc_cred[0][0], action.INVOICE_TYPE, action.VOID_INVOICE % (acc_cred[0][0], self.void_authorization.user_name_authorized_by, self.payment_treeview.get_selected_data()[0]))
+            database.exec_nonquery([[sql_commands.void_invoice, (self.payment_treeview.get_selected_data()[0], )]])
+            self.update_payment_treeview()
+        self.void_authorization = mini_popup.authorization(self, (width, height), void_invoice)
+
         self.grid_forget()
 
     def invoice_callback(self):
@@ -988,9 +1011,11 @@ class payment_frame(ctk.CTkFrame):
             messagebox.showwarning("Fail to proceed", "You cannot void a transaction\nwith an availed service/s", parent = self)
             return
         else:
-            def void_callback():
-                pass    
-            #need to fix bukas
+            self.void_authorization.place(relx = .5, rely = .5, anchor = 'c')
+        
+    def void_callback(self):
+        pass
+        #need to fix
 
     def search_callback(self):
         if self.search_entry.get() == "":
@@ -2333,7 +2358,7 @@ class reports_frame(ctk.CTkFrame):
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=(0, height*0.0075))
 
         self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.4,
-                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Service:{int(width*0.165)}-tr/Item:{int(width*0.165)}-tr/Total:{int(width*0.135)}-tr!30!30')
+                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Subtotal:{int(width*0.165)}-tr/Deduction:{int(width*0.165)}-tr/Total:{int(width*0.135)}-tr!30!30')
         self.daily_data_view.pack()
 
 
