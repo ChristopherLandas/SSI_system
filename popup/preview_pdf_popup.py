@@ -144,7 +144,7 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
                     length_counter += len(s_name)
                     if length_counter > 25:
                         length_counter = len(s_name)
-                        serv_name += '\\n'
+                        serv_name += '\n'
                     serv_name += f'{s_name} '
 
                 receipt_content.append([serv_name, '1', "P{:,.2f}".format(float(p[6])), "P{:,.2f}".format(float(p[6]))])
@@ -363,6 +363,7 @@ class preview_pdf_popup(ctk.CTkToplevel):
 
         self.title(title)
         self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
+        self.grab_set()
         
         self.main_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum)
         self.main_frame.pack(pady=window_width*0.005, padx=window_width*0.005)
@@ -468,6 +469,10 @@ class preview_pdf_popup(ctk.CTkToplevel):
             self.vaas2.pack(pady=self.window_width*0.005, padx=(self.window_width*0.005))
 
         self.after(200, self.button_state("normal"))
+
+    def _cleanup(self):
+        self.grab_release()
+        self.destroy()
     
     #old version for reports
     '''
