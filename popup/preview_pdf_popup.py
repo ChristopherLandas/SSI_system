@@ -137,13 +137,33 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         
         if not service_particulars is None:
             for p in service_particulars:
-                receipt_content.append([f'{p[0]} - {p[1]}', '1', "P{:,.2f}".format(float(p[6])), "P{:,.2f}".format(float(p[6]))])
+                length_counter = 0
+                service_name = f'{p[0]} - {p[1]}'
+                serv_name = ''
+                for s_name in service_name.split():
+                    length_counter += len(s_name)
+                    if length_counter > 25:
+                        length_counter = len(s_name)
+                        serv_name += '\\n'
+                    serv_name += f'{s_name} '
+
+                receipt_content.append([serv_name, '1', "P{:,.2f}".format(float(p[6])), "P{:,.2f}".format(float(p[6]))])
         if not item_particulars is None:
             for p in item_particulars:
+                length_counter = 0
+                item_name = p[2]
+                itm_name = ''
+                for i_name in item_name.split():
+                    length_counter += len(i_name)
+                    if length_counter > 25:
+                        length_counter = len(i_name)
+                        itm_name += f'\n{i_name}'
+                    else:
+                        itm_name += f'{i_name} '
                 item_prc = "P{:,.2f}".format(float(p[4]))
                 item_total = "P{:,.2f}".format(float(p[4])*float(p[3]))
                 #receipt_content.append([p[2], p[3], p[4], float(p[4])*float(p[3])])
-                receipt_content.append([p[2], p[3], item_prc, item_total])
+                receipt_content.append([itm_name, p[3], item_prc, item_total])
         if old:
             total_amount_price = "P{:,.2f}".format(float(total_amount))
             deduction_price = "P{:,.2f}".format(float(deduction))
@@ -166,12 +186,14 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
         receipt_content.append(['Change:', '', '', f'{change_price}'])
 
         #add data for table
+        #colWidths
         table_content = Table(receipt_content)
         bc = colors.lightgrey
         #add table style
         tbl_style = TableStyle(
             [
             #text alignment, starting axis, -1 = end
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
             ('SPAN', (0, 0), (1, 0)),
             ('SPAN', (2, 0), (-1, 0)),
             ('SPAN', (0, 1), (1, 1)),
