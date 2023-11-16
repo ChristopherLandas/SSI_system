@@ -421,9 +421,10 @@ class customcustomtkinter:
         def delete_all_data(self):
             for frm in self.data_frames:
                 frm.destroy()
-            self.data_grid_btn_mng._buttons.clear()
-            self.data_grid_btn_mng._og_color.clear()
-            self._data.clear()
+            #self.data_grid_btn_mng._buttons.clear()
+            #self.data_grid_btn_mng._og_color.clear()
+            self.data_grid_btn_mng = customcustomtkinterutil.button_manager(self.data_frames, self._selected_color, True, None)
+            self._data = []
 
         def configure(self, require_redraw=False, **kwargs):
             if 'double_click_command' in kwargs:
@@ -1025,3 +1026,16 @@ class customcustomtkinterutil:
 
         def update_colors(self, button: ctk.CTkButton | customcustomtkinter.ctkButtonFrame):
             self._og_color[self._buttons.index(button)] = button._fg_color
+
+    def entry_limiter(length: int, entry: ctk.CTkEntry, command: callable = None):
+        ret = ctk.StringVar();
+
+        def limit(var, index, mode):
+            if len(entry.get()) > length:
+                entry.delete(length, ctk.END)
+
+            if callable(command):
+                command()
+
+        ret.trace_add("write", callback = limit)
+        return ret

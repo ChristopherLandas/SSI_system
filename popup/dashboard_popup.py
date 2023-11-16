@@ -8,15 +8,13 @@ from Theme import Color, Icons
 from util import database, generateId
 from tkinter import messagebox
 from constants import action
-import datetime
 from PIL import Image
-import datetime
 from functools import partial
 from typing import *
 import tkinter as tk
 from util import *
 import util
-from datetime import date
+from datetime import date, timedelta, datetime
 
 def status_bar(master, info: tuple, height, width, text: str, icon_color: str, count: Optional[int] = 0, command:callable = None, icon:Optional[ctk.CTkImage] = None,
                fg_color:str = Color.White_AntiFlash, hover_color:str = Color.Platinum, display_warning: bool=True, indicator_space:bool = True, display_count: bool=True):
@@ -308,7 +306,7 @@ def sched_service_info_popup(master, info:tuple):
             '''DATE ADDED FRAME'''
             self.date_added_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion)
             self.date_added_frame.grid(row=0, column=1, sticky="nsew",  padx=(0,width*0.005), pady=(height*0.01,0))
-            ctk.CTkLabel(self.date_added_frame, text="Date Added: ", font=("DM Sans Medium", 14), fg_color='transparent',width=width*0.075, anchor="e").pack(side='left', padx=(width*0.005,0), pady=(height*0.0085))
+            ctk.CTkLabel(self.date_added_frame, text="Scheduled date: ", font=("DM Sans Medium", 14), fg_color='transparent',width=width*0.075, anchor="e").pack(side='left', padx=(width*0.005,0), pady=(height*0.0085))
             self.date_added_name = ctk.CTkLabel(self.date_added_frame, text="Grooming", font=("DM Sans Medium", 14), fg_color='transparent', anchor='w', padx=(width*0.005), width=width*0.125)
             self.date_added_name.pack(side="left", fill='x', expand=1, padx=(0,width*0.005), pady=(height*0.0085))
             
@@ -361,7 +359,7 @@ def sched_service_info_popup(master, info:tuple):
             self.sched_date.pack(side="left", fill='both', expand=1, padx=(0), pady=(height*0.0085))
             
             self.show_calendar = ctk.CTkButton(self.sched_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
-                                               command=lambda: cctk.tk_calendar(self.sched_date, "%s", date_format="raw", min_date=datetime.datetime.now(), set_date_callback=check_date), corner_radius=5)
+                                               command=lambda: cctk.tk_calendar(self.sched_date, "%s", date_format="raw", min_date=datetime.now(), set_date_callback=check_date), corner_radius=5)
             self.show_calendar.pack(side="left", fill='x', expand=1, padx=(width*0.0025,width*0.005), pady=(height*0.0085))
             
             '''QUESTION FRAME'''
@@ -422,15 +420,36 @@ def rescheduling_service_info(master, info:tuple):
                 self.queston_frame.grid_forget()
                 
             def proceed_resched():
-                print(self.sched_date.cget('text'))
+                if self.paid:
+                    if self.preeceding_checkbox.get() == 0:
+                        _date = datetime.strptime(self.data_labels[6]._text, '%B %d, %Y')
+                        preceeding_service = database.fetch_data(sql_commands.get_preceeding_by_id, (self.data_labels[0]._text, _date.strftime('%Y-%m-%d')))
+                        days_dif = (datetime.combine(self.sched_date._text, datetime.min.time()) - datetime.strptime(self.data_labels[-2]._text, "%B %d, %Y") )
+                        database.exec_nonquery([[sql_commands.update_preceeding, (preceeding_service[0][-2] + days_dif, preceeding_service[0][1], preceeding_service[0][0])]])
+                    else:
+                        _date = datetime.strptime(self.data_labels[6]._text, '%B %d, %Y')
+                        preceeding_service = database.fetch_data(sql_commands.get_preceeding_by_id, (self.data_labels[0]._text, _date.strftime('%Y-%m-%d')))
+                        days_dif = (datetime.combine(self.sched_date._text, datetime.min.time()) - datetime.strptime(self.data_labels[-2]._text, "%B %d, %Y") )
+                        database.exec_nonquery([[sql_commands.update_preceeding, (s[-2] + days_dif, s[1], s[0])] for s in preceeding_service])
+                    messagebox.showinfo("Success", 'Service Rescheduled', parent=self)
+                    self.update_treeview_callback()
+                else:
+                    if database.exec_nonquery([[sql_commands.update_invoice_schedule, (self.sched_date.cget('text'), self.data_labels[0]._text)]]):
+                        messagebox.showinfo("Success", 'Service Rescheduled', parent=self)
+                        self.update_treeview_callback()
+                self.place_forget()
             
             def check_date():
                 if str(self.sched_date._text) == str(date.today()):
                     self.queston_frame.grid_forget()
                 else:
-                    self.queston_frame.grid(row=4, column=0, columnspan=2, sticky="ns", padx=(width*0.005), pady=(0,height*0.01))
+                    preceeding = database.fetch_data(sql_commands.check_if_there_a_preceeding_schedule, (self.reception_name._text, ))[0][0] > 0
+                    if preceeding:
+                        self.preeceding_checkbox.select()
+                        self.preceeding_question_frmae.grid(row=4, column=0, columnspan=2, sticky="ns", padx=(width*0.005), pady=(0,height*0.01))
+                    self.queston_frame.grid(row= 4 if not preceeding else 5, column=0, columnspan=2, sticky="ns", padx=(width*0.005), pady=(0,height*0.01))
                     
-            self.main_frame = ctk.CTkFrame(self, width=width*0.45, height=height*0.575, fg_color=Color.White_Color[3], corner_radius= 0)
+            self.main_frame = ctk.CTkFrame(self, width=width*0.45, height=height*0.585, fg_color=Color.White_Color[3], corner_radius= 0)
             self.main_frame.grid(row=0, column=0)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
@@ -516,8 +535,15 @@ def rescheduling_service_info(master, info:tuple):
             self.sched_date.pack(side="left", fill='both', expand=1, padx=(0), pady=(height*0.0085))
             
             self.show_calendar = ctk.CTkButton(self.sched_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
-                                               command=lambda: cctk.tk_calendar(self.sched_date, "%s", date_format="raw", min_date=datetime.datetime.now(), set_date_callback=check_date), corner_radius=5)
+                                               command=lambda: cctk.tk_calendar(self.sched_date, "%s", date_format="raw", min_date=datetime.now(), set_date_callback=check_date), corner_radius=5)
             self.show_calendar.pack(side="left", fill='x', expand=1, padx=(width*0.0025,width*0.005), pady=(height*0.0085))
+            
+            '''PRECEEDING FRAME'''
+            self.preceeding_question_frmae = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Platinum, height=height*0.055, width=width*0.25)
+            self.preceeding_question_frmae.pack_propagate(0)
+            #ctk.CTkLabel(self.preceeding_question_frmae, text = 'Affect Preceeding Schedule?').pack(side='left', padx=(width*0.01,0), pady=(height*0.0085))
+            self.preeceding_checkbox = ctk.CTkCheckBox(self.preceeding_question_frmae, 100, 100, text= 'Affect Preceeding Schedule?', font=("DM Sans Medium", 14))
+            self.preeceding_checkbox.pack()
             
             '''QUESTION FRAME'''
             self.queston_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Platinum)
@@ -547,11 +573,15 @@ def rescheduling_service_info(master, info:tuple):
             for i in range(len(self.data_labels)):
                 self.data_labels[i].configure(text="")
         
-        def place(self, uid, **kwargs):
+        def place(self, uid, update_treeview_callback: callable = None, **kwargs):
+            self.paid = False
+            self.update_treeview_callback = update_treeview_callback
             if 'TR#' in uid:
+                self.paid = True
                 self._rec_ID.configure(text = "Transaction ID:")
                 self.price_name.configure(text_color = 'green')
                 self.data = database.fetch_data(sql_commands.get_rescheduling_info_preceeding_by_id, (uid[4:], ))[0]
+                self.original_date = datetime.strptime(self.data[-2], '%B %d, %Y')
             else:
                 self.data = database.fetch_data(sql_commands.get_rescheduling_info_invoice_by_id, (uid, ))[0]
             self.load_data(self.data)

@@ -13,7 +13,7 @@ from tkinter import ttk
 from popup import preview_pdf_popup as ppdfp
 from util import *
 from datetime import date
-from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup
+from popup import mini_popup, Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup
 
 def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
     class sales_record(ctk.CTkFrame):
@@ -45,10 +45,11 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                     for it in i:
                         temp_items.append(it)
                     formatted_items.append(temp_items)
-                #ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer", is_receipt=1)
                 #added deduction
-
                 ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=raw_transaction_info[2], paid=raw_transaction_info[2], title="Transaction Receipt Viewer", is_receipt=1, deduction=raw_transaction_info[6])
+
+                #ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=price_format_to_float(raw_transaction_info[2][1:]), paid=price_format_to_float(raw_transaction_info[2][1:]), title="Transaction Receipt Viewer", is_receipt=1, deduction=raw_transaction_info[6])
+                #ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=raw_transaction_info[2], paid=raw_transaction_info[2], title="Transaction Receipt Viewer", is_receipt=1, deduction=raw_transaction_info[6])
             
             def view_removed():
                 _temp = [(data[0],) + (f'{data[1]} ({data[2]})',) + data[3:] if data[2] else (data[0], data[1], data[3:]) for data in database.fetch_data(sql_commands.get_replaced_items_by_id, (self.or_label._text,))]
@@ -118,8 +119,8 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
             self.view_receipt.grid(row=0, column=2, sticky="nse",padx=(0,width*0.005), pady= width*0.005)
             
             self.change_order_btn = ctk.CTkButton(self.client_info_frame, text="Replace Item", font=("DM Sans Medium", 14), image=Icons.get_image("replaced_icon", (25,25)),
-                                                  text_color=Color.White_Lotion,
-                                                  command=lambda:self.change_order.place(relx=0.5, rely=0.5, anchor='c', info=self.or_label._text, items=self.items))
+                                                  text_color=Color.White_Lotion)
+                                                 #command=lambda:self.change_order.place(relx=0.5, rely=0.5, anchor='c', info=self.or_label._text, items=self.items))
             
             self.replaced_item_btn = ctk.CTkButton(self.client_info_frame, text="Replaced Item", font=("DM Sans Medium", 14), cursor='hand2', text_color=Color.White_Lotion,
                                                    image=Icons.get_image('replaced_icon', (25,25)), command=view_removed,
@@ -154,13 +155,15 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
         
             self.change_order = change_order(self,(width, height, acc_info, acc_cred))
             self.replaced = view_removed_items(self,(width, height, acc_info, acc_cred))
-            
-            
+            self.replace_authorization = mini_popup.authorization(self, (width, height), lambda:self.change_order.place(relx=0.5, rely=0.5, anchor='c', info=self.or_label._text, items=self.items))
+            self.change_order_btn.configure(command = lambda: self.replace_authorization.place(relx = .5, rely = .5, anchor = 'c'))
+
         def set_values(self):
             [self.labels[i].configure(text=f"{self.transact_info[i]}") for i in range(len(self.labels))]     
             self.status_label.configure(text=f"{'Paid' if self.transact_info[-1] == 1 else 'Paid and Replaced'}")
-            
-            if self.transact_info[-1] == 1:
+
+            #change to -2 since the -1 became the deduction
+            if self.transact_info[-2] == 1:
                 self.change_order_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)  
                 self.replaced_item_btn.grid_forget()
             else:
