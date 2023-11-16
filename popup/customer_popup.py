@@ -106,6 +106,21 @@ def new_customer(master, info:tuple, command_callback: callable = None):
                                          command=self.add_record)
             self.add_btn.pack(side="right",padx=(width*0.005),pady=(width*0.005))
 
+            def num_entry_checker():
+                if self.customer_num_entry.get()[-1].isdecimal():
+                    return
+                elif self.customer_num_entry.get()[-1] == "+":
+                    return
+                self.customer_num_entry.delete(len(self.customer_address_entry.get()) - 2, ctk.END)
+
+            self.customer_address_limiter = cctku.entry_limiter(256, self.customer_address_entry)
+            self.customer_name_limiter = cctku.entry_limiter(128, self.customer_name_entry)
+            self.customer_num_limiter = cctku.entry_limiter(20, self.customer_num_entry, num_entry_checker)
+
+            self.customer_address_entry.configure(textvariable = self.customer_address_entry)
+            self.customer_name_entry.configure(textvariable = self.customer_name_limiter)
+            self.customer_num_entry.configure(textvariable = self.customer_num_limiter)
+
         def add_record(self):
             if not self.customer_name_entry.get():
                 messagebox.showerror("Fail to Proceed", "Fill the Name entry", parent = self)
