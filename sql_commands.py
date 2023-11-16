@@ -253,7 +253,7 @@ add_item_statistic = "INSERT INTO item_statistic_info VALUES(?, MONTH(CURRENT_DA
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, ?, CURRENT_DATE, 1, ?)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?, 1)"
-record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+record_services_transaction_content = "INSERT INTO services_transaction_content VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
@@ -289,6 +289,7 @@ get_reorder_state= "SELECT item_general_info.brand, item_general_info.name, item
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                         INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                        WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
@@ -305,17 +306,20 @@ get_out_of_stock_state = "SELECT item_general_info.brand, item_general_info.name
                                            then sum(item_inventory_info.stock) ELSE -1 END AS stock\
                           FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                               INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                          WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                           GROUP BY item_inventory_info.uid\
                           HAVING stock >= 0;"
 
-get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                 item_inventory_info.Stock,\
-                                 case when item_inventory_info.Expiry_Date <= DATE_ADD(CURRENT_DATE, INTERVAL 15 DAY)\
-                                             AND item_inventory_info.Expiry_Date > CURRENT_DATE\
-                                             AND item_inventory_info.Expiry_Date IS NOT NULL \
-                                             then item_inventory_info.Expiry_Date ELSE 0 END AS EXP\
-                         FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                         HAVING exp;"
+get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name,item_general_info.unit,\
+                                      SUM(item_inventory_info.Stock)\
+                               FROM item_inventory_info\
+                               JOIN item_general_info\
+                                       ON item_inventory_info.UID = item_general_info.UID\
+                               JOIN item_settings\
+                                       ON item_inventory_info.UID = item_settings.UID\
+                               WHERE DATE_SUB(item_inventory_info.Expiry_Date, INTERVAL 14 DAY) <= CURRENT_DATE\
+                                       AND NOT item_inventory_info.Expiry_Date <= current_date\
+                               GROUP BY item_general_info.UID"
 
 
 get_expired_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
@@ -324,7 +328,8 @@ get_expired_state = "SELECT item_general_info.brand, item_general_info.name, ite
                                          AND item_inventory_info.Expiry_Date IS NOT NULL\
                                          then item_inventory_info.Expiry_Date ELSE NULL END AS EXP\
                      FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                     WHERE item_inventory_info.state = 1 HAVING exp;"
+                     WHERE item_inventory_info.state = 1 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                     HAVING exp;"
 
 #FOR DAILY SALES
 get_todays_transaction_count = "SELECT COUNT(*)  FROM transaction_record WHERE transaction_date = CURRENT_DATE"
@@ -995,7 +1000,8 @@ get_out_of_stock_names = "SELECT item_general_info.name\
                           FROM item_general_info\
                           JOIN item_inventory_info \
                               ON item_general_info.UID = item_inventory_info.UID\
-                          WHERE item_inventory_info.Stock = 0\
+                          WHERE item_inventory_info.Stock = 0 AND item_inventory_info.state = 1\
+                                AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                           GROUP BY item_general_info.UID"
 
 get_low_items_name = "SELECT item_general_info.name,\
@@ -1269,3 +1275,5 @@ get_customer_record_non_regular = "SELECT pet_owner_info.owner_id,\
                             GROUP BY owner_id\
                             HAVING COUNT(transaction_record.transaction_uid) < ?\
                             Order BY pet_owner_info.owner_name ASC"
+                            
+update_customer_record_info ="UPDATE pet_owner_info SET owner_name = ?,address = ?, contact_number = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE owner_id = ?"

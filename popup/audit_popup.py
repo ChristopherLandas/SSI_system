@@ -80,6 +80,7 @@ def audit_info(master, info:tuple, title: Optional[str] = "Record Information"):
             
             self.entries = [self.added_by_name, self.added_date_entry, self.updated_by_name, self.updated_date_entry]
         def reset(self):
+            [entry.configure(text= 'N/A')  for entry in self.entries]
             self.place_forget()
         
         def set_entries(self):

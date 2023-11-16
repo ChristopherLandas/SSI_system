@@ -361,9 +361,11 @@ class dashboard(ctk.CTkToplevel):
         ntf_c6 = [('Scheduled Today', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}', [s]) for s in scheduled_today]
 
         past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
-        #ntf_c7 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
-        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"are" if len(past_scheduled) > 1 else "is"} patient overdue for an appointment', past_scheduled)] #for _ in past_scheduled]
-
+        #ntf_c8 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        
+        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"patients" if len(past_scheduled) > 1 else "patient"} overdue for an appointment', past_scheduled)] if past_scheduled else [] #for _ in past_scheduled]
+        #this removes the shedule overdue when there is no overdue record, weird when it notifies 0
+        
         ntf_c = ntf_c5 + ntf_c6 + ntf_c7 + ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
         self.notif_btn.configure(image=Icons.get_image("notif_none_icon", (35,35))) if not ntf_c else self.notif_btn.configure(image=Icons.get_image("notif_alarm_icon", (35,35)))
         for _ntf in self.notifs:
@@ -1075,7 +1077,7 @@ class customer_frame(ctk.CTkFrame):
             elif 'All' == var:
                 temp =database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count']))
       
-            
+            self.no_data_label.place(relx=0.5, rely=0.5, anchor='c') if not temp else self.no_data_label.place_forget()
             self.customer_treeview.pack_forget()
             self.customer_treeview.update_table(temp)
             self.customer_treeview.pack()
@@ -1137,8 +1139,10 @@ class customer_frame(ctk.CTkFrame):
         
         
         self.add_customer_popup = customer_popup.new_customer(self, (width, height, acc_cred, acc_info), self.add_callback)
-        self.view_customer_popup = customer_popup.view_record(self, (width, height, acc_cred, acc_info), None)
+        self.view_customer_popup = customer_popup.view_record(self, (width, height, acc_cred, acc_info), self.refresh_treeview)
         
+        
+        self.no_data_label = ctk.CTkLabel(self.customer_treeview, text="No data yet to show.", font=("DM Sans Medium", 14))
         self.refresh_treeview()
 
     def add_callback(self):
@@ -1148,9 +1152,11 @@ class customer_frame(ctk.CTkFrame):
     def refresh_treeview(self):
         self.refresh_btn.configure(state = ctk.DISABLED)
         self.customer_treeview.pack_forget()
-        self.customer_treeview.update_table(database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count'])))
+        temp = database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] , SETTINGS_VAL['Regular_order_count']))
+        self.customer_treeview.update_table(temp)
         self.customer_treeview.pack()
         self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+        self.no_data_label.place(relx=0.5, rely=0.5, anchor='c') if not temp else self.no_data_label.place_forget()
 
 
 class services_frame(ctk.CTkFrame):
