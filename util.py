@@ -233,8 +233,9 @@ def decode_action(type_code: str):
     if type_code.startswith('DPSO'):
         temp = re.findall(r'/(\w+)+', type_code)
         return f'Create Invoice {temp[-1]}'
-
-
+    if type_code.startswith('INVV'):
+        temp = re.findall(r'/(\w+)+', type_code)
+        return f'Void Invoice {temp[-1]} auth: {temp[1]}'
     
 
 '''def text_overflow_elipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1, width_padding: int = 0,):
