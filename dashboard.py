@@ -671,6 +671,7 @@ class dashboard_frame(ctk.CTkFrame):
         data= [database.fetch_data(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
                database.fetch_data(sql_commands.get_out_of_stock_state), database.fetch_data(sql_commands.get_critical_state),
                database.fetch_data(sql_commands.get_reorder_state),]
+        #self.inventory_tabs = [self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button]
         
         [self.inventory_tabs[tabs].update_data(len(data[tabs]), data[tabs]) for tabs in range(len(self.inventory_tabs))] 
 
@@ -917,6 +918,7 @@ class reception_frame(ctk.CTkFrame):
                         break 
 
                 if can_accomodate:
+                    
                     self.sender_entity.send(data[0])
                 else:
                     messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
@@ -989,7 +991,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button = ctk.CTkButton(self.content_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("DM San Medium", 14), compound="right")
         self.proceeed_button.configure(command= self.proceed_to_pay)
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
-        self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
+        self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height), self.reset)
 
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
@@ -1130,7 +1132,6 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn.configure(state = ctk.DISABLED)
         self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
         self.customer_treeview.update_table(database.fetch_data(sql_commands.get_customers_information, (SETTINGS_VAL['Regular_order_count'] ,)))
-
 
 class services_frame(ctk.CTkFrame):
     global width, height, IP_Address, PORT_NO
@@ -1541,7 +1542,6 @@ class inventory_frame(ctk.CTkFrame):
         def batch_dispose():
             if self.data_view1._data:
                 if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?", parent = self):
-                    
                     self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired')
                 else:
                     print("Thank you for saving a trash like me")
@@ -1555,8 +1555,6 @@ class inventory_frame(ctk.CTkFrame):
                 del temp
             else:
                 update_tables()
-                
-                
 
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
@@ -1565,8 +1563,6 @@ class inventory_frame(ctk.CTkFrame):
         def inv_search_callback():
             temp = [database.fetch_data(sql_commands.get_item_brand_name_unit, (data[0],))[0] for data in self.inv_search_bar.get()]
             set_table(custom_sort((list_filterer(source=temp, reference=self.raw_data)), self.sort_key))
-            
-            
         #endregion
         
         #region Tab Setup 
@@ -1954,8 +1950,6 @@ class inventory_frame(ctk.CTkFrame):
                                                 close_command_callback=refresh_supplier_table, 
                                                 quary_command=sql_commands.get_supplier_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
         self.supplier_search_bar.grid(row=1, column=0,sticky="nsew", padx=(width*0.005), pady=(width*0.005))
-        
-        
         
         #endregion
         
