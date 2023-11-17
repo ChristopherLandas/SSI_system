@@ -1264,11 +1264,9 @@ class services_frame(ctk.CTkFrame):
 
         def refresh(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
-            #self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
-            #self.services_data_for_treeview = [] if self.services_raw_data is None else [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
             self.update_table()           
-            self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
-
+            self.update_items_svc()
+            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
     
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
@@ -1381,16 +1379,24 @@ class services_frame(ctk.CTkFrame):
         
         
         
+        def svc_item_bd_command (m):
+            data = self.svc_item_treeview._data[m]
+            uid = database.fetch_data(sql_commands.find_item_id_by_metainfo, (data[0], data[1]))[0][0]
+            database.exec_nonquery([[sql_commands.set_data_to_depleted, (uid, data[3])]])
+            self.update_items_svc()
         
-        
+        self.svc_item_treeview.bd_commands = svc_item_bd_command
+        self.add_service_item = Inventory_popup.add_service_item(self, (width, height, acc_cred), command_callback= self.update_items_svc)
         load_main_frame(0)
-        
-        self.add_service_item = Inventory_popup.add_service_item(self, (width, height), command_callback= None)
+        self.update_items_svc()
+
+    def update_items_svc(self):
+        self.svc_item_treeview.update_table(database.fetch_data(sql_commands.load_svc_item))
         
     def update_table(self):
-        return
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
+        return
 
 class sales_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, IP_Address, PORT_NO
@@ -3138,7 +3144,7 @@ class histlog_frame(ctk.CTkFrame):
         for i in self.action_tree.get_children():
             self.action_tree.delete(i)
         temp = database.fetch_data(sql_commands.get_raw_action_history, (datetime.datetime.strptime(self.date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'), self.sort_role_option.get()))
-        modified_data = [(temp.index(s) + 1, s[1], s[2].capitalize(), decode_action(s[3]), s[4].strftime("%I:%M %p")) for s in temp]
+        modified_data = [(temp.index(s) + 1, s[1], s[2].capitalize(), decode_action(s[3]), s[4].strftime("%B %d, %Y")) for s in temp]
         for i in range(len(modified_data)):
             if (i % 2) == 0:
                 tag = "even"
