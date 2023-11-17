@@ -823,8 +823,8 @@ insert_service = "INSERT INTO service_info_test VALUES( ?, ?, ?, NULL, ?, ?, ?)"
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
 create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
 create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
-                                                           Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
+update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Reception = ?, Payment=?, Customer=?, Services = ?, Sales = ?,\
+                                                           Inventory = ?, Pet = ?, Report = ?, User = ?, Settings = ?, History=?\
                                                            WHERE usn = ?"
 
 #dashboard
