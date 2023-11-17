@@ -76,7 +76,9 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=304 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=286 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+
+-- Data exporting was unselected.
 
 -- Dumping structure for table ssi_merged.categories
 CREATE TABLE IF NOT EXISTS `categories` (
@@ -136,7 +138,6 @@ CREATE TABLE IF NOT EXISTS `invoice_record` (
   `State` int(1) NOT NULL DEFAULT 0,
   `Date_transacted` date DEFAULT NULL,
   `process_type` int(11) NOT NULL,
-  `Service_provider` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`invoice_uid`),
   KEY `Attendant_usn` (`Attendant_usn`) USING BTREE,
   CONSTRAINT `invoice_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)
@@ -194,7 +195,9 @@ CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   PRIMARY KEY (`id`),
   KEY `UID` (`UID`),
   CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+
+-- Data exporting was unselected.
 
 -- Dumping structure for table ssi_merged.item_settings
 CREATE TABLE IF NOT EXISTS `item_settings` (
@@ -271,26 +274,6 @@ CREATE TABLE IF NOT EXISTS `log_history` (
   CONSTRAINT `log_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
-DELIMITER //
-CREATE PROCEDURE `newUser`()
-BEGIN
-    DECLARE newid INT;
-
-    SET newid = 10;
-    SELECT newid;
-END//
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE `newUser`()
-BEGIN
-    DECLARE newid INT;
-
-    SET newid = 10;
-    SELECT newid;
-END//
-DELIMITER ;
-
 -- Data exporting was unselected.
 
 -- Dumping structure for procedure ssi_merged.newUser
@@ -361,6 +344,8 @@ CREATE TABLE IF NOT EXISTS `pet_owner_info` (
   PRIMARY KEY (`owner_id`),
   UNIQUE KEY `name` (`owner_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- Data exporting was unselected.
 
 -- Dumping structure for table ssi_merged.receiving_history_info
 CREATE TABLE IF NOT EXISTS `receiving_history_info` (
@@ -559,7 +544,6 @@ CREATE TABLE IF NOT EXISTS `user_level_access` (
   `Dashboard` int(1) NOT NULL,
   `Reception` int(1) NOT NULL,
   `Payment` int(1) NOT NULL,
-  `Customer` int(1) NOT NULL,
   `Services` int(1) NOT NULL,
   `Sales` int(1) NOT NULL,
   `Inventory` int(1) NOT NULL,

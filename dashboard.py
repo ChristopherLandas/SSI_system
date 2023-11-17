@@ -226,13 +226,7 @@ class dashboard(ctk.CTkToplevel):
             self.active_main_frame = self.main_frames[cur_frame]
             self.active_main_frame.grid(row =1, column =1, sticky = 'nsew')
         
-        def log_out():
-            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?', parent = self)
-            if b:
-                database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
-                                        (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
-                self._master.deiconify()
-                self.destroy()
+        
                 
         self.grid_rowconfigure(1,weight=1)
         self.side_frame = ctk.CTkFrame(self, height= height, width = side_frame_w,
@@ -321,6 +315,8 @@ class dashboard(ctk.CTkToplevel):
                                          position= (1 - acc_menubar_width/2,
                                                     self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                                     'c'))
+        self.logout_btn = ctk.CTkButton(self.acc_menu_bar, width * acc_menubar_width * .85, height * default_menubar_height * .2, text = 'Logout', command= self.log_out)
+        self.logout_btn.pack(pady = (height * .005, 0))
 
         self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
                                                           children=[self.notif_menu_bar, self.acc_menu_bar], active_double_click_nullified= False)
@@ -332,7 +328,7 @@ class dashboard(ctk.CTkToplevel):
         self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], PORT_NO['Notif_gen'], self.receiver_callback)
         self.network_receiver.start_receiving()
         self.generate_notification()
-        self.protocol("WM_DELETE_WINDOW", log_out)
+        self.protocol("WM_DELETE_WINDOW", self.log_out)
         self.mainloop()
     
     def generate_notification(self):
@@ -366,6 +362,11 @@ class dashboard(ctk.CTkToplevel):
         ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"patients" if len(past_scheduled) > 1 else "patient"} overdue for an appointment', past_scheduled)] if past_scheduled else [] #for _ in past_scheduled]
         #this removes the shedule overdue when there is no overdue record, weird when it notifies 0
         
+        #ntf_c8 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        
+        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"patients" if len(past_scheduled) > 1 else "patient"} overdue for an appointment', past_scheduled)] if past_scheduled else [] #for _ in past_scheduled]
+        #this removes the shedule overdue when there is no overdue record, weird when it notifies 0
+        
         ntf_c = ntf_c5 + ntf_c6 + ntf_c7 + ntf_c1 + ntf_c2 + ntf_c3 + ntf_c4
         self.notif_btn.configure(image=Icons.get_image("notif_none_icon", (35,35))) if not ntf_c else self.notif_btn.configure(image=Icons.get_image("notif_alarm_icon", (35,35)))
         for _ntf in self.notifs:
@@ -379,6 +380,14 @@ class dashboard(ctk.CTkToplevel):
 
     def popup_command(self,info):
         print(info)
+
+    def log_out(self):
+        b = messagebox.askyesno('Log out', 'Are you sure you want to log out?', parent = self)
+        if b:
+            database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
+                                    (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
+            self._master.deiconify()
+            self.destroy()
 
 ''' 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶'''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''main frames'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -672,6 +681,7 @@ class dashboard_frame(ctk.CTkFrame):
         data= [database.fetch_data(sql_commands.get_safe_state),database.fetch_data(sql_commands.get_expired_state), database.fetch_data(sql_commands.get_near_expire_state),
                database.fetch_data(sql_commands.get_out_of_stock_state), database.fetch_data(sql_commands.get_critical_state),
                database.fetch_data(sql_commands.get_reorder_state),]
+        #self.inventory_tabs = [self.safety_button, self.reorder_button, self.critical_button, self.out_stock_button, self.near_button, self.expire_button]
         
         [self.inventory_tabs[tabs].update_data(len(data[tabs]), data[tabs]) for tabs in range(len(self.inventory_tabs))] 
 
@@ -836,13 +846,23 @@ class reception_frame(ctk.CTkFrame):
         
         '''SCHEDULING FRAME'''
         self.scheduling_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, corner_radius=0)
+        self.scheduling_frame.columnconfigure(0, weight = 1)
 
         self.scheduling_invoice_treeview = cctk.cctkTreeView(self.scheduling_frame, width= width * .805, height=height * .725, corner_radius=0,
                                                              column_format=f'/No:{int(width*.035)}-#r/ReceptionID:{int(width*.115)}-tc/Owner:x-tl/Pet:x-tl/Service:{int(width*.15)}-tl/Total:{int(width*.085)}-tr/Date:{int(width*.125)}-tc!33!35',)                                                             #column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Per:x-tl/Services:x-tl/Date:{int(width*.1)}-tc!30!30')
         self.scheduling_invoice_treeview.pack()
-        self.proceeed_button = ctk.CTkButton(self.scheduling_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.145,font=("DM Sans Medium", 14),
+
+        self.selection_svc_pro_frame = ctk.CTkFrame(self.scheduling_frame, fg_color = 'transparent', height= 0.005)
+        self.selection_svc_pro_frame.pack(side = 'right', padx=(width*0.005), pady=(width*0.005))
+
+        self.proceeed_button = ctk.CTkButton(self.selection_svc_pro_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.145,font=("DM Sans Medium", 14),
                                              compound="right", command = self.proceed_to_payment)
-        self.proceeed_button.pack(side='right', padx=(width*0.005), pady=(width*0.005))
+        self.proceeed_button.pack(side = 'right', padx=(0, width*0.005))
+
+        self.selection = ctk.CTkOptionMenu(self.selection_svc_pro_frame, height=height*0.05, width=width*0.17,font=("DM Sans Medium", 14),)
+        self.selection.set("Select Service Provider")
+        self.selection.pack(side = 'right', padx=(0, width*0.005))
+
         '''SCHEDULING FRAME: END'''
         
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), lambda: self.update_invoice_treeview(True), acc_cred[0][0])
@@ -851,6 +871,7 @@ class reception_frame(ctk.CTkFrame):
         self.grid_forget()
 
     def load_tab(self, i: int = None):
+        self.selection.configure(values = [s[-1] for s in database.fetch_data(sql_commands.select_specific_provider, ("Service Provider", ))])
         if i == 0:
             #self.service_treeview_frame.grid_forget()
             self.scheduling_frame.grid_forget()
@@ -924,6 +945,9 @@ class reception_frame(ctk.CTkFrame):
     def proceed_to_payment(self):
         data = self.active.get_selected_data()
         if(data):
+            if self.selection.get() == "Select Service Provider" and self.active == self.scheduling_invoice_treeview:
+                messagebox.showerror("Unable to Proceed", "Select a provider to proceed", parent = self)
+                return
             if 'TR# ' not in data[0]:
                 #stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
                 items_uid_in_invoice = database.fetch_data(sql_commands.check_quan_of_invoice, (data[0], ))
@@ -940,8 +964,12 @@ class reception_frame(ctk.CTkFrame):
                     if li[1] > current_stock[li[0]]:
                         can_accomodate = False
                         break 
-
                 if can_accomodate:
+                    if self.active == self.scheduling_invoice_treeview:
+                        if not database.exec_nonquery([[sql_commands.set_provider_to_invoice, (self.selection.get(), self.active.get_selected_data()[0])]]):
+                            messagebox.showwarning("Fail to proceed", "Unable to Proceed", parent = self)
+                            return
+                        database.exec_nonquery([[sql_commands.set_provider_to_invoice, (self.selection.get(), self.active.get_selected_data()[0])]])
                     self.sender_entity.send(data[0])
                 else:
                     messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
@@ -951,7 +979,6 @@ class reception_frame(ctk.CTkFrame):
                     self.scheduling_invoice_treeview.remove_selected_data()
         else:
             messagebox.showwarning("Fail to proceed", "Select an transaction record before\nheading into the payment", parent = self)
-    #obsolete
 
 class payment_frame(ctk.CTkFrame):
     def __init__(self, master):
@@ -1014,7 +1041,7 @@ class payment_frame(ctk.CTkFrame):
         self.proceeed_button = ctk.CTkButton(self.content_frame, text="Proceed", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("DM San Medium", 14), compound="right")
         self.proceeed_button.configure(command= self.proceed_to_pay)
         self.proceeed_button.grid(row=2, column=3, pady=(0,height*0.01),padx=(0, width*0.005), sticky="e")
-        self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height))
+        self.show_payment_proceed = transaction_popups.show_payment_proceed(self,(width, height), self.reset)
 
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
@@ -1619,7 +1646,6 @@ class inventory_frame(ctk.CTkFrame):
         def batch_dispose():
             if self.data_view1._data:
                 if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?", parent = self):
-                    
                     self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired')
                 else:
                     print("Thank you for saving a trash like me")
@@ -1633,8 +1659,6 @@ class inventory_frame(ctk.CTkFrame):
                 del temp
             else:
                 update_tables()
-                
-                
 
         def reset(self):
             self.data1 = database.fetch_data(sql_commands.get_inventory_by_group, None)
@@ -1643,8 +1667,6 @@ class inventory_frame(ctk.CTkFrame):
         def inv_search_callback():
             temp = [database.fetch_data(sql_commands.get_item_brand_name_unit, (data[0],))[0] for data in self.inv_search_bar.get()]
             set_table(custom_sort((list_filterer(source=temp, reference=self.raw_data)), self.sort_key))
-            
-            
         #endregion
         
         #region Tab Setup 
@@ -2032,8 +2054,6 @@ class inventory_frame(ctk.CTkFrame):
                                                 close_command_callback=refresh_supplier_table, 
                                                 quary_command=sql_commands.get_supplier_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
         self.supplier_search_bar.grid(row=1, column=0,sticky="nsew", padx=(width*0.005), pady=(width*0.005))
-        
-        
         
         #endregion
         
