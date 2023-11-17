@@ -1170,7 +1170,7 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
-                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c', button=self.add_customer))
+                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
@@ -1258,8 +1258,6 @@ class services_frame(ctk.CTkFrame):
 
         def refresh(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
-            #self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
-            #self.services_data_for_treeview = [] if self.services_raw_data is None else [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
             self.update_table()           
             self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
@@ -1365,10 +1363,59 @@ class services_frame(ctk.CTkFrame):
         self.add_service_item = Inventory_popup.add_service_item(self, (width, height), command_callback= None)
         self.deplted_history = Inventory_popup.deplted_history(self, (width, height))
         
+        
+        """SERVICE ITEMS"""
+        
+        
+        self.svc_button_frame = ctk.CTkFrame(self.service_item_frame, fg_color='transparent', corner_radius=0, height=height*0.055)
+        self.svc_button_frame.pack_propagate(0)
+        self.svc_button_frame.pack(fill="x", expand = 1, padx=(width*0.005), pady=(width*0.005))
+        
+        self.svc_add_item = ctk.CTkButton(self.svc_button_frame, text="Add Item", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, image=self.plus,
+                                         command=lambda: self.add_service_item.place(relx=0.5, rely=0.5, anchor="c"))
+        self.svc_add_item.pack(side="left", padx=(0,width*0.005), pady=(0))
+        
+        self.svc_refresh_btn = ctk.CTkButton(self.svc_button_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh)
+        self.svc_refresh_btn.pack(side="left", padx=(0,width*0.005), pady=(0)) 
+        
+        
+        self.svc_item_data_frame = ctk.CTkFrame(self.service_item_frame, fg_color=Color.White_Platinum, corner_radius=0)
+        self.svc_item_data_frame.pack(pady=(0, width*0.005))
+
+        #self.svc_item_data = database.fetch_data(sql_commands.get_service_data_test, None)
+        
+        self.svc_item_treeview = cctk.cctkTreeView(self.svc_item_data_frame, data =[] , width=width*0.805, height=height*0.8,
+                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.125)}-tc/ItemDescription:x-tl/Status:{int(width*.175)}-tl/ExpirationDate:{int(width*.115)}-tr/Action:{int(width*.085)}-bD!33!35',
+                                               bd_message="Are you sure you want to remove one (1) quantity of this item?")
+        self.svc_item_treeview.pack()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        def svc_item_bd_command (m):
+            data = self.svc_item_treeview._data[m]
+            uid = database.fetch_data(sql_commands.find_item_id_by_metainfo, (data[0], data[1]))[0][0]
+            database.exec_nonquery([[sql_commands.set_data_to_depleted, (uid, data[3])]])
+            self.update_items_svc()
+        
+        self.svc_item_treeview.bd_commands = svc_item_bd_command
+        self.add_service_item = Inventory_popup.add_service_item(self, (width, height, acc_cred), command_callback= self.update_items_svc)
+        load_main_frame(0)
+        self.update_items_svc()
+
+    def update_items_svc(self):
+        self.svc_item_treeview.update_table(database.fetch_data(sql_commands.load_svc_item))
+        
     def update_table(self):
         return
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
+        return
 
 class sales_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, IP_Address, PORT_NO
@@ -3121,7 +3168,7 @@ class histlog_frame(ctk.CTkFrame):
         for i in self.action_tree.get_children():
             self.action_tree.delete(i)
         temp = database.fetch_data(sql_commands.get_raw_action_history, (datetime.datetime.strptime(self.date_sort_label._text, '%B %d, %Y').strftime('%Y-%m-%d'), self.sort_role_option.get()))
-        modified_data = [(temp.index(s) + 1, s[1], s[2].capitalize(), decode_action(s[3]), s[4].strftime("%I:%M %p")) for s in temp]
+        modified_data = [(temp.index(s) + 1, s[1], s[2].capitalize(), decode_action(s[3]), s[4].strftime("%B %d, %Y")) for s in temp]
         for i in range(len(modified_data)):
             if (i % 2) == 0:
                 tag = "even"

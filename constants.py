@@ -32,6 +32,7 @@ class action:
     TRANSACTION_TYPE = 'Transaction Record'
     DISPOSAL_TYPE = 'Disposal'
     ADD_SERVICE = 'Service Encoding'
+    ADD_ITEM_TO_SERVICE = 'Item to Service Encoding'
 
     RESTOCKED_ITEM = f'RST/%s/%s/%s' #item stocked, stocked_change, success?
     CONFIRM_RECIEVE_ITEM = f'CRI/%s/%s/%s' #item recieve and move to inventory, user, item_uid, stock
@@ -42,3 +43,4 @@ class action:
     MOVE_TO_DISPOSAL = 'DPSM/%s/%s' #Move item to disposal, user, item_uid
     OFFICIALLY_DISPOSE = 'DPSO/%s/%s' #Completely disposal of item, user, item_uid
     VOID_INVOICE = 'INVV/%s/%s/%s' #usn, #authorization, invoice_uid
+    ENCODE_ITEM_TO_SVC = 'EITS/%s/%s' #uid of item, acc
