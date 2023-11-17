@@ -238,14 +238,39 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.type_option.set("")
             self.sex_option.set("") 
 
-            self.patient_name_limiter = cctku.entry_limiter(128, self.patient_name_entry)
-            self.owner_name_limiter = cctku.entry_limiter(128, self.owner_name_entry._entry)
+            def check_for_names():
+                txt = self.patient_name_entry.get()
+                char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
+
+                if str.islower(txt[0]):
+                    temp = txt[0].upper()
+                    self.patient_name_entry.delete(0, 1)
+                    self.patient_name_entry.insert(0, temp)
+
+                for i in range(len(txt)):
+                    if txt[i] not in char_format:
+                        self.patient_name_entry.delete(i, i+1)
+
+            def check_for_number():
+                num = self.contact_entry.get()
+                char_format = "1234567890"
+
+                if num[0] != '+' or num[0] not in char_format:
+                    temp = num[0].upper()
+                    self.contact_entry.delete(0, 1)
+                    self.contact_entry.insert(0, temp)
+
+                for i in range(1, len(num), 1):
+                    if num[i] not in char_format:
+                        self.contact_entry.delete(i, i+1)
+
+
+            self.patient_name_limiter = cctku.entry_limiter(128, self.patient_name_entry, check_for_names)
             self.breed_name_limiter = cctku.entry_limiter(64, self.breed_option._entry)
-            self.contact_limiter = cctku.entry_limiter(20, self.contact_entry)
+            self.contact_limiter = cctku.entry_limiter(20, self.contact_entry, check_for_number)
             self.address_limiter = cctku.entry_limiter(256, self.address_entry)
 
             self.patient_name_entry.configure(textvariable = self.patient_name_limiter)
-            self.owner_name_entry._entry.configure(textvariable = self.owner_name_limiter)
             self.breed_option._entry.configure(textvariable = self.breed_name_limiter)
             self.contact_entry.configure(textvariable = self.contact_limiter)
             self.address_entry.configure(textvariable = self.address_limiter)
