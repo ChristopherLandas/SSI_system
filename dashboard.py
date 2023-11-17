@@ -355,6 +355,7 @@ class dashboard(ctk.CTkToplevel):
         ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s are" if len(low_stock) > 1 else " is"} expired', expired)] if expired else []# for _ in expired]
 
         near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
+        #ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
         ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
 
         scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
@@ -837,13 +838,23 @@ class reception_frame(ctk.CTkFrame):
         
         '''SCHEDULING FRAME'''
         self.scheduling_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, corner_radius=0)
+        self.scheduling_frame.columnconfigure(0, weight = 1)
 
         self.scheduling_invoice_treeview = cctk.cctkTreeView(self.scheduling_frame, width= width * .805, height=height * .725, corner_radius=0,
                                                              column_format=f'/No:{int(width*.035)}-#r/ReceptionID:{int(width*.115)}-tc/Owner:x-tl/Pet:x-tl/Service:{int(width*.15)}-tl/Total:{int(width*.085)}-tr/Date:{int(width*.125)}-tc!33!35',)                                                             #column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Per:x-tl/Services:x-tl/Date:{int(width*.1)}-tc!30!30')
         self.scheduling_invoice_treeview.pack()
-        self.proceeed_button = ctk.CTkButton(self.scheduling_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.145,font=("DM Sans Medium", 14),
+
+        self.selection_svc_pro_frame = ctk.CTkFrame(self.scheduling_frame, fg_color = 'transparent', height= 0.005)
+        self.selection_svc_pro_frame.pack(side = 'right', padx=(width*0.005), pady=(width*0.005))
+
+        self.proceeed_button = ctk.CTkButton(self.selection_svc_pro_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.145,font=("DM Sans Medium", 14),
                                              compound="right", command = self.proceed_to_payment)
-        self.proceeed_button.pack(side='right', padx=(width*0.005), pady=(width*0.005))
+        self.proceeed_button.pack(side = 'right', padx=(0, width*0.005))
+
+        self.selection = ctk.CTkOptionMenu(self.selection_svc_pro_frame, height=height*0.05, width=width*0.17,font=("DM Sans Medium", 14),)
+        self.selection.set("Select Service Provider")
+        self.selection.pack(side = 'right', padx=(0, width*0.005))
+
         '''SCHEDULING FRAME: END'''
         
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), lambda: self.update_invoice_treeview(True), acc_cred[0][0])
@@ -852,6 +863,7 @@ class reception_frame(ctk.CTkFrame):
         self.grid_forget()
 
     def load_tab(self, i: int = None):
+        self.selection.configure(values = [s[-1] for s in database.fetch_data(sql_commands.select_specific_provider, ("Service Provider", ))])
         if i == 0:
             #self.service_treeview_frame.grid_forget()
             self.scheduling_frame.grid_forget()
@@ -925,6 +937,9 @@ class reception_frame(ctk.CTkFrame):
     def proceed_to_payment(self):
         data = self.active.get_selected_data()
         if(data):
+            if self.selection.get() == "Select Service Provider" and self.active == self.scheduling_invoice_treeview:
+                messagebox.showerror("Unable to Proceed", "Select a provider to proceed", parent = self)
+                return
             if 'TR# ' not in data[0]:
                 #stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
                 items_uid_in_invoice = database.fetch_data(sql_commands.check_quan_of_invoice, (data[0], ))
@@ -941,9 +956,12 @@ class reception_frame(ctk.CTkFrame):
                     if li[1] > current_stock[li[0]]:
                         can_accomodate = False
                         break 
-
                 if can_accomodate:
-                    
+                    if self.active == self.scheduling_invoice_treeview:
+                        if not database.exec_nonquery([[sql_commands.set_provider_to_invoice, (self.selection.get(), self.active.get_selected_data()[0])]]):
+                            messagebox.showwarning("Fail to proceed", "Unable to Proceed", parent = self)
+                            return
+                        database.exec_nonquery([[sql_commands.set_provider_to_invoice, (self.selection.get(), self.active.get_selected_data()[0])]])
                     self.sender_entity.send(data[0])
                 else:
                     messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
@@ -953,7 +971,6 @@ class reception_frame(ctk.CTkFrame):
                     self.scheduling_invoice_treeview.remove_selected_data()
         else:
             messagebox.showwarning("Fail to proceed", "Select an transaction record before\nheading into the payment", parent = self)
-    #obsolete
 
 class payment_frame(ctk.CTkFrame):
     def __init__(self, master):
