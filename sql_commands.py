@@ -726,7 +726,7 @@ get_selling_rate = "SELECT case when item_settings.rate_mode = 0\
                                                     when item_statistic_info.rate_symbol = 'd'\
                                                         then '🠋'\
                                                         ELSE '-' end\
-                                    when item_settings.rate_mode = 0\
+                                    when item_settings.rate_mode = 2\
                                         then '🠉'\
                                         ELSE '🠋' END AS rate,\
                             item_general_info.brand,\
