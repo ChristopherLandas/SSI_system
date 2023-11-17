@@ -2443,17 +2443,13 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
         def __init__(self, master, info:tuple, command_callback ):
             width = info[0]
             height = info[1]
+            self.acc_cred = info[2]
             super().__init__(master, width*0.65, height=height*0.65, corner_radius= 0, fg_color='transparent')
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
             self.command_callback = command_callback
-            
-            def reset():
-                self.grab_release()
-                self.place_forget()
-            
                     
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], border_width=1, border_color=Color.Platinum)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -2466,7 +2462,7 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text="ITEM", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
-            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
             self.item_treeview_frame = ctk.CTkFrame(self.main_frame, fg_color = Color.White_Platinum)
@@ -2481,15 +2477,39 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", pady=(0, height*0.01), padx=(height*0.01))
             
             self.add_item_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Add Item", font=("DM Sans Medium", 14),
-                                             command=None)
+                                             command=self.encode_item   )
             self.add_item_btn.pack(side="right", pady=(height*0.01), padx=(height*0.01))
             
             self.cancel_btn = ctk.CTkButton(self.bottom_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
-                                            font=("DM Sans Medium", 16), text='Cancel', command= reset)
+                                            font=("DM Sans Medium", 16), text='Cancel', command= self.reset)
             self.cancel_btn.pack(side="left", pady=(height*0.01), padx=(height*0.01,0))
         
+        def encode_item(self):
+            item_info = self.item_treeview.get_selected_data()
+            if item_info:
+                print(item_info[0])
+                data = database.fetch_data(sql_commands.get_the_first_item_to_inv, (item_info[0], ))[0]
+                database.exec_nonquery([[sql_commands.insert_instance_to_used_in_services, (data[1], data[3], self.acc_cred[0][0])]])
+
+                if data[2] == 1:
+                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE uid = ?", (item_info[0], ))[0][0] == 1:
+                        #dont delete, set to 0
+                        database.exec_nonquery([[sql_commands.empty_instance_of_inventory, (data[0],)]])
+                    else:
+                        database.exec_nonquery([[sql_commands.delete_instance_of_inventory, (data[0],)]])
+                else:
+                        database.exec_nonquery([[sql_commands.deduct_1_stock_of_inventory, (data[0],)]])
+                    
+                if callable(command_callback):
+                    command_callback()
+                self.reset()
+                messagebox.showinfo("Succeed", f"Item added {data[1]}", parent = self)
+                record_action(self.acc_cred[0][0], action.ADD_ITEM_TO_SERVICE, action.ENCODE_ITEM_TO_SVC % (data[1], self.acc_cred[0][0]))
+            else:
+                messagebox.showerror("Unable to Proceed", "Select an item to add", parent = self)
+
         def refresh_table(self):
-            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info")
+            self.raw_item_data = database.fetch_data(sql_commands.select_item_valid_for_service)
             self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
             self.item_treeview.update_table(self.item_data)
                 
@@ -2497,5 +2517,9 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.grab_set()
             self.refresh_table()
             return super().place(**kwargs)
+        
+        def reset(self):
+            self.grab_release()
+            self.place_forget()
         
     return add_service_item(master, info, command_callback)
