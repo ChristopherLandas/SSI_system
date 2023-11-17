@@ -3,7 +3,7 @@ get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
 get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
-get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
 get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 
@@ -1361,3 +1361,15 @@ check_if_customer_is_considered_regular = "SELECT owner_name,\
                                                ON pet_owner_info.owner_id = transaction_record.Client_id\
                                            WHERE owner_name = ?\
                                            GROUP BY owner_name"
+
+
+get_services_daily_report_content = "SELECT services_transaction_content.transaction_uid, transaction_record.client_name,\
+      service_name, CONCAT('₱', FORMAT(price, 2)) as service_price, price\
+          FROM services_transaction_content INNER JOIN transaction_record ON transaction_record.transaction_uid = services_transaction_content.transaction_uid \
+            WHERE transaction_record.transaction_date = ?"
+
+get_sales_daily_report_content = "SELECT item_transaction_content.transaction_uid, item_name,\
+      quantity, CONCAT('₱', FORMAT(price, 2)) as item_price,\
+       CONCAT('₱', FORMAT(price*quantity, 2)) as total_item_price, price*quantity as all_total \
+          FROM item_transaction_content INNER JOIN transaction_record ON transaction_record.transaction_uid = item_transaction_content.transaction_uid \
+            WHERE transaction_record.transaction_date = ?"

@@ -3342,8 +3342,6 @@ class admin_settings_frame(ctk.CTkFrame):
                                          command= open_service_record)
         self.view_button.pack(side='left', padx=(width*0.005))
         
-        
-        
         '''TREEVIEW FRAME'''
         
         self.service_treeview_frame = ctk.CTkFrame(self.service_frame, fg_color="transparent")
