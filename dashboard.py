@@ -335,7 +335,7 @@ class dashboard(ctk.CTkToplevel):
         '''ALL OF THE COMMENTED NTF_C VARIABLE PUT A NOTIFICATION IN INSTANCE RATHER THAN GROUP'''
 
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock)] #for _ in out_of_stock]
+        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock)] if out_of_stock else []#  #for _ in out_of_stock]
         #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
@@ -344,20 +344,24 @@ class dashboard(ctk.CTkToplevel):
 
         near_expire = database.fetch_data(sql_commands.get_near_expired_items_name, (SETTINGS_VAL['Near_expiry_date_alert'], ))
         #ntf_c3 = [('About to Expire', f'Item {s[0]} is about to expire in {s[2]} day{"s" if s[2] > 1 else ""}') for s in near_expire]
-        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire)] #for _ in near_expire]
+        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire)] if near_expire else [] #for _ in near_expire]
 
         expired = database.fetch_data(sql_commands.get_expired_items_name)
         #ntf_c4 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
         ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s are" if len(low_stock) > 1 else " is"} expired', expired)] if expired else []# for _ in expired]
 
         near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
-        #ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
-        ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
+        ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled] if near_shceduled else []
 
         scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
         ntf_c6 = [('Scheduled Today', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}', [s]) for s in scheduled_today]
 
         past_scheduled = database.fetch_data(sql_commands.get_past_scheduled_clients_names)
+        #ntf_c8 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
+        
+        ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"patients" if len(past_scheduled) > 1 else "patient"} overdue for an appointment', past_scheduled)] if past_scheduled else [] #for _ in past_scheduled]
+        #this removes the shedule overdue when there is no overdue record, weird when it notifies 0
+        
         #ntf_c8 = [('Schedule Overdue', f'{str(s[1]).capitalize()} is overdue for {s[0]}') for s in past_scheduled]
         
         ntf_c7 = [('Schedule Overdue', f'{len(past_scheduled)} {"patients" if len(past_scheduled) > 1 else "patient"} overdue for an appointment', past_scheduled)] if past_scheduled else [] #for _ in past_scheduled]
@@ -1230,6 +1234,7 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
         self.no_data_label.place(relx=0.5, rely=0.5, anchor='c') if not temp else self.no_data_label.place_forget()
 
+
 class services_frame(ctk.CTkFrame):
     global width, height, IP_Address, PORT_NO
     def __init__(self, master):
@@ -1317,8 +1322,10 @@ class sales_frame(ctk.CTkFrame):
             self.update_table()
             
         def search_callback():
-            self.source = list_filterer(self.search_bar.get(), self.raw_data)
+            self.transaction_records = database.fetch_data(sql_commands.get_all_transaction_record)
+            self.source = list_filterer(self.search_bar.get(), self.transaction_records)
             temp = self.source
+            print(self.source)
             self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.search_bar.get()[0]) if len(self.search_bar.get()) == 1 else self.set_table(temp)
             self.attendant_sort_option.set("All")
             
@@ -2449,7 +2456,7 @@ class reports_frame(ctk.CTkFrame):
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=(0, height*0.0075))
 
         self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.4,
-                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Subtotal:{int(width*0.165)}-tr/Deduction:{int(width*0.165)}-tr/Total:{int(width*0.135)}-tr!30!30')
+                                           column_format=f'/No:{int(width*0.035)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Item:{int(width*.115)}-tr/Service:{int(width*.115)}-tr/Deduction:{int(width*0.115)}-tr/Total:{int(width*0.135)}-tr!33!35')
         self.daily_data_view.pack()
 
 
@@ -2457,7 +2464,7 @@ class reports_frame(ctk.CTkFrame):
         self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
         self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.5,
-                                           column_format=f"/No:{int(width*.025)}-#c/Date:x-tl/Item:{int(width*.165)}-tr/Service:{int(width*.165)}-tr/Total:{int(width*.135)}-tr!30!30")
+                                           column_format=f"/No:{int(width*.035)}-#c/Date:x-tl/Item:{int(width*.115)}-tr/Service:{int(width*.115)}-tr/Deduction:{int(width*.115)}-tr/Total:{int(width*.135)}-tr!33!35")
         self.monthly_data_view.pack()
 
         self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.005,Color.White_Platinum], label=monthly_label)
@@ -2467,7 +2474,7 @@ class reports_frame(ctk.CTkFrame):
         self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
         self.yearly_data_view = cctk.cctkTreeView(self.data_frame,  width=width*0.8, height=height *0.5,
-                                           column_format=f"/No:{int(width*.025)}-#c/Month:x-tl/Item:{int(width*.165)}-tr/Service:{int(width*.165)}-tr/Total:{int(width*.135)}-tr!30!30")
+                                           column_format=f"/No:{int(width*.035)}-#c/Month:x-tl/Item:{int(width*.115)}-tr/Service:{int(width*.115)}-tr/Deduction:{int(width*.115)}-tr/Total:{int(width*.135)}-tr!33!35")
         self.yearly_data_view.pack()
 
         self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,Color.White_Platinum], label=self.months)
@@ -2501,7 +2508,7 @@ class reports_frame(ctk.CTkFrame):
         self.rep_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
 
         self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
-                                           column_format=f"/No:{int(width*.025)}-#c/InitialCode:{int(width*.1)}-tc/ItemName:x-tl/CurrentStockPcs:{int(width*.125)}-tr!30!30")
+                                           column_format=f"/No:{int(width*.025)}-#c/ItemID:{int(width*.1)}-tc/ItemName:x-tl/CurrentStockPcs:{int(width*.125)}-tr!33!35")
         self.inventory_rep_treeview.pack()
         
         self.update_invetory_graph()
@@ -3250,7 +3257,7 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
         
         self.service_data_view = cctk.cctkTreeView(self.service_treeview_frame,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ServiceID:{int(width*.115)}-tc/ServiceName:x-tl/Category:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/ServiceID:{int(width*.115)}-tc/ServiceName:x-tl/DurationType:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!30!30',
                                            double_click_command = lambda _: self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data(), service_reload_callback = refresh_service))
         self.service_data_view.pack()
         
