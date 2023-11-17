@@ -3,7 +3,7 @@ get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
 get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
-get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
 get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 
@@ -198,11 +198,11 @@ get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                  WHERE item_general_info.name = ?\
                                  GROUP BY item_general_info.UID"
 
-get_services_and_their_price = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info WHERE state = 1"
+get_services_and_their_price = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 get_services_data_for_transaction = "SELECT uid,\
                                              service_name,\
                                              CAST(price AS DECIMAL(10, 2))\
-                                     FROM service_info\
+                                     FROM service_info_test\
                                      WHERE service_name = ?;"
 
 check_item_if_it_expire_by_categ = "SELECT categories.does_expire\
@@ -253,7 +253,7 @@ add_item_statistic = "INSERT INTO item_statistic_info VALUES(?, MONTH(CURRENT_DA
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, ?, CURRENT_DATE, 1, ?)"
 record_item_transaction_content = "INSERT INTO item_transaction_content VALUES(?, ?, ?, ?, ?, ?, 1)"
-record_services_transaction_content = "INSERT INTO services_transaction_content VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+record_services_transaction_content = "INSERT INTO services_transaction_content VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 #UPDATING STOCK AFTER TRANSACTION
 get_specific_stock = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date > CURRENT_DATE OR Expiry_Date IS NULL) ORDER BY Expiry_Date ASC"
@@ -267,8 +267,8 @@ null_stocks_by_id = "UPDATE item_inventory_info SET Stock = 0 WHERE id = ?"
 get_transaction_data = "SELECT * FROM transaction_record"
 
 #FOR SERVICES
-get_service_data = "SELECT service_name, price, date_added FROM service_info"
-get_services_names = "SELECT DISTINCT service_name FROM service_info"
+get_service_data = "SELECT service_name, price, date_added FROM service_info_test"
+get_services_names = "SELECT DISTINCT service_name FROM service_info_test"
 
 #FOR LOG AUDIT
 get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT_DATE"
@@ -289,6 +289,7 @@ get_reorder_state= "SELECT item_general_info.brand, item_general_info.name, item
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                         INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                        WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
@@ -305,17 +306,20 @@ get_out_of_stock_state = "SELECT item_general_info.brand, item_general_info.name
                                            then sum(item_inventory_info.stock) ELSE -1 END AS stock\
                           FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                               INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                          WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                           GROUP BY item_inventory_info.uid\
                           HAVING stock >= 0;"
 
-get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                 item_inventory_info.Stock,\
-                                 case when item_inventory_info.Expiry_Date <= DATE_ADD(CURRENT_DATE, INTERVAL 15 DAY)\
-                                             AND item_inventory_info.Expiry_Date > CURRENT_DATE\
-                                             AND item_inventory_info.Expiry_Date IS NOT NULL \
-                                             then item_inventory_info.Expiry_Date ELSE 0 END AS EXP\
-                         FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                         HAVING exp;"
+get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name,item_general_info.unit,\
+                                      SUM(item_inventory_info.Stock)\
+                               FROM item_inventory_info\
+                               JOIN item_general_info\
+                                       ON item_inventory_info.UID = item_general_info.UID\
+                               JOIN item_settings\
+                                       ON item_inventory_info.UID = item_settings.UID\
+                               WHERE DATE_SUB(item_inventory_info.Expiry_Date, INTERVAL 14 DAY) <= CURRENT_DATE\
+                                       AND NOT item_inventory_info.Expiry_Date <= current_date\
+                               GROUP BY item_general_info.UID"
 
 
 get_expired_state = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
@@ -324,7 +328,8 @@ get_expired_state = "SELECT item_general_info.brand, item_general_info.name, ite
                                          AND item_inventory_info.Expiry_Date IS NOT NULL\
                                          then item_inventory_info.Expiry_Date ELSE NULL END AS EXP\
                      FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                     WHERE item_inventory_info.state = 1 HAVING exp;"
+                     WHERE item_inventory_info.state = 1 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                     HAVING exp;"
 
 #FOR DAILY SALES
 get_todays_transaction_count = "SELECT COUNT(*)  FROM transaction_record WHERE transaction_date = CURRENT_DATE"
@@ -406,7 +411,7 @@ get_disposal_items = "SELECT id, item_name, initial_quantity, reason, CAST(date_
 #ACCOUNT CREATION
 
 #PET INFO
-get_owners = "SELECT owner_name, address, contact_number FROM pet_owner_info"
+get_owners = "SELECT owner_name, address, contact_number FROM pet_owner_info ORDER BY owner_name ASC"
 check_owner_if_exist = owners = "SELECT COUNT(*) FROM pet_owner_info WHERE owner_name = ? "
 get_id_owner = "SELECT owner_id FROM pet_owner_info WHERE owner_name = ?"
 
@@ -423,9 +428,9 @@ get_pet_record=f"SELECT pet_info.id, pet_info.p_name, CONCAT(type, ' - ' , breed
                 FROM pet_info INNER JOIN pet_owner_info ON pet_info.owner_id = pet_owner_info.owner_id ORDER BY pet_owner_info.owner_name ASC"
 
 get_pet_info_for_cust_info = "SELECT breed FROM pet_info WHERE p_name = ?"
-insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+insert_new_pet_info = "INSERT INTO pet_info VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL)"
 
-insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_name, address, contact_number) VALUES (?, ?, ?)"
+insert_new_pet_owner = f"INSERT INTO pet_owner_info (owner_id, owner_name, address, contact_number, added_by, date_added) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
 
 insert_new_pet_breed = f"INSERT INTO pet_breed VALUES(?,?)"
 #PET INFO SORT
@@ -772,7 +777,7 @@ check_feasible_items = "SELECT item_general_info.uid, SUM(COALESCE(item_inventor
 #need to fix      
 
 #get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
-update_pet_record_pet_info = "UPDATE pet_info SET p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ? WHERE id = ?"
+update_pet_record_pet_info = "UPDATE pet_info SET p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE id = ?"
 update_pet_record_pet_owner = f"UPDATE pet_owner_info\
                                 INNER JOIN pet_info ON pet_owner_info.owner_id = pet_info.owner_id\
                                 SET owner_name = ? ,\
@@ -1038,7 +1043,8 @@ get_out_of_stock_names = "SELECT item_general_info.name\
                           FROM item_general_info\
                           JOIN item_inventory_info \
                               ON item_general_info.UID = item_inventory_info.UID\
-                          WHERE item_inventory_info.Stock = 0\
+                          WHERE item_inventory_info.Stock = 0 AND item_inventory_info.state = 1\
+                                AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                           GROUP BY item_general_info.UID"
 
 get_low_items_name = "SELECT item_general_info.name,\
@@ -1062,6 +1068,7 @@ get_expired_items_name = "SELECT item_general_info.name, SUM(item_inventory_info
                           JOIN item_settings\
                                   ON item_inventory_info.UID = item_settings.UID\
                           WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE\
+                              AND  item_inventory_info.state = 1 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                           GROUP BY item_general_info.UID"
 
 get_near_expired_items_name = "SELECT item_general_info.name,\
@@ -1279,7 +1286,43 @@ get_customers_information = "SELECT pet_owner_info.owner_id,\
                              FROM pet_owner_info\
                              LEFT JOIN transaction_record\
                                  ON pet_owner_info.owner_id = transaction_record.Client_id\
-                             GROUP BY owner_id"
+                            GROUP BY owner_id\
+                             Order BY CASE\
+                             WHEN COUNT(transaction_record.transaction_uid) > ? then 1\
+                                         ELSE 2 END, pet_owner_info.owner_name ASC"
+                                         
+get_customer_quary_command = "SELECT owner_id, owner_name FROM pet_owner_info WHERE owner_id LIKE '%?%' OR owner_name LIKE '%?%' ORDER BY owner_name"
+get_customer_view_record = "SELECT owner_id, owner_name, contact_number, address, COUNT(transaction_record.transaction_uid)\
+                    FROM pet_owner_info LEFT JOIN transaction_record ON pet_owner_info.owner_id = transaction_record.Client_id\
+                    WHERE owner_id = ?"
+                                
+get_customer_record_regular = "SELECT pet_owner_info.owner_id,\
+                                     pet_owner_info.owner_name,\
+                                     case when COUNT(transaction_record.transaction_uid) > ?\
+                                         then 'Regular'\
+                                         ELSE 'Non-Regular' END,\
+                                     pet_owner_info.contact_number\
+                             FROM pet_owner_info\
+                             LEFT JOIN transaction_record\
+                                 ON pet_owner_info.owner_id = transaction_record.Client_id\
+                            GROUP BY owner_id\
+                            HAVING COUNT(transaction_record.transaction_uid) >= ?\
+                            Order BY pet_owner_info.owner_name ASC"
+                            
+get_customer_record_non_regular = "SELECT pet_owner_info.owner_id,\
+                                     pet_owner_info.owner_name,\
+                                     case when COUNT(transaction_record.transaction_uid) > ?\
+                                         then 'Regular'\
+                                         ELSE 'Non-Regular' END,\
+                                     pet_owner_info.contact_number\
+                             FROM pet_owner_info\
+                             LEFT JOIN transaction_record\
+                                 ON pet_owner_info.owner_id = transaction_record.Client_id\
+                            GROUP BY owner_id\
+                            HAVING COUNT(transaction_record.transaction_uid) < ?\
+                            Order BY pet_owner_info.owner_name ASC"
+                            
+update_customer_record_info ="UPDATE pet_owner_info SET owner_name = ?,address = ?, contact_number = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE owner_id = ?"
 
 check_if_there_a_preceeding_schedule = "SELECT COUNT(*) FROM service_preceeding_schedule WHERE transaction_uid = ?"
 update_invoice_schedule = "UPDATE invoice_service_content SET scheduled_date = ? WHERE invoice_uid = ?"
@@ -1287,6 +1330,15 @@ get_preceeding_by_id = "SELECT * FROM service_preceeding_schedule WHERE transact
 get_scheduled_by_id = "SELECT * FROM services_transaction_content WHERE transaction_uid = ?"
 
 update_preceeding = "UPDATE service_preceeding_schedule SET scheduled_date = ? WHERE transaction_uid = ? and id = ?"
+
+check_if_customer_is_considered_regular = "SELECT owner_name,\
+                                                   count(transaction_record.transaction_uid) > ?\
+                                           FROM pet_owner_info\
+                                           LEFT JOIN transaction_record\
+                                               ON pet_owner_info.owner_id = transaction_record.Client_id\
+                                           WHERE owner_name = ?\
+                                           GROUP BY owner_name"
+
 
 get_services_daily_report_content = "SELECT services_transaction_content.transaction_uid, transaction_record.client_name,\
       service_name, CONCAT('₱', FORMAT(price, 2)) as service_price, price\
