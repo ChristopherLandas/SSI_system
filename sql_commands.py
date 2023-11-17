@@ -1326,7 +1326,7 @@ get_customer_record_non_regular = "SELECT pet_owner_info.owner_id,\
                             Order BY pet_owner_info.owner_name ASC"
                             
 update_customer_record_info ="UPDATE pet_owner_info SET owner_name = ?,address = ?, contact_number = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE owner_id = ?"
-                             GROUP BY owner_id"
+                             #GROUP BY owner_id"
 
 check_if_there_a_preceeding_schedule = "SELECT COUNT(*) FROM service_preceeding_schedule WHERE transaction_uid = ?"
 update_invoice_schedule = "UPDATE invoice_service_content SET scheduled_date = ? WHERE invoice_uid = ?"
