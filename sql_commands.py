@@ -560,7 +560,10 @@ yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction
                                ORDER BY transaction_record.transaction_date;"
 
 #invoices
-insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, Null)"
+set_provider_to_invoice = "UPDATE invoice_record SET Service_provider = ? WHERE invoice_uid = ?"
+get_provider_to_invoice = "SELECT Service_provider FROM invoice_record WHERE invoice_uid = ?"
+select_specific_provider = "SELECT DISTINCT full_name FROM acc_info WHERE job_position = ?"
 insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
 cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
