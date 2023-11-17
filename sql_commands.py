@@ -1287,3 +1287,11 @@ get_preceeding_by_id = "SELECT * FROM service_preceeding_schedule WHERE transact
 get_scheduled_by_id = "SELECT * FROM services_transaction_content WHERE transaction_uid = ?"
 
 update_preceeding = "UPDATE service_preceeding_schedule SET scheduled_date = ? WHERE transaction_uid = ? and id = ?"
+
+check_if_customer_is_considered_regular = "SELECT owner_name,\
+                                                   count(transaction_record.transaction_uid) > ?\
+                                           FROM pet_owner_info\
+                                           LEFT JOIN transaction_record\
+                                               ON pet_owner_info.owner_id = transaction_record.Client_id\
+                                           WHERE owner_name = ?\
+                                           GROUP BY owner_name"
