@@ -3,7 +3,7 @@ import json
 import sql_commands
 import tkcalendar
 import tkinter as tk
-from customcustomtkinter import customcustomtkinter as cctk
+from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
 from Theme import Color
 from tkinter import messagebox
 from constants import action
@@ -42,8 +42,9 @@ def add_service(master, info:tuple, update_callback: callable):
                     messagebox.showerror("Unable to proceed", "Fill all the fields", parent = self)
                     return
                 if self.service_name_entry.get() == "" and self.price_entry.get() == "":
-                    messagebox.showerror("Missing Data", "Complete all the fields to continue", parent = self)   
-                    
+                    messagebox.showerror("Missing Data", "Complete all the fields to continue", parent = self)
+                if database.fetch_data('SELECT COUNT(*) FROM service_info_test WHERE service_name = ?', (self.service_name_entry.get(), ))[0][0] > 0:
+                    messagebox.showerror("Unable to proceed", "Service name already exist", parent = self)
                 else:    
                     database.exec_nonquery([[sql_commands.insert_service, (self.id_label._text, self.service_name_entry.get(), self.price_entry.get(), self.radio_var.get(), 1, date.today())]])
                     messagebox.showinfo("Service Added", "New service is added", parent = self)
@@ -147,7 +148,17 @@ def add_service(master, info:tuple, update_callback: callable):
             self.proceed_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, width=width*0.115, text="Add Service", font=("DM Sans Medium", 14), command=new_service)
             self.proceed_btn.pack(side='right')
             
-            
+            def checkprice(a, b, c):
+                if (re.search(r'[0-9\.]$', self.price_entry.get() or "") is None):
+                    l = len(self.price_entry.get())
+                    self.price_entry.delete(l-1, l)
+            self.price_checker = ctk.StringVar()
+            self.price_checker.trace_add("write", checkprice)
+            self.price_entry.configure(textvariable = self.price_checker)
+
+            self.name_limiter = cctku.entry_limiter(256, self.service_name_entry)
+            self.service_name_entry.configure(textvariable = self.name_limiter)
+
         def place(self, **kwargs):
             self.id_label.configure(text=generateId('S',6).upper())
             return super().place(**kwargs)

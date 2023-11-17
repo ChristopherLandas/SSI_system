@@ -737,11 +737,13 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             self.sched_treeview.pack()
 
         def update_treeview(self):
+            self.sched_treeview.pack_forget()
             self.sched_treeview.update_table(database.fetch_data(sql_commands.get_all_schedule))
+            self.sched_treeview.pack()
 
         def resched_btn_callback(self, _: any = None):
             if self.sched_treeview.get_selected_data():
-                dashboard_popup.rescheduling_service_info(self  , (self.width, self.height)).place(relx = .5, rely = .5, anchor = 'c', uid= self.sched_treeview.get_selected_data()[0])
+                dashboard_popup.rescheduling_service_info(self, (self.width, self.height)).place(relx = .5, rely = .5, anchor = 'c', uid= self.sched_treeview.get_selected_data()[0], update_treeview_callback= self.update_treeview)
                 #code for reshceduling here
             else:
                 messagebox.showerror("Unable to Proceed", "Select a service to resched", parent = self)

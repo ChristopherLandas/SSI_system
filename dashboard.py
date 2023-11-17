@@ -20,7 +20,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from constants import db
 from constants import action
-from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup, customer_popup, customer_popup
+from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup, customer_popup, mini_popup
 from math import *
 import random
 import copy
@@ -735,6 +735,34 @@ class reception_frame(ctk.CTkFrame):
         self.invoice_frame.grid_rowconfigure((1), weight=1)
         self.invoice_frame.grid_columnconfigure(0, weight=1)
         
+        '''TOP FRAME'''
+        self.top_con_frame = ctk.CTkFrame(self.invoice_frame,fg_color="transparent")
+        self.top_con_frame.grid(row=0, column=0,sticky="new", padx=(width*0.005), pady=(height*0.01, 0))
+        #invoice search button
+        self.search_frame = ctk.CTkFrame(self.top_con_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.search_frame.pack(side="left")
+        self.search_frame.pack_propagate(0)
+        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
+        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
+        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
+                                        width=width*0.005,)
+        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        
+        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.05, text="Create Transaction ",image=self.add_icon, font=("DM Sans Medium", 14))
+        self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_item_btn.pack(side="left", padx=(width*0.005))
+
+        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.05, text="View Schedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
+                                               command = lambda: self.scheduled_services_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.view_schedule_btn.pack(side="left", padx=(0, width*0.005))
+
+        self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = lambda:self.update_invoice_treeview(True))
+        self.refresh_btn.pack(side="left", padx=(0,width*0.005))
+    
+        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Reception", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        self.cancel_invoice_btn.pack(side="right")
+
         '''TAB NAV'''
         #region
         self.tab_frame = ctk.CTkFrame(self.invoice_frame, fg_color="transparent")
@@ -868,11 +896,9 @@ class reception_frame(ctk.CTkFrame):
                 
                 for li in queued_services:
                     self.scheduling_invoice_treeview.add_data(li)
-                self.scheduling_invoice_treeview.data_grid_btn_mng.update_buttons()
 
-                #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info_queued, (index, )))
-                #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info, (index, )))
-                # load the queued service treeview
+                self.active.data_grid_btn_mng.update_buttons()
+    
             self.loaded[index] = True
         self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
         
@@ -887,8 +913,10 @@ class reception_frame(ctk.CTkFrame):
         else:
             if(messagebox.askyesno("Cancel Transaction", "Are you really want to cancel this transaction", parent = self)) and self.active != self.scheduling_invoice_treeview:
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.active.get_selected_data()[0], )]])
-                self.update_invoice_treeview(True)
-
+                #self.update_invoice_treeview(True)
+                self.active.remove_selected_data()
+                self.active.data_grid_btn_mng.update_buttons()
+    
     def load_invoice_content(self, _:any = None):
         if (self.active == self.item_invoice_treeview) and self.active.get_selected_data() is not None:
             transaction_popups.show_invoice_content(self, (width, height)).place(relx = .5, rely = .5, anchor = 'c', invoice_id= self.active.get_selected_data()[0])
@@ -897,8 +925,23 @@ class reception_frame(ctk.CTkFrame):
         data = self.active.get_selected_data()
         if(data):
             if 'TR# ' not in data[0]:
-                stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
-                if 0 not in stock_quan:
+                #stock_quan = [s[0] for s in database.fetch_data(sql_commands.check_if_stock_can_accomodate, (data[0], ))]
+                items_uid_in_invoice = database.fetch_data(sql_commands.check_quan_of_invoice, (data[0], ))
+                items_about_to_pay = database.fetch_data(sql_commands.check_quan_of_paying_item)
+                current_stock = database.fetch_data(sql_commands.check_feasible_items)
+                current_stock = {s[0]: s[1] for s in current_stock}
+
+                for li in items_about_to_pay:
+                    if li[0] in current_stock:
+                        current_stock[li[0]] = current_stock[li[0]] - li[1]
+
+                can_accomodate = True
+                for li in items_uid_in_invoice:
+                    if li[1] > current_stock[li[0]]:
+                        can_accomodate = False
+                        break 
+
+                if can_accomodate:
                     self.sender_entity.send(data[0])
                 else:
                     messagebox.showwarning("Fail to proceed", "Current stock cannot accomodate the transaction", parent = self)
@@ -975,6 +1018,13 @@ class payment_frame(ctk.CTkFrame):
 
         self.receiving_entity = nsu.network_receiver(IP_Address["MY_NETWORK_IP"], PORT_NO['Billing_Recieving'], self.received_callback)
         self.receiving_entity.start_receiving()
+
+        def void_invoice():
+            record_action(acc_cred[0][0], action.INVOICE_TYPE, action.VOID_INVOICE % (acc_cred[0][0], self.void_authorization.user_name_authorized_by, self.payment_treeview.get_selected_data()[0]))
+            database.exec_nonquery([[sql_commands.void_invoice, (self.payment_treeview.get_selected_data()[0], )]])
+            self.update_payment_treeview()
+        self.void_authorization = mini_popup.authorization(self, (width, height), void_invoice)
+
         self.grid_forget()
 
     def invoice_callback(self):
@@ -986,9 +1036,11 @@ class payment_frame(ctk.CTkFrame):
             messagebox.showwarning("Fail to proceed", "You cannot void a transaction\nwith an availed service/s", parent = self)
             return
         else:
-            def void_callback():
-                pass    
-            #need to fix bukas
+            self.void_authorization.place(relx = .5, rely = .5, anchor = 'c')
+        
+    def void_callback(self):
+        pass
+        #need to fix
 
     def search_callback(self):
         if self.search_entry.get() == "":
@@ -2367,9 +2419,9 @@ class reports_frame(ctk.CTkFrame):
         self.sales_daily_graph = ctk.CTkFrame(self.daily_graph, fg_color=Color.White_Platinum)
         self.sales_daily_graph.grid(row=0, column= 0,columnspan=3, sticky="nsew",  padx=(width*0.005,0), pady=(height*0.01))
 
-        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(self.data[0])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
+        self.items_total = ctk.CTkLabel(self.daily_graph,  text=f"Item:        {format_price(self.data[0])}", corner_radius=5, fg_color=Color.Light_Green,  font=("DM Sans Medium",14), height=height*0.05)
         self.items_total.grid(row=1, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.007))
-        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(self.data[1])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
+        self.service_total = ctk.CTkLabel(self.daily_graph,text=f"Services     {format_price(self.data[1])}", corner_radius=5, fg_color=Color.Blue_Cornflower,  font=("DM Sans Medium",14), height=height*0.05)
         self.service_total.grid(row=1, column=1, sticky="nsew",padx=(width*0.005), pady=(0,height*0.007))
         self.income_total = ctk.CTkLabel(self.daily_graph,text=f"Total    {format_price(self.data[0] + self.data[1])}", corner_radius=5, fg_color=Color.White_Lotion,  font=("DM Sans Medium",14), height=height*0.05)
         self.income_total.grid(row=1, column=2, sticky="nsew", pady=(0,height*0.007))
@@ -2382,7 +2434,7 @@ class reports_frame(ctk.CTkFrame):
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=(0, height*0.0075))
 
         self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.4,
-                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Service:{int(width*0.165)}-tr/Item:{int(width*0.165)}-tr/Total:{int(width*0.135)}-tr!30!30')
+                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Subtotal:{int(width*0.165)}-tr/Deduction:{int(width*0.165)}-tr/Total:{int(width*0.135)}-tr!30!30')
         self.daily_data_view.pack()
 
 
@@ -2474,8 +2526,12 @@ class reports_frame(ctk.CTkFrame):
         pie_figure= Figure(figsize=(width, height), dpi=100)
         pie_figure.set_facecolor(fg_color)
         ax =pie_figure.add_subplot(111)
-        ax.pie(data, labels=label, autopct='%1.1f%%', startangle=90,counterclock=0,
-                textprops={'fontsize':12, 'color':"black", 'family':'monospace'}, colors=[Color.Light_Green,Color.Red_Tulip])
+        #ax.pie(data, labels=label, autopct='%1.1f%%', startangle=90,counterclock=0, textprops={'fontsize':12, 'color':"black", 'family':'monospace'}, colors=[Color.Light_Green,Color.Blue_Cornflower])
+        
+        #pie chart copied from dashboard
+        ax.pie(data, labels=label, autopct=f"{'%1.1f%%'if self.data[0] + self.data[1] > 0 else ''}", 
+               startangle=90, counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Blue_Cornflower] if self.data[0] + self.data[1] > 0 else [Color.White_Gray],
+                textprops={'fontsize':17, 'color': Color.Blue_Maastricht, 'family':'monospace', 'weight':'bold' },)
 
         self.daily_pie_canvas = FigureCanvasTkAgg(pie_figure, self.sales_daily_graph,)
         self.daily_pie_canvas.draw()
@@ -2497,7 +2553,7 @@ class reports_frame(ctk.CTkFrame):
         bar_figure= Figure(figsize=(width, height), dpi=100)
         bar_figure.set_facecolor(fg_color)
         ax =bar_figure.add_subplot(111)
-        ax.barh(label, self.data, align='center',  color=[Color.Light_Green,Color.Red_Tulip])
+        ax.barh(label, self.data, align='center',  color=[Color.Light_Green,Color.Blue_Cornflower])
         #ax.set_xlabel("Income")
         self.daily_hbar_canvas = FigureCanvasTkAgg(bar_figure, self.bars_daily_graph)
         self.daily_hbar_canvas.draw()
@@ -2519,8 +2575,8 @@ class reports_frame(ctk.CTkFrame):
         ax = bar_figure.add_subplot(111)
 
         ax.bar(x_axis-0.2, _data_item, width=0.4, label=_label[0], color=Color.Light_Green)
-        ax.bar(x_axis+0.2, _data_service, width=0.4, label = _label[1], color= Color.Red_Tulip)
-        ax.legend(["Income", "Services"])
+        ax.bar(x_axis+0.2, _data_service, width=0.4, label = _label[1], color= Color.Blue_Cornflower)
+        ax.legend(["Item Sales", "Services"])
         ax.set_xticks(x_axis,_label)
         #ax.set_xlabel("Income")
 
