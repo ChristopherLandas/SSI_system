@@ -220,19 +220,19 @@ def record_action(usn: str, _type: str, action_code: str):
 def decode_action(type_code: str):
     if type_code.startswith('INVM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
+        return f'Create Transaction {temp[-1]}'
     if type_code.startswith('CRI'):
         temp = re.findall(r'/(\w+)+', type_code)
         return f'Receive item {temp[-1]}'
     if type_code.startswith('TRNM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
+        return f'Create Transaction {temp[-1]}'
     if type_code.startswith('DPSM'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
+        return f'Create Transaction {temp[-1]}'
     if type_code.startswith('DPSO'):
         temp = re.findall(r'/(\w+)+', type_code)
-        return f'Create Invoice {temp[-1]}'
+        return f'Create Transaction {temp[-1]}'
     if type_code.startswith('INVV'):
         temp = re.findall(r'/(\w+)+', type_code)
         return f'Void Invoice {temp[-1]} auth: {temp[1]}'

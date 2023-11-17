@@ -1665,30 +1665,21 @@ def show_category(master, info:tuple):
 
             #self.category_data = self.conv_data()
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, width= width*0.635, height= height*0.5, corner_radius=0,
-                                            column_format=f'/No:{int(width*.035)}-#r/Category:x-tl/HasExpiry:{int(width*.095)}-tc!30!30', #/Action:{int(width*.055)}-bD
+                                            column_format=f'/No:{int(width*.035)}-#r/Category:x-tl/HasExpiry:{int(width*.095)}-tc/IsSellable:{int(width*.095)}-tc!30!30', #/Action:{int(width*.055)}-bD
                                             bd_commands=deactivate_category)
             self.data_view1.pack()
 
         def conv_data(self):
-            self.data = database.fetch_data("SELECT categ_name, does_expire FROM categories WHERE state = 1")
-            self.ret = []
-            for i in range(len(self.data)):
-                temp = list(self.data[i])
-                if temp[1] == 0:
-                    temp[1] = "No"
-                else:
-                    temp[1] = "Yes" 
-                self.ret.append(tuple(temp))
-            
-            self.data_view1.update_table(self.ret)
+            temp = [(data[0], 'Yes'if data[1] else 'No', 'Yes'if data[2] else 'No', ) for data in database.fetch_data("SELECT categ_name, does_expire, sellable FROM categories WHERE state = 1")]
+            self.data_view1.update_table(temp)
             self.data_view1.pack()
             
         def refresh_table(self):
             self.conv_data()
             
         def place(self, **kwargs):
-            self.conv_data()
             self.grab_set()
+            self.conv_data()
             return super().place(**kwargs)
     return show_category(master, info)
 
@@ -1802,8 +1793,11 @@ def add_category(master, info:tuple, table_update_callback: callable):
                 self.place_forget()
                 
             def add_category():
-                if self.category_name_entry.get()=='':
+                temp = [category[0] for category in database.fetch_data("SELECT categ_name FROM categories")]
+                if self.category_name_entry.get().strip()=='':
                     messagebox.showwarning("Missing Information", "Complete required fields", parent = self)
+                elif self.category_name_entry.get() in temp:
+                    messagebox.showwarning("Warning", "Category already existed", parent = self)
                 else:
                     database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get(),user,self.sellable_switch.get())]])
                     reset()
@@ -2055,7 +2049,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             width = info[0]
             height = info[1]
             self.acc_user = info[2][0][0]
-            super().__init__(master, width=width*0.3, height=height*0.4, corner_radius= 0, fg_color='transparent')
+            super().__init__(master, width=width*0.4, height=height*0.4, corner_radius= 0, fg_color='transparent')
             
             self.command_callback = command_callback
             self.grid_columnconfigure(0, weight=1)
@@ -2081,7 +2075,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='', image=self.restock, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
-            ctk.CTkLabel(self.top_frame, text='ORDER DISPOSAL', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            ctk.CTkLabel(self.top_frame, text='CANCEL BACKORDER', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -2096,7 +2090,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             self.item_name = ctk.CTkLabel(self.item_frame, text="🐱", font=("DM Sans Medium", 14))
             self.item_name.pack(side='left',pady = (height*0.01), padx = (0))
             
-            ctk.CTkLabel(self.confirm_frame, text="Reason for Disposal ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
+            ctk.CTkLabel(self.confirm_frame, text="Reason for Cancelling ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
             self.disposal_entry = ctk.CTkComboBox(self.confirm_frame, font=("DM Sans Medium",14), height=height*0.045, values=disp_reason, variable=self.combo_var, button_color=Color.Blue_Tufts,
                                                   button_hover_color=Color.Blue_Steel)
             self.disposal_entry.grid(row = 2, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
@@ -2111,7 +2105,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
                                             font=("DM Sans Medium", 16), text='Cancel', command= self.reset)
             self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
             
-            self.dispose_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm Disposal',
+            self.dispose_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
                                              command=self.dispose_confirm)
             self.dispose_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
         
@@ -2127,7 +2121,7 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
                 item_id = database.fetch_data("Select item_uid from recieving_item where id = ?", (self.data[0], ))[0][0]
                 database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), self.data[0], item_id, self.data[2], self.data[3], f'{self.disposal_entry.get()}', self.acc_user)],
                                             ["UPDATE recieving_item SET state = -1 WHERE id = ?", (self.data[0], )]])
-                messagebox.showinfo("Succeed", "Item Disposed", parent = self)
+                messagebox.showinfo("Succeed", "Order sucessfully cancelled", parent = self)
                 self.reset()
         def place(self, data, **kwargs):
             self.data = data
@@ -2443,13 +2437,17 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
         def __init__(self, master, info:tuple, command_callback ):
             width = info[0]
             height = info[1]
-            self.acc_cred = info[2]
             super().__init__(master, width*0.65, height=height*0.65, corner_radius= 0, fg_color='transparent')
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
             self.command_callback = command_callback
+            
+            def reset():
+                self.grab_release()
+                self.place_forget()
+            
                     
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], border_width=1, border_color=Color.Platinum)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -2462,7 +2460,7 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text="ITEM", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
-            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
             self.item_treeview_frame = ctk.CTkFrame(self.main_frame, fg_color = Color.White_Platinum)
@@ -2477,39 +2475,15 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", pady=(0, height*0.01), padx=(height*0.01))
             
             self.add_item_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Add Item", font=("DM Sans Medium", 14),
-                                             command=self.encode_item   )
+                                             command=None)
             self.add_item_btn.pack(side="right", pady=(height*0.01), padx=(height*0.01))
             
             self.cancel_btn = ctk.CTkButton(self.bottom_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
-                                            font=("DM Sans Medium", 16), text='Cancel', command= self.reset)
+                                            font=("DM Sans Medium", 16), text='Cancel', command= reset)
             self.cancel_btn.pack(side="left", pady=(height*0.01), padx=(height*0.01,0))
         
-        def encode_item(self):
-            item_info = self.item_treeview.get_selected_data()
-            if item_info:
-                print(item_info[0])
-                data = database.fetch_data(sql_commands.get_the_first_item_to_inv, (item_info[0], ))[0]
-                database.exec_nonquery([[sql_commands.insert_instance_to_used_in_services, (data[1], data[3], self.acc_cred[0][0])]])
-
-                if data[2] == 1:
-                    if database.fetch_data("SELECT COUNT(*) FROM item_inventory_info WHERE uid = ?", (item_info[0], ))[0][0] == 1:
-                        #dont delete, set to 0
-                        database.exec_nonquery([[sql_commands.empty_instance_of_inventory, (data[0],)]])
-                    else:
-                        database.exec_nonquery([[sql_commands.delete_instance_of_inventory, (data[0],)]])
-                else:
-                        database.exec_nonquery([[sql_commands.deduct_1_stock_of_inventory, (data[0],)]])
-                    
-                if callable(command_callback):
-                    command_callback()
-                self.reset()
-                messagebox.showinfo("Succeed", f"Item added {data[1]}", parent = self)
-                record_action(self.acc_cred[0][0], action.ADD_ITEM_TO_SERVICE, action.ENCODE_ITEM_TO_SVC % (data[1], self.acc_cred[0][0]))
-            else:
-                messagebox.showerror("Unable to Proceed", "Select an item to add", parent = self)
-
         def refresh_table(self):
-            self.raw_item_data = database.fetch_data(sql_commands.select_item_valid_for_service)
+            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info")
             self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
             self.item_treeview.update_table(self.item_data)
                 
@@ -2518,8 +2492,125 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.refresh_table()
             return super().place(**kwargs)
         
-        def reset(self):
-            self.grab_release()
-            self.place_forget()
-        
     return add_service_item(master, info, command_callback)
+
+def cancel_orders(master, info:tuple,):
+    class cancel_orders(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, ):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+
+            self.cal_icon= ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(15,15))
+
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+            self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
+            self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
+            self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
+            self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
+            self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+            self.trash_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
+            self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
+            self.generate_report_icon = ctk.CTkImage(light_image=Image.open("image/gen_report.png"),size=(26,26))
+            
+            def reset():
+                self.place_forget()
+             
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3])
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.025)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(2, weight=1)
+            self.main_frame.grid_rowconfigure((2),weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=5,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text="CANCELLED ORDERS", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+                        
+            self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.White_Lotion, corner_radius=0)
+            self.treeview_frame.grid(row=1, column=0, columnspan=5, sticky="ew", padx=width*0.005, pady=(width*0.005))
+
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * 0.8, height= height * 0.8, corner_radius=0,
+                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.09)}-tc/ItemName:x-tl/StockPcs:{int(width*0.075)}-tr/Reason:{int(width*0.15)}-tl/CancelledBy:{int(width*.135)}-tc!33!35',
+                                            )
+            self.data_view1.pack()
+            
+            self.no_order_data = ctk.CTkLabel(self.data_view1, text="No order data yet to show.", font=("DM Sans Medium", 14))
+            
+        
+        def place(self, **kwargs):
+            self.data_view1.update_table(database.fetch_data(sql_commands.get_cancel_filter))
+            #self.raw_data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (f'{month_year}',))
+
+            #self.data_view1.update_table(data)
+            #self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not data else self.no_order_data.place_forget()
+            return super().place(**kwargs)
+
+    return cancel_orders(master, info)
+
+
+def deplted_history(master, info:tuple,):
+    class deplted_history(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, ):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, width * .835, height=height*0.92, corner_radius= 0, fg_color='transparent')
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+
+            self.cal_icon= ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(15,15))
+
+            self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
+            self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
+            self.plus = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(12,13))
+            self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(13,13))
+            self.restock_icon = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
+            self.sales_icon = ctk.CTkImage(light_image=Image.open("image/sales_report.png"), size=(16,16))
+            self.inventory_icon = ctk.CTkImage(light_image = Image.open("image/inventory.png"), size=(24,25))
+            self.trash_icon = ctk.CTkImage(light_image = Image.open("image/stock_sub.png"), size=(20,18))
+            self.person_icon = ctk.CTkImage(light_image= Image.open("image/person_icon.png"), size=(24,24))
+            self.generate_report_icon = ctk.CTkImage(light_image=Image.open("image/gen_report.png"),size=(26,26))
+            
+            def reset():
+                self.place_forget()
+             
+
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3])
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=width*0.01, pady=height*0.025)
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(2, weight=1)
+            self.main_frame.grid_rowconfigure((2),weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=5,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text="DEPLETED ITEMS", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+                        
+            self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.White_Lotion, corner_radius=0)
+            self.treeview_frame.grid(row=1, column=0, columnspan=5, sticky="ew", padx=width*0.005, pady=(width*0.005))
+
+            self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * 0.8, height= height * 0.8, corner_radius=0,
+                                            column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*0.09)}-tc/ItemDescription:x-tl/StockPcs:{int(width*0.075)}-tr/DepletionDate:{int(width*0.15)}-tl!33!35',
+                                            )
+            self.data_view1.pack()
+            
+            self.no_order_data = ctk.CTkLabel(self.data_view1, text="No order data yet to show.", font=("DM Sans Medium", 14))
+            
+        
+        def place(self, **kwargs):
+            #self.data_view1.update_table(database.fetch_data(sql_commands.get_cancel_filter))
+            return super().place(**kwargs)
+
+    return deplted_history(master, info)
