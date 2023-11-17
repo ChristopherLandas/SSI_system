@@ -84,7 +84,7 @@ from popup import preview_pdf_popup as ppdfp
             self.search_frame.grid(row=0, column=0,padx=(width*0.0075), pady=(height*0.01,0),sticky="w")
             self.search_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+            ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
             self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white",
@@ -101,10 +101,10 @@ from popup import preview_pdf_popup as ppdfp
             self.bottom_frame.grid(row=2, column=0 )
             self.bottom_frame.grid_propagate(0)
             self.bottom_frame.grid_columnconfigure(1, weight=1)
-            self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("Arial", 14), command=self.reset)
+            self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("DM Sans Medium", 14), command=self.reset)
             self.back_button.grid(row=0, column=0, sticky="w")
 
-            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14), command= proceed)
+            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("DM Sans Medium", 14), command= proceed)
             self.select_button.grid(row=0, column=1, sticky="e")
 
             """ self.select_button = ctk.CTkButton(self.x_fr, text='Select', command=self.get_item, width =270, font=("Poppins-Bold", 45))
@@ -235,7 +235,7 @@ from popup import preview_pdf_popup as ppdfp
             self.search_frame.grid(row=0, column=0,padx=(width*0.0075), pady=(height*0.01,0),sticky="w")
             self.search_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+            ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
             self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white",
@@ -266,10 +266,10 @@ from popup import preview_pdf_popup as ppdfp
             self.bottom_frame.grid(row=2, column=0 )
             self.bottom_frame.grid_propagate(0)
             self.bottom_frame.grid_columnconfigure(1, weight=1)
-            self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("Arial", 14), command=self.reset)
+            self.back_button = ctk.CTkButton(self.bottom_frame, text='Cancel', width=width*0.1, font=("DM Sans Medium", 14), command=self.reset)
             self.back_button.grid(row=0, column=0, sticky="w")
 
-            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("Arial", 14), command= proceed)
+            self.select_button = ctk.CTkButton(self.bottom_frame, text='Select', width=width*0.1, font=("DM Sans Medium", 14), command= proceed)
             self.select_button.grid(row=0, column=1, sticky="e")
 
         def reset(self):
@@ -416,7 +416,7 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.service_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
             self.service_frame.grid_columnconfigure(0, weight=1)
 
-            ctk.CTkLabel(self.service_frame, text='Services Availed:',font=("Arial", 14), fg_color="transparent").grid(row=0, column=0, padx=width*0.005, pady=(0,height*0.005), sticky="w")
+            ctk.CTkLabel(self.service_frame, text='Services Availed:',font=("DM Sans Medium", 14), fg_color="transparent").grid(row=0, column=0, padx=width*0.005, pady=(0,height*0.005), sticky="w")
 
             #self.service_data = [(f'{s[1]}', format_price(float(s[4]))) for s in self._services_info]
             self.service_list = cctk.cctkTreeView(self.service_frame, data=None, height=height*0.245, width=width*0.545,
@@ -427,15 +427,15 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.service_total_frame.pack_propagate(0)
             self.service_total_frame.grid(row=2,column=0, sticky="e", pady=(5,0))
 
-            ctk.CTkLabel(self.service_total_frame, text="Services Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.service_total_amount = ctk.CTkLabel(self.service_total_frame, text="0,000.00", font=("Arial", 14))
+            ctk.CTkLabel(self.service_total_frame, text="Services Total:", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.service_total_amount = ctk.CTkLabel(self.service_total_frame, text="0,000.00", font=("DM Sans Medium", 14))
             self.service_total_amount.pack(side="right",  padx=(0,width*0.0075))'''
 
             self.item_frame = ctk.CTkFrame(self.content_frame, corner_radius=0, fg_color="transparent")
             self.item_frame.grid(row=2, column=0, padx=10, pady=(0,10), sticky="nsew")
             self.item_frame.grid_columnconfigure(0, weight=1)
 
-            ctk.CTkLabel(self.item_frame, text='Items Availed:',font=("Arial", 14), fg_color="transparent").grid(row=0, column=0, padx=width*0.005, pady=(0,height*0.005), sticky="w")
+            ctk.CTkLabel(self.item_frame, text='Items Availed:',font=("DM Sans Medium", 14), fg_color="transparent").grid(row=0, column=0, padx=width*0.005, pady=(0,height*0.005), sticky="w")
 
             #self.item_data = [(f'{s[1]} * {s[3]}', format_price(float(s[4]))) for s in self._item_info]
             self.item_list = cctk.cctkTreeView(self.item_frame, data=None, height=height*0.245, width=width*0.545,
@@ -446,8 +446,8 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.item_total_frame.pack_propagate(0)
             self.item_total_frame.grid(row=2,column=0, sticky="e", pady=(5,0))
 
-            ctk.CTkLabel(self.item_total_frame, text="Items Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("Arial", 14))
+            ctk.CTkLabel(self.item_total_frame, text="Items Total:", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="0,000.00", font=("DM Sans Medium", 14))
             self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))'''
 
             ctk.CTkButton(self.content_frame, text="Cancel", command=self.reset).grid(row=3, column=0, padx=10, pady=(0,10), sticky="w")
@@ -460,24 +460,24 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.payment_service_frame.pack_propagate(0)
             self.payment_service_frame.pack(fill="x", pady=(height*0.005))
 
-            ctk.CTkLabel(self.payment_service_frame, text="Service:", font=("Arial", 16)).pack(side="left", padx=(width*0.0075,0))
-            self.payment_service_amount = ctk.CTkLabel(self.payment_service_frame, text="0,000.00", font=("Arial", 16))
+            ctk.CTkLabel(self.payment_service_frame, text="Service:", font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.payment_service_amount = ctk.CTkLabel(self.payment_service_frame, text="0,000.00", font=("DM Sans Medium", 16))
             self.payment_service_amount.pack(side="right",  padx=(0,width*0.0075))
 
             self.payment_item_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
             self.payment_item_frame.pack_propagate(0)
             self.payment_item_frame.pack(fill="x", pady=(height*0.005))
 
-            ctk.CTkLabel(self.payment_item_frame, text="Items:", font=("Arial", 16)).pack(side="left", padx=(width*0.0075,0))
-            self.payment_item_amount = ctk.CTkLabel(self.payment_item_frame, text="0,000.00", font=("Arial", 16))
+            ctk.CTkLabel(self.payment_item_frame, text="Items:", font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.payment_item_amount = ctk.CTkLabel(self.payment_item_frame, text="0,000.00", font=("DM Sans Medium", 16))
             self.payment_item_amount.pack(side="right",  padx=(0,width*0.0075))
 
             self.total_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
             self.total_frame.pack_propagate(0)
             self.total_frame.pack(fill="x", pady=(height*0.005))
 
-            ctk.CTkLabel(self.total_frame, text="Total:", font=("Arial", 20)).pack(side="left", padx=(width*0.0075,0))
-            self.total_amount = ctk.CTkLabel(self.total_frame, text="0,000.00", font=("Arial", 20), width=width*0.15, fg_color="light grey", corner_radius=5,
+            ctk.CTkLabel(self.total_frame, text="Total:", font=("DM Sans Medium", 20)).pack(side="left", padx=(width*0.0075,0))
+            self.total_amount = ctk.CTkLabel(self.total_frame, text="0,000.00", font=("DM Sans Medium", 20), width=width*0.15, fg_color="light grey", corner_radius=5,
                                              anchor="e")
             self.total_amount.pack(side="right",  padx=(0,width*0.0075))
 
@@ -485,25 +485,25 @@ def show_transaction_proceed(master, info:tuple, service_price, item_price, tota
             self.payment_entry_frame.pack_propagate(0)
             self.payment_entry_frame.pack(fill="x", pady=(height*0.005))
 
-            ctk.CTkLabel(self.payment_entry_frame, text="Enter Payment:", font=("Arial", 20)).pack(padx=(width*0.0075,0), anchor="w")
-            self.payment_entry = ctk.CTkEntry(self.payment_entry_frame, placeholder_text="Payment here...", font=("Arial", 20),height=height*0.05, justify="right")
+            ctk.CTkLabel(self.payment_entry_frame, text="Enter Payment:", font=("DM Sans Medium", 20)).pack(padx=(width*0.0075,0), anchor="w")
+            self.payment_entry = ctk.CTkEntry(self.payment_entry_frame, placeholder_text="Payment here...", font=("DM Sans Medium", 20),height=height*0.05, justify="right")
             self.payment_entry.pack(fill="x", padx=(width*0.0075))
 
             self.change_frame = ctk.CTkFrame(self.payment_frame, width=width*0.15, height=height*0.05, fg_color="transparent")
             self.change_frame.pack_propagate(0)
             self.change_frame.pack(fill="x", pady=(height*0.005))
 
-            ctk.CTkLabel(self.change_frame, text="Change:", font=("Arial", 20)).pack(side="left", padx=(width*0.0075,0))
-            self.change_amount = ctk.CTkLabel(self.change_frame, text="0,000.00", font=("Arial", 20), width=width*0.15, fg_color="light grey", corner_radius=5, anchor="e")
+            ctk.CTkLabel(self.change_frame, text="Change:", font=("DM Sans Medium", 20)).pack(side="left", padx=(width*0.0075,0))
+            self.change_amount = ctk.CTkLabel(self.change_frame, text="0,000.00", font=("DM Sans Medium", 20), width=width*0.15, fg_color="light grey", corner_radius=5, anchor="e")
             self.change_amount.pack(side="right",  padx=(0,width*0.0075))
 
-            self.proceed_button = ctk.CTkButton(self.payment_frame, text='Proceed', font=("Arial", 20), height=height*0.085, command=record_transaction)
+            self.proceed_button = ctk.CTkButton(self.payment_frame, text='Proceed', font=("DM Sans Medium", 20), height=height*0.085, command=record_transaction)
             self.proceed_button.pack(fill="x",side="bottom", pady=height*0.025, padx=(width*0.025))
             """
             self.total_frame = ctk.CTkFrame(self.rightmost_frame)
             self.total_frame.grid(row=0, column=0, padx=10, pady=10, sticky="new", columnspan = 2)
 
-            self.total_lbl = ctk.CTkLabel(self.total_frame, text='Total:',font=("Arial", 25))
+            self.total_lbl = ctk.CTkLabel(self.total_frame, text='Total:',font=("DM Sans Medium", 25))
             self.total_lbl.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
 
             self.total_val = ctk.CTkEntry(self.total_frame, height=height*0.12, width=width*0.31, font=('DM Sans Medium', 35))
@@ -622,10 +622,10 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_propagate(0)
 
-            self.client_name_label = ctk.CTkLabel(self.content_frame, text="Client's Pet Information",font=("Arial",18))
+            self.client_name_label = ctk.CTkLabel(self.content_frame, text="Client's Pet Information",font=("DM Sans Medium",18))
             self.client_name_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nw")
             #Name label
-            ctk.CTkLabel(self.content_frame, text='Select Pet:',font=("Arial", 14)).grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
+            ctk.CTkLabel(self.content_frame, text='Select Pet:',font=("DM Sans Medium", 14)).grid(row=1, column=0, padx=10, pady=(10, 0), sticky="nw")
             """ self.pet_frame = ctk.CTkScrollableFrame(self.content_frame, height=height*0.15, fg_color="transparent")
             self.pet_frame.grid(row=2,column=0, sticky="we") """
             self.tables = database.fetch_data(sql_commands.get_pet_name)
@@ -633,14 +633,14 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
             """ 
             for pet_index in range(len(self.pet_values)):
                 ctk.CTkButton(self.pet_frame, text=self.pet_values[pet_index]).pack() """
-            self.pet_name = ctk.CTkOptionMenu(self.content_frame, width=width*0.45, font=("Arial", 14), values=self.pet_values, command= automate_fill)
+            self.pet_name = ctk.CTkOptionMenu(self.content_frame, width=width*0.45, font=("DM Sans Medium", 14), values=self.pet_values, command= automate_fill)
             self.pet_name.set('')
             self.pet_name.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ns")
             
-            self.animal_breed_lbl = ctk.CTkLabel(self.content_frame, text='Breed and Animal Type:',font=("Arial", 14))
+            self.animal_breed_lbl = ctk.CTkLabel(self.content_frame, text='Breed and Animal Type:',font=("DM Sans Medium", 14))
             self.animal_breed_lbl.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="nw")
             #Breed and Animal Type entry
-            self.animal_breed_entry = ctk.CTkEntry(self.content_frame, width=width*0.45, font=("Arial", 14))
+            self.animal_breed_entry = ctk.CTkEntry(self.content_frame, width=width*0.45, font=("DM Sans Medium", 14))
             self.animal_breed_entry.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="ns")
             
             self.schedule_service_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
@@ -650,10 +650,10 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
                                               onvalue="on", offvalue="off")
             self.sched_switch.grid(row=0, column=0, padx=(10, 0), pady=(0, 10), sticky="nw")
 
-            self.scheduled_service_lbl = ctk.CTkLabel(self.schedule_service_frame, text="Set Schedule",font=("Arial", 14))
+            self.scheduled_service_lbl = ctk.CTkLabel(self.schedule_service_frame, text="Set Schedule",font=("DM Sans Medium", 14))
             self.scheduled_service_lbl.grid(row=1, column=0, padx=(10, 0), sticky="nw")
             #Scheduled service label
-            self.scheduled_service_val = ctk.CTkLabel(self.schedule_service_frame, width=width*0.25, height=height*0.05,font=("Arial", 14), fg_color='light grey', text="Set Date", text_color="grey")
+            self.scheduled_service_val = ctk.CTkLabel(self.schedule_service_frame, width=width*0.25, height=height*0.05,font=("DM Sans Medium", 14), fg_color='light grey', text="Set Date", text_color="grey")
             self.scheduled_service_val.grid(row=2, column=0, padx=(10, 0), pady=(0, 10), sticky="nsew")
             self.show_calendar = ctk.CTkButton(self.schedule_service_frame, text="",height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,image=self.cal_icon,
                                                command=lambda: cctk.tk_calendar(self.scheduled_service_val, "%s"), corner_radius=3)
@@ -663,10 +663,10 @@ def customer_info(master, info:tuple, parent_value = None) -> ctk.CTkFrame:
 
             self.x_fr.grid(row=6, column=0, padx=10, pady=10, sticky="s")
 
-            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=discard, font=("Arial", 20))
+            self.back_button = ctk.CTkButton(self.x_fr, text='Back', command=discard, font=("DM Sans Medium", 20))
             self.back_button.grid(row=0, column=1, padx=20, pady=(15, 15), sticky='s')
 
-            self.select_button = ctk.CTkButton(self.x_fr, text='Confirm', command=record, font=("Arial", 20))
+            self.select_button = ctk.CTkButton(self.x_fr, text='Confirm', command=record, font=("DM Sans Medium", 20))
             self.select_button.grid(row=0, column=2, padx=(0, 20), pady=(15, 15), sticky="se")
 
             sched_swtich_event()
@@ -679,7 +679,7 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
         def __init__(self, master, info:tuple, parent):
             width = info[0]
             height = info[1]
-            super().__init__(master, corner_radius= 0, fg_color="transparent")
+            super().__init__(master, corner_radius= 0, fg_color=Color.White_Platinum)
 
             global IP_Address, PORT_NO
             self.width = self.winfo_screenwidth()
@@ -692,8 +692,8 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
 
             self._master = master
 
-            self.main_frame = ctk.CTkFrame(self, width=width*0.75, height=height*0.75, corner_radius=0)
-            self.main_frame.pack()
+            self.main_frame = ctk.CTkFrame(self, width=width*0.815, height=height*0.885, corner_radius=0)
+            self.main_frame.pack(padx=1,pady=1)
             self.main_frame.grid_columnconfigure((0), weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
             self.main_frame.grid_propagate(0)
@@ -704,25 +704,25 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             ctk.CTkLabel(self.top_frame, text='Scheduled Services', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.015,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=hide).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
 
-            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0)
-            self.content_frame.grid(row=1,column=0, padx=width*0.005, pady=height*0.01, sticky="nsew")
+            self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=5)
+            self.content_frame.grid(row=1,column=0, sticky="nsew")
             self.content_frame.grid_columnconfigure(2, weight=1)
             self.content_frame.grid_rowconfigure(1, weight=1)
             self.content_frame.grid_propagate(0)
 
-            self.search_frame = ctk.CTkFrame(self.content_frame, fg_color="light grey", width=width*0.35, height = height*0.05,)
+            """ self.search_frame = ctk.CTkFrame(self.content_frame, fg_color="light grey", width=width*0.35, height = height*0.05,)
             self.search_frame.grid(row=0, column=0,padx=(width*0.005),pady=(height*0.01), sticky="w")
             self.search_frame.pack_propagate(0)
 
-            ctk.CTkLabel(self.search_frame,text="Search", font=("Arial", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+            ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
             self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="grey",
                                             width=width*0.005)
-            self.search_btn.pack(side="left", padx=(0, width*0.0025))
+            self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
 
             self.resched_option_btn = ctk.CTkButton(self.content_frame, width * .075, height*0.05, text='Reschedule', font= ("DM Sans Medium", 14), command= self.resched_btn_callback)
-            self.resched_option_btn.grid(row=0, column=1,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
+            self.resched_option_btn.grid(row=0, column=1,padx=(width*0.005),pady=(height*0.01),sticky="w")
 
             self.refresh_btn = ctk.CTkButton(self.content_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= self.update_treeview)
             self.refresh_btn.grid(row=0, column=2,padx=(0,width*0.005),pady=(height*0.01),sticky="w")
@@ -730,8 +730,8 @@ def scheduled_services(master, info:tuple, parent= None) -> ctk.CTkFrame:
             self.sched_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
             self.sched_frame.grid(row=1, column=0, columnspan=3, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
-            self.sched_treeview = cctk.cctkTreeView(self.sched_frame, data =[], width=width*0.725, height=height*0.7,
-                                                    column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Pet:x-tl/Owner:x-tl/Service:{int(width*.12)}-tl/Total:{int(width*.1)}-tr/Date:{int(width*.12)}-tc!30!30',)
+            self.sched_treeview = cctk.cctkTreeView(self.sched_frame, data =[], width=width*0.8, height=height*0.7,
+                                                    column_format=f'/No:{int(width*.035)}-#r/ReceptionID:{int(width*.115)}-tc/Owner:x-tl/Pet:x-tl/Service:{int(width*.12)}-tl/Total:{int(width*.085)}-tr/Date:{int(width*.135)}-tc!33!35',)
             #                                   column_format=f'/No:{int(width*.025)}-#r/OR:{int(width*0.05)}-tc/ClientName:x-tl/Service:{int(width*.15)}-tr/Schedule:{int(width*.1)}-tc/Action:{int(width*.08)}-bD!30!30',)
             self.update_treeview()
             self.sched_treeview.pack()
@@ -805,8 +805,10 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
 
                 
             def service_proceed(_: any = None):
+                
                 if len(self.client) < 1:
-                    messagebox.showerror('Invalid Process', 'Assign the Client first', parent = self)
+                    messagebox.showerror('Invalid Process', 'The client have no customer record or pet in the record', parent = self)
+                    return
                 elif self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
@@ -917,7 +919,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             self.content_frame.grid_columnconfigure(0, weight=1)
             self.content_frame.grid_rowconfigure((1,2), weight=1)
                 
-            self.filter_optionmenu = ctk.CTkOptionMenu(self.content_frame, width=width*0.1, height=height*0.045, fg_color=Color.Blue_Tufts, values=["All", "Services", "Items"], anchor="center")
+            self.filter_optionmenu = ctk.CTkOptionMenu(self.content_frame, width=width*0.1, height=height*0.045, fg_color=Color.Blue_Tufts, values=["All", "Services", "Items"], anchor="center", font=("DM Sans Medium", 14),
+                                                       dropdown_font=("DM Sans Medium",14))
             self.filter_optionmenu.configure(command=filter_func)
             self.filter_optionmenu.grid(row=0, column=0, sticky="nsw", padx=(width*0.005), pady=(height*0.01))
             
@@ -936,6 +939,7 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             filter_func("All")
             
         def reset(self):
+            
             self.place_forget()
 
         def place(self, **kwargs):
@@ -982,7 +986,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             width = info[0]
             height = info[1]
             super().__init__(master,width * .835, height=height*0.92, corner_radius= 0, fg_color="transparent")
-            self.services_lists = [s[0] for s in database.fetch_data("SELECT service_name FROM service_info GROUP BY UID")]
+            self.services_lists = [s[0] for s in database.fetch_data("SELECT service_name FROM service_info_test GROUP BY UID")]
             self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
             self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
             self._attentdant: str = attendant
@@ -1022,7 +1026,12 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                         '''initial process'''
 
             def save_invoice_callback():
+                
+                if self.client_name_entry.get().strip() == "":
+                    messagebox.showwarning("Warning", "There is no client name")
+                    return
                 if len(self.transact_treeview._data) == 0:
+                    messagebox.showwarning("Warning", "There is no record to be saved")
                     return
                 for dt in self.transact_treeview._data:
                     if(dt[0] in self.service_dict and dt[0] in self.services_lists):
@@ -1108,6 +1117,12 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                 record_action(self._attentdant, action.INVOICE_TYPE, action.MAKE_INVOICE % (self._attentdant, uid))
                 messagebox.showinfo('Success', 'Reception record is saved', parent = self)
                 self.reset(True)
+                
+            def open_particulars():
+                if self.client_name_entry.get().strip() =="":
+                    messagebox.showwarning("Missing Input", "Select a customer or enter their surname for identification.", parent=self)
+                else:
+                    self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get())
 
                 
             self.grid_columnconfigure(0, weight=1)
@@ -1123,74 +1138,75 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.top_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
             self.top_frame.grid(row=0, column=0, columnspan=3, sticky="ew")
             self.top_frame.pack_propagate(0)
-
-            ctk.CTkLabel(self.top_frame, text='',image=self.invoice_icon).pack(side="left", padx=(width*0.015,0))
-            ctk.CTkLabel(self.top_frame, text='ADD RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
+            #self.invoice_icon
+            ctk.CTkLabel(self.top_frame, text='',image=Icons.get_image('histlogs_icon', (15,18))).pack(side="left", padx=(width*0.01,0))
+            ctk.CTkLabel(self.top_frame, text='ADD TRANSACTION RECORD', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.005,0))
             ctk.CTkButton(self.top_frame, text="X",width=width*0.025, command=self.reset).pack(side="right", padx=(0,width*0.01))
 
-            self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="__",  width=width*0.085, height=height*0.05, font=("DM Sans Medium", 14), fg_color="light grey", corner_radius=5)
+            self.invoice_id_label =ctk.CTkLabel(self.main_frame, text="__",  width=width*0.085, height=height*0.055, font=("DM Sans Medium", 16), fg_color=Color.White_Platinum, corner_radius=5)
             self.invoice_id_label.grid(row=1, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
 
-            self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color="light grey", width=width*0.35, height=height*0.05)
+            self.client_name_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum, width=width*0.35, height=height*0.055)
             self.client_name_frame.grid(row=1, column=1, sticky="w", padx=(0,width*0.005), pady=(height*0.01))
             self.client_name_frame.pack_propagate(0)
 
             self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
             self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
 
-            self.client_name_entry = ctk.CTkOptionMenu(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color='black', command= change_customer_callback)
+            self.client_name_entry = ctk.CTkComboBox(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color=Color.Blue_Maastricht, command= change_customer_callback, dropdown_font=("DM Sans Medium", 14),
+                                                     height=height*0.055, border_width=0, button_color=Color.Blue_Steel, button_hover_color=Color.Blue_Cobalt)
             self.client_name_entry.set('')
             self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
             self.client_name_entry.configure(values = self.client_names)
-            self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005), pady=(height*0.005))
+            self.client_name_entry.pack(side="left", fill="x", expand=1, padx=(width*0.005,width*0.0025), pady=(width*0.0025))
             
-            self.add_particulars: add_particulars = ctk.CTkButton(self.main_frame,text="Add Particulars", width=width*0.125, height=height*0.05, image=self.add_icon, font=("DM Sans Medium", 14),
-                                               command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
+            self.add_particulars: add_particulars = ctk.CTkButton(self.main_frame,text="Add Particulars", width=width*0.125, height=height*0.055, image=self.add_icon, font=("DM Sans Medium", 14),
+                                               command=open_particulars)
             self.add_particulars.grid(row=1, column=2, sticky="w")
 
             self.transact_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[3], corner_radius=0 )
             self.transact_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=(0))
 
             self.transact_treeview = cctk.cctkTreeView(self.transact_frame, data=[], width=width*0.8, height=height*0.685,
-                                                    column_format=f'/No:{int(width*0.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.1)}-tr/Quantity:{int(width*0.115)}-id/Total:{int(width*0.1)}-tr/Action:{int(width*.065)}-bD!30!35')
+                                                    column_format=f'/No:{int(width*0.035)}-#r/Particulars:x-tl/UnitPrice:{int(width*0.1)}-tr/Quantity:{int(width*0.115)}-id/Total:{int(width*0.1)}-tr/Action:{int(width*.065)}-bD!33!35')
             self.transact_treeview.pack(pady=(0,0))
             self.transact_treeview.bd_commands = bd_commands
             
-            self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent", height=height*0.05)
+            self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent", height=height*0.055)
             self.bottom_frame.grid(row=3, column=0, columnspan=3, sticky="ew", padx=(width*0.005), pady=(height*0.01))
 
             #self.add_particulars = ctk.CTkButton(self.bottom_frame, width=width*0.125, height=height*0.05, text='Add Particulars',
             #                                   image=self.add_icon, command=lambda:self.show_particulars.place(relx=0.5, rely=0.5, anchor="c", client = self.client_name_entry.get()))
             
-            self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+            self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.185, height=height*0.055, fg_color=Color.White_Platinum)
         
-            ctk.CTkLabel(self.price_total_frame, text="Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text="0,000.00", font=("Arial", 14))
+            ctk.CTkLabel(self.price_total_frame, fg_color=Color.White_Platinum, text="Grand Total:", font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text="₱0,000.00", fg_color=Color.White_Platinum, font=("DM Sans Medium", 16))
             self.price_total_amount.pack(side="right",  padx=(0,width*0.0075))
             
-            self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+            self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.185, height=height*0.055, fg_color=Color.White_Platinum)
 
-            ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="₱0,000.00", font=("Arial", 14))
+            ctk.CTkLabel(self.item_total_frame, text="Item Total:", fg_color=Color.White_Platinum, font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text="₱0,000.00", fg_color=Color.White_Platinum, font=("DM Sans Medium", 16))
             self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
 
-            self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
+            self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.185, height=height*0.055, fg_color=Color.White_Platinum)
         
-            ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="₱0,000.00", font=("Arial", 14))
+            ctk.CTkLabel(self.services_total_frame, text="Service Total:", fg_color=Color.White_Platinum, font=("DM Sans Medium", 16)).pack(side="left", padx=(width*0.0075,0))
+            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text="₱0,000.00", fg_color=Color.White_Platinum, font=("DM Sans Medium", 16))
             self.services_total_amount.pack(side="right",  padx=(0,width*0.0075)) 
             
-            self.services_total_frame.pack(side="left", padx=(0,width*0.0075))
+            self.services_total_frame.pack(side="left", padx=(0,width*0.0075),)
             self.services_total_frame.pack_propagate(0)
             self.item_total_frame.pack(side="left", padx=(0,width*0.0075))
             self.item_total_frame.pack_propagate(0)
             self.price_total_frame.pack(side="left")
             self.price_total_frame.pack_propagate(0)
  
-            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Record",height=height*0.05, width=width*0.09, font=("DM Sans Medium", 16), command= save_invoice_callback)
+            self.save_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Save Record",image=Icons.get_image('save_icon', (25,25)),height=height*0.055, width=width*0.09, font=("DM Sans Medium", 16), command= save_invoice_callback)
             self.save_invoice_btn.pack(side="right")
             
-            self.cancel_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip, height=height*0.05, width=width*0.06, font=("DM Sans Medium", 16))
+            self.cancel_invoice_btn = ctk.CTkButton(self.bottom_frame,text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Pastel_Hover, height=height*0.055, width=width*0.06, font=("DM Sans Medium", 16))
             self.cancel_invoice_btn.configure(command=self.reset)
             self.cancel_invoice_btn.pack(side="right", padx=(width*0.005))
             
@@ -1412,20 +1428,20 @@ def additional_option_invoice(master, info:tuple, attendant: str, uid: str, upda
             prices = database.fetch_data(sql_commands.get_prices_of_invoice, (self._uid, ))[0]
             self.price_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
         
-            ctk.CTkLabel(self.price_total_frame, text="Total:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text=f"₱{format_price(sum(prices))}", font=("Arial", 14))
+            ctk.CTkLabel(self.price_total_frame, text="Total:", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.price_total_amount = ctk.CTkLabel(self.price_total_frame, text=f"₱{format_price(sum(prices))}", font=("DM Sans Medium", 14))
             self.price_total_amount.pack(side="right",  padx=(0,width*0.0075))
             
             self.item_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
 
-            ctk.CTkLabel(self.item_total_frame, text="Item:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text= f'₱{format_price(int(prices[0]))}', font=("Arial", 14))
+            ctk.CTkLabel(self.item_total_frame, text="Item:", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.item_total_amount = ctk.CTkLabel(self.item_total_frame, text= f'₱{format_price(int(prices[0]))}', font=("DM Sans Medium", 14))
             self.item_total_amount.pack(side="right",  padx=(0,width*0.0075))
 
             self.services_total_frame = ctk.CTkFrame(self.bottom_frame, width=width*0.125, height=height*0.05, fg_color="light grey")
         
-            ctk.CTkLabel(self.services_total_frame, text="Services:", font=("Arial", 14)).pack(side="left", padx=(width*0.0075,0))
-            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text=f'₱{format_price(int(prices[1]))}', font=("Arial", 14))
+            ctk.CTkLabel(self.services_total_frame, text="Services:", font=("DM Sans Medium", 14)).pack(side="left", padx=(width*0.0075,0))
+            self.services_total_amount = ctk.CTkLabel(self.services_total_frame, text=f'₱{format_price(int(prices[1]))}', font=("DM Sans Medium", 14))
             self.services_total_amount.pack(side="right",  padx=(0,width*0.0075)) 
             
             self.services_total_frame.pack(side="left", padx=(0,width*0.0075))
