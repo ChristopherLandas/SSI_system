@@ -170,7 +170,7 @@ def calendar_with_scheduling(master, info:tuple, parent_ui: ctk.CTkLabel | ctk.C
             width = info[0]
             height = info[1]
             global SETTINGS_VAL
-            super().__init__(master, width=width * .5, height=height * .4, corner_radius= 0, fg_color='white')
+            super().__init__(master, width=width * .65, height=height * .6, corner_radius= 0, fg_color=Color.White_Platinum)
 
             self.parent_ui = parent_ui
             self.date_format = date_format
@@ -181,8 +181,8 @@ def calendar_with_scheduling(master, info:tuple, parent_ui: ctk.CTkLabel | ctk.C
             self.grid_rowconfigure(1, weight=1)
             self.grid_propagate(0)
 
-            self.top_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.04)
-            self.top_frame.grid(row=0, column=0, sticky="ew")
+            self.top_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.055)
+            self.top_frame.grid(row=0, column=0, sticky="ew", padx=1, pady=(1,0))
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=Icons.schedule_icon).pack(side="left",padx=(width*0.01,0))
@@ -193,19 +193,21 @@ def calendar_with_scheduling(master, info:tuple, parent_ui: ctk.CTkLabel | ctk.C
             self.main_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Color[0])
             self.main_frame.pack_propagate(0)
             self.main_frame.grid_propagate(0)
-            self.main_frame.grid(row=1, column=0, sticky="nsew")
+            self.main_frame.grid(row=1, column=0, sticky="nsew", padx=1, pady=(0,1))
+            self.main_frame.grid_rowconfigure(0,weight=1)
+            self.main_frame.grid_columnconfigure((0), weight=1)
 
             date = datetime.datetime.now()
             self.cal = cctk.tkc(self.main_frame, year=date.year, month=date.month, day=date.day, showweeknumbers=False, date_pattern="mm-dd-yyyy",
                                 normalbackground="#EAEAEA", weekendbackground="#F3EFE0", state = ctk.NORMAL,
                                 select_callback= self.get_data_schedule, mindate = self._min_date)
-            self.cal.pack(expand=True, padx=5, pady=5, anchor = 'w')
+            self.cal.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(width*0.005))
 
-            self.treeview_data = cctk.cctkTreeView(self, width= width *.5 * .5, height= height * .4 * .8, column_format='/Client:x-tl/Name:x-tl!50!30')
-            self.treeview_data.pack(expand=True, padx=5, pady=5, anchor = 'e')
+            self.treeview_data = cctk.cctkTreeView(self.main_frame, width= width *.35, height= height * .4 * .8, column_format='/PetName:x-tl/Service:x-tl!33!35')
+            self.treeview_data.grid(row=0, column=1, sticky="nse", padx=(width*0.005), pady=(width*0.005))
 
-            self.btn = ctk.CTkButton(self, text='set', command= self.set_date_ui)
-            self.btn.pack()
+            self.btn = ctk.CTkButton(self.main_frame, text='Set Date', command= self.set_date_ui)
+            self.btn.grid(row=1, column=0, columnspan=2, padx=(width*0.005), pady=(width*0.005))
 
             self.get_data_schedule()
             

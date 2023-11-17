@@ -799,7 +799,7 @@ update_pet_record_pet_owner = f"UPDATE pet_owner_info\
                                 contact_number = ?\
                                 WHERE pet_info.id = ? "
 
-insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, ?, 1, CURRENT_TIMESTAMP, NULL, NULL)"
+insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP, NULL, NULL)"
 update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
 update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
@@ -1111,7 +1111,7 @@ get_near_scheduled_clients_names = "SELECT service_name,\
                                     patient_name,\
                                     DATEDIFF(current_date, DATE_sub(scheduled_date, INTERVAL ? DAY))\
                                     from services_transaction_content\
-                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date AND item_inventory_info.stock > 0\
+                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date\
                                         AND scheduled_date != current_date"
                           
 get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
@@ -1289,8 +1289,12 @@ get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAS
                                 
 get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
-                        WHERE item_general_info.Category = ? AND reason = ?\
+                        WHERE item_general_info.Category = ? AND reason = ? AND receive_id IS NULL\
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
+
+get_cancel_filter = "SELECT receive_id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+                        LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
+                        WHERE  receive_id IS NOT NULL ORDER BY date_of_disposal DESC"
 
 get_customers_information = "SELECT pet_owner_info.owner_id,\
                                      pet_owner_info.owner_name,\

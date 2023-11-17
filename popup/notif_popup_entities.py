@@ -18,7 +18,7 @@ class notif_entity(cctk.ctkButtonFrame):
                  height: int = 200,
                  fg_color: str| tuple[str, str]= None,
                  command: Callable[[], None] | None = None,
-                 hover: bool = True,
+                 hover: bool = False,
                  hover_color: str | Tuple[str, str] = Color.White_Platinum,
                  text_colors: Optional[Tuple[str, str, str] | Tuple[Tuple[str, str, str], Tuple[str, str, str]]] = None,
                  fonts: Optional[Tuple[Tuple[str, int], Tuple[str, int], Tuple[str, int]]] = None,
@@ -82,7 +82,8 @@ def create_entity(master: any,
                  info_cnt: tuple | str | int = None) -> notif_entity:
     "Creates the Notif and automatically place it to the master"
 
-    command = lambda: notif_info_popup(info_cnt[0], (info_cnt[1], info_cnt[2])).place(text_info = info_cnt[3])
+    #command = lambda: notif_info_popup(info_cnt[0], (info_cnt[1], info_cnt[2])).place(text_info = info_cnt[3])
+    command = None
     instance: notif_entity = notif_entity(master, notif_title, notif_desc, width, height, fg_color, command= command, font_sizes= font_sizes, info_cnt = info_cnt)
     instance.pack(fill = 'x', pady=(3,0), padx=(3,0))
     instance.update()
