@@ -153,19 +153,20 @@ def sales_history_popup(master, info:tuple):
             
     return instance(master, info)
 
-def sched_info_popup(master, info:tuple):
+def sched_info_popup(master, info:tuple, source:Optional[str] = None):
     class instance(ctk.CTkFrame):
-        def __init__(self, master, info:tuple):
+        def __init__(self, master, info:tuple, source:Optional[str] = None):
             width = info[0]
             height = info[1]
-            super().__init__(master, corner_radius= 0, fg_color='transparent')
-
+            super().__init__(master, corner_radius= 0, fg_color=Color.White_Platinum)
+            
             self.sched_icon = ctk.CTkImage(light_image=Image.open("image/schedule.png"), size=(25,25))
             self.height = height
             self.width = width
+            self.source = source
                 
             def open_record(_):
-                if self.scheduled_pet_treeview.get_selected_data():
+                if self.scheduled_pet_treeview.get_selected_data() and self.source != 'dashboard':
                     temp = list(self.scheduled_pet_treeview.get_selected_data())
                     temp.extend(list(self.client_data))
                     sched_service_info_popup(master,(width, height)).place(relx=0.5, rely=0.525, anchor='c', sched_info=temp)
@@ -174,7 +175,7 @@ def sched_info_popup(master, info:tuple):
             def reset():
                 self.place_forget()
 
-            self.main_frame.grid(row=0, column=0)
+            self.main_frame.grid(row=0, column=0, padx=1, pady =1)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
@@ -245,7 +246,7 @@ def sched_info_popup(master, info:tuple):
             
             return super().place(**kwargs)
             
-    return instance(master, info)
+    return instance(master, info, source)
 
 def sched_service_info_popup(master, info:tuple):
     class instance(ctk.CTkFrame):
@@ -407,7 +408,7 @@ def rescheduling_service_info(master, info:tuple):
         def __init__(self, master, info:tuple):
             width = info[0]
             height = info[1]
-            super().__init__(master, corner_radius= 0, fg_color='transparent')
+            super().__init__(master, corner_radius= 0, fg_color=Color.White_Platinum)
 
             self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
             self.sched_icon = ctk.CTkImage(light_image=Image.open("image/schedule.png"), size=(25,25))
@@ -431,7 +432,7 @@ def rescheduling_service_info(master, info:tuple):
                     self.queston_frame.grid(row=4, column=0, columnspan=2, sticky="ns", padx=(width*0.005), pady=(0,height*0.01))
                     
             self.main_frame = ctk.CTkFrame(self, width=width*0.45, height=height*0.575, fg_color=Color.White_Color[3], corner_radius= 0)
-            self.main_frame.grid(row=0, column=0)
+            self.main_frame.grid(row=0, column=0, padx=1, pady=1)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)

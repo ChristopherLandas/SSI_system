@@ -3,7 +3,7 @@ get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
 get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
-get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
 get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 
@@ -198,11 +198,11 @@ get_item_data_for_transaction = "SELECT item_general_info.UID,\
                                  WHERE item_general_info.name = ?\
                                  GROUP BY item_general_info.UID"
 
-get_services_and_their_price = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info WHERE state = 1"
+get_services_and_their_price = "SELECT UID, service_name, Item_needed, CONCAT('₱', FORMAT(price, 2)) FROM service_info_test WHERE state = 1"
 get_services_data_for_transaction = "SELECT uid,\
                                              service_name,\
                                              CAST(price AS DECIMAL(10, 2))\
-                                     FROM service_info\
+                                     FROM service_info_test\
                                      WHERE service_name = ?;"
 
 check_item_if_it_expire_by_categ = "SELECT categories.does_expire\
@@ -267,8 +267,8 @@ null_stocks_by_id = "UPDATE item_inventory_info SET Stock = 0 WHERE id = ?"
 get_transaction_data = "SELECT * FROM transaction_record"
 
 #FOR SERVICES
-get_service_data = "SELECT service_name, price, date_added FROM service_info"
-get_services_names = "SELECT DISTINCT service_name FROM service_info"
+get_service_data = "SELECT service_name, price, date_added FROM service_info_test"
+get_services_names = "SELECT DISTINCT service_name FROM service_info_test"
 
 #FOR LOG AUDIT
 get_log_audit_for_today = "SELECT * FROM log_history WHERE date_logged = CURRENT_DATE"
@@ -411,7 +411,7 @@ get_disposal_items = "SELECT id, item_name, initial_quantity, reason, CAST(date_
 #ACCOUNT CREATION
 
 #PET INFO
-get_owners = "SELECT owner_name, address, contact_number FROM pet_owner_info"
+get_owners = "SELECT owner_name, address, contact_number FROM pet_owner_info ORDER BY owner_name ASC"
 check_owner_if_exist = owners = "SELECT COUNT(*) FROM pet_owner_info WHERE owner_name = ? "
 get_id_owner = "SELECT owner_id FROM pet_owner_info WHERE owner_name = ?"
 
@@ -1025,6 +1025,7 @@ get_expired_items_name = "SELECT item_general_info.name, SUM(item_inventory_info
                           JOIN item_settings\
                                   ON item_inventory_info.UID = item_settings.UID\
                           WHERE item_inventory_info.Expiry_Date <= CURRENT_DATE\
+                              AND  item_inventory_info.state = 1 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                           GROUP BY item_general_info.UID"
 
 get_near_expired_items_name = "SELECT item_general_info.name,\

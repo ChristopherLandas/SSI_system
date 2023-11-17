@@ -343,7 +343,7 @@ class dashboard(ctk.CTkToplevel):
         #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
-        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock', low_stock)] #for _ in low_stock]
+        ntf_c2 = [('Item low stock', f'{len(low_stock)} Item{"s are" if len(low_stock) > 1 else " is"} currently low stock', low_stock)] if low_stock else []#for _ in low_stock]
         #ntf_c2 = [('Item low stock', f'Item {s[0]} is currently low stock with only {s[1]} left') for s in low_stock]
 
         near_expire = database.fetch_data(sql_commands.get_near_expired_items_name, (SETTINGS_VAL['Near_expiry_date_alert'], ))
@@ -352,7 +352,7 @@ class dashboard(ctk.CTkToplevel):
 
         expired = database.fetch_data(sql_commands.get_expired_items_name)
         #ntf_c4 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
-        ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s are" if len(low_stock) > 1 else " is"} expired', expired)]# for _ in expired]
+        ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s are" if len(low_stock) > 1 else " is"} expired', expired)] if expired else []# for _ in expired]
 
         near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
         ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
@@ -608,8 +608,8 @@ class dashboard_frame(ctk.CTkFrame):
         self.load_scheduled_service()
         self.grid_forget()
         
-        #self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
-        #self.sched_info = dashboard_popup.sched_info_popup(self, (width, height))
+        self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
+        self.sched_info = dashboard_popup.sched_info_popup(self, (width, height), source='dashboard')
         #self.customer = customer_popup.new_customer(self, (width, height, ),)
         self.receiving_entity.start_receiving()
         
@@ -730,62 +730,34 @@ class reception_frame(ctk.CTkFrame):
         self.edit_icon = ctk.CTkImage(light_image=Image.open("image/edit_icon.png"), size=(18,18))
 
         '''INVOICE FRAME: START'''
-        self.invoice_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion)
+        self.invoice_frame = ctk.CTkFrame(self, fg_color='transparent')
         self.invoice_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-        self.invoice_frame.grid_rowconfigure(2, weight=1)
+        self.invoice_frame.grid_rowconfigure((1), weight=1)
         self.invoice_frame.grid_columnconfigure(0, weight=1)
         
-        '''TOP FRAME'''
-        self.top_con_frame = ctk.CTkFrame(self.invoice_frame,fg_color="transparent")
-        self.top_con_frame.grid(row=0, column=0,sticky="new", padx=(width*0.005), pady=(height*0.01, 0))
-        #invoice search button
-        self.search_frame = ctk.CTkFrame(self.top_con_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side="left")
-        self.search_frame.pack_propagate(0)
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
-                                        width=width*0.005,)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
-        
-        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.05, text="Create Transaction ",image=self.add_icon, font=("DM Sans Medium", 14))
-        self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
-        self.add_item_btn.pack(side="left", padx=(width*0.005))
-
-        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.05, text="View Shcedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
-                                               command = lambda: self.scheduled_services_popup.place(relx = .5, rely = .5, anchor = 'c'))
-        self.view_schedule_btn.pack(side="left", padx=(0, width*0.005))
-
-        self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = lambda:self.update_invoice_treeview(True))
-        self.refresh_btn.pack(side="left", padx=(0,width*0.005))
-    
-        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Reception", width=width*0.065, height = height*0.05, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
-        self.cancel_invoice_btn.pack(side="right")
-
         '''TAB NAV'''
         #region
         self.tab_frame = ctk.CTkFrame(self.invoice_frame, fg_color="transparent")
-        self.tab_frame.grid(row=1, column=0, sticky="new" ,padx=(width*0.005), pady=(height*0.005, 0))
-        self.tab_frame.grid_columnconfigure(4, weight=1)
+        self.tab_frame.grid(row=0, column=0, sticky="new" ,padx=(0), pady=(0))
+        self.tab_frame.grid_columnconfigure((2,3), weight=1)
         ctk.CTkFrame(self.tab_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=6, sticky="nsew")
 
-        self.item_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        self.item_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.065, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
         self.item_tab.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
         self.item_tab.configure(command = lambda: self.load_tab(0))
-        self.account_tab_icon = ctk.CTkLabel(self.item_tab, text="",image=self.trash_icon)
+        self.account_tab_icon = ctk.CTkLabel(self.item_tab, text="",image=Icons.get_image("inventory_icon", (24,25)))
         self.account_tab_icon.pack(side="left", padx=(width*0.01,width*0.0025))
-        self.accounts_label = ctk.CTkLabel(self.item_tab, text="ITEMS", text_color="white",font=('DM Sans Medium', 14))
+        self.accounts_label = ctk.CTkLabel(self.item_tab, text="ITEMS QUEUE", text_color="white",font=('DM Sans Medium', 14))
         self.accounts_label.pack(side="left")
         self.item_tab.grid()
         self.item_tab.update_children()
 
-        self.scheduling_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.055, width=width*0.125,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
-        self.scheduling_tab.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.scheduling_tab = cctk.ctkButtonFrame(self.tab_frame, cursor="hand2", height=height*0.065, width=width*0.135,fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        self.scheduling_tab.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
         self.scheduling_tab.configure(command = lambda: self.load_tab(1))
-        self.account_tab_icon = ctk.CTkLabel(self.scheduling_tab, text="",image=self.trash_icon)
-        self.account_tab_icon.pack(side="left", padx=(width*0.01,width*0.0025))
-        self.accounts_label = ctk.CTkLabel(self.scheduling_tab, text="QUEUE", text_color="white",font=('DM Sans Medium', 14))
+        self.account_tab_icon = ctk.CTkLabel(self.scheduling_tab, text="",image=Icons.get_image("services_icon", (24,25)))
+        self.account_tab_icon.pack(side="left", padx=(width*0.01,width*0.0035))
+        self.accounts_label = ctk.CTkLabel(self.scheduling_tab, text="SERVICES QUEUE", text_color="white",font=('DM Sans Medium', 14))
         self.accounts_label.pack(side="left")
         self.scheduling_tab.grid()
         self.scheduling_tab.update_children()
@@ -794,30 +766,55 @@ class reception_frame(ctk.CTkFrame):
         self.tab_mng.click(0)
         #endregion
 
-        '''INVOICE FRAME ITEMS'''
-        self.item_treeview_frame = ctk.CTkFrame(self.invoice_frame)
-        self.item_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
+        self.content_frame = ctk.CTkFrame(self.invoice_frame, fg_color=Color.White_Lotion, corner_radius=0)
+        self.content_frame.grid(row=1, column=0, sticky='nsew')
+        self.content_frame.grid_columnconfigure(0, weight=1)
+        #self.content_frame.grid_rowconfigure()
+        
+        '''TOP FRAME'''
+        self.top_con_frame = ctk.CTkFrame(self.tab_frame,fg_color="transparent")
+        self.top_con_frame.grid(row=0, column= 3,sticky="nsew", padx=(0), pady=(0))
+        
+        self.add_item_btn = ctk.CTkButton(self.top_con_frame,width=width*0.1, height = height*0.055, text="Create Transaction ",image=self.add_icon, font=("DM Sans Medium", 14))
+        self.add_item_btn.configure(command=lambda:self.show_invoice.place(relx=0.5, rely=0.5, anchor="c"))
+        self.add_item_btn.pack(side="left", padx=(width*0.005))
 
-        self.item_invoice_treeview = cctk.cctkTreeView(self.item_treeview_frame, width= width * .805, height= height * .684, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',
+        self.view_schedule_btn = ctk.CTkButton(self.top_con_frame, width= width * .1, height = height*0.055, text="View Schedules",image=Icons.schedule_icon, font=("DM Sans Medium", 14),
+                                               command = lambda: self.scheduled_services_popup.place(relx = .5, rely = .5, anchor = 'c'))
+        self.view_schedule_btn.pack(side="left", padx=(0, width*0.005))
+
+        self.refresh_btn = ctk.CTkButton(self.top_con_frame,text="", width=width*0.025, height = height*0.055, image=self.refresh_icon, fg_color="#83BD75", command = lambda:self.update_invoice_treeview(True))
+        self.refresh_btn.pack(side="left", padx=(0,width*0.005))
+    
+        self.cancel_invoice_btn = ctk.CTkButton(self.top_con_frame,text="Cancel Reception", width=width*0.065, height = height*0.055, font=("DM Sans Medium", 14), fg_color= '#ff6464', command = self.cancel_invoice)
+        self.cancel_invoice_btn.pack(side="right")
+        
+        
+        '''INVOICE FRAME ITEMS'''
+        self.item_treeview_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, corner_radius=0)
+        self.item_treeview_frame.grid(row=0, column=0, sticky="nsew",padx=(0), pady=(width*0.005))
+
+        self.item_invoice_treeview = cctk.cctkTreeView(self.item_treeview_frame, width= width * .805, height= height * .725, corner_radius=0,
+                                           column_format=f'/No:{int(width*.035)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Total:{int(width*.1)}-tr/Date:{int(width*.15)}-tc!33!35',
                                            double_click_command= self.load_invoice_content)
         self.active = self.item_invoice_treeview
         self.item_invoice_treeview.pack()
 
-        self.proceeed_button = ctk.CTkButton(self.item_treeview_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
+        self.proceeed_button = ctk.CTkButton(self.item_treeview_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.145,font=("DM Sans Medium", 14),
                                              compound="right", command = self.proceed_to_payment)
-        self.proceeed_button.pack(padx = (0, (width*.0025)), anchor = 'e', pady = (height * .005))
+        self.proceeed_button.pack(side='right', padx=(width*0.005), pady=(width*0.005))
+        
         '''INVOICE FRAME ITEMS: END'''
         
         '''SCHEDULING FRAME'''
-        self.scheduling_frame = ctk.CTkFrame(self.invoice_frame)
+        self.scheduling_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, corner_radius=0)
 
-        self.scheduling_invoice_treeview = cctk.cctkTreeView(self.scheduling_frame, width= width * .805, height= height * .684, corner_radius=0,
-                                                             column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Pet:x-tl/Owner:x-tl/Service:{int(width*.15 )}-tl/Total:{int(width*.1)}-tr/Date:{int(width*.1)}-tc!30!30',)                                                             #column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Per:x-tl/Services:x-tl/Date:{int(width*.1)}-tc!30!30')
+        self.scheduling_invoice_treeview = cctk.cctkTreeView(self.scheduling_frame, width= width * .805, height=height * .725, corner_radius=0,
+                                                             column_format=f'/No:{int(width*.035)}-#r/ReceptionID:{int(width*.115)}-tc/Owner:x-tl/Pet:x-tl/Service:{int(width*.15)}-tl/Total:{int(width*.085)}-tr/Date:{int(width*.125)}-tc!33!35',)                                                             #column_format=f'/No:{int(width*.025)}-#r/ReceptionID:{int(width*.115)}-tc/Per:x-tl/Services:x-tl/Date:{int(width*.1)}-tc!30!30')
         self.scheduling_invoice_treeview.pack()
-        self.proceeed_button = ctk.CTkButton(self.scheduling_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.135,font=("Arial", 14),
+        self.proceeed_button = ctk.CTkButton(self.scheduling_frame, text="Proceed to Payment", image=self.proceed_icon, height=height*0.05, width=width*0.145,font=("DM Sans Medium", 14),
                                              compound="right", command = self.proceed_to_payment)
-        self.proceeed_button.pack(padx = (0, (width*.0025)), anchor = 'e', pady = (height * .005))
+        self.proceeed_button.pack(side='right', padx=(width*0.005), pady=(width*0.005))
         '''SCHEDULING FRAME: END'''
         
         self.show_invoice:ctk.CTkFrame = transaction_popups.add_invoice(self,(width, height), lambda: self.update_invoice_treeview(True), acc_cred[0][0])
@@ -830,18 +827,18 @@ class reception_frame(ctk.CTkFrame):
             #self.service_treeview_frame.grid_forget()
             self.scheduling_frame.grid_forget()
             self.active = self.item_invoice_treeview
-            self.item_treeview_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
+            self.item_treeview_frame.grid(row=0, column=0, sticky="nsew",padx=(0), pady=(width*0.005))
         elif i == 1:
             #self.service_treeview_frame.grid_forget()
             self.item_treeview_frame.grid_forget()
             self.active = self.scheduling_invoice_treeview
-            self.scheduling_frame.grid(row=2, column=0, sticky="nsew",padx=(width*0.004), pady=(0,height*0.01))
+            self.scheduling_frame.grid(row=0, column=0, sticky="nsew",padx=(0), pady=(width*0.005))
         self.update_invoice_treeview()
 
     def post_sent_callback(self, i):
         if i == 1:
             self.active.remove_selected_data()
-            messagebox.showinfo("Succeed", 'Invoice preceeded to payment', parent = self)
+            messagebox.showinfo("Succeed", 'Transaction record preceeded to payment', parent = self)
         else:
             messagebox.showerror("Error", "An error occured", parent = self)
 
@@ -877,18 +874,18 @@ class reception_frame(ctk.CTkFrame):
                 #self.active.update_table(database.fetch_data(sql_commands.get_invoice_info, (index, )))
                 # load the queued service treeview
             self.loaded[index] = True
-        self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+        self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
         
 
     def cancel_invoice(self, bypass_confirmation: bool = False):
         if self.active.get_selected_data() is None:
-            messagebox.showwarning("Fail to proceed", "Select an invoice \nto cancel", parent = self)
+            messagebox.showwarning("Fail to proceed", "Select an transaction record to cancel", parent = self)
             return
         if bypass_confirmation:
             database.exec_nonquery([[sql_commands.cancel_invoice, (self.invoice_treeview.get_selected_data()[0], )]])
             self.update_invoice_treeview(True)
         else:
-            if(messagebox.askyesno("Cancel Invoice", "Are you really want\nto cancel this invoice", parent = self)) and self.active != self.scheduling_invoice_treeview:
+            if(messagebox.askyesno("Cancel Transaction", "Are you really want to cancel this transaction", parent = self)) and self.active != self.scheduling_invoice_treeview:
                 database.exec_nonquery([[sql_commands.cancel_invoice, (self.active.get_selected_data()[0], )]])
                 self.update_invoice_treeview(True)
 
@@ -910,7 +907,7 @@ class reception_frame(ctk.CTkFrame):
                     messagebox.showinfo("Success", "Service mark as done", parent = self)
                     self.scheduling_invoice_treeview.remove_selected_data()
         else:
-            messagebox.showwarning("Fail to proceed", "Select an invoice before\nheading into the payment", parent = self)
+            messagebox.showwarning("Fail to proceed", "Select an transaction record before\nheading into the payment", parent = self)
     #obsolete
 
 class payment_frame(ctk.CTkFrame):
@@ -955,11 +952,11 @@ class payment_frame(ctk.CTkFrame):
         self.refresh_btn.pack(side = ctk.LEFT, padx=(0, width*0.005), pady=(height*0.01))
         #self.refresh_btn.grid(row=0, column=1, sticky="w", padx=(0, width*0.0025))
 
-        self.additional_option = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Edit Items", font= ("Arial", 16), command = self.add_item_command, image= self.edit_icon)
+        self.additional_option = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Edit Items", font= ("DM Sans Medium", 16), command = self.add_item_command, image= self.edit_icon)
         self.additional_option.pack(side = ctk.LEFT, padx=(0, width*0.005), pady=(height*0.01))
         #self.additional_option.grid(row=0, column=2, sticky="w", padx=(0, width*0.0025))
 
-        self.void_billing = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Void Transaction", font= ("Arial", 16), anchor = ctk.RIGHT, fg_color = '#ff6464', command = self.invoice_callback)
+        self.void_billing = ctk.CTkButton(self.upper_frame, width=width*0.05, height = height*0.05, text= "Void Transaction", font= ("DM Sans Medium", 16), anchor = ctk.RIGHT, fg_color = '#ff6464', command = self.invoice_callback)
         self.void_billing.pack(side = ctk.RIGHT, padx=(0, width*0.005), pady=(height*0.01))
         #self.void_billing.grid(row=0, column=5, sticky="ew", padx=(0, width*0.0025))
        
@@ -967,7 +964,7 @@ class payment_frame(ctk.CTkFrame):
         self.payment_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew",padx=(width*0.005), pady=(0,height*0.01))
 
         self.payment_treeview = cctk.cctkTreeView(self.payment_treeview_frame, width= width * 0.805, height= height *.745, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/InvoiceId:{int(width*.075)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!30!30',)
+                                           column_format=f'/No:{int(width*.035)}-#r/ReceptionID:{int(width*.115)}-tc/ClientName:x-tl/Services:{int(width*.1)}-tr/Items:{int(width*.1)}-tr/Total:{int(width*.09)}-tr!33!35',)
         self.update_payment_treeview()
         self.payment_treeview.pack()
 
@@ -2417,7 +2414,7 @@ class reports_frame(ctk.CTkFrame):
         self.search_frame.pack_propagate(0)
 
         ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("Arial", 14), text_color="black", fg_color=Color.White_Color[3])
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("DM Sans Medium", 14), text_color="black", fg_color=Color.White_Color[3])
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
 
         self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.03, height = height*0.0575, image=self.refresh_icon, fg_color="#83BD75")

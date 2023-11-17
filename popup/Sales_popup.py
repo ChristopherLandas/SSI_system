@@ -158,8 +158,8 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
         def set_values(self):
             [self.labels[i].configure(text=f"{self.transact_info[i]}") for i in range(len(self.labels))]     
             self.status_label.configure(text=f"{'Paid' if self.transact_info[-1] == 1 else 'Paid and Replaced'}")
-            
-            if self.transact_info[-1] == 1:
+            #print(self.transact_info)
+            if self.transact_info[-2] == 1:
                 self.change_order_btn.grid(row=0, column=3, sticky="nse",padx=(0,width*0.005), pady= width*0.005)  
                 self.replaced_item_btn.grid_forget()
             else:

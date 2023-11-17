@@ -586,7 +586,7 @@ def show_status(master, info:tuple,):
             def page_callback():
                 self.update_table()
 
-            self.page_row_count = 14
+            self.page_row_count = 12
             
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], width=width*0.65, height=height*0.86,
                                            border_width=1, border_color=Color.White_Platinum)
@@ -618,7 +618,7 @@ def show_status(master, info:tuple,):
             self.db_inventory_frame.grid(row=2, column=0, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
             self.db_inventory_treeview = cctk.cctkTreeView(self.db_inventory_frame, width=width*0.64, height=height*0.85,
-                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*0.1)}-tl/ItemDescription:x-tl/QuantityPcs:{int(width*0.125)}-tr!30!30',)
+                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*0.1)}-tl/ItemDescription:x-tl/QuantityPcs:{int(width*0.125)}-tr!33!35',)
             self.db_inventory_treeview.pack()
             
             self.page_counter = cctk.cctkPageNavigator(self.main_frame,  width=width*0.125, height=height*0.055, fg_color=Color.White_Platinum, page_fg_color=Color.White_Lotion, 
@@ -1137,7 +1137,8 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
             self.item_treeview_frame.grid(row=1, column=0, sticky="nsew", pady=(height*0.01), padx=(height*0.01))
             
             self.item_treeview = cctk.cctkTreeView(self.item_treeview_frame, data=[],width= width*0.64, height= height*0.5, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.085)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl!30!35',)
+                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.085)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl!33!35',
+                                           bd_message="Are you sure you want to remove this item to this supplier?")
             self.item_treeview.pack()
             
             self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color = Color.White_Platinum)
