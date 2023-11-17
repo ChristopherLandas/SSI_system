@@ -736,7 +736,167 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         d.add(pc, '')
         #create pdf
         renderPDF.drawToFile(d, my_path, '')
+    #Daily Income Report Content
+    def sales_gen():
+        date_temp = datetime.datetime.strptime(daily_date_text_var.get(), '%B %d, %Y').strftime('%Y-%m-%d')
+        service_total_temp = 0
+        sales_total_temp = 0
+        #path for charts
+        sales_filename = f'image\sales.pdf'
+        pdf = SimpleDocTemplate(
+            filename=sales_filename,
+            pagesize=letter
+        )
+        daily_service_report_content_temp = [
+            ['Services', '', '', ''],
+            ['OR#', 'Client Name', 'Service Description', 'Price'],
+                                           ]
+        
+        daily_sales_report_content_temp = [
+            ['Sales', '', '', '', ''],
+            ['OR#', 'Particular', 'Quantity', 'Price', 'Total Price'],
+                                           ]
+        #add data for tables
+        for x in database.fetch_data(sql_commands.get_services_daily_report_content, (date_temp,)):
+            temp_data = []
+            temp_data.append(x[0])
+            temp_data.append(x[1])
+            temp_data.append(x[2])
+            temp_data.append(x[3])
+            service_total_temp += float(x[4])
+            daily_service_report_content_temp.append(temp_data)
+        daily_service_report_content_temp.append(['Total:', '', '', f'P{service_total_temp:,.2f}'])
+        for x in database.fetch_data(sql_commands.get_sales_daily_report_content, (date_temp,)):
+            temp_data = []
+            temp_data.append(x[0])
+            length_counter = 0
+            item_name = x[1]
+            itm_name = ''
+            for i_name in item_name.split():
+                length_counter += len(i_name)
+                if length_counter > 21:
+                    length_counter = len(i_name)
+                    itm_name += f'\n{i_name}'
+                else:
+                    itm_name += f'{i_name} '
+            temp_data.append(itm_name)
+            temp_data.append(x[2])
+            temp_data.append(x[3])
+            temp_data.append(x[4])
+            sales_total_temp += float(x[5])
+            daily_sales_report_content_temp.append(temp_data)
+        daily_sales_report_content_temp.append(['Total:', '', '', '', f'P{sales_total_temp:,.2f}'])
 
+        table_content = Table(daily_service_report_content_temp)
+        table_content2 = Table(daily_sales_report_content_temp)
+        empty_space = Table([''], [''])
+        
+        #add table style
+        tbl_style = TableStyle(
+            [
+            #text alignment, starting axis, -1 = end
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('SPAN', (0, 0), (-1, 0)),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            #centers or num column
+            ('ALIGN', (0, 2), (0, -1), 'CENTER'),
+            #aligns left client name column
+            ('ALIGN', (1, 2), (1, -1), 'LEFT'),
+            #aligns left service name column
+            ('ALIGN', (2, 2), (2, -1), 'LEFT'),
+            #aligns right price column
+            ('ALIGN', (3, 2), (3, -1), 'RIGHT'),
+            #font style
+            ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            #space at the bottom
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (1, 0), (1, -1), 10),
+            #for total
+            ('SPAN', (0, len(daily_service_report_content_temp)-1), (2, len(daily_service_report_content_temp)-1)),
+            ('ALIGN', (0, len(daily_service_report_content_temp)-1), (-1, len(daily_service_report_content_temp)-1), 'RIGHT'),
+            ]
+        )
+
+        tbl_style2 = TableStyle(
+            [
+            #text alignment, starting axis, -1 = end
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('SPAN', (0, 0), (-1, 0)),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            #centers or num column
+            ('ALIGN', (0, 2), (0, -1), 'CENTER'),
+            #aligns left particulars column
+            ('ALIGN', (1, 2), (1, -1), 'LEFT'),
+            #aligns left quantity name column
+            ('ALIGN', (2, 2), (2, -1), 'RIGHT'),
+            #aligns right price column
+            ('ALIGN', (3, 2), (3, -1), 'RIGHT'),
+            #aligns right total price column
+            ('ALIGN', (4, 2), (4, -1), 'RIGHT'),
+            #font style
+            ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            #space at the bottom
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (1, 0), (1, -1), 10),
+            #for total
+            ('SPAN', (0, len(daily_sales_report_content_temp)-1), (3, len(daily_sales_report_content_temp)-1)),
+            ('ALIGN', (0, len(daily_sales_report_content_temp)-1), (-1, len(daily_sales_report_content_temp)-1), 'RIGHT'),
+            ]
+        )
+
+        empty_style = TableStyle(
+            [
+            #space at the bottom
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 30),
+            ('LEFTPADDING', (1, 0), (1, -1), 10),
+            ]
+        )
+
+        table_content.setStyle(tbl_style)
+        table_content2.setStyle(tbl_style2)
+        empty_space.setStyle(empty_style)
+        #alternate background color
+        rowNumb = len(daily_service_report_content_temp)
+        for i in range(1, rowNumb):
+            if i % 2 == 0:
+                bc = colors.white
+            else:
+                bc = colors.lightgrey
+
+            ts = TableStyle(
+                [('BACKGROUND', (0, i), (-1, i), bc)]
+            )
+            table_content.setStyle(ts)
+
+        rowNumb = len(daily_sales_report_content_temp)
+        for i in range(1, rowNumb):
+            if i % 2 == 0:
+                bc = colors.white
+            else:
+                bc = colors.lightgrey
+
+            ts = TableStyle(
+                [('BACKGROUND', (0, i), (-1, i), bc)]
+            )
+            table_content2.setStyle(ts)
+
+        #add borders
+        ts = TableStyle([
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        table_content.setStyle(ts)
+        table_content2.setStyle(ts)
+
+        elems = []
+        elems.append(table_content)
+        elems.append(empty_space)
+        elems.append(table_content2)
+
+        pdf.build(elems)
     #yearly
 
     if 'Yearly' == report_type:
@@ -1194,6 +1354,21 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
 
         pdf.build(elems)
         #pdf compilation
+        sales_gen()
+
+        merger = PdfWriter()
+        input1 = open(f"image/sales.pdf", "rb")
+        input2 = open(f"{filename}", "rb")
+        # add the first 3 pages of input1 document to output
+        merger.append(input2)
+        merger.append(input1)
+        # Write to an output PDF document
+        output = open(filename, "wb")
+        merger.write(output)
+        # Close File Descriptors
+        merger.close()
+        output.close()
+
         merger = PdfWriter()
         input1 = open(f"image\charts.pdf", "rb")
         input2 = open(filename, "rb")
@@ -1219,7 +1394,8 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         for page in range(len(p1.pages)):
             merger = pdfrw(p1.pages[page])
             merger.add(p2.pages[page]).render()
-            if page == (len(p1.pages)-1):
+            #if page == (len(p1.pages)-1):
+            if page == 0:
                 merger.add(p4.pages[0]).render()
         if include_graphs:
             merger = pdfrw(p1.pages[0])
@@ -1227,6 +1403,7 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
 
         writer = pdfrw2()
         writer.write(filename, p1)
+
         if finish_alerts:
             messagebox.showinfo(title="Generate PDF Report", message="Succesfully Generated Daily Report.", parent = master)
 
@@ -1421,8 +1598,18 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     ctr = 0
     for x in inventory_report_data:
         temp_data = []
-        temp_data.append(x[0])
-        #temp_data.append(x[0])
+        temp_data.append(x[3])
+        length_counter = 0
+        item_name = x[0]
+        itm_name = ''
+        for i_name in item_name.split():
+            length_counter += len(i_name)
+            if length_counter > 25:
+                length_counter = len(i_name)
+                itm_name += f'\n{i_name}'
+            else:
+                itm_name += f'{i_name} '
+        temp_data.append(itm_name)
         temp_data.append(x[2])
         temp_data.append(x[3])
         inventory_report_data_temp.append(temp_data)
@@ -1432,6 +1619,7 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     tbl_style = TableStyle(
         [
         #text alignment, starting axis, -1 = end
+        ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
         ('SPAN', (0, 0), (-1, 0)),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('ALIGN', (0, 1), (0, -1), 'LEFT'),
@@ -1517,7 +1705,6 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
         if page == (len(p1.pages)-1):
             if not stop_foot_gen2:
                 merger.add(p3.pages[0]).render()
-                print('asd')
         else:
             merger.add(p2.pages[page]).render()
 
