@@ -1176,7 +1176,7 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
-                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c'))
+                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c', button=self.add_customer))
         self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
@@ -1244,13 +1244,30 @@ class services_frame(ctk.CTkFrame):
         self.grid_columnconfigure(0,weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_forget()
+        
+        self.sub_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion,corner_radius=0)
+        self.sub_frame.grid(row=1, column=0, sticky="nsew", columnspan=2, padx=(width*0.005), pady=(0, height*0.01))
+        self.sub_frame.grid_rowconfigure(1, weight=1)
+        self.sub_frame.grid_columnconfigure(0, weight=1)
+        
+        self.services_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Color[3])
+        self.service_item_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Color[3])
+        
+        self.report_frames=[self.services_frame, self.service_item_frame]
+        self.active_report = None
+
+        def load_main_frame(cur_frame: int):
+            if self.active_report is not None:
+                self.active_report.grid_forget()
+            self.active_report = self.report_frames[cur_frame]
+            self.active_report.grid(row=1, column=0, sticky="nsew")
 
         def refresh(_ :any = None):
             self.refresh_btn.configure(state = ctk.DISABLED)
             #self.services_raw_data = database.fetch_data(sql_commands.get_service_data, None)
             #self.services_data_for_treeview = [] if self.services_raw_data is None else [(s[0], format_price(float(s[1])), s[2]) for s in self.services_raw_data]
             self.update_table()           
-            self.refresh_btn.after(5000, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
+            self.refresh_btn.after(100, lambda: self.refresh_btn.configure(state = ctk.NORMAL))
 
     
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
@@ -1259,12 +1276,44 @@ class services_frame(ctk.CTkFrame):
         
         self.date_label = ctk.CTkLabel(self, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 15),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=1, sticky="ns", padx=width*0.005,pady=height*0.01)
+        self.date_label.grid(row=0, column=1, sticky="ns", padx=width*0.005,pady=height*0.005)
 
-        self.top_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion, height = height*0.055, corner_radius=0)
-        self.top_frame.grid(row=0, column=0 , sticky="nw",padx=width*0.005,pady=(height*0.01,0))
+        ctk.CTkFrame(self.sub_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.0075, bg_color=Color.Blue_Yale).grid(row=0, column=0, columnspan=5, sticky="nsew")
+        
+        self.top_frame = ctk.CTkFrame(self, fg_color="transparent", height = height*0.05, corner_radius=0)
+        self.top_frame.grid(row=0, column=0 , sticky="nsw",padx=width*0.005,pady=(height*0.01,0))
+        self.top_frame.grid_rowconfigure(0, weight=1)
 
-        self.search_frame = ctk.CTkFrame(self.top_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        self.services_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.115,
+                                                       fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=Color.Blue_Yale)
+
+        self.services_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.services_button.configure(command=partial(load_main_frame, 0))
+        self.inventory_icon = ctk.CTkLabel(self.services_button, text="",image=Icons.get_image("services_icon", (18,20)))
+        self.inventory_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.inventory_label = ctk.CTkLabel(self.services_button, text="SERVICES", text_color="white", font=("DM Sans Medium", 14))
+        self.inventory_label.pack(side="left")
+        self.services_button.grid()
+        self.services_button.update_children()
+
+        self.service_item_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=Color.Blue_Yale)
+
+        self.service_item_button.grid(row=0, column=1, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.service_item_button.configure(command=partial(load_main_frame, 1))
+        self.stock_in_icon = ctk.CTkLabel(self.service_item_button, text="",image=Icons.get_image("inventory_icon", (19,20)))
+        self.stock_in_icon.pack(side="left", padx=(width*0.01,width*0.005))
+        self.stock_in_label = ctk.CTkLabel(self.service_item_button, text="SERVICE ITEMS", text_color="white", font=("DM Sans Medium", 14))
+        self.stock_in_label.pack(side="left")
+        self.service_item_button.grid()
+        self.service_item_button.update_children()
+        
+        self.button_manager = cctku.button_manager([self.services_button, self.service_item_button,], Color.Blue_Yale, False, 0)
+        self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
+                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
+        self.button_manager.click(self.button_manager._default_active, None)
+        
+        """ self.search_frame = ctk.CTkFrame(self.top_frame, width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.pack(side="left", padx=(width*0.005), pady=(height*0.01))
         self.search_frame.pack_propagate(0)
 
@@ -1274,30 +1323,72 @@ class services_frame(ctk.CTkFrame):
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
                                         width=width*0.005)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
         
-        self.add_service = ctk.CTkButton(self.top_frame, text="Add Service", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, image=self.plus,
+        """SERVICE"""
+        self.button_frame = ctk.CTkFrame(self.services_frame, fg_color='transparent', corner_radius=0, height=height*0.055)
+        self.button_frame.pack_propagate(0)
+        self.button_frame.pack(fill="x", expand = 1, padx=(width*0.005), pady=(width*0.005))
+        
+        self.add_service = ctk.CTkButton(self.button_frame, text="Add Service", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, image=self.plus,
                                          command=lambda: service_popup.add_service(self,(width, height,  acc_cred[0][0]), self.update_table).place(relx=0.5, rely=0.5, anchor="c"))
-        self.add_service.pack(side="left", padx=(0,width*0.005), pady=(height*0.01))
+        self.add_service.pack(side="left", padx=(0,width*0.005), pady=(0))
         
-        self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh)
-        self.refresh_btn.pack(side="left", padx=(0,width*0.005), pady=(height*0.01))
-
-        self.sub_frame = ctk.CTkFrame(self, fg_color=Color.White_Lotion,corner_radius=0)
-        self.sub_frame.grid(row=1, column=0, sticky="nsew", columnspan=2, padx=(width*0.005), pady=(0, height*0.01))
-        self.sub_frame.grid_rowconfigure(0, weight=1)
-        self.sub_frame.grid_columnconfigure(0, weight=1)
+        self.refresh_btn = ctk.CTkButton(self.button_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh)
+        self.refresh_btn.pack(side="left", padx=(0,width*0.005), pady=(0)) 
         
-        self.service_data_frame = ctk.CTkFrame(self.sub_frame, fg_color=Color.White_Platinum, corner_radius=0)
-        self.service_data_frame.grid(row=0, column=0, columnspan=6, sticky="nsew", padx=(width*0.005), pady=(height*0.0125, height*0.02))
+        
+        self.service_data_frame = ctk.CTkFrame(self.services_frame, fg_color=Color.White_Platinum, corner_radius=0)
+        self.service_data_frame.pack(pady=(0, width*0.005))
 
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         
-        self.services_treeview = cctk.cctkTreeView(self.service_data_frame, data = self.services_data , width=width*0.8, height=height*0.8,
-                                               column_format=f'/No:{int(width*.025)}-#r/ServiceCode:{int(width*.125)}-tc/ServiceName:x-tl/Duration:{int(width*.175)}-tl/Price:{int(width*.115)}-tr!33!35')
+        self.services_treeview = cctk.cctkTreeView(self.service_data_frame, data = self.services_data , width=width*0.805, height=height*0.8,
+                                               column_format=f'/No:{int(width*.035)}-#r/ServiceCode:{int(width*.125)}-tc/ServiceName:x-tl/Duration:{int(width*.175)}-tl/Price:{int(width*.115)}-tr!33!35')
         self.services_treeview.pack()
         
+        
+        """SERVICE ITEMS"""
+        
+        
+        self.svc_button_frame = ctk.CTkFrame(self.service_item_frame, fg_color='transparent', corner_radius=0, height=height*0.055)
+        self.svc_button_frame.pack_propagate(0)
+        self.svc_button_frame.pack(fill="x", expand = 1, padx=(width*0.005), pady=(width*0.005))
+        
+        self.svc_add_item = ctk.CTkButton(self.svc_button_frame, text="Add Item", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, image=self.plus,
+                                         command=lambda: self.add_service_item.place(relx=0.5, rely=0.5, anchor="c"))
+        self.svc_add_item.pack(side="left", padx=(0,width*0.005), pady=(0))
+        
+        self.svc_refresh_btn = ctk.CTkButton(self.svc_button_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh)
+        self.svc_refresh_btn.pack(side="left", padx=(0,width*0.005), pady=(0)) 
+        
+        
+        self.svc_item_data_frame = ctk.CTkFrame(self.service_item_frame, fg_color=Color.White_Platinum, corner_radius=0)
+        self.svc_item_data_frame.pack(pady=(0, width*0.005))
+
+        #self.svc_item_data = database.fetch_data(sql_commands.get_service_data_test, None)
+        
+        self.svc_item_treeview = cctk.cctkTreeView(self.svc_item_data_frame, data =[] , width=width*0.805, height=height*0.8,
+                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.125)}-tc/ItemDescription:x-tl/Status:{int(width*.175)}-tl/ExpirationDate:{int(width*.115)}-tr/Action:{int(width*.085)}-bD!33!35',
+                                               bd_message="Are you sure you want to remove one (1) quantity of this item?")
+        self.svc_item_treeview.pack()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        load_main_frame(0)
+        
+        self.add_service_item = Inventory_popup.add_service_item(self, (width, height), command_callback= None)
+        
     def update_table(self):
+        return
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
 

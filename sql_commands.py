@@ -3,7 +3,7 @@ get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
 get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
-get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
 get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 
@@ -463,32 +463,6 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
-#changed order by from UID to name and group by from name to UID, changed item_gen_info.name to name with unit      
-get_inventory_report = "SELECT item_general_info.UID, CONCAT(item_general_info.name, COALESCE(CONCAT(' - ', item_general_info.unit), '')) AS  name_with_unit,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
-                                   FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.UID\
-                                   ORDER BY item_general_info.name"
-
-get_inventory_info_with_uid = "SELECT CONCAT(item_general_info.name, COALESCE(CONCAT(' - ', item_general_info.unit), '')) AS  name_with_unit,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
-                                    item_general_info.UID FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.UID\
-                                   ORDER BY item_general_info.Name;"
-
-get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
-                                      		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
-                                      FROM item_transaction_content\
-                                      JOIN transaction_record ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
-                                      WHERE transaction_record.transaction_date = current_date AND item_transaction_content.state = 1\
-                                      GROUP BY item_transaction_content.item_name\
-                                      ORDER BY transaction_record.transaction_uid"
                                    
 get_inventory_report = "SELECT item_general_info.UID,\
                                     CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
@@ -825,7 +799,7 @@ update_pet_record_pet_owner = f"UPDATE pet_owner_info\
                                 contact_number = ?\
                                 WHERE pet_info.id = ? "
 
-insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, NULL, NULL)"
+insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, ?, 1, CURRENT_TIMESTAMP, NULL, NULL)"
 update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
 update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
