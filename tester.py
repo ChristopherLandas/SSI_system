@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Union
 import customtkinter as ctk
 from tkinter import messagebox
 from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
-from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup, mini_popup, dashboard_popup
+from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup, mini_popup, dashboard_popup, transaction_popups
 #from decimal import Decimal
 from util import *
 #import sql_commands
@@ -31,8 +31,10 @@ class body(ctk.CTk):
         self.entry.configure(textvariable = temp)'''
 
         #dashboard_popup.rescheduling_service_info(self, self.screen).place(relx = .5, rely = .5, anchor = 'c', uid= 'TR# 179')
-        data = database.fetch_data("select * from service_preceeding_schedule")[0][-2]
-        print(type(data + datetime.timedelta(days= 5)))
+        #data = database.fetch_data("select * from service_preceeding_schedule")[0][-2]
+        #print(type(data + datetime.timedelta(days= 5)))
+
+        transaction_popups.svc_provider(self, self.screen).place(relx = .5, rely = .5, anchor = 'c')
         self.mainloop()
 
         '''self.entry = ctk.CTkEntry(self, font= ('Arial', 24))
