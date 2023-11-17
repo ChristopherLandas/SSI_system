@@ -3,7 +3,8 @@ get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
 get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
-get_service_uid = "SELECT UID FROM service_info where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
 get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 
@@ -463,32 +464,6 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
-#changed order by from UID to name and group by from name to UID, changed item_gen_info.name to name with unit      
-get_inventory_report = "SELECT item_general_info.UID, CONCAT(item_general_info.name, COALESCE(CONCAT(' - ', item_general_info.unit), '')) AS  name_with_unit,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
-                                   FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.UID\
-                                   ORDER BY item_general_info.name"
-
-get_inventory_info_with_uid = "SELECT CONCAT(item_general_info.name, COALESCE(CONCAT(' - ', item_general_info.unit), '')) AS  name_with_unit,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
-                                    item_general_info.UID FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.UID\
-                                   ORDER BY item_general_info.Name;"
-
-get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
-                                      		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
-                                      FROM item_transaction_content\
-                                      JOIN transaction_record ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
-                                      WHERE transaction_record.transaction_date = current_date AND item_transaction_content.state = 1\
-                                      GROUP BY item_transaction_content.item_name\
-                                      ORDER BY transaction_record.transaction_uid"
                                    
 get_inventory_report = "SELECT item_general_info.UID,\
                                     CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
@@ -825,7 +800,7 @@ update_pet_record_pet_owner = f"UPDATE pet_owner_info\
                                 contact_number = ?\
                                 WHERE pet_info.id = ? "
 
-insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, NULL, NULL)"
+insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP, NULL, NULL)"
 update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
 update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
@@ -1137,7 +1112,7 @@ get_near_scheduled_clients_names = "SELECT service_name,\
                                     patient_name,\
                                     DATEDIFF(current_date, DATE_sub(scheduled_date, INTERVAL ? DAY))\
                                     from services_transaction_content\
-                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date AND item_inventory_info.stock > 0\
+                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date\
                                         AND scheduled_date != current_date"
                           
 get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
@@ -1315,8 +1290,12 @@ get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAS
                                 
 get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
-                        WHERE item_general_info.Category = ? AND reason = ?\
+                        WHERE item_general_info.Category = ? AND reason = ? AND receive_id IS NULL\
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
+
+get_cancel_filter = "SELECT receive_id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+                        LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
+                        WHERE  receive_id IS NOT NULL ORDER BY date_of_disposal DESC"
 
 get_customers_information = "SELECT pet_owner_info.owner_id,\
                                      pet_owner_info.owner_name,\
@@ -1399,3 +1378,50 @@ get_sales_daily_report_content = "SELECT item_transaction_content.transaction_ui
        CONCAT('₱', FORMAT(price*quantity, 2)) as total_item_price, price*quantity as all_total \
           FROM item_transaction_content INNER JOIN transaction_record ON transaction_record.transaction_uid = item_transaction_content.transaction_uid \
             WHERE transaction_record.transaction_date = ?"
+
+select_item_valid_for_service = "SELECT item_general_info.UID,\
+                                         item_general_info.brand,\
+                                         item_general_info.name,\
+                                         item_general_info.unit,\
+                                         SUM(item_inventory_info.Stock) AS stock\
+                                 FROM item_general_info\
+                                 JOIN item_inventory_info\
+                                     ON item_general_info.UID = item_inventory_info.UID\
+                                 WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                 GROUP BY item_general_info.UID\
+                                 HAVING stock > 0"
+
+get_the_first_item_to_inv = "SELECT id, uid, stock, expiry_date\
+                             FROM item_inventory_info\
+                             WHERE uid = ?\
+                                 AND (expiry_date IS NULL\
+                                 OR expiry_date > CURRENT_DATE)\
+                                 AND (stock > 0)\
+                             ORDER BY case when expiry_date IS NULL then added_date ELSE expiry_date END"
+
+insert_instance_to_used_in_services = "INSERT INTO used_items_in_services (item_uid, expiration_date, added_by, added_date, state) VALUES (?, ?, ?, CURRENT_DATE, 1)"
+delete_instance_of_inventory = "DELETE FROM item_inventory_info WHERE id = ?"
+empty_instance_of_inventory = "UPDATE item_inventory_info SET stock = 0  WHERE id = ?"
+deduct_1_stock_of_inventory = "UPDATE item_inventory_info SET stock = stock - 1  WHERE id = ?"
+deduct_1_stock_of_inventory = "UPDATE item_inventory_info SET stock = stock - 1  WHERE id = ?"
+
+load_svc_item = "SELECT item_general_info.brand,\
+                         CONCAT(item_general_info.name, ' (', item_general_info.unit, ')'),\
+                         case when used_items_in_services.expiration_date IS NULL\
+                             then 'No-Expiry'\
+                         when used_items_in_services.expiration_date <= CURRENT_DATE\
+                             then 'Expired'\
+                             ELSE 'Normal'\
+                         END,\
+                         COALESCE(DATE_FORMAT(used_items_in_services.expiration_date, '%M %d, %Y'), 'None')\
+                 FROM used_items_in_services\
+                 JOIN item_general_info\
+                     ON used_items_in_services.item_uid = item_general_info.UID\
+                 WHERE state = 1"
+
+set_data_to_depleted = "UPDATE used_items_in_services SET state = 0, depleted_date = CURRENT_DATE WHERE item_uid = ? AND (expiration_date = ? OR expiration_date IS null)"
+
+find_item_id_by_metainfo = "SELECT UID\
+                            FROM item_general_info\
+                            WHERE brand = ?\
+                                AND (CONCAT(name, ' (', unit, ')')) = ?"

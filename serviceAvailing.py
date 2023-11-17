@@ -242,7 +242,7 @@ class pet_multiple_period_info_frame(ctk.CTkFrame):
 class pets(ctk.CTkFrame):
     def __init__(self, master: any, length:int, title: str, pets_name: List[str], proceed_command:callable, cancel_command:callable = None, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
-        self.frames: List[pet_info_frame] = []
+        self.frames: List[pet_info_frame | pet_period_info_frame | pet_multiple_period_info_frame] = []
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         self.parent_frame_tab = None
@@ -323,11 +323,15 @@ class pets(ctk.CTkFrame):
             self.place_forget()
             
         def update_frames_selection(sender: ctk.CTkOptionMenu, to_remove: str) -> None:
-            for i in self.frames:
-                if i is not sender:
-                    temp = pets_name.copy()
-                    temp.pop(temp.index(to_remove))
-                    i.name.configure(values = temp)
+            pet_copy = pets_name.copy()
+
+            for fr in self.frames:
+                pet_name = fr.get_data('tuple')
+                if pet_name[0] in pet_copy:
+                    pet_copy.pop(pet_copy.index(pet_name[0]))
+
+            for fr in self.frames:
+                fr.name.configure(values = pet_copy)
         #manage the selection of each patient frames to prevent duplicate pets 
 
         self.main_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.White_Lotion, width=width*0.45,  height=height*0.85, border_color=Color.White_Platinum, border_width=1)

@@ -8,6 +8,8 @@ from Theme import Color, Icons
 import re, os, json
 from typing import *
 
+ctk.set_appearance_mode('light')
+
 class ip_setup(ctk.CTk):
     def __init__(self, fg_color: str | Tuple[str, str] | None = None, **kwargs):
         super().__init__(fg_color, **kwargs)

@@ -268,14 +268,14 @@ class accounts_frame(ctk.CTkFrame):
         self.top_frame = ctk.CTkFrame(self, fg_color='transparent')
         self.top_frame.grid(row=0, column=0, sticky="ew", padx=(width*0.005), pady=(height*0.01,0))
         
-        self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        """ self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.pack(side="left",padx=(0,width*0.005))
         self.search_frame.pack_propagate(0)
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
 
         self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color='#74bc8a',
                                          command=self.refresh_table)
@@ -615,12 +615,12 @@ class roles_frame(ctk.CTkFrame):
         self.values = {k: v for k,v in zip(self.access_lvls, access)}
 
         for k in self.values.keys():
+            self.check_boxes[k].configure(state = ctk.NORMAL)
             if self.values[k] == 1:
-                self.check_boxes[k].configure(state = ctk.NORMAL)
                 if from_select_username_callback:
                     self.check_boxes[k].select()
             else:
-                self.check_boxes[k].configure(state = ctk.DISABLED)
+                #self.check_boxes[k].configure(state = ctk.DISABLED)
                 self.check_boxes[k].deselect()
 
     def update_roles(self):
@@ -656,14 +656,14 @@ class deactivated_frame(ctk.CTkFrame):
         self.top_frame = ctk.CTkFrame(self, fg_color='transparent')
         self.top_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
 
-        self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
+        """ self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
         self.search_frame.pack(side="left",padx=(0,width*0.005))
         self.search_frame.pack_propagate(0)
         ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
         self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
         self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
 
         self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color='#74bc8a', command= self.load_deactivated_acc)
         self.refresh_btn.pack(side="left", padx=(0, width*0.005))
@@ -675,12 +675,12 @@ class deactivated_frame(ctk.CTkFrame):
         self.treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
 
         self.account_treeview = cctk.cctkTreeView(self.treeview_frame, height= height*0.735, width=width*0.8025,
-                                           column_format=f'/No:{int(width*.025)}-#r/Username:x-tl/Role:{int(width*.175)}-tr/Reason:{int(width*.3)}-tr!30!30',)
+                                           column_format=f'/No:{int(width*.025)}-#r/Username:x-tl/Role:{int(width*.175)}-tr!30!30',)
         self.account_treeview.pack()
         self.load_deactivated_acc()
     
     def load_deactivated_acc(self):
-        self.account_treeview.update_table(database.fetch_data('SELECT usn, job_position, "Testing" FROM acc_info WHERE state = 0'))
+        self.account_treeview.update_table(database.fetch_data('SELECT usn, job_position FROM acc_info WHERE state = 0'))
 
     def reactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:

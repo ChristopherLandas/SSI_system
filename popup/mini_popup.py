@@ -73,7 +73,7 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
                                         fg_color=Color.White_Milk, show='●', width = width * .75, text_color= 'black')
             self.password_entry.pack(side='left', fill='x', expand=True,padx=(3),pady=(5))
             
-            self.login_button = ctk.CTkButton(self.main_frame, text="LOGIN", height=50,
+            self.login_button = ctk.CTkButton(self.main_frame, text="Login", height=50,
                                           font=('DM Sans Medium',20),text_color='#FFFFFF',
                                           fg_color=Color.Blue_Cobalt,corner_radius=5,
                                           command= self.authorize)
