@@ -238,6 +238,18 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.type_option.set("")
             self.sex_option.set("") 
 
+            self.patient_name_limiter = cctku.entry_limiter(128, self.patient_name_entry)
+            self.owner_name_limiter = cctku.entry_limiter(128, self.owner_name_entry._entry)
+            self.breed_name_limiter = cctku.entry_limiter(64, self.breed_option._entry)
+            self.contact_limiter = cctku.entry_limiter(20, self.contact_entry)
+            self.address_limiter = cctku.entry_limiter(256, self.address_entry)
+
+            self.patient_name_entry.configure(textvariable = self.patient_name_limiter)
+            self.owner_name_entry._entry.configure(textvariable = self.owner_name_limiter)
+            self.breed_option._entry.configure(textvariable = self.breed_name_limiter)
+            self.contact_entry.configure(textvariable = self.contact_limiter)
+            self.address_entry.configure(textvariable = self.address_limiter)
+
         def place(self, **kwargs):
             self.owner_data= database.fetch_data(sql_commands.get_owners)
             self.data=[s[0] for s in self.owner_data] 

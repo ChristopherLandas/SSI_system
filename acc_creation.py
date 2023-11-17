@@ -2,7 +2,7 @@ from typing import *
 from typing import Optional, Tuple, Union
 import customtkinter as ctk
 import tkinter as tk;
-from customcustomtkinter import customcustomtkinter as cctk
+from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku   
 from PIL import Image
 from Theme import Color
 from util import database
@@ -306,6 +306,10 @@ class accounts_frame(ctk.CTkFrame):
     def deactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:
             messagebox.showerror("Invalid", "Select an account to Deactivate", parent = self)
+            return
+        if self.account_treeview.get_selected_data()[-1] == 'Owner':
+            messagebox.showerror("Invalid", "You cannot deactive all of the owner account", parent = self)
+            return
         else:
             if messagebox.askyesno("Warning", f"Are you sure you want to deactivate {self.account_treeview.get_selected_data()[0]}", parent = self):
                 database.exec_nonquery([[sql_commands.update_deactivate_account, (self.account_treeview.get_selected_data()[0], )]])
@@ -344,19 +348,21 @@ class creation_frame(ctk.CTkFrame):
         self.con_sub_frame = ctk.CTkFrame(self.credential_content_frame, fg_color=Color.White_Lotion)
         self.con_sub_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         self.con_sub_frame.grid_columnconfigure(1, weight=1)
+        #remove account picture and camera button
         '''PICTURE FRAME'''
-        self.picture_frame = ctk.CTkFrame(self.con_sub_frame, fg_color=Color.White_Platinum, width=width*0.135, height=height*0.235)
+
+        '''self.picture_frame = ctk.CTkFrame(self.con_sub_frame, fg_color=Color.White_Platinum, width=width*0.135, height=height*0.235)
         self.picture_frame.grid(row=0, column=0, sticky="w", padx=(width*0.005),  pady=(height*0.01))
         self.picture_frame.pack_propagate(0)
         self.acc_pic = ctk.CTkLabel(self.picture_frame, text='', corner_radius=5, image=self.pet_sample_icon)
         self.acc_pic.pack(fill="both",expan=1,padx=(width*0.005), pady=(height*0.01))
         
         self.camera_btn = ctk.CTkButton(self.con_sub_frame,text="", width=width*0.025, height = height*0.05, image=self.camera_icon, fg_color="#83BD75", hover_color='#74bc8a')
-        self.camera_btn.grid(row=0, column=1, sticky="sw",  pady=(height*0.01))
+        self.camera_btn.grid(row=0, column=1, sticky="sw",  pady=(height*0.01))'''
 
         '''FULL NAME ENTRY'''
         self.fullname_frame = ctk.CTkFrame(self.con_sub_frame, fg_color=Color.White_Platinum)
-        self.fullname_frame.grid(row=1, column=0, sticky="nsew", columnspan=2, padx=(width*0.005),  pady=(0,height*0.01))
+        self.fullname_frame.grid(row=1, column=0, sticky="nsew", columnspan=2, padx=(width*0.005),  pady=(height*0.02,height*0.01))
         ctk.CTkLabel(self.fullname_frame, text='Full Name: ', font=("DM Sans Medium", 14), anchor='e', corner_radius=5, width=width*0.075, text_color=Color.Blue_Maastricht).pack(side="left", padx=(width*0.005,0),  pady=(height*0.01))
         self.fullname_entry = ctk.CTkEntry(self.fullname_frame, border_width=0, placeholder_text="Type Here...", placeholder_text_color="light grey", height=height*0.045 ,font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, border_color=Color.Blue_Maastricht)
         self.fullname_entry.pack(side="left", fill="x", expand=1, padx=(0,width*0.005),  pady=(height*0.01))
@@ -414,6 +420,14 @@ class creation_frame(ctk.CTkFrame):
         
         self.create_acc_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Create Account", font=("DM Sans Medium", 14), command= self.create_acc   )
         self.create_acc_btn.pack(side='right')
+
+        self.password_limiter = cctku.entry_limiter(128, self.password_entry)
+        self.user_limiter = cctku.entry_limiter(128, self.username_entry)
+        self.name_limiter = cctku.entry_limiter(128, self.fullname_entry)
+        self.password_entry.configure(textvariable = self.password_limiter)
+        self.username_entry.configure(textvariable = self.user_limiter)
+        self.fullname_entry.configure(textvariable = self.name_limiter)
+        #text limiter
 
     def reset_acc_creation(self):
         self.fullname_entry.delete(0, ctk.END)
@@ -506,17 +520,17 @@ class roles_frame(ctk.CTkFrame):
         self.left_inner_frame = ctk.CTkFrame(self.left_sub_frame, fg_color=Color.White_Lotion)
         self.left_inner_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         self.left_inner_frame.grid_columnconfigure(0, weight=1)
-        
+        #remove account picture and camera button
         '''PICTURE FRAME'''
-        self.picture_frame = ctk.CTkFrame(self.left_inner_frame, fg_color=Color.White_Platinum, width=width*0.135, height=height*0.235)
-        self.picture_frame.grid(row=0, column=0, sticky="w", padx=(width*0.005),  pady=(height*0.01))
-        self.picture_frame.pack_propagate(0)
-        self.acc_pic = ctk.CTkLabel(self.picture_frame, text='', corner_radius=5, image=self.pet_sample_icon)
-        self.acc_pic.pack(fill="both",expan=1,padx=(width*0.005), pady=(height*0.01))
+        #self.picture_frame = ctk.CTkFrame(self.left_inner_frame, fg_color=Color.White_Platinum, width=width*0.135, height=height*0.235)
+        #self.picture_frame.grid(row=0, column=0, sticky="w", padx=(width*0.005),  pady=(height*0.01))
+        #self.picture_frame.pack_propagate(0)
+        #self.acc_pic = ctk.CTkLabel(self.picture_frame, text='', corner_radius=5, image=self.pet_sample_icon)
+        #self.acc_pic.pack(fill="both",expan=1,padx=(width*0.005), pady=(height*0.01))
        
         '''FULL NAME ENTRY'''
         self.fullname_frame = ctk.CTkFrame(self.left_inner_frame, fg_color=Color.White_Platinum)
-        self.fullname_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
+        self.fullname_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),  pady=(height*0.02,height*0.01))
         ctk.CTkLabel(self.fullname_frame, text='Full Name: ', font=("DM Sans Medium", 14), anchor='e', corner_radius=5, width=width*0.075, text_color=Color.Blue_Maastricht).pack(side="left", padx=(width*0.005,0),  pady=(height*0.01))
         self.fullname_entry = ctk.CTkEntry(self.fullname_frame, border_width=0, placeholder_text="Type Here...", placeholder_text_color="light grey", height=height*0.045 ,font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, border_color=Color.Blue_Maastricht, state='readonly')
         #self.username_selection = ctk.CTkOptionMenu(self.fullname_frame, height=height*0.045 ,font=("DM Sans Medium", 14), command= self.select_username_callback)
@@ -579,6 +593,8 @@ class roles_frame(ctk.CTkFrame):
     def activate_positions(self, from_select_username_callback: bool = True, _: any = None):
         access: tuple = database.fetch_data(sql_commands.get_level_acessess, (self.position_selection.get(), ))[0]
         access = tuple(v for i, v in enumerate(access) if i not in [0, 1])
+        #access:list = list(access)
+        #access.pop(0)
         self.values = {k: v for k,v in zip(self.access_lvls, access)}
 
         for k in self.values.keys():

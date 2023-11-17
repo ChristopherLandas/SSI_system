@@ -23,6 +23,7 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
             height = info[1] * .4
             super().__init__(master, width, height, corner_radius= 0, fg_color="white")
             self.command_callback = command_callback
+            self.user_name_authorized_by = None
             self.pack_propagate(0)
 
             self.user_icon = ctk.CTkImage(light_image=Image.open("image/user_icon.png"),size=(30,30))
@@ -102,6 +103,8 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
                 if database.fetch_data('SELECT state FROM acc_info WHERE usn = ?', (self.user_entry.get(), ))[0][0] == 0:
                     messagebox.showerror("Failed to Login", "The Account you're been\nlogged has been deactivated.\nInquire to the Owner", parent = self)
                     return
+
+                self.user_name_authorized_by = self.user_entry.get()
 
                 if callable(self.command_callback):
                     self.command_callback()

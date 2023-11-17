@@ -336,27 +336,27 @@ get_expired_state = "SELECT item_general_info.brand, item_general_info.name, ite
 #FOR DAILY SALES
 get_todays_transaction_count = "SELECT COUNT(*)  FROM transaction_record WHERE transaction_date = CURRENT_DATE"
 
-get_services_daily_sales = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
+get_services_daily_sales = "SELECT CAST(SUM(services_transaction_content.price) - SUM(transaction_record.deduction) AS DECIMAL(10,2))\
                             FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                             WHERE transaction_record.transaction_date = CURRENT_DATE;"
 
-get_items_daily_sales = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
+get_items_daily_sales = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS DECIMAL(10,2))\
                          FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
                          WHERE transaction_record.transaction_date = CURRENT_DATE AND item_transaction_content.state = 1;"
 
-get_services_daily_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
+get_services_daily_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) - SUM(transaction_record.deduction) AS DECIMAL(10,2))\
                             FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                             WHERE transaction_record.transaction_date = ?;"
 
-get_items_daily_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
-                            FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                            WHERE transaction_record.transaction_date = ? AND item_transaction_content.state = 1;"
+get_items_daily_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS DECIMAL(10,2))\
+                                FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                                WHERE transaction_record.transaction_date = ? AND item_transaction_content.state = 1;"
 
-get_items_monthly_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS DECIMAL(10,2))\
+get_items_monthly_sales_sp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS DECIMAL(10,2))\
                               FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
                               WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ? AND item_transaction_content.state = 1;"
 
-get_services_monthly_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) AS DECIMAL(10,2))\
+get_services_monthly_sales_sp = "SELECT CAST(SUM(services_transaction_content.price) - SUM(transaction_record.deduction) AS DECIMAL(10,2))\
                                  FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                                  WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
 
@@ -490,40 +490,49 @@ get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,
                                       GROUP BY item_transaction_content.item_name\
                                       ORDER BY transaction_record.transaction_uid"
 
-get_items_daily_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS FLOAT)\
-                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                         WHERE transaction_record.transaction_date = ? AND item_transaction_content.state = 1;"
+get_items_daily_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS FLOAT)\
+                            FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                            WHERE transaction_record.transaction_date = ? AND item_transaction_content.state = 1;"
 
-get_services_daily_sales_sp_temp = "SELECT CAST(SUM(services_transaction_content.price) AS FLOAT)\
+get_services_daily_sales_sp_temp = "SELECT CAST(SUM(services_transaction_content.price) - SUM(transaction_record.deduction) AS FLOAT)\
                             FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                             WHERE transaction_record.transaction_date = ?;"
 
-get_items_monthly_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) AS FLOAT)\
-                         FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                         WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ? AND item_transaction_content.state = 1;"
+get_items_monthly_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS FLOAT)\
+                            FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
+                            WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ? AND item_transaction_content.state = 1;"
 
-get_services_monthly_sales_sp_temp = "SELECT CAST(SUM(services_transaction_content.price) AS FLOAT)\
+get_services_monthly_sales_sp_temp = "SELECT CAST(SUM(services_transaction_content.price) - SUM(transaction_record.deduction) AS FLOAT)\
                             FROM transaction_record JOIN services_transaction_content ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                             WHERE MONTH(transaction_record.transaction_date) = ? AND YEAR(transaction_record.transaction_date) = ?;"
 
 #REPORT TREEVIEWS
 daily_report_treeview_data = "SELECT transaction_record.transaction_uid,\
                                       transaction_record.client_name,\
-                                      CONCAT('₱', FORMAT(COALESCE(sum(services_transaction_content.price), 0) ,2)) AS service,\
-                                      CONCAT('₱', FORMAT(COALESCE(SUM(item_transaction_content.price * item_transaction_content.quantity), 0) ,2)) AS item,\
-                                      CONCAT('₱', FORMAT(transaction_record.Total_amount ,2)) AS total\
+                                      CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
+		                                      	then item_transaction_content.price * item_transaction_content.quantity\
+		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2))AS subtotal,\
+							  					CONCAT('₱', FORMAT(transaction_record.deduction ,2)) AS deduction,\
+                                      CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
+		                                      										then item_transaction_content.price * item_transaction_content.quantity\
+		                                      										ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0)\
+																			- transaction_record.deduction, 2)) AS total\
                               FROM transaction_record\
                               left JOIN services_transaction_content\
                                           ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                               LEFT JOIN item_transaction_content\
                                           ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                              WHERE transaction_date = ? AND item_transaction_content.state = 1\
+                              WHERE transaction_date = ?\
                               GROUP BY transaction_record.transaction_uid"
 
 monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M %d, %Y') AS 'date',\
-                                        CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0), 2)) AS item,\
-                                        CONCAT('₱', FORMAT(COALESCE(sum(services_transaction_content.price), 0) ,2)) AS service,\
-                                        CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0) + coalesce(sum(services_transaction_content.price), 0), 2))\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
+		                                      	then item_transaction_content.price * item_transaction_content.quantity\
+		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS subtotal,\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(transaction_record.deduction), 0) ,2)) AS deduction,\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
+		                                      	then item_transaction_content.price * item_transaction_content.quantity\
+		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0) - COALESCE(sum(transaction_record.deduction), 0) ,2)) AS total\
                                 FROM transaction_record\
                                 left JOIN services_transaction_content\
                                     ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
@@ -531,21 +540,24 @@ monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transactio
                                     ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
                                 WHERE MONTH(transaction_record.transaction_date) = ?\
                                     AND YEAR(transaction_record.transaction_date) = ?\
-                                        AND item_transaction_content.state = 1\
                                 GROUP BY transaction_record.transaction_date\
                                 ORDER BY transaction_record.transaction_date;"
 
 yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M') AS 'date',\
-                                      CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0), 2)) AS item,\
-                                      CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0) ,2)) AS service,\
-                                      CONCAT('₱', FORMAT(COALESCE(sum(item_transaction_content.price * item_transaction_content.quantity), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS total\
+                                      CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
+		                                      	then item_transaction_content.price * item_transaction_content.quantity\
+		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS item,\
+		                           		COALESCE(SUM(services_transaction_content.price), 0),\
+                                      CONCAT('₱', FORMAT(COALESCE(SUM(transaction_record.deduction), 0) ,2)) AS service,\
+												  CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
+		                                      	then item_transaction_content.price * item_transaction_content.quantity\
+		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0) - COALESCE(sum(transaction_record.deduction), 0) ,2)) AS total\
                                FROM transaction_record\
                                left JOIN services_transaction_content\
                                            ON transaction_record.transaction_uid = services_transaction_content.transaction_uid\
                                LEFT JOIN item_transaction_content\
                                            ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
-                               WHERE YEAR(transaction_record.transaction_date) = 2023\
-                                   AND item_transaction_content.state = 1\
+                               WHERE YEAR(transaction_record.transaction_date) = ?\
                                GROUP BY month(transaction_record.transaction_date)\
                                ORDER BY transaction_record.transaction_date;"
 
@@ -554,6 +566,7 @@ insert_invoice_data = "INSERT INTO invoice_record VALUES (?, ?, ?, ?, ?, ?, ?, ?
 insert_invoice_service_data = "INSERT INTO invoice_service_content values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 insert_invoice_item_data = "INSERT INTO invoice_item_content VALUES (? ,? ,? ,?, ?, ?)"
 cancel_invoice = "UPDATE invoice_record SET State = -1 WHERE invoice_uid = ?"
+void_invoice = "UPDATE invoice_record SET State = -2 WHERE invoice_uid = ?"
 
 get_invoice_info_item = "SELECT invoice_record.invoice_uid,\
                             invoice_record.client_name,\
@@ -728,12 +741,42 @@ get_log_history = "SELECT log_history.USN, acc_info.job_position, log_history.DA
                     WHERE log_history.DATE_LOGGED = ?"
 
 #transaction
-check_if_stock_can_accomodate = "SELECT invoice_item_content.quantity <= SUM(item_inventory_info.Stock)\
+check_if_stock_can_accomodate1 = "SELECT invoice_item_content.quantity <= SUM(item_inventory_info.Stock)\
                                  FROM invoice_item_content JOIN item_inventory_info\
                                      ON invoice_item_content.Item_uid = item_inventory_info.UID\
                                  WHERE invoice_item_content.invoice_uid = ?\
                                  GROUP BY invoice_item_content.Item_uid"
-                    
+#currently_unused
+
+check_if_stock_can_accomodate = "SELECT invoice_item_content.item_uid,\
+                                         SUM(case when invoice_record.invoice_uid = ? then invoice_item_content.quantity/2 ELSE 0 END) <=\
+                                         (item_inventory_info.Stock - SUM(case when invoice_record.State = 1 then invoice_item_content.quantity/2 ELSE 0 END))\
+                                 FROM invoice_item_content\
+                                 JOIN invoice_record\
+                                     ON invoice_item_content.invoice_uid = invoice_record.invoice_uid\
+                                 JOIN item_inventory_info\
+                                     ON invoice_item_content.item_uid = item_inventory_info.UID\
+                                 GROUP BY invoice_item_content.item_uid"
+
+check_quan_of_invoice = "SELECT item_uid, SUM(quantity)\
+                         FROM  invoice_item_content\
+                         WHERE invoice_item_content.invoice_uid = ?\
+                         group BY item_uid"
+
+check_quan_of_paying_item = "SELECT item_uid, SUM(quantity)\
+                            FROM  invoice_item_content\
+                            JOIN invoice_record\
+                                ON invoice_item_content.invoice_uid = invoice_record.invoice_uid\
+                            WHERE invoice_record.State = 1\
+                            group BY item_uid"
+
+check_feasible_items = "SELECT item_general_info.uid, SUM(COALESCE(item_inventory_info.stock, 0))\
+                        FROM item_general_info\
+                        LEFT join item_inventory_info\
+                            ON item_general_info.UID = item_inventory_info.UID\
+                        WHERE item_inventory_info.expiry_date IS NULL OR item_inventory_info.expiry_date > current_date\
+                        GROUP BY item_general_info.uid"
+#need to fix      
 
 #get_pet_record = "SELECT * FROM pet_info WHERE id = ?"                    
 update_pet_record_pet_info = "UPDATE pet_info SET p_name = ?, breed = ?, type = ?, sex = ?, weight = ?, bday = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE id = ?"
@@ -774,7 +817,7 @@ update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transa
 
 #dashboard
 get_monthly_sales_data = "SELECT DATE_FORMAT(transaction_date, '%M %d, %Y'),\
-                               CONCAT('₱', FORMAT(sum(total_amount), 2)) AS price\
+                               CONCAT('₱', FORMAT(COALESCE(sum(total_amount), 0) - COALESCE(SUM(deduction), 0), 2)) AS price\
                           FROM transaction_record\
                           WHERE MONTH(transaction_date) = ?\
                                AND YEAR(transaction_date) = ?\
@@ -789,7 +832,7 @@ get_specific_pet_record = "SELECT services_transaction_content.service_name,\
                            WHERE  services_transaction_content.pet_uid = ?"
                            #    AND services_transaction_content.`status` = 0"
                            
-get_daily_sales_data_by_day = "SELECT transaction_uid, client_name, Attendant_usn, CONCAT('₱',FORMAT(Total_amount,2))AS total FROM transaction_record WHERE transaction_record.transaction_date = ?"
+get_daily_sales_data_by_day = "SELECT transaction_uid, client_name, Attendant_usn, CONCAT('₱',FORMAT(COALESCE(Total_amount, 0) - COALESCE(deduction, 0),2))AS total FROM transaction_record WHERE transaction_record.transaction_date = ?"
 
 
 get_scheduled_clients_today = f"SELECT invoice_record.client_name, pet_owner_info.contact_number\
@@ -843,7 +886,7 @@ get_pet_record_search_query=f"SELECT id, p_name, pet_owner_info.owner_name FROM 
                                    WHERE p_name LIKE '%?%' OR pet_owner_info.owner_name LIKE '%?%' ORDER BY p_name ASC"
 
 #SALES 
-get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount,  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
+get_sales_data = "SELECT transaction_uid, client_name, transaction_date, Total_amount - COALESCE(deduction, 0),  Attendant_usn FROM transaction_record WHERE transaction_date = ?"
 
 get_item_record = "SELECT  item_name, quantity, price, ROUND((quantity*price),2) AS total FROM item_transaction_content WHERE transaction_uid = ? AND STATE = 1"
 get_service_record = "SELECT CONCAT(service_name,' - ',  'Pet: ',patient_name) AS service, 1 AS quantity, price, ROUND(price,2)AS total FROM services_transaction_content WHERE transaction_uid = ?"
@@ -898,24 +941,24 @@ update_supplier_info = f"UPDATE supplier_info SET supp_name = ?, telephone = ?, 
 
 '''SALES'''
 
-get_sales_record_by_date = f"SELECT transaction_uid, CASE  WHEN state = 1 THEN 'Paid' ElSE 'Replaced' END, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
+get_sales_record_by_date = f"SELECT transaction_uid, CASE  WHEN state = 1 THEN 'Paid' ElSE 'Replaced' END, client_name , CONCAT('₱', FORMAT(Total_amount - COALESCE(deduction, 0 ),2)) AS price, transaction_date, Attendant_usn\
                                 FROM transaction_record WHERE transaction_date BETWEEN ? AND ? ORDER BY transaction_date"
 
-get_sales_record_all =f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn FROM transaction_record"
+get_sales_record_all =f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount - COALESCE(deduction, 0),2)) AS price, transaction_date, Attendant_usn FROM transaction_record"
 
 get_sales_search_query = f"SELECT transaction_uid, client_name FROM transaction_record WHERE client_name LIKE '%?%' OR transaction_uid LIKE '%?%' ORDER BY client_name"
 
-get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn, state, deduction\
-                            FROM transaction_record WHERE transaction_uid = ?"
+get_sales_record_info = f"SELECT transaction_uid, client_name, CONCAT('₱', FORMAT(Total_amount - COALESCE(deduction, 0),2)) AS price, transaction_date, Attendant_usn, state, deduction\
+                          FROM transaction_record WHERE transaction_uid = ?"
 
 #sends price but without format and deduction
-get_sales_record_info_temp = f"SELECT transaction_uid, client_name, Total_amount AS price, transaction_date, Attendant_usn, state, deduction\
+get_sales_record_info_temp = f"SELECT transaction_uid, client_name, (Total_amount - COALESCE(deduction, 0)) AS price, transaction_date, Attendant_usn, state, deduction\
                             FROM transaction_record WHERE transaction_uid = ?"
 
 #Tentative;                          
 get_sales_attendant = f"SELECT DISTINCT Attendant_usn FROM transaction_record"
 
-get_sales_by_attendant = f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount,2)) AS price, transaction_date, Attendant_usn\
+get_sales_by_attendant = f"SELECT transaction_uid, client_name , CONCAT('₱', FORMAT(Total_amount - COALESCE(deduction, 0),2)) AS price, transaction_date, Attendant_usn\
                         FROM transaction_record WHERE transaction_date BETWEEN ? AND ?\
                             AND Attendant_usn = ?"
                             
@@ -1074,7 +1117,8 @@ get_all_schedule = "SELECT CONCAT('TR# ', service_preceeding_schedule.transactio
                                                 services_transaction_content.patient_name,\
                                                 CONCAT(services_transaction_content.service_name, ' ', coalesce(prefix, '')),\
                                                 'Paid',\
-                                                DATE_FORMAT(service_preceeding_schedule.scheduled_date, '%M %d, %Y') AS shceduled_date\
+                                                DATE_FORMAT(service_preceeding_schedule.scheduled_date, '%M %d, %Y') AS shceduled_date,\
+                                                service_preceeding_schedule.scheduled_date AS sorting_date\
                                             FROM service_preceeding_schedule\
                                             LEFT JOIN transaction_record\
                                                 ON service_preceeding_schedule.transaction_uid = transaction_record.transaction_uid\
@@ -1087,7 +1131,8 @@ get_all_schedule = "SELECT CONCAT('TR# ', service_preceeding_schedule.transactio
                                                     invoice_service_content.patient_name,\
                                                     CONCAT(invoice_service_content.service_name, case when service_info_test.duration_type != 0 then ' (Initial)' ELSE '' END),\
                                                     CONCAT('₱', FORMAT(invoice_record.Total_amount, 2)) AS price,\
-                                                    DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y') AS date\
+                                                    DATE_FORMAT(invoice_service_content.scheduled_date, '%M %d, %Y') AS shceduled_date,\
+                                                    invoice_service_content.scheduled_date AS sorting_date\
                                                 FROM invoice_record\
                                                 LEFT JOIN invoice_service_content\
                                                     ON invoice_record.invoice_uid = invoice_service_content.invoice_uid\
@@ -1098,7 +1143,7 @@ get_all_schedule = "SELECT CONCAT('TR# ', service_preceeding_schedule.transactio
                                                 WHERE invoice_record.State = 0\
                                                     AND process_type = 1\
                                                 GROUP BY invoice_record.invoice_uid\
-                    ORDER BY shceduled_date"
+                    ORDER BY sorting_date ASC"
 
 get_updated_avg_of_old_statistics = "SELECT item_general_info.UID,\
                                          avg((COALESCE(item_transaction_content.quantity, 0))),\
@@ -1135,7 +1180,7 @@ get_rescheduling_info_invoice_by_id = "SELECT invoice_service_content.invoice_ui
                                                CONCAT('₱', FORMAT(invoice_service_content.price, 2)),\
                                                pet_owner_info.owner_name,\
                                                pet_owner_info.contact_number,\
-                                               DATE_FORMAT(invoice_record.transaction_date, '%M %d, %Y'),\
+                                               DATE_FORMAT(invoice_service_content.scheduled_date, '%M %d, %Y'),\
                                                invoice_service_content.scheduled_date\
                                        FROM invoice_service_content\
                                        JOIN invoice_record\
@@ -1152,7 +1197,7 @@ get_rescheduling_info_preceeding_by_id = "SELECT service_preceeding_schedule.tra
                                                   'Paid',\
                                                   pet_owner_info.owner_name,\
                                               pet_owner_info.contact_number,\
-                                              DATE_FORMAT(transaction_record.transaction_date, '%M %d, %Y'),\
+                                              DATE_FORMAT(service_preceeding_schedule.scheduled_date, '%M %d, %Y'),\
                                               service_preceeding_schedule.scheduled_date\
                                           FROM service_preceeding_schedule\
                                           JOIN services_transaction_content\
@@ -1281,6 +1326,15 @@ get_customer_record_non_regular = "SELECT pet_owner_info.owner_id,\
                             Order BY pet_owner_info.owner_name ASC"
                             
 update_customer_record_info ="UPDATE pet_owner_info SET owner_name = ?,address = ?, contact_number = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE owner_id = ?"
+                             GROUP BY owner_id"
+
+check_if_there_a_preceeding_schedule = "SELECT COUNT(*) FROM service_preceeding_schedule WHERE transaction_uid = ?"
+update_invoice_schedule = "UPDATE invoice_service_content SET scheduled_date = ? WHERE invoice_uid = ?"
+get_preceeding_by_id = "SELECT * FROM service_preceeding_schedule WHERE transaction_uid = ? and scheduled_date >= ?"
+get_scheduled_by_id = "SELECT * FROM services_transaction_content WHERE transaction_uid = ?"
+
+update_preceeding = "UPDATE service_preceeding_schedule SET scheduled_date = ? WHERE transaction_uid = ? and id = ?"
+
 
 
 get_all_transaction_record = "SELECT transaction_uid,\
