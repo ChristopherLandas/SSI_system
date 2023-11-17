@@ -1129,10 +1129,10 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
                 exist = database.fetch_data(sql_commands.get_supplier_item_info_if_exist, (self.supplier_id, self.item_treeview.get_selected_data()[0]))[0][0]
                 if self.item_treeview.get_selected_data():
                     if exist:
-                        print("IF")
+                        #print("IF")
                         database.exec_nonquery([[sql_commands.update_supplier_item_info_active, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
                     else:
-                        print("ELSE")
+                        #print("ELSE")
                         database.exec_nonquery([[sql_commands.set_supplier_items, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
                     messagebox.showinfo("Item Added", "Item added to supplier delivery.", parent = self)
                 else:
@@ -1591,6 +1591,7 @@ def show_category(master, info:tuple):
             self.grid_rowconfigure(0, weight=1)
             
             def reset():
+                self.grab_release()
                 self.place_forget()
                 
             def deactivate_category(i:int):
@@ -1651,7 +1652,7 @@ def show_category(master, info:tuple):
             
         def place(self, **kwargs):
             self.conv_data()
-            
+            self.grab_set()
             return super().place(**kwargs)
     return show_category(master, info)
 
@@ -1758,16 +1759,17 @@ def add_category(master, info:tuple, table_update_callback: callable):
             self._table_update_callback = table_update_callback 
             
             def reset():
-                self.place_forget()
-                self.category_name_entry.delete(0, tk.END)
                 self.expiry_switch.deselect()
                 self._table_update_callback()
+                self.category_name_entry.delete(0, tk.END)
+                self.grab_release()
+                self.place_forget()
                 
             def add_category():
                 if self.category_name_entry.get()=='':
                     messagebox.showwarning("Missing Information", "Complete required fields", parent = self)
                 else:
-                    database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get(),user)]])
+                    database.exec_nonquery([[sql_commands.insert_new_category, (self.category_name_entry.get(),self.expiry_switch.get(),user,self.sellable_switch.get())]])
                     reset()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
@@ -1801,6 +1803,14 @@ def add_category(master, info:tuple, table_update_callback: callable):
                                                 font=("DM Sans Medium", 14))
             self.expiry_switch.grid(row=1,column=1, sticky="w", padx = (width*0.01))
             
+            self.sellable_switch= ctk.StringVar(value="0")
+            ctk.CTkLabel(self.add_category_frame, text="Sellable: ", font=("DM Sans Medium", 14), width=width*0.1, anchor="e").grid(row=2, column=0, pady = (0,height*0.01), padx = (width*0.01,0))
+            self.sellable_switch = ctk.CTkSwitch(self.add_category_frame, text="", variable=self.sellable_switch, onvalue="1", offvalue="0",
+
+                                                font=("DM Sans Medium", 14))
+            self.sellable_switch.grid(row=2,column=1, sticky="w", padx = (width*0.01))
+            self.sellable_switch.toggle()
+            
             '''Action Frame'''
             self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2])
             self.action_frame.grid(row = 2, column = 0, sticky = 'nsew', padx=(width*0.005), pady = (0,height*0.01))
@@ -1816,6 +1826,10 @@ def add_category(master, info:tuple, table_update_callback: callable):
 
             self.category_limiter = cctku.entry_limiter(64, self.category_name_entry)
             self.category_name_entry.configure(textvariable = self.category_limiter)
+            
+        def place(self, **kwargs):
+            self.grab_set()
+            return super().place(**kwargs)
             
     return add_category(master, info, table_update_callback)
 
@@ -2386,3 +2400,66 @@ def order_info_screen(master, info:tuple):
             return super().place(**kwargs)
             
     return order_info_screen(master, info)
+
+
+def add_service_item(master, info:tuple, command_callback: callable = None):
+    class add_service_item(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback ):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, width*0.65, height=height*0.65, corner_radius= 0, fg_color='transparent')
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+            
+            self.command_callback = command_callback
+            
+            def reset():
+                self.grab_release()
+                self.place_forget()
+            
+                    
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], border_width=1, border_color=Color.Platinum)
+            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1,weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=5,sticky="nsew",  padx=1, pady=(1,0))
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text="ITEM", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.015)
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+            
+            self.item_treeview_frame = ctk.CTkFrame(self.main_frame, fg_color = Color.White_Platinum)
+            self.item_treeview_frame.grid(row=1, column=0, sticky="nsew", pady=(height*0.01), padx=(height*0.01))
+            
+            self.item_treeview = cctk.cctkTreeView(self.item_treeview_frame, data=[],width= width*0.64, height= height*0.5, corner_radius=0,
+                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.085)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl!33!35',
+                                           bd_message="Are you sure you want to remove this item to this supplier?")
+            self.item_treeview.pack()
+            
+            self.bottom_frame = ctk.CTkFrame(self.main_frame, fg_color = Color.White_Platinum)
+            self.bottom_frame.grid(row=2, column=0, sticky="nsew", pady=(0, height*0.01), padx=(height*0.01))
+            
+            self.add_item_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Add Item", font=("DM Sans Medium", 14),
+                                             command=None)
+            self.add_item_btn.pack(side="right", pady=(height*0.01), padx=(height*0.01))
+            
+            self.cancel_btn = ctk.CTkButton(self.bottom_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
+                                            font=("DM Sans Medium", 16), text='Cancel', command= reset)
+            self.cancel_btn.pack(side="left", pady=(height*0.01), padx=(height*0.01,0))
+        
+        def refresh_table(self):
+            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info")
+            self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
+            self.item_treeview.update_table(self.item_data)
+                
+        def place(self,  **kwargs):
+            self.grab_set()
+            self.refresh_table()
+            return super().place(**kwargs)
+        
+    return add_service_item(master, info, command_callback)
