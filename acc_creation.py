@@ -615,12 +615,12 @@ class roles_frame(ctk.CTkFrame):
         self.values = {k: v for k,v in zip(self.access_lvls, access)}
 
         for k in self.values.keys():
+            self.check_boxes[k].configure(state = ctk.NORMAL)
             if self.values[k] == 1:
-                self.check_boxes[k].configure(state = ctk.NORMAL)
                 if from_select_username_callback:
                     self.check_boxes[k].select()
             else:
-                self.check_boxes[k].configure(state = ctk.DISABLED)
+                #self.check_boxes[k].configure(state = ctk.DISABLED)
                 self.check_boxes[k].deselect()
 
     def update_roles(self):
