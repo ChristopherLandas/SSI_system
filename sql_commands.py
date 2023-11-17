@@ -464,31 +464,38 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
                                    
-get_inventory_report = "SELECT item_general_info.UID, item_general_info.name,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
-                                   FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.name\
-                                   ORDER BY item_general_info.UID"
+get_inventory_report = "SELECT item_general_info.UID,\
+                                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                                    ELSE CONCAT(item_general_info.name,' (',item_general_info.unit,')') END,\
+                                    CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                    GROUP BY item_general_info.UID\
+                                    ORDER BY item_inventory_info.Stock, item_general_info.name"
 
-get_inventory_info_with_uid = "SELECT item_general_info.name,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
-                                    item_general_info.UID FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.name\
-                                   ORDER BY item_general_info.UID;"
+get_inventory_info_with_uid = "SELECT item_general_info.UID,\
+                                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                                    ELSE CONCAT(item_general_info.name,' (',item_general_info.unit,')') END,\
+                                    CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                    GROUP BY item_general_info.UID\
+                                    ORDER BY item_inventory_info.Stock, item_general_info.name;"
 
-get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
-                                      		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
-                                      FROM item_transaction_content\
-                                      JOIN transaction_record ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
-                                      WHERE transaction_record.transaction_date = current_date AND item_transaction_content.state = 1\
-                                      GROUP BY item_transaction_content.item_name\
-                                      ORDER BY transaction_record.transaction_uid"
+get_all_bought_items_group_by_name = "SELECT item_general_info.UID,\
+                                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                                    ELSE CONCAT(item_general_info.name,' (',item_general_info.unit,')') END,\
+                                    CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                    GROUP BY item_general_info.UID\
+                                    ORDER BY item_inventory_info.Stock, item_general_info.name"
 
 get_items_daily_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS FLOAT)\
                             FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
@@ -511,7 +518,8 @@ daily_report_treeview_data = "SELECT transaction_record.transaction_uid,\
                                       transaction_record.client_name,\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
-		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2))AS subtotal,\
+		                                      	ELSE 0 END), 0), 2))AS item_subtotal,\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0), 2)) AS servive_subtotal,\
 							  					CONCAT('₱', FORMAT(transaction_record.deduction ,2)) AS deduction,\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      										then item_transaction_content.price * item_transaction_content.quantity\
@@ -528,7 +536,8 @@ daily_report_treeview_data = "SELECT transaction_record.transaction_uid,\
 monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M %d, %Y') AS 'date',\
                                         CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
-		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS subtotal,\
+		                                      	ELSE 0 END), 0), 2)) AS item_subtotal,\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0),2)) AS service_subtotal,\
                                         CONCAT('₱', FORMAT(COALESCE(SUM(transaction_record.deduction), 0) ,2)) AS deduction,\
                                         CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
@@ -546,8 +555,8 @@ monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transactio
 yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M') AS 'date',\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
-		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS item,\
-		                           		COALESCE(SUM(services_transaction_content.price), 0),\
+		                                      	ELSE 0 END), 0), 2)) AS item,\
+		                           	    CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0),2)),\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(transaction_record.deduction), 0) ,2)) AS service,\
 												  CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\

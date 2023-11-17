@@ -2456,7 +2456,7 @@ class reports_frame(ctk.CTkFrame):
         self.data_frame.grid(row=2, column=0, sticky="nsew", columnspan = 2,pady=(0, height*0.0075))
 
         self.daily_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.4,
-                                           column_format=f'/No:{int(width*0.025)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Subtotal:{int(width*0.165)}-tr/Deduction:{int(width*0.165)}-tr/Total:{int(width*0.135)}-tr!30!30')
+                                           column_format=f'/No:{int(width*0.035)}-#c/OR:{int(width*0.095)}-tc/Client:x-tl/Item:{int(width*.115)}-tr/Service:{int(width*.115)}-tr/Deduction:{int(width*0.115)}-tr/Total:{int(width*0.135)}-tr!33!35')
         self.daily_data_view.pack()
 
 
@@ -2464,7 +2464,7 @@ class reports_frame(ctk.CTkFrame):
         self.monthly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
         self.monthly_data_view = cctk.cctkTreeView(self.data_frame, width=width*0.8, height=height *0.5,
-                                           column_format=f"/No:{int(width*.025)}-#c/Date:x-tl/Item:{int(width*.165)}-tr/Service:{int(width*.165)}-tr/Total:{int(width*.135)}-tr!30!30")
+                                           column_format=f"/No:{int(width*.035)}-#c/Date:x-tl/Item:{int(width*.115)}-tr/Service:{int(width*.115)}-tr/Deduction:{int(width*.115)}-tr/Total:{int(width*.135)}-tr!33!35")
         self.monthly_data_view.pack()
 
         self.monthly_vbar_canvas = self.show_bar(self.monthly_graph, data_item=monthly_data_items, data_service=monthly_data_service, info=[width*0.0175,height*0.005,Color.White_Platinum], label=monthly_label)
@@ -2474,7 +2474,7 @@ class reports_frame(ctk.CTkFrame):
         self.yearly_graph.grid(row=1, column=0, sticky="nsew", columnspan=2, pady=height*0.0075)
 
         self.yearly_data_view = cctk.cctkTreeView(self.data_frame,  width=width*0.8, height=height *0.5,
-                                           column_format=f"/No:{int(width*.025)}-#c/Month:x-tl/Item:{int(width*.165)}-tr/Service:{int(width*.165)}-tr/Total:{int(width*.135)}-tr!30!30")
+                                           column_format=f"/No:{int(width*.035)}-#c/Month:x-tl/Item:{int(width*.115)}-tr/Service:{int(width*.115)}-tr/Deduction:{int(width*.115)}-tr/Total:{int(width*.135)}-tr!33!35")
         self.yearly_data_view.pack()
 
         self.yearly_vbar_canvas = self.show_bar(self.yearly_graph, data_item=yearly_data_items, data_service=yearly_data_service, info=[width*0.01,height*0.005,Color.White_Platinum], label=self.months)
@@ -2508,7 +2508,7 @@ class reports_frame(ctk.CTkFrame):
         self.rep_treeview_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", padx=(width*0.0025), pady=(height*0.005,0))
 
         self.inventory_rep_treeview = cctk.cctkTreeView(self.rep_treeview_frame, width=width*0.8, height=height *0.8,
-                                           column_format=f"/No:{int(width*.025)}-#c/InitialCode:{int(width*.1)}-tc/ItemName:x-tl/CurrentStockPcs:{int(width*.125)}-tr!30!30")
+                                           column_format=f"/No:{int(width*.025)}-#c/ItemID:{int(width*.1)}-tc/ItemName:x-tl/CurrentStockPcs:{int(width*.125)}-tr!33!35")
         self.inventory_rep_treeview.pack()
         
         self.update_invetory_graph()
