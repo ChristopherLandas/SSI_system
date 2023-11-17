@@ -2941,14 +2941,18 @@ class histlog_frame(ctk.CTkFrame):
 
         self.action_log_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
         self.log_history_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
+        self.attempts_frame = ctk.CTkFrame(self.base_frame, fg_color=Color.White_Color[3])
 
         self.action_log_frame.grid_columnconfigure(2, weight=1)
         self.action_log_frame.grid_rowconfigure(1, weight=1)
         
         self.log_history_frame.grid_columnconfigure(2, weight=1)
         self.log_history_frame.grid_rowconfigure(1, weight=1)
+
+        self.attempts_frame.grid_columnconfigure(2, weight=1)
+        self.attempts_frame.grid_rowconfigure(1, weight=1)
         
-        self.report_frames=[self.action_log_frame, self.log_history_frame]
+        self.report_frames=[self.action_log_frame, self.log_history_frame, self.attempts_frame]
         self.active_report = None
         
         self.grid_forget()
@@ -2965,13 +2969,13 @@ class histlog_frame(ctk.CTkFrame):
             
         self.top_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.top_frame.grid(row=0, column=0, sticky="ew" ,padx=(width*0.005),  pady=(height*0.01,0))
-        self.top_frame.grid_columnconfigure(2, weight=1)
+        self.top_frame.grid_columnconfigure(3, weight=1)
 
-        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=4, sticky="nsew")
+        ctk.CTkFrame(self.top_frame, corner_radius=0, fg_color=selected_color, height=height*0.0075, bg_color=selected_color).grid(row=1, column=0, columnspan=5, sticky="nsew")
 
         self.date_label = ctk.CTkLabel(self.top_frame, text=date.today().strftime('%B %d, %Y'), font=("DM Sans Medium", 14),
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
-        self.date_label.grid(row=0, column=3, sticky="n")
+        self.date_label.grid(row=0, column=4, sticky="n")
 
 
         self.action_log_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.13,
@@ -2998,9 +3002,21 @@ class histlog_frame(ctk.CTkFrame):
         self.log_in_button.grid()
         self.log_in_button.update_children()
 
-        self.button_manager = cctku.button_manager([self.action_log_button, self.log_in_button], selected_color, False, 0)
+        self.attempts_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.125,
+                                                           fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
+        self.attempts_button.grid(row=0, column=2, sticky="s", padx=(0,width*0.0025), pady=0)
+        self.attempts_button.configure(command=partial(load_main_frame, 2))
+        self.attemps_button_lbl = ctk.CTkLabel(self.attempts_button, text="",image=self.histlog)
+        self.attemps_button_lbl.pack(side="left", padx=(width*0.01,width*0.005))
+        self.attempts_lbl = ctk.CTkLabel(self.attempts_button, text="LOGIN ATTEMPS", text_color="white", font=("DM Sans Medium", 14))
+        self.attempts_lbl.pack(side="left")
+        self.attempts_button.grid()
+        self.attempts_button.update_children()
+
+        self.button_manager = cctku.button_manager([self.action_log_button, self.log_in_button, self.attempts_button], selected_color, False, 0)
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
-                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
+                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
+                                        lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"))
         self.button_manager.click(self.button_manager._default_active, None)
 
         '''ACTION HISTORY - START'''
@@ -3134,10 +3150,16 @@ class histlog_frame(ctk.CTkFrame):
         self.y_scrollbar.grid(row=0, column=1, sticky="ns")
         """Table End"""
         
-        '''LOGIN HISTORY - END'''        
+        '''LOGIN HISTORY - END'''
+
+        '''ATTEMPTS - START'''     
+        self.attempts_treeview = cctk.cctkTreeView(self.attempts_frame, width = 1040, height = 780, column_format="/AttemptingUSN:x-tl/UsedUSN:x-tl/DateAttempted:x-tr!30!30")
+        self.attempts_treeview.pack()
+        '''ATTEMPTS - END'''     
         
         self.update_login_audit()
         self.update_action_content()
+        self.update_attempt_audit()
         load_main_frame(0)
     
     def update_action_content(self, e: any = None):
@@ -3164,6 +3186,12 @@ class histlog_frame(ctk.CTkFrame):
             else:
                 tag ="odd"
             self.log_audit_tree.insert(parent='', index='end', iid=i, text="", values= (i + 1, )+ temp[i], tags=tag )
+
+    def update_attempt_audit(self, e: any = None):
+        self.attempts_treeview.pack_forget()
+        self.attempts_treeview.update_table(database.fetch_data("Select COALESCE(attempt_usn, '<None>'), usn_used, DATE_FORMAT(date_created, '%M %d, %Y at %h:%i %p') from login_report"))
+        self.attempts_treeview.pack()
+        
             
 class admin_settings_frame(ctk.CTkFrame):
     global width, height, IP_Address, PORT_NO
