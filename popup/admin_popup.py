@@ -41,7 +41,7 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
                 self.save_button.pack_forget()
                 self.cancel_button.pack_forget()
                 
-                self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
+                #self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
                 
             def save_changes():
@@ -56,11 +56,11 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
                     messagebox.showerror("Error", "An error occured\nfailed to change", parent = self)
 
                 self.place_forget()
-                self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
+                #self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
             
             self.main_frame = ctk.CTkFrame(self, width * 0.45, height=height*0.525, corner_radius= 0, fg_color=Color.White_Lotion)
-            self.main_frame.grid(row=0, column=0, sticky="nsew",)
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
             self.main_frame.grid_propagate(0)
@@ -70,7 +70,7 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.service).pack(side="left",padx=(width*0.01,0))
-            ctk.CTkLabel(self.top_frame, text="SERVICE INFO", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+            ctk.CTkLabel(self.top_frame, text="SERVICE INFORMATION", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
@@ -92,7 +92,7 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
             self.event_frame.pack_propagate(0)
             
             self.remove_button = ctk.CTkButton(self.event_frame, text="Remove", height=height*0.055, width=width*0.065,image=self.remove_icon, fg_color=Color.Red_Pastel, font=("DM Sans Medium", 14),)
-            self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
+            #self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
             
             self.edit_button = ctk.CTkButton(self.event_frame, text="Edit", height=height*0.055, width=width*0.065,image=self.edit_icon, font=("DM Sans Medium", 14), command=edit_entries)
             self.edit_button.pack(side=ctk.RIGHT)
@@ -113,7 +113,7 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
         
             '''SERVICE CATEGORY'''
             self.service_category_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
-            self.service_category_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
+            #self.service_category_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(width*0.005), pady=(0, height*0.01))
             ctk.CTkLabel(self.service_category_frame, text="Category: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.085, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.service_category_entry = ctk.CTkEntry(self.service_category_frame,  font=("DM Sans Medium",14), fg_color=Color.White_Lotion, state='disable')
             self.service_category_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
@@ -209,7 +209,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 #self.item_category_option.pack_forget()
                 #self.item_category_entry.pack(side=ctk.LEFT, fill="x", expand=1, padx=(0,width*0.0025), pady=(height*0.005))
                 
-                self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
+                #self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
                 
             def save_changes():
@@ -228,11 +228,11 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 else:
                     messagebox.showerror("Failed to Update", "An error occured", parent = self)
                 
-                self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
+                #self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
                 self.edit_button.pack(side=ctk.RIGHT)
             
             self.main_frame = ctk.CTkFrame(self, width * 0.45, height=height*0.85, corner_radius= 0, fg_color=Color.White_Lotion)
-            self.main_frame.grid(row=0, column=0, sticky="nsew",)
+            self.main_frame.grid(row=0, column=0, sticky="nsew",padx=1, pady=1)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
             self.main_frame.grid_propagate(0)
@@ -242,7 +242,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text="", fg_color="transparent", image=self.inventory).pack(side="left",padx=(width*0.01,0))
-            ctk.CTkLabel(self.top_frame, text="ITEM INFO", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+            ctk.CTkLabel(self.top_frame, text="ITEM INFORMATION", text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
             
@@ -264,7 +264,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.event_frame.pack_propagate(0)
             
             self.remove_button = ctk.CTkButton(self.event_frame, text="Remove", height=height*0.055, width=width*0.065,image=self.remove_icon, fg_color=Color.Red_Pastel, font=("DM Sans Medium", 14),)
-            self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
+            #self.remove_button.pack(side=ctk.RIGHT,padx=(width*0.005, 0))
             
             self.edit_button = ctk.CTkButton(self.event_frame, text="Edit", height=height*0.055, width=width*0.065,image=self.edit_icon, font=("DM Sans Medium", 14), command=edit_entries)
             self.edit_button.pack(side=ctk.RIGHT)

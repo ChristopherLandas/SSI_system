@@ -3239,7 +3239,7 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
         
         self.service_data_view = cctk.cctkTreeView(self.service_treeview_frame,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ServiceID:{int(width*.115)}-tc/ServiceName:x-tl/Category:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!30!30',
+                                           column_format=f'/No:{int(width*.025)}-#r/ServiceID:{int(width*.115)}-tc/ServiceName:x-tl/DurationType:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!30!30',
                                            double_click_command = lambda _: self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data(), service_reload_callback = refresh_service))
         self.service_data_view.pack()
         
