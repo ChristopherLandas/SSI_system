@@ -45,10 +45,8 @@ def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
                     for it in i:
                         temp_items.append(it)
                     formatted_items.append(temp_items)
-                #ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=f"{or_num}", title="Receipt Viewer", is_receipt=1)
-                #added deduction
-                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=price_format_to_float(raw_transaction_info[2][1:]), paid=price_format_to_float(raw_transaction_info[2][1:]), title="Transaction Receipt Viewer", is_receipt=1, deduction=raw_transaction_info[6])
-            
+                
+                ppdfp.preview_pdf_popup(receipt=0, view_receipt_by_or=or_num, ornum=raw_transaction_info[0], cashier=raw_transaction_info[4], client=raw_transaction_info[1], pet='s[1]', item=formatted_items, service=raw_service_info, total=(raw_transaction_info[2]), paid=(raw_transaction_info[2]), title="Transaction Receipt Viewer", is_receipt=1, deduction=raw_transaction_info[6])
             def view_removed():
                 _temp = [(data[0],) + (f'{data[1]} ({data[2]})',) + data[3:] if data[2] else (data[0], data[1], data[3:]) for data in database.fetch_data(sql_commands.get_replaced_items_by_id, (self.or_label._text,))]
                 self.replaced.place(relx=0.5, rely=0.5, anchor='c', info=(self.or_label._text, self.client_name._text), data=_temp)
@@ -428,12 +426,16 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
                     else database.fetch_data(sql_commands.get_item_id_by_name_null_unit, split_unit(item.winfo_children()[2]._text))[0][0] for item in self.client_treeview.data_frames]
             #get_stocks_by_id
             for item in range(len(spinners)):
-                spinners[item].configure(val_range = (0,database.fetch_data(sql_commands.get_stocks_by_id, (item_ids[item],))[0][0]))
+                spinners[item].configure(val_range = (0,database.fetch_data(sql_commands.get_stocks_by_id, (item_ids[item],))[0][0] or self.items[item][1]))
                 spinners[item].configure(value = self.items[item][1])
             
                 spinners[item].winfo_children()[0].bind("<Button-1>", self.row_values)
-                spinners[item].winfo_children()[2].bind("<Button-1>", self.row_values)
                 
+                
+                if not database.fetch_data(sql_commands.get_stocks_by_id, (item_ids[item],))[0][0]:
+                    spinners[item].winfo_children()[2].configure(state='disabled')
+                else:
+                    spinners[item].winfo_children()[2].bind("<Button-1>", self.row_values)
                 spinners[item].set_entry_state('disabled')
                 
         def update_table_buttons(self):
@@ -445,14 +447,24 @@ def change_order(master, info:tuple) -> ctk.CTkFrame:
                 spinners[item].set_entry_state('disabled')
                 
         def place(self, info, items, **kwargs):
-            self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (info,))[0]
-            self.item_total = format_price(database.fetch_data(sql_commands.get_item_total_by_id, (info,))[0][0])
-            self.service_total = format_price(database.fetch_data(sql_commands.get_service_total_by_id, (info,))[0][0] or 0)
-            
-            self.items = items
-            self.set_values()
-            self.set_table()
-            return super().place(**kwargs)
+            try:
+                self.transact_info = database.fetch_data(sql_commands.get_sales_record_info, (info,))[0]
+                self.item_total = format_price(database.fetch_data(sql_commands.get_item_total_by_id, (info,))[0][0])
+                self.service_total = format_price(database.fetch_data(sql_commands.get_service_total_by_id, (info,))[0][0] or 0)
+                
+                
+                self.items = items
+                self.set_values()
+                self.set_table()
+                return super().place(**kwargs)
+            finally:
+                item_ids = [database.fetch_data(sql_commands.get_item_id_by_name_unit, split_unit(items[0][0].split(' ', 1)[1]))[0][0] if len(split_unit(items[0][0].split(' ', 1)[1])) == 2
+                    else database.fetch_data(sql_commands.get_item_id_by_name_null_unit, split_unit(items[0][0].split(' ', 1)[1]))[0][0] for item in items]
+             
+                temp = [database.fetch_data(sql_commands.get_stocks_by_id, (ids,))[0][0] or 0 for ids in item_ids]
+                #print(temp)
+                if 0 in temp:
+                    messagebox.showinfo("Replacement ","An item in this record is currently out of stock and cannot be replaced", parent = self)
         
         def place_forget(self, **kwargs):
             self.replace_item_btn.configure(text=f"Replaced Items (0)")

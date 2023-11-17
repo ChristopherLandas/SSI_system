@@ -339,7 +339,7 @@ class dashboard(ctk.CTkToplevel):
         '''ALL OF THE COMMENTED NTF_C VARIABLE PUT A NOTIFICATION IN INSTANCE RATHER THAN GROUP'''
 
         out_of_stock = [s[0] for s in database.fetch_data(sql_commands.get_out_of_stock_names)]
-        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock)] #for _ in out_of_stock]
+        ntf_c1 = [('Out of stock', f'{len(out_of_stock)} Item{"s are " if len(out_of_stock) > 1 else " is "} currently out of stock', out_of_stock)] if out_of_stock else []#  #for _ in out_of_stock]
         #ntf_c1 = [('Out sf stock', f'Item {s} is currently out of stock') for s in out_of_stock]
         
         low_stock = database.fetch_data(sql_commands.get_low_items_name)
@@ -348,14 +348,14 @@ class dashboard(ctk.CTkToplevel):
 
         near_expire = database.fetch_data(sql_commands.get_near_expired_items_name, (SETTINGS_VAL['Near_expiry_date_alert'], ))
         #ntf_c3 = [('About to Expire', f'Item {s[0]} is about to expire in {s[2]} day{"s" if s[2] > 1 else ""}') for s in near_expire]
-        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire)] #for _ in near_expire]
+        ntf_c3 = [('About to Expire', f'{len(near_expire)} Item{"s are" if len(near_expire) > 1 else " is" } about to expire', near_expire)] if near_expire else [] #for _ in near_expire]
 
         expired = database.fetch_data(sql_commands.get_expired_items_name)
         #ntf_c4 = [('Expired stock', f'Item {s[0]} had {s[1]} expired item{"s" if s[1] > 1 else ""}') for s in low_stock]
         ntf_c4 = [('Expired stock', f'{len(expired)} Item{"s are" if len(low_stock) > 1 else " is"} expired', expired)] if expired else []# for _ in expired]
 
         near_shceduled = database.fetch_data(sql_commands.get_near_scheduled_clients_names, (SETTINGS_VAL['Appointment_Alert'], SETTINGS_VAL['Appointment_Alert']))
-        ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled]
+        ntf_c5 = [('Near scheduled', f'{str(s[1]).capitalize()} is scheduled in {s[2]} day{"s" if s[2] > 1 else ""} for {s[0]}', [s]) for s in near_shceduled] if near_shceduled else []
 
         scheduled_today = database.fetch_data(sql_commands.get_scheduled_clients_today_names)
         ntf_c6 = [('Scheduled Today', f'{str(s[1]).capitalize()} is scheduled today for {s[0]}', [s]) for s in scheduled_today]
@@ -1243,8 +1243,10 @@ class sales_frame(ctk.CTkFrame):
             self.update_table()
             
         def search_callback():
-            self.source = list_filterer(self.search_bar.get(), self.raw_data)
+            self.transaction_records = database.fetch_data(sql_commands.get_all_transaction_record)
+            self.source = list_filterer(self.search_bar.get(), self.transaction_records)
             temp = self.source
+            print(self.source)
             self.show_sale_info.place(relx=0.5, rely=0.5, anchor = 'c', sales_info=self.search_bar.get()[0]) if len(self.search_bar.get()) == 1 else self.set_table(temp)
             self.attendant_sort_option.set("All")
             

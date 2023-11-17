@@ -521,31 +521,6 @@ class preview_pdf_popup(ctk.CTkToplevel):
                  ):
         super().__init__(*args, fg_color=fg_color, **kwargs)
 
-        '''self.attributes('-topmost',1)
-        toplvl_width = 800
-        toplvl_height = 600
-        position_X = (self.winfo_screenwidth()/2) - (toplvl_width/2)
-        position_Y = (self.winfo_screenheight()/2) - (toplvl_height/2)
-
-
-        self.title(title)
-        self.geometry("%dx%d+%d+%d"%(toplvl_width,toplvl_height,position_X,position_Y))
-        print(position_X)
-        print(position_Y)
-        self.configure(bg='white')
-        global zoom_out_btn, zoom_in_btn, zoom_label, vaas2, ctr, pdf_viewer_frame
-        ctr = 2
-        #region add zooming function widgets
-        zoom_frame = ctk.CTkFrame(self)
-        zoom_frame.pack()
-        zoom_out_btn = ctk.CTkButton(zoom_frame, text='-', command=zoom_out, font = ("DM Sans Medium", 14), width=30)
-        zoom_out_btn.pack(side = 'left')
-        zoom_label = ctk.CTkLabel(zoom_frame, fg_color='#ffffff', text = '100%', corner_radius=5)
-        zoom_label.pack(side = 'left', padx = 5)
-        zoom_in_btn = ctk.CTkButton(zoom_frame, text='+', command=zoom_in, font=("DM Sans Medium", 14), width=30)
-        zoom_in_btn.pack(side = 'left')
-        #endregion
-        '''       
         
         window_height, window_width = self.winfo_screenheight()/scaling, (self.winfo_screenwidth()/scaling)
         self.attributes('-topmost',1)
