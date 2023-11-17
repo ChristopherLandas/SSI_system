@@ -411,9 +411,22 @@ class creation_frame(ctk.CTkFrame):
         self.create_acc_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Create Account", font=("DM Sans Medium", 14), command= self.create_acc   )
         self.create_acc_btn.pack(side='right')
 
+        def check_for_names():
+            txt = self.fullname_entry.get()
+            char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
+
+            if str.islower(txt[0]):
+                temp = txt[0].upper()
+                self.fullname_entry.delete(0, 1)
+                self.fullname_entry.insert(0, temp)
+
+            for i in range(len(txt)):
+                if txt[i] not in char_format:
+                    self.fullname_entry.delete(i, i+1)
+
         self.password_limiter = cctku.entry_limiter(128, self.password_entry)
         self.user_limiter = cctku.entry_limiter(128, self.username_entry)
-        self.name_limiter = cctku.entry_limiter(128, self.fullname_entry)
+        self.name_limiter = cctku.entry_limiter(128, self.fullname_entry, check_for_names)
         self.password_entry.configure(textvariable = self.password_limiter)
         self.username_entry.configure(textvariable = self.user_limiter)
         self.fullname_entry.configure(textvariable = self.name_limiter)
@@ -557,6 +570,22 @@ class roles_frame(ctk.CTkFrame):
         
         self.update_acc_btn =  ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Update Account", font=("DM Sans Medium", 14), command = self.update_roles)
         self.update_acc_btn.pack(side='right')
+
+        def check_for_names():
+            txt = self.fullname_entry.get()
+            char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
+
+            if str.islower(txt[0]):
+                temp = txt[0].upper()
+                self.fullname_entry.delete(0, 1)
+                self.fullname_entry.insert(0, temp)
+
+            for i in range(len(txt)):
+                if txt[i] not in char_format:
+                    self.fullname_entry.delete(i, i+1)
+
+        self.fullname_limiter = cctku.entry_limiter(128, self.fullname_entry, check_for_names)
+        self.fullname_entry.configure(textvariable = self.fullname_limiter)
 
     def grid(self, **kwargs):
         if self.usn_option._values == ['CTkOptionMenu']:

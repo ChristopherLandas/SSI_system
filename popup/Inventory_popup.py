@@ -871,17 +871,53 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             
             self.entries = [self.supplier_name_entry, self.supplier_person_entry, self.supplier_tele_entry, self.supplier_number_entry, self.supplier_email_entry, self.supplier_address_entry]
             
+            def check_for_names():
+                txt = self.supplier_person_entry.get()
+                char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
+                #contains all the valid characters
+
+                if str.islower(txt[0]):
+                    temp = txt[0].upper()
+                    self.supplier_person_entry.delete(0, 1)
+                    self.supplier_person_entry.insert(0, temp)
+                #if the first letter is lowercase, copy the text, make it capital, delete the first word then replace the other
+
+                for i in range(len(txt)):
+                    if txt[i] not in char_format:
+                        self.supplier_person_entry.delete(i, i+1)
+                #if it's not in the char format, delete letter based on which index it was located
+
+            def check_for_number():
+                num = self.supplier_number_entry.get()
+                char_format = "1234567890"
+
+                if num[0] != '+' or num[0] not in char_format:
+                    temp = num[0].upper()
+                    self.supplier_number_entry.delete(0, 1)
+                    self.supplier_number_entry.insert(0, temp)
+
+                for i in range(1, len(num), 1):
+                    if num[i] not in char_format:
+                        self.supplier_number_entry.delete(i, i+1)
+
+            def check_for_tele():
+                num = self.supplier_tele_entry.get()
+                char_format = "1234567890-"
+                for i in range(1, len(num), 1):
+                    if num[i] not in char_format:
+                        self.supplier_tele_entry.delete(i, i+1)
+
             self.supplier_name_limiter = cctku.entry_limiter(128, self.supplier_name_entry)
-            self.supplier_tele_limiter = cctku.entry_limiter(64, self.supplier_tele_entry)
-            self.supplier_person_limiter = cctku.entry_limiter(128, self.supplier_person_entry)
-            #self.supplier_number_limiter = cctku.entry_limiter(20, self.supplier_number_entry)
+            self.supplier_tele_limiter = cctku.entry_limiter(64, self.supplier_tele_entry, check_for_tele)
+            self.supplier_person_limiter = cctku.entry_limiter(128, self.supplier_person_entry, check_for_names)
+            self.supplier_number_limiter = cctku.entry_limiter(20, self.supplier_number_entry, check_for_number)
             self.supplier_email_limiter = cctku.entry_limiter(128, self.supplier_email_entry)
             self.supplier_address_limiter = cctku.entry_limiter(256, self.supplier_address_entry)
 
             self.supplier_name_entry.configure(textvariable = self.supplier_name_limiter)
             self.supplier_tele_entry.configure(textvariable = self.supplier_tele_limiter)
             self.supplier_person_entry.configure(textvariable = self.supplier_person_limiter)
-            #self.supplier_number_entry.configure(textvariable = self.supplier_number_entry)
+            self.supplier_number_entry.configure(textvariable = self.supplier_number_limiter)
             self.supplier_email_entry.configure(textvariable = self.supplier_email_limiter)
             self.supplier_address_entry.configure(textvariable = self.supplier_address_limiter  )
 
