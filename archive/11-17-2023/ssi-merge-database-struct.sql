@@ -17,7 +17,7 @@
 
 -- Dumping database structure for ssi_merged
 CREATE DATABASE IF NOT EXISTS `ssi_merged` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
-USE `ssi_merged`;
+USE `ssi_merged`; -- CHANGE THE NAME
 
 -- Dumping structure for table ssi_merged.account_access_level
 CREATE TABLE IF NOT EXISTS `account_access_level` (
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=307 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=286 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
 -- Data exporting was unselected.
 
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   PRIMARY KEY (`id`),
   KEY `UID` (`UID`),
   CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 -- Data exporting was unselected.
 
@@ -423,6 +423,7 @@ CREATE TABLE IF NOT EXISTS `services_transaction_content` (
   `end_schedule` date DEFAULT NULL,
   `multiple_sched_quan` int(11) DEFAULT NULL,
   `instance_of_mul_sched` int(11) DEFAULT NULL,
+  `service_provider` varchar(265) DEFAULT NULL,
   KEY `transaction_uid` (`transaction_uid`),
   KEY `FK_services_transaction_content_pet_info` (`pet_uid`),
   CONSTRAINT `FK_services_transaction_content_pet_info` FOREIGN KEY (`pet_uid`) REFERENCES `pet_info` (`id`),
@@ -483,7 +484,7 @@ CREATE TABLE IF NOT EXISTS `service_preceeding_schedule` (
   KEY `FK__service_info_test` (`service_uid`) USING BTREE,
   CONSTRAINT `FK__service_info_test` FOREIGN KEY (`service_uid`) REFERENCES `service_info_test` (`UID`),
   CONSTRAINT `FK__services_transaction_content` FOREIGN KEY (`transaction_uid`) REFERENCES `services_transaction_content` (`transaction_uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- Data exporting was unselected.
 
@@ -539,18 +540,18 @@ CREATE TABLE IF NOT EXISTS `transaction_record` (
 -- Dumping structure for table ssi_merged.user_level_access
 CREATE TABLE IF NOT EXISTS `user_level_access` (
   `Title` varchar(32) NOT NULL,
+  `add_item` int(1) NOT NULL,
   `Dashboard` int(1) NOT NULL,
   `Reception` int(1) NOT NULL,
   `Payment` int(1) NOT NULL,
-  `Customer` int(1) NOT NULL,
   `Services` int(1) NOT NULL,
   `Sales` int(1) NOT NULL,
   `Inventory` int(1) NOT NULL,
   `Pet_Info` int(1) NOT NULL,
   `Report` int(1) NOT NULL,
-  `User_settings` int(1) NOT NULL,
-  `Gen_Settings` int(1) NOT NULL,
-  `History` int(1) NOT NULL,
+  `User` int(1) NOT NULL,
+  `Action` int(1) NOT NULL,
+  `Gen_Settings` int(11) NOT NULL,
   PRIMARY KEY (`Title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 

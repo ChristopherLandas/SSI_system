@@ -121,10 +121,39 @@ def new_customer(master, info:tuple, command_callback: callable = None):
                 elif self.customer_num_entry.get()[-1] == "+":
                     return
                 self.customer_num_entry.delete(len(self.customer_address_entry.get()) - 2, ctk.END)
+            
+            def check_for_names():
+                txt = self.customer_name_entry.get()
+                char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
+                #contains all the valid characters
 
-            self.customer_address_limiter = cctku.entry_limiter(256, self.customer_address_entry)
-            self.customer_name_limiter = cctku.entry_limiter(128, self.customer_name_entry)
-            self.customer_num_limiter = cctku.entry_limiter(20, self.customer_num_entry, num_entry_checker)
+                if str.islower(txt[0]):
+                    temp = txt[0].upper()
+                    self.customer_name_entry.delete(0, 1)
+                    self.customer_name_entry.insert(0, temp)
+                #if the first letter is lowercase, copy the text, make it capital, delete the first word then replace the other
+
+                for i in range(len(txt)):
+                    if txt[i] not in char_format:
+                        self.customer_name_entry.delete(i, i+1)
+                #if it's not in the char format, delete letter based on which index it was located
+
+            def check_for_number():
+                num = self.customer_num_entry.get()
+                char_format = "1234567890"
+
+                if num[0] != '+' or num[0] not in char_format:
+                    temp = num[0].upper()
+                    self.customer_num_entry.delete(0, 1)
+                    self.customer_num_entry.insert(0, temp)
+
+                for i in range(1, len(num), 1):
+                    if num[i] not in char_format:
+                        self.customer_num_entry.delete(i, i+1)
+
+            self.customer_address_limiter = cctku.entry_limiter(128, self.customer_address_entry)
+            self.customer_name_limiter = cctku.entry_limiter(128, self.customer_name_entry, check_for_names)
+            self.customer_num_limiter = cctku.entry_limiter(20, self.customer_num_entry, check_for_number)
 
             self.customer_address_entry.configure(textvariable = self.customer_address_entry)
             self.customer_name_entry.configure(textvariable = self.customer_name_limiter)
@@ -309,6 +338,40 @@ def view_record(master, info:tuple, command_callback: callable = None):
             self.entries = [self.customer_name_entry, self.customer_num_entry, self.customer_address_entry, self.total_number_entry]
             self.history_log = audit_popup.audit_info(self, (width, height))
             
+            def check_for_names():
+                txt = self.customer_name_entry.get()
+                char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
+
+                if str.islower(txt[0]):
+                    temp = txt[0].upper()
+                    self.customer_name_entry.delete(0, 1)
+                    self.customer_name_entry.insert(0, temp)
+
+                for i in range(len(txt)):
+                    if txt[i] not in char_format:
+                        self.customer_name_entry.delete(i, i+1)
+
+            def check_for_number():
+                num = self.customer_num_entry.get()
+                char_format = "1234567890"
+
+                if num[0] != '+' or num[0] not in char_format:
+                    temp = num[0].upper()
+                    self.customer_num_entry.delete(0, 1)
+                    self.customer_num_entry.insert(0, temp)
+
+                for i in range(1, len(num), 1):
+                    if num[i] not in char_format:
+                        self.customer_num_entry.delete(i, i+1)
+
+            self.name_limiter = cctku.entry_limiter(128, self.customer_name_entry, check_for_names)
+            self.number_limiter = cctku.entry_limiter(20, self.customer_num_entry, check_for_number)
+            self.address_limiter = cctku.entry_limiter(128, self.customer_address_entry )
+
+            self.customer_name_entry.configure(textvariable = self.name_limiter)
+            self.customer_num_entry.configure(textvariable = self.number_limiter)
+            self.customer_address_entry.configure(textvariable = self.address_limiter)
+
         def set_entries(self):
             self.record_info = database.fetch_data(sql_commands.get_customer_view_record, (self.info[0],))[0]
             [entry.configure(state = ctk.NORMAL) for entry in self.entries]
