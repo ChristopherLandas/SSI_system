@@ -226,13 +226,7 @@ class dashboard(ctk.CTkToplevel):
             self.active_main_frame = self.main_frames[cur_frame]
             self.active_main_frame.grid(row =1, column =1, sticky = 'nsew')
         
-        def log_out():
-            b = messagebox.askyesno('Log out', 'Are you sure you want to log out?', parent = self)
-            if b:
-                database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
-                                        (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
-                self._master.deiconify()
-                self.destroy()
+        
                 
         self.grid_rowconfigure(1,weight=1)
         self.side_frame = ctk.CTkFrame(self, height= height, width = side_frame_w,
@@ -321,6 +315,8 @@ class dashboard(ctk.CTkToplevel):
                                          position= (1 - acc_menubar_width/2,
                                                     self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
                                                     'c'))
+        self.logout_btn = ctk.CTkButton(self.acc_menu_bar, width * acc_menubar_width * .85, height * default_menubar_height * .2, text = 'Logout', command= self.log_out)
+        self.logout_btn.pack(pady = (height * .005, 0))
 
         self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
                                                           children=[self.notif_menu_bar, self.acc_menu_bar], active_double_click_nullified= False)
@@ -332,7 +328,7 @@ class dashboard(ctk.CTkToplevel):
         self.network_receiver = nsu.network_receiver(IP_Address['MY_NETWORK_IP'], PORT_NO['Notif_gen'], self.receiver_callback)
         self.network_receiver.start_receiving()
         self.generate_notification()
-        self.protocol("WM_DELETE_WINDOW", log_out)
+        self.protocol("WM_DELETE_WINDOW", self.log_out)
         self.mainloop()
     
     def generate_notification(self):
@@ -380,6 +376,14 @@ class dashboard(ctk.CTkToplevel):
 
     def popup_command(self,info):
         print(info)
+
+    def log_out(self):
+        b = messagebox.askyesno('Log out', 'Are you sure you want to log out?', parent = self)
+        if b:
+            database.exec_nonquery([[f'UPDATE {db.LOG_HIST} SET {db.log_hist.TIME_OUT} = ? WHERE {db.log_hist.DATE_LOGGED} = ? AND {db.log_hist.TIME_IN} = ?',
+                                    (datetime.datetime.now().time(), date_logged.date(), date_logged.time().strftime("%H:%M:%S"))]])
+            self._master.deiconify()
+            self.destroy()
 
 ''' 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶 🐱 🐶'''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''main frames'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
