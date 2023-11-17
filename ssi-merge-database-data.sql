@@ -1,3 +1,10 @@
+-- --------------------------------------------------------
+-- Host:                         127.0.0.1
+-- Server version:               11.1.2-MariaDB - mariadb.org binary distribution
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.3.0.6589
+-- --------------------------------------------------------
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -7,6 +14,7 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+-- Dumping data for table ssi_merged.account_access_level: ~1 rows (approximately)
 INSERT INTO `account_access_level` (`usn`, `Dashboard`, `Reception`, `Payment`, `Customer`, `Services`, `Sales`, `Inventory`, `Pet`, `Report`, `User`, `Settings`, `History`) VALUES
 	('admin', 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0),
 	('Bob', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -22,6 +30,7 @@ INSERT INTO `acc_cred` (`usn`, `pss`, `slt`, `entry_OTP`) VALUES
 	('Jrizal', '4436a253401b8e74a80e7a9a04930e16ae6e37dbc8c36f49f871ead477044f53', '3wbtXJDmSTm98iubl13hLw==', NULL),
 	('jayr', '56a1f73718b12d1a021f12eee52d2d1bbe1e6c067698c27e98c5fdd22fb0a0dd', 'WqMM26lyQDirax7evZgFuQ==', NULL);
 
+-- Dumping data for table ssi_merged.acc_info: ~8 rows (approximately)
 INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('123123', '123123', 'Assisstant', 0),
 	('admin', 'Big Boss 1', 'Owner', 1),
@@ -33,6 +42,7 @@ INSERT INTO `acc_info` (`usn`, `full_name`, `job_position`, `state`) VALUES
 	('Jrizal', 'Jose Rizal', 'Assisstant', 0),
 	('jayr', 'jayr', 'Assisstant', 0);
 
+-- Dumping data for table ssi_merged.action_history: ~248 rows (approximately)
 INSERT INTO `action_history` (`Column 5`, `usn`, `Type`, `ACTION`, `action_date`) VALUES
 	(1, 'admin', 'Item Encoding', 'ADD/admin/I10fdf', '2023-09-11 23:50:11'),
 	(2, 'aila', 'invoice', 'INVM/aila/Pec804', '2023-08-23 15:11:35'),
@@ -328,6 +338,7 @@ INSERT INTO `categories` (`categ_name`, `does_expire`, `creator`, `state`, `date
 	('Test006', 0, 'admin', 0, '2023-10-03 22:14:58', 'admin', '2023-10-04 11:38:29'),
 	('Vaccines', 1, 'admin', 1, '2023-11-07 22:45:40', NULL, NULL);
 
+-- Dumping data for table ssi_merged.disposal_history: ~38 rows (approximately)
 INSERT INTO `disposal_history` (`id`, `receive_id`, `item_uid`, `item_name`, `initial_quantity`, `Current_quantity`, `reason`, `date_of_disposal`, `full_dispose_date`, `disposed_by`) VALUES
 	('D021C068', NULL, 'I1aa81', 'Comedy (100mg)', 1, NULL, 'Defective/Damaged', '2023-11-11 00:00:00', NULL, 'admin'),
 	('D2CBCF8C', NULL, 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 12, 0, 'Expired', '2023-10-22 00:00:00', NULL, 'admin'),
@@ -729,6 +740,7 @@ INSERT INTO `invoice_record` (`invoice_uid`, `Attendant_usn`, `client_name`, `To
 	('Pec804', 'aila', 'Christopher L.', 440, NULL, '2023-08-23', -1, NULL, 0, NULL),
 	('Pf6e9c', 'aila', 'N/A', 796.95, NULL, '2023-08-23', 2, '2023-08-23', 0, NULL);
 
+-- Dumping data for table ssi_merged.invoice_service_content: ~65 rows (approximately)
 INSERT INTO `invoice_service_content` (`invoice_uid`, `service_uid`, `service_name`, `pet_uid`, `patient_name`, `scheduled_date`, `price`, `deduction`, `end_schedule`, `multiple_sched_quan`, `instance_of_mul_sched`) VALUES
 	('P1d58d', 'S00001', 'Grooming', 'P1ec18', 'Brutus', '2023-08-19', 500, 0, NULL, NULL, NULL),
 	('P3d236', 'S00001', 'Grooming', 'P536ec', 'Clarence', '2023-08-19', 500, 0, NULL, NULL, NULL),
@@ -1177,6 +1189,7 @@ INSERT INTO `item_transaction_content` (`transaction_uid`, `Item_uid`, `item_nam
 	('188', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 3, 1140.15, 0, 1),
 	('190', 'I00006', 'UniLeash (100mg)', 5, 144, 0, 1);
 
+-- Dumping data for table ssi_merged.login_report: ~4 rows (approximately)
 INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'admin', '2023-06-07 23:50:59'),
 	('admin', 'admin', '2023-06-07 23:54:09'),
@@ -1184,6 +1197,7 @@ INSERT INTO `login_report` (`attempt_usn`, `usn_used`, `date_created`) VALUES
 	(NULL, 'chris', '2023-07-05 17:36:56'),
 	(NULL, 'james', '2023-11-13 20:01:07');
 
+-- Dumping data for table ssi_merged.log_history: ~33 rows (approximately)
 INSERT INTO `log_history` (`usn`, `date_logged`, `time_in`, `time_out`) VALUES
 	('Chris2', '2023-08-31', '00:05:36', '00:05:36'),
 	('admin', '2023-09-11', '23:28:25', '23:28:25'),
@@ -1318,6 +1332,7 @@ INSERT INTO `pet_owner_info` (`owner_id`, `owner_name`, `address`, `contact_numb
 	('CU098866', 'Chenny Dela Cruz', 'Tala Caloocan City', '09153580361', 'admin', '2023-11-16 11:50:17', 'admin', '2023-11-16 11:56:45'),
 	('CU0D48E8', 'Kajo Baldismo', 'Trese Street, Caloocan City', '+63 123 457 1345', 'admin', '2023-11-16 19:04:22', NULL, NULL);
 
+-- Dumping data for table ssi_merged.receiving_history_info: ~66 rows (approximately)
 INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receiver`, `expiry`, `date_received`) VALUES
 	('R20205', 10, 'admin', NULL, '2023-10-08 15:11:26'),
 	('R6B64B', 5, 'admin', NULL, '2023-10-08 15:20:51'),
@@ -1391,6 +1406,7 @@ INSERT INTO `receiving_history_info` (`receiving_id`, `order_quantity`, `receive
 	('RBB8F5', 1, 'admin', NULL, '2023-11-10 21:47:40'),
 	('RF6EC1', 5, 'admin', NULL, '2023-11-17 08:17:52');
 
+-- Dumping data for table ssi_merged.recieving_item: ~89 rows (approximately)
 INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_stock`, `current_stock`, `supp_id`, `exp_date`, `reciever`, `state`, `date_set`, `date_recieved`) VALUES
 	('1', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 15, 0, 'SU000001', '2023-10-26', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:49:18'),
 	('2', 'Nutri-Vet Bladder Control Supplement for Dogs', 'I00005', 'admin', 25, 25, 'SU000001', '2023-08-03', 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 01:57:52'),
@@ -1497,6 +1513,7 @@ INSERT INTO `recieving_item` (`id`, `NAME`, `item_uid`, `ordered_by`, `initial_s
 	('RFFE1B', 'Test', 'I10fdf', 'admin', 10, 5, 'SU000004', NULL, 'admin', 2, '2023-09-16 15:25:28', '2023-10-08 16:01:37'),
 	('Rf166d', 'MayPaw Heavy Duty Rope Dog Leash', 'I00001', 'admin', 15, 15, 'SU000001', NULL, 'klyde', 2, '0000-00-00 00:00:00', '2023-06-12 03:08:47');
 
+-- Dumping data for table ssi_merged.replacement_items: ~28 rows (approximately)
 INSERT INTO `replacement_items` (`rep_id`, `item_id`, `item_desc`, `price`, `quantity`, `reason`) VALUES
 	('REP0090A1750', 'Ia71e7', 'Kawaki wo ameku (100mg)', 244.78, 1, 'Defective/Damaged'),
 	('REP0090A1750', 'I00006', 'UniLeash (100mg)', 144, 1, 'Defective/Damaged'),
@@ -1529,6 +1546,7 @@ INSERT INTO `replacement_items` (`rep_id`, `item_id`, `item_desc`, `price`, `qua
 	('REP0039F1597', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 1140.15, 1, 'Defective/Damaged'),
 	('REP00B019D65', 'I00005', 'Nutri-Vet Bladder Control Supplement for Dogs (100mg)', 1140.15, 1, 'Expired');
 
+-- Dumping data for table ssi_merged.replacement_record: ~21 rows (approximately)
 INSERT INTO `replacement_record` (`rep_id`, `transction_id`, `new_total`, `replace_by`, `replacement_date`) VALUES
 	('REP001512299', '161', 2640, 'admin', '2023-11-07 17:43:35'),
 	('REP0016FEA96', '165', 796.95, 'admin', '2023-11-07 14:01:46'),
@@ -1596,6 +1614,7 @@ INSERT INTO `service_category_test` (`category`, `state`) VALUES
 	('Test', 1),
 	('Vaccination', 1);
 
+-- Dumping data for table ssi_merged.service_info: ~8 rows (approximately)
 INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 'test', 500, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 'test', 1500, 1, '2023-05-29'),
@@ -1606,6 +1625,7 @@ INSERT INTO `service_info` (`UID`, `service_name`, `Item_needed`, `price`, `stat
 	('S00007', 'Euthanasion', 'test', 900, 1, '2023-05-29'),
 	('S00008', 'Feline Castration Srugery', 'test', 500, 1, '2023-05-29');
 
+-- Dumping data for table ssi_merged.service_info_test: ~8 rows (approximately)
 INSERT INTO `service_info_test` (`UID`, `service_name`, `price`, `category`, `duration_type`, `state`, `date_added`) VALUES
 	('S00001', 'Grooming', 500, '', 0, 1, '2023-05-29'),
 	('S00002', '5-in-1 Vaccine', 1500, '', 2, 1, '2023-05-29'),
@@ -1705,6 +1725,7 @@ INSERT INTO `supplier_item_info` (`supplier_id`, `item_id`, `active`) VALUES
 	('SU000001', 'IAEF95', 1),
 	('SU000004', 'ICCEFE', 1);
 
+-- Dumping data for table ssi_merged.transaction_record: ~181 rows (approximately)
 INSERT INTO `transaction_record` (`transaction_uid`, `Attendant_usn`, `Client_id`, `client_name`, `Total_amount`, `transaction_date`, `state`, `deduction`) VALUES
 	('0', 'aila', '0', 'N/A', 1045, '2023-07-14', 1, 0),
 	('1', 'aila', '0', 'James V.', 500, '2023-07-15', 1, 0),

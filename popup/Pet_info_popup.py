@@ -264,13 +264,12 @@ def new_record(master, info:tuple, table_update_callback: callable):
                     if num[i] not in char_format:
                         self.contact_entry.delete(i, i+1)
 
-
-            self.patient_name_limiter = cctku.entry_limiter(128, self.patient_name_entry, check_for_names)
             self.breed_name_limiter = cctku.entry_limiter(64, self.breed_option._entry)
             self.contact_limiter = cctku.entry_limiter(20, self.contact_entry, check_for_number)
             self.address_limiter = cctku.entry_limiter(256, self.address_entry)
 
             self.patient_name_entry.configure(textvariable = self.patient_name_limiter)
+            #self.owner_name_entry._entry.configure(textvariable = self.owner_name_limiter)
             self.breed_option._entry.configure(textvariable = self.breed_name_limiter)
             self.contact_entry.configure(textvariable = self.contact_limiter)
             self.address_entry.configure(textvariable = self.address_limiter)

@@ -3,7 +3,7 @@ get_uid = "SELECT UID FROM item_general_info where name = ? and unit = ?"
 get_uid_null_unit = "SELECT UID FROM item_general_info where name = ? and unit is NULL"
 get_item_info = "SELECT * FROM item_general_info where name = ? and unit = ?"
 get_item_info_null_unit = "SELECT * FROM item_general_info where name = ? and unit is NULL"
-get_service_uid = "SELECT UID FROM service_info_test where service_name = ?"
+get_service_uid = "SELECT UID FROM service_info where service_name = ?"
 get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 
@@ -78,11 +78,11 @@ get_out_of_stock_inventory = f"SELECT item_general_info.brand, item_general_info
                                 FROM item_general_info\
                                 JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                                 INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                                WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                                 GROUP BY item_general_info.name, item_general_info.unit\
                                 HAVING STATUS = 'Out of Stock'\
                                 ORDER BY item_general_info.UID"
-
+#WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
 get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.brand, item_general_info.name, item_general_info.unit,\
                                   item_inventory_info.Stock,\
                                   CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
@@ -298,6 +298,7 @@ get_critical_state = "SELECT item_general_info.brand, item_general_info.name, it
                                         then sum(item_inventory_info.stock) ELSE 0 END AS stock\
                     FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
                         INNER JOIN item_settings ON item_inventory_info.UID = item_settings.UID\
+                    WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
                     GROUP BY item_inventory_info.uid\
                     HAVING stock;"
 
@@ -319,6 +320,7 @@ get_near_expire_state = "SELECT item_general_info.brand, item_general_info.name,
                                        ON item_inventory_info.UID = item_settings.UID\
                                WHERE DATE_SUB(item_inventory_info.Expiry_Date, INTERVAL 14 DAY) <= CURRENT_DATE\
                                        AND NOT item_inventory_info.Expiry_Date <= current_date\
+                                        AND item_inventory_info.stock > 0\
                                GROUP BY item_general_info.UID"
 
 
@@ -328,9 +330,9 @@ get_expired_state = "SELECT item_general_info.brand, item_general_info.name, ite
                                          AND item_inventory_info.Expiry_Date IS NOT NULL\
                                          then item_inventory_info.Expiry_Date ELSE NULL END AS EXP\
                      FROM item_general_info JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                     WHERE item_inventory_info.state = 1 AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                     WHERE item_inventory_info.state = 1 AND item_inventory_info.stock > 0\
                      HAVING exp;"
-
+#WHERE item_inventory_info.stock > 0 AND item_inventory_info.state = 1
 #FOR DAILY SALES
 get_todays_transaction_count = "SELECT COUNT(*)  FROM transaction_record WHERE transaction_date = CURRENT_DATE"
 
@@ -462,31 +464,38 @@ get_current_stock_group_by_name = "SELECT item_general_info.name,\
                                    GROUP BY item_general_info.name\
                                    ORDER BY item_general_info.UID;"
                                    
-get_inventory_report = "SELECT item_general_info.UID, item_general_info.name,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
-                                   FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.name\
-                                   ORDER BY item_general_info.UID"
+get_inventory_report = "SELECT item_general_info.UID,\
+                                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                                    ELSE CONCAT(item_general_info.name,' (',item_general_info.unit,')') END,\
+                                    CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                    GROUP BY item_general_info.UID\
+                                    ORDER BY item_inventory_info.Stock, item_general_info.name"
 
-get_inventory_info_with_uid = "SELECT item_general_info.name,\
-                                       CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks,\
-                                    item_general_info.UID FROM item_general_info\
-                                   JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
-                                   INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
-                                   WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
-                                   GROUP BY item_general_info.name\
-                                   ORDER BY item_general_info.UID;"
+get_inventory_info_with_uid = "SELECT item_general_info.UID,\
+                                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                                    ELSE CONCAT(item_general_info.name,' (',item_general_info.unit,')') END,\
+                                    CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                    GROUP BY item_general_info.UID\
+                                    ORDER BY item_inventory_info.Stock, item_general_info.name;"
 
-get_all_bought_items_group_by_name = "SELECT item_transaction_content.item_name,\
-                                      		 CAST(SUM(item_transaction_content.quantity) AS INT) AS quantity\
-                                      FROM item_transaction_content\
-                                      JOIN transaction_record ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
-                                      WHERE transaction_record.transaction_date = current_date AND item_transaction_content.state = 1\
-                                      GROUP BY item_transaction_content.item_name\
-                                      ORDER BY transaction_record.transaction_uid"
+get_all_bought_items_group_by_name = "SELECT item_general_info.UID,\
+                                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                                    ELSE CONCAT(item_general_info.name,' (',item_general_info.unit,')') END,\
+                                    CAST(SUM(item_inventory_info.Stock) AS INT) AS current_stocks\
+                                    FROM item_general_info\
+                                    JOIN item_inventory_info ON item_general_info.UID = item_inventory_info.UID\
+                                    INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                                    WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
+                                    GROUP BY item_general_info.UID\
+                                    ORDER BY item_inventory_info.Stock, item_general_info.name"
 
 get_items_daily_sales_sp_temp = "SELECT CAST(SUM(item_transaction_content.price * item_transaction_content.quantity) - SUM(transaction_record.deduction) AS FLOAT)\
                             FROM transaction_record JOIN item_transaction_content ON transaction_record.transaction_uid = item_transaction_content.transaction_uid\
@@ -509,7 +518,8 @@ daily_report_treeview_data = "SELECT transaction_record.transaction_uid,\
                                       transaction_record.client_name,\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
-		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2))AS subtotal,\
+		                                      	ELSE 0 END), 0), 2))AS item_subtotal,\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0), 2)) AS servive_subtotal,\
 							  					CONCAT('₱', FORMAT(transaction_record.deduction ,2)) AS deduction,\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      										then item_transaction_content.price * item_transaction_content.quantity\
@@ -526,7 +536,8 @@ daily_report_treeview_data = "SELECT transaction_record.transaction_uid,\
 monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M %d, %Y') AS 'date',\
                                         CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
-		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS subtotal,\
+		                                      	ELSE 0 END), 0), 2)) AS item_subtotal,\
+                                        CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0),2)) AS service_subtotal,\
                                         CONCAT('₱', FORMAT(COALESCE(SUM(transaction_record.deduction), 0) ,2)) AS deduction,\
                                         CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
@@ -544,8 +555,8 @@ monthly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transactio
 yearly_report_treeview_data = "SELECT DATE_FORMAT(transaction_record.transaction_date, '%M') AS 'date',\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
-		                                      	ELSE 0 END), 0) + COALESCE(SUM(services_transaction_content.price), 0), 2)) AS item,\
-		                           		COALESCE(SUM(services_transaction_content.price), 0),\
+		                                      	ELSE 0 END), 0), 2)) AS item,\
+		                           	    CONCAT('₱', FORMAT(COALESCE(SUM(services_transaction_content.price), 0),2)),\
                                       CONCAT('₱', FORMAT(COALESCE(SUM(transaction_record.deduction), 0) ,2)) AS service,\
 												  CONCAT('₱', FORMAT(COALESCE(SUM(case when item_transaction_content.state = 1\
 		                                      	then item_transaction_content.price * item_transaction_content.quantity\
@@ -812,8 +823,8 @@ insert_service = "INSERT INTO service_info_test VALUES( ?, ?, ?, NULL, ?, ?, ?)"
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
 create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
 create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Transaction = ?, Services = ?, Sales = ?,\
-                                                           Inventory = ?, Pet_info = ?, Report = ?, User = ?, Action = ?\
+update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Reception = ?, Payment=?, Customer=?, Services = ?, Sales = ?,\
+                                                           Inventory = ?, Pet = ?, Report = ?, User = ?, Settings = ?, History=?\
                                                            WHERE usn = ?"
 
 #dashboard
@@ -1046,10 +1057,10 @@ get_out_of_stock_names = "SELECT item_general_info.name\
                           FROM item_general_info\
                           JOIN item_inventory_info \
                               ON item_general_info.UID = item_inventory_info.UID\
-                          WHERE item_inventory_info.Stock = 0 AND item_inventory_info.state = 1\
-                                AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
-                          GROUP BY item_general_info.UID"
-
+                          WHERE  (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
+                            GROUP BY item_general_info.UID\
+                            HAVING SUM(item_inventory_info.Stock) = 0"
+#AND (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
 get_low_items_name = "SELECT item_general_info.name,\
                              SUM(item_inventory_info.Stock) AS price,\
                              item_settings.Reorder_factor,\
@@ -1084,6 +1095,7 @@ get_near_expired_items_name = "SELECT item_general_info.name,\
                                        ON item_inventory_info.UID = item_settings.UID\
                                WHERE DATE_SUB(item_inventory_info.Expiry_Date, INTERVAL ? DAY) <= CURRENT_DATE\
                                        AND NOT item_inventory_info.Expiry_Date <= current_date\
+                                        AND item_inventory_info.stock > 0\
                                GROUP BY item_general_info.UID"
 
 get_scheduled_clients_today_names = "SELECT service_name, patient_name from services_transaction_content\
@@ -1099,7 +1111,7 @@ get_near_scheduled_clients_names = "SELECT service_name,\
                                     patient_name,\
                                     DATEDIFF(current_date, DATE_sub(scheduled_date, INTERVAL ? DAY))\
                                     from services_transaction_content\
-                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date\
+                                    WHERE DATE_sub(scheduled_date, INTERVAL ? DAY) <= current_date AND item_inventory_info.stock > 0\
                                         AND scheduled_date != current_date"
                           
 get_on_order_items = "SELECT item_general_info.brand, recieving_item.NAME, recieving_item.current_stock\
@@ -1326,6 +1338,7 @@ get_customer_record_non_regular = "SELECT pet_owner_info.owner_id,\
                             Order BY pet_owner_info.owner_name ASC"
                             
 update_customer_record_info ="UPDATE pet_owner_info SET owner_name = ?,address = ?, contact_number = ?, updated_by = ?, updated_date = CURRENT_TIMESTAMP WHERE owner_id = ?"
+                             #GROUP BY owner_id"
 
 check_if_there_a_preceeding_schedule = "SELECT COUNT(*) FROM service_preceeding_schedule WHERE transaction_uid = ?"
 update_invoice_schedule = "UPDATE invoice_service_content SET scheduled_date = ? WHERE invoice_uid = ?"
@@ -1333,6 +1346,13 @@ get_preceeding_by_id = "SELECT * FROM service_preceeding_schedule WHERE transact
 get_scheduled_by_id = "SELECT * FROM services_transaction_content WHERE transaction_uid = ?"
 
 update_preceeding = "UPDATE service_preceeding_schedule SET scheduled_date = ? WHERE transaction_uid = ? and id = ?"
+
+
+
+get_all_transaction_record = "SELECT transaction_uid,\
+                                CASE WHEN state = 2 THEN 'Replaced' ELSE 'Paid' END,\
+                                client_name, Total_amount, transaction_date, Attendant_usn\
+                                FROM transaction_record"
 
 check_if_customer_is_considered_regular = "SELECT owner_name,\
                                                    count(transaction_record.transaction_uid) > ?\

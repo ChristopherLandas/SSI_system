@@ -1417,13 +1417,14 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)
     bought_item_dict = {s[0]: s[1] for s in bought_item}
     inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item_dict else bought_item_dict[s[0]]), s[1], s[2]) for s in current_stock]
+    
     ctr = 0
     for x in inventory_report_data:
         temp_data = []
-        temp_data.append(x[3])
-        #temp_data.append(x[0])
         temp_data.append(x[0])
+        #temp_data.append(x[0])
         temp_data.append(x[2])
+        temp_data.append(x[3])
         inventory_report_data_temp.append(temp_data)
     table_content = Table(inventory_report_data_temp)
     

@@ -85,6 +85,7 @@ from popup import preview_pdf_popup as ppdfp
             self.search_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
+            ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.0025))
             self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white")
             self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
             self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white",
@@ -808,7 +809,8 @@ def add_particulars(master, info:tuple, root_treeview: cctk.cctkTreeView, change
             def service_proceed(_: any = None):
                 
                 if len(self.client) < 1:
-                    messagebox.showerror('Invalid Process', 'Assign the Client first\nIf you assign one, that client\nmay had no pets recorded', parent = self)
+                    messagebox.showerror('Invalid Process', 'The client have no customer record or pet in the record', parent = self)
+                    return
                 elif self.service_treeview.data_grid_btn_mng.active:
                     data = self.service_treeview._data[self.service_treeview.data_frames.index(self.service_treeview.data_grid_btn_mng.active)]
                     add_data = (data[0], data[1], data[1])
@@ -2267,7 +2269,6 @@ def show_invoice_content(master, info:tuple,):
                     tag ="odd"
                 self.receipt_tree.insert(parent='', index='end', iid=i, text="", values=(i+1, ) +temp[i],tags=tag)
             
-            return super().place(**kwargs)
     return instance(master, info)
 
 def svc_provider(master, info:tuple, parent= None) -> ctk.CTkFrame:

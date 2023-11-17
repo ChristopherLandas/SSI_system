@@ -349,16 +349,6 @@ class creation_frame(ctk.CTkFrame):
         self.con_sub_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         self.con_sub_frame.grid_columnconfigure(1, weight=1)
         #remove account picture and camera button
-        '''PICTURE FRAME'''
-
-        '''self.picture_frame = ctk.CTkFrame(self.con_sub_frame, fg_color=Color.White_Platinum, width=width*0.135, height=height*0.235)
-        self.picture_frame.grid(row=0, column=0, sticky="w", padx=(width*0.005),  pady=(height*0.01))
-        self.picture_frame.pack_propagate(0)
-        self.acc_pic = ctk.CTkLabel(self.picture_frame, text='', corner_radius=5, image=self.pet_sample_icon)
-        self.acc_pic.pack(fill="both",expan=1,padx=(width*0.005), pady=(height*0.01))
-        
-        self.camera_btn = ctk.CTkButton(self.con_sub_frame,text="", width=width*0.025, height = height*0.05, image=self.camera_icon, fg_color="#83BD75", hover_color='#74bc8a')
-        self.camera_btn.grid(row=0, column=1, sticky="sw",  pady=(height*0.01))'''
 
         '''FULL NAME ENTRY'''
         self.fullname_frame = ctk.CTkFrame(self.con_sub_frame, fg_color=Color.White_Platinum)
@@ -404,14 +394,14 @@ class creation_frame(ctk.CTkFrame):
         self.access_content_frame = ctk.CTkFrame(self.access_frame, fg_color=Color.White_Platinum, corner_radius=0)
         self.access_content_frame.grid(row=1, column=0, columnspan=2, sticky="nsew")
 
-        self.access_lvl_frame = ctk.CTkFrame(self.access_content_frame, fg_color=Color.White_Lotion)
+        self.access_lvl_frame = ctk.CTkScrollableFrame(self.access_content_frame, fg_color=Color.White_Lotion)
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Customer', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
+        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Customer', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Reports', 'User Settings', 'Settings', 'History']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
-            self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
+            self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, width=width*0.15, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
             self.check_boxes[self.access_lvls[i]].grid(row = i, column = 0, padx=(width*0.0075), pady = (height*0.01));
             
         '''BOTTOM'''
@@ -453,10 +443,8 @@ class creation_frame(ctk.CTkFrame):
 
     def activate_positions(self, _: any = None):
         self.generate_credential()
-        access: tuple = database.fetch_data(sql_commands.get_level_acessess, (self.position_selection.get(), ))[0]
-        access = tuple(v for i, v in enumerate(access) if i not in [0, 1])
+        access: tuple = database.fetch_data(sql_commands.get_level_acessess, (self.position_selection.get(), ))[0][1:]
         self.values = {k: v for k,v in zip(self.access_lvls, access)}
-
         for k in self.values.keys():
             if self.values[k] == 1:
                 self.check_boxes[k].configure(state = ctk.NORMAL)
@@ -571,7 +559,7 @@ class roles_frame(ctk.CTkFrame):
         self.access_lvl_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         
         '''CHECKLIST'''
-        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Customer', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log', 'General']
+        self.access_lvls: List[str] = ['Dashboard', 'Reception', 'Payment', 'Customer', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Reports', 'User Settings', 'Settings', 'History']
         self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
         for i in range(len(self.access_lvls)):
             self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24, text=self.access_lvls[i], state=ctk.DISABLED, font=("DM Sans Medium", 14));
@@ -602,7 +590,8 @@ class roles_frame(ctk.CTkFrame):
     def grid(self, **kwargs):
         if self.usn_option._values == ['CTkOptionMenu']:
             pos = [s[0] for s in database.fetch_data("SELECT DISTINCT Title FROM user_level_access")]
-            emp = [s[0] for s in database.fetch_data("SELECT DISTINCT usn FROM acc_info")]
+            emp = [s[0] for s in database.fetch_data("SELECT DISTINCT usn FROM acc_info ORDER BY usn ")]
+            print(pos, emp)
             self.usn_option.configure(values = emp)
             self.position_selection.configure(values = pos)
             self.usn_option.set("_")
@@ -620,8 +609,7 @@ class roles_frame(ctk.CTkFrame):
         self.activate_positions()
 
     def activate_positions(self, from_select_username_callback: bool = True, _: any = None):
-        access: tuple = database.fetch_data(sql_commands.get_level_acessess, (self.position_selection.get(), ))[0]
-        access = tuple(v for i, v in enumerate(access) if i not in [0, 1])
+        access: tuple = database.fetch_data(sql_commands.get_level_acessess, (self.position_selection.get(), ))[0][1:]
         #access:list = list(access)
         #access.pop(0)
         self.values = {k: v for k,v in zip(self.access_lvls, access)}
@@ -637,8 +625,10 @@ class roles_frame(ctk.CTkFrame):
 
     def update_roles(self):
         if self.usn_option.get() == "_":
+
             return
         val = tuple(self.check_boxes[k].get() for k in self.check_boxes.keys())
+        print(val)
         database.exec_nonquery([[sql_commands.update_acc_access_level, val + (self.usn_option.get(), )],
                                 ["UPDATE acc_info SET full_name = ? WHERE USN = ?", (self.fullname_entry.get(), self.usn_option.get())]])
         messagebox.showinfo("Success", f"{self.fullname_entry.get()} Updated", parent = self)
