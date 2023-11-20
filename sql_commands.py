@@ -909,9 +909,13 @@ get_service_record_temp = "SELECT CONCAT(service_name) AS service, patient_name,
 #General Settings
 get_service_info = f"SELECT UID, service_name, price, category, date_added FROM service_info_test WHERE UID = ?"
 
-get_inventory = f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category,\
+get_inventory = f"SELECT item_general_info.UID,\
+                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                    ELSE CONCAT(item_general_info.name, ' (', item_general_info.unit,')') END,\
+                    item_general_info.Category,\
                     CONCAT('₱' , FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)) AS price\
-                    FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID"
+                    FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                    ORDER BY name"
 
 get_inventory_info= f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category, FORMAT(item_settings.Cost_Price,2) AS unit_cost,\
                         item_settings.Markup_Factor, FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)AS selling, item_settings.Reorder_factor,\
@@ -1425,3 +1429,8 @@ find_item_id_by_metainfo = "SELECT UID\
                             FROM item_general_info\
                             WHERE brand = ?\
                                 AND (CONCAT(name, ' (', unit, ')')) = ?"
+                                
+                                
+get_service_search_query ="SELECT UID, service_name\
+                            FROM service_info_test\
+                            WHERE service_name LIKE '%?%' or UID LIKE '%?%'"

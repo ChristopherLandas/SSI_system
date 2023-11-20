@@ -151,13 +151,14 @@ class dashboard(ctk.CTkToplevel):
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
-            del datakey
+            del datakey """
         #for preventing security breach through python code; enable it to test it
-        """
+        
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+       
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
         self.dashboard_icon = Icons.get_image('dashboard_icon',size=(22,22))
@@ -191,6 +192,7 @@ class dashboard(ctk.CTkToplevel):
         temp_icons = [self.dashboard_icon,  self.reception_icon, self.payment_icon,  self.customer_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.settings_icon, self.histlog_icon]
         temp_main_frames = [dashboard_frame, reception_frame, payment_frame, customer_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
 
+        print(acc_info)
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
         self.labels = []
         self.icons = []
@@ -1170,7 +1172,7 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
-                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c'))
+                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c',))
         self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
@@ -3273,18 +3275,6 @@ class admin_settings_frame(ctk.CTkFrame):
                                        fg_color=Color.White_Color[3], width=width*0.125, height = height*0.05, corner_radius=5)
         self.date_label.grid(row=0, column=4, sticky="n")
 
-        """ self.general_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
-                                                       fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
-
-        self.general_button.grid(row=0, column=0, sticky="s", padx=(0,width*0.0025), pady=0)
-        self.general_button.configure(command=partial(load_main_frame, 0))
-        self.general_icon = ctk.CTkLabel(self.general_button, text="",image=self.service)
-        self.general_icon.pack(side="left", padx=(width*0.01,width*0.005)) 
-        self.general_label = ctk.CTkLabel(self.general_button, text="GENERAL", text_color="white", font=("DM Sans Medium", 14))
-        self.general_label.pack(side="left")
-        self.general_button.grid()
-        self.general_button.update_children() """
-    
         self.service_button = cctk.ctkButtonFrame(self.top_frame, cursor="hand2", height=height*0.055, width=width*0.1,
                                                        fg_color=Color.White_Color[7], corner_radius=0, hover_color=Color.Blue_LapisLazuli_1, bg_color=selected_color)
 
@@ -3316,14 +3306,14 @@ class admin_settings_frame(ctk.CTkFrame):
 
         
         def refresh_service():
-            self.refresh_btn.configure(state=ctk.DISABLED)
-            self.after(5000, lambda:  self.refresh_btn.configure(state=ctk.NORMAL))
+            self.service_refresh_btn.configure(state=ctk.DISABLED)
             self.load_service_data()
+            self.after(200, lambda:  self.service_refresh_btn.configure(state=ctk.NORMAL))
             
         def refresh_item():
-            self.refresh_btn.configure(state=ctk.DISABLED)
-            self.after(5000, lambda:  self.refresh_btn.configure(state=ctk.NORMAL))
+            self.item_refresh_btn.configure(state=ctk.DISABLED)
             self.load_inventory_data()
+            self.after(200, lambda:  self.item_refresh_btn.configure(state=ctk.NORMAL))
             
             
         def open_service_record():
@@ -3339,66 +3329,22 @@ class admin_settings_frame(ctk.CTkFrame):
             else:
                 messagebox.showerror("Missing Selection", "Select a record first", parent = self)
         
-        """  '''GENERAL FRAME - START'''
+        def service_search_callback(): 
+            temp = list_filterer(source=self.service_settings_search_bar.get(), reference=self.raw_service_data)  
+            self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=temp[0], service_reload_callback = refresh_service) if len(temp) == 1 else self.service_data_view.update_table(temp)
         
-        self.top_frame = ctk.CTkFrame(self.general_frame, fg_color='transparent')
-        self.top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
+        def item_search_callback():
+            temp = list_filterer(source=self.item_settings_search_bar.get(), reference=self.raw_inventory_data)  
+            self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", service_info=temp[0], item_reload_callback = refresh_item) if len(temp) == 1 else self.inventory_data_view.update_table(temp)
         
-                         
-        self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side='left')
-        self.search_frame.pack_propagate(0)
+        self.service_top_frame = ctk.CTkFrame(self.service_frame, fg_color='transparent')
+        self.service_top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
         
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005,)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025))
+        self.service_refresh_btn = ctk.CTkButton(self.service_top_frame,text="", width=width*0.03, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color=Color.Green_Button_Hover_Color,command=refresh_service)
         
-        self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.03, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh_service)
-        self.refresh_btn.pack(side='left', padx=(width*0.005, 0))
-        
-        self.view_button = ctk.CTkButton(self.top_frame, text="View", image=self.show, fg_color=Color.Blue_Tufts, height=height*0.05, width=width*0.075, font=("DM Sans Medium", 14),
+        self.service_view_button = ctk.CTkButton(self.service_top_frame, text="View", image=self.show, fg_color=Color.Blue_Tufts, height=height*0.05, width=width*0.075, font=("DM Sans Medium", 14),
                                          command= open_service_record)
-        self.view_button.pack(side='left', padx=(width*0.005))
         
-        
-        
-        '''TREEVIEW FRAME'''
-        
-        self.general_treeview = ctk.CTkFrame(self.general_frame, fg_color="transparent")
-        self.general_treeview.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
-        
-        self.general_data_view = cctk.cctkTreeView(self.general_treeview,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ColumI:{int(width*.115)}-tc/ColumII:x-tl/ColumIII:{int(width*.165)}-tl/ColumIV:{int(width*.125)}-tr!30!30',)
-        self.general_data_view.pack()
-        
-        
-        '''GENERAL FRAME - END'''
-         """
-        
-        '''SERVICE FRAME - START'''
-        
-        self.top_frame = ctk.CTkFrame(self.service_frame, fg_color='transparent')
-        self.top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
-        
-                         
-        """ self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side='left')
-        self.search_frame.pack_propagate(0)
-        
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005,)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
-        
-        self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.03, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh_service)
-        self.refresh_btn.pack(side='left', padx=(0))
-        
-        self.view_button = ctk.CTkButton(self.top_frame, text="View", image=self.show, fg_color=Color.Blue_Tufts, height=height*0.05, width=width*0.075, font=("DM Sans Medium", 14),
-                                         command= open_service_record)
-        self.view_button.pack(side='left', padx=(width*0.005))
         
         '''TREEVIEW FRAME'''
         
@@ -3406,34 +3352,21 @@ class admin_settings_frame(ctk.CTkFrame):
         self.service_treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
         
         self.service_data_view = cctk.cctkTreeView(self.service_treeview_frame,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ServiceID:{int(width*.115)}-tc/ServiceName:x-tl/DurationType:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!30!30',
+                                           column_format=f'/No:{int(width*.035)}-#r/ServiceID:{int(width*.085)}-tc/ServiceName:x-tl/DurationType:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!33!35',
                                            double_click_command = lambda _: self.show_service_info.place(relx=0.5, rely=0.5, anchor="c", service_info=self.service_data_view.get_selected_data(), service_reload_callback = refresh_service))
         self.service_data_view.pack()
-        
-        
         '''SERVICE FRAME - END'''
         
         '''INVENTORY FRAME - START'''
-        self.top_frame = ctk.CTkFrame(self.inventory_frame, fg_color='transparent')
-        self.top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
+        self.items_top_frame = ctk.CTkFrame(self.inventory_frame, fg_color='transparent')
+        self.items_top_frame.grid(row=0, column=0, sticky="nsew",  padx=(width*0.005), pady=(height*0.01))
         
-                         
-        """ self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side='left')
-        self.search_frame.pack_propagate(0)
+        self.item_refresh_btn = ctk.CTkButton(self.items_top_frame,text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh_item)
         
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005,)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
         
-        self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.03, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh_item)
-        self.refresh_btn.pack(side='left', padx=(0))
-        
-        self.view_button = ctk.CTkButton(self.top_frame, text="View", image=self.show, fg_color=Color.Blue_Tufts, height=height*0.05, width=width*0.075, font=("DM Sans Medium", 14), 
+        self.item_view_button = ctk.CTkButton(self.items_top_frame, text="View", image=self.show, fg_color=Color.Blue_Tufts, height=height*0.05, width=width*0.075, font=("DM Sans Medium", 14), 
                                          command=open_item_record)
-        self.view_button.pack(side='left', padx=(width*0.005))
+        
         
         
         '''TREEVIEW FRAME'''
@@ -3442,10 +3375,9 @@ class admin_settings_frame(ctk.CTkFrame):
         self.inventory_treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
         
         self.inventory_data_view = cctk.cctkTreeView(self.inventory_treeview_frame,width= width * .805, height= height * .775, corner_radius=0,
-                                           column_format=f'/No:{int(width*.025)}-#r/ItemID:{int(width*.115)}-tc/ItemName:x-tl/Category:{int(width*.165)}-tl/Price:{int(width*.125)}-tr!30!30',
+                                           column_format=f'/No:{int(width*.035)}-#r/ItemID:{int(width*.085)}-tc/ItemName:x-tl/Category:{int(width*.125)}-tl/Price:{int(width*.125)}-tr!33!35',
                                            double_click_command = lambda _: self.show_item_info.place(relx=0.5, rely=0.5, anchor="c", item_info=self.inventory_data_view.get_selected_data(),  item_reload_callback = refresh_item))
         self.inventory_data_view.pack()
-        
         '''INVENTORY FRAME - END'''
         
         self.load_service_data()
@@ -3454,15 +3386,33 @@ class admin_settings_frame(ctk.CTkFrame):
         self.show_service_info = admin_popup.show_service_info(self,(width, height))
         self.show_item_info = admin_popup.show_item_info(self,(width, height))
         
+        self.service_settings_search_bar = cctk.cctkSearchBar(self.service_top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=service_search_callback,
+                                                 close_command_callback=self.load_service_data,
+                                             quary_command=sql_commands.get_service_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
+        self.service_settings_search_bar.pack(side='left')
+        self.service_refresh_btn.pack(side='left', padx=(width*0.005))
+        self.service_view_button.pack(side='left', padx=(0, width*0.005))
+        
+        self.item_settings_search_bar = cctk.cctkSearchBar(self.items_top_frame, height=height*0.055, width=width*0.325, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=item_search_callback,
+                                                 close_command_callback=self.load_inventory_data,
+                                             quary_command=sql_commands.get_item_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
+        self.item_settings_search_bar.pack(side='left')
+        self.item_refresh_btn.pack(side='left', padx=(width*0.005))
+        self.item_view_button.pack(side='left', padx=(0,width*0.005))
+        
         load_main_frame(0)
     
     def load_inventory_data(self):
+        self.inventory_data_view.pack_forget()
         self.raw_inventory_data = database.fetch_data(sql_commands.get_inventory)
         self.inventory_data_view.update_table(self.raw_inventory_data) 
+        self.inventory_data_view.pack()
     
     def load_service_data(self):
+        self.service_data_view.pack_forget()
         self.raw_service_data = database.fetch_data(sql_commands.get_service_data_test)
         self.service_data_view.update_table(self.raw_service_data)
+        self.service_data_view.pack()
 
     def load_both(self):
         self.load_inventory_data()

@@ -1866,7 +1866,8 @@ def show_payment_proceed(master, info:tuple,update_mainfames_callback):
 
         def place(self, invoice_data: tuple, cashier: str, treeview_callback: callable, **kwargs):
             if self.or_button._text.endswith("_"):
-                count = database.fetch_data("SELECT transaction_uid FROM transaction_record ORDER BY CAST(transaction_uid AS INT) desc")[0][0]
+                count = database.fetch_data("SELECT transaction_uid FROM transaction_record ORDER BY CAST(transaction_uid AS INT) desc")
+                count = 1 if len(count) < 1 else count[0][0]
                 self.or_button.configure(text = f"OR#: {str(int(count)+1).zfill(3)}")
             #set up the or button
 
