@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Tuple
 import customtkinter as ctk
 from typing import *
 import datetime
@@ -6,7 +6,6 @@ from Theme import Color
 from PIL import Image
 from customcustomtkinter import customcustomtkinter as cctk
 from tkinter import messagebox
-import re
 from util import database
 from util import *
 from popup import service_popup
@@ -315,6 +314,7 @@ class pets(ctk.CTkFrame):
                         
                 total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
+                #what causes the error
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
                 self.change_total_val_serv_callback(-previous_price)
                 self.change_total_val_serv_callback(price_format_to_float(total_price_lbl._text[1:]))

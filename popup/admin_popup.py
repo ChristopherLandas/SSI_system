@@ -1,17 +1,10 @@
 import customtkinter as ctk
-from customcustomtkinter import customcustomtkinter as cctk
 import sql_commands
-import tkcalendar
 from Theme import Color
 from util import database
 from util import *
 from tkinter import messagebox
-from constants import action
 from PIL import Image
-import tkinter as tk
-from tkinter import ttk
-
-
 
 def show_service_info(master, info:tuple) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
@@ -162,7 +155,7 @@ def show_service_info(master, info:tuple) -> ctk.CTkFrame:
             self.set_entries(state='normal')
             self.service_id_label.configure(text=f"{raw_data[0][0]}")
             self.service_name_entry.insert(0, f"{raw_data[0][1]}")
-            self.service_price_entry.insert(0, f"{format_price(raw_data[0][2])}")
+            self.service_price_entry.insert(0, f"{raw_data[0][2]}")
             self.service_category_entry.insert(0, f"{raw_data[0][3]}")
             self.service_date_label.configure(text=f"{raw_data[0][4]}")
             
@@ -221,10 +214,11 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 #self.item_category_entry.pack(side=ctk.LEFT, fill="x", expand=1, padx=(0,width*0.0025), pady=(height*0.005))
 
                 if database.exec_nonquery([["UPDATE item_general_info SET name =?, Category =? WHERE UID =?", (self.item_name_entry.get(), self.item_category_entry.get(), self.item_id_label._text)],
-                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, rate_mode = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/100, float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._values.index(self.item_rate_entry.get())), self.item_id_label._text)]]):
+                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, rate_mode = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/float(self.item_unit_price_entry.get()), float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._values.index(self.item_rate_entry.get())), self.item_id_label._text)]]):
                     messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes", parent = self)
                     self.reload_item()
                     self.place_forget()
+                    self.reset()
                 else:
                     messagebox.showerror("Failed to Update", "An error occured", parent = self)
                 
@@ -313,10 +307,10 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.item_markup_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06,width=width*0.15)
             self.item_markup_frame.grid(row=5, column=1, columnspan=1, sticky="nsw", padx=(0,width*0.005), pady=(0, height*0.01))
             self.item_markup_frame.pack_propagate(0)
-            ctk.CTkLabel(self.item_markup_frame, text="Markup Factor: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.08, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
+            ctk.CTkLabel(self.item_markup_frame, text="Markup Price: ", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.08, anchor="e").pack(side=ctk.LEFT, padx=(width*0.005,0),pady=(height*0.01))
             self.item_markup_entry = ctk.CTkEntry(self.item_markup_frame,  font=("DM Sans Medium",14), width=width*0.04, fg_color=Color.White_Lotion, state='disable', justify='right')
             self.item_markup_entry.pack(side=ctk.LEFT, fill="both",expand=1, padx=(0,width*0.0025), pady=(height*0.005))
-            ctk.CTkLabel(self.item_markup_frame, text="  %", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.015, anchor="w").pack(side=ctk.RIGHT, padx=(0,width*0.005),pady=(height*0.01))
+            #ctk.CTkLabel(self.item_markup_frame, text="  %", font=("DM Sans Medium", 14), fg_color="transparent", width=width*0.015, anchor="w").pack(side=ctk.RIGHT, padx=(0,width*0.005),pady=(height*0.01))
             
             #SELLING PRICE
             self.item_selling_frame = ctk.CTkFrame(self.content_frame, fg_color=Color.White_Lotion, height=height*0.06)
@@ -371,10 +365,10 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 
         def set_entries(self, state):
             for i in range(len(self.entries)):
-                if 'normal' in state:
-                    b_width= 2
-                elif 'disabled' in state:
+                if 'disabled' in state or i in [1, 2, 5]:
                     b_width = 0
+                if 'normal' in state and i not in [1, 2, 5]:
+                    b_width= 2
                 self.entries[i].configure(state=state,border_width=b_width)
             
         def reset_entries(self):
@@ -388,9 +382,9 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
             self.item_id_label.configure(text=raw_data[0])
             #self.item_rate_entry.configure(text = raw_data[-1])
             for i in range(len(self.entries)):
-                if i == 4:
+                '''if i == 4:
                     self.entries[i].insert(0, f"{raw_data[i+1]*100}" )
-                    continue
+                    continue'''
                 
                 self.entries[i].insert(0, raw_data[i+1])
             self.set_entries('disabled')
@@ -398,15 +392,16 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
         def place(self, item_info, item_reload_callback, **kwargs):
             self.reload_item = item_reload_callback
             self.raw_data = database.fetch_data(sql_commands.get_inventory_info, (f'{item_info[0]}',))[0]
-            #For testing
             temp=[]
             for i in range(len(self.raw_data)):
+                print(self.raw_data[i])
                 temp.append(self.raw_data[i])
-                if i == 1 : 
-                    temp.append('Unit') 
-                    continue
+                '''if i == 1 : 
+                    temp.append('') 
+                    continue'''
             self.load_data(raw_data=temp)
             del temp
             
             return super().place(**kwargs)
+        
     return instance(master, info)

@@ -246,7 +246,7 @@ add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, 
 
 
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
-add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?)"
+add_item_supplier = "INSERT INTO supplier_item_info VALUES(?, ?, 1)"
 
 add_item_statistic = "INSERT INTO item_statistic_info VALUES(?, MONTH(CURRENT_DATE), 0, 'm')"
 
@@ -909,14 +909,18 @@ get_service_record_temp = "SELECT CONCAT(service_name) AS service, patient_name,
 #General Settings
 get_service_info = f"SELECT UID, service_name, price, category, date_added FROM service_info_test WHERE UID = ?"
 
-get_inventory = f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category,\
+get_inventory = f"SELECT item_general_info.UID,\
+                    CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
+                    ELSE CONCAT(item_general_info.name, ' (', item_general_info.unit,')') END,\
+                    item_general_info.Category,\
                     CONCAT('₱' , FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)) AS price\
-                    FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID"
+                    FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
+                    ORDER BY name"
 
-get_inventory_info= f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category, FORMAT(item_settings.Cost_Price,2) AS unit_cost,\
-                        item_settings.Markup_Factor, FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)AS selling, item_settings.Reorder_factor,\
-                        item_settings.Crit_factor, item_settings.Safe_stock, item_settings.rate_mode\
-                        FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
+get_inventory_info = "SELECT item_general_info.UID, item_general_info.name, COALESCE(item_general_info.unit, ''), item_general_info.Category, ROUND(item_settings.Cost_Price, 2) AS unit_cost,\
+                      ROUND(item_settings.Cost_Price * item_settings.Markup_Factor,2), ROUND(item_settings.Cost_Price*(item_settings.Markup_Factor+1), 2) AS selling, item_settings.Reorder_factor,\
+                      item_settings.Crit_factor, item_settings.Safe_stock, item_settings.rate_mode\
+                      FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
 
 check_if_item_does_expire = "SELECT does_expire\
                             FROM categories\
@@ -945,6 +949,7 @@ get_supplier_record = f"SELECT supp_id, supp_name, telephone, contact_person, co
 get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp_name\
                             FROM item_supplier_info INNER JOIN supplier_info ON item_supplier_info.supp_id = supplier_info.supp_id\
                             WHERE item_supplier_info.UID = ?"
+#OBSOLETE
                         
 #UPDATES
 
@@ -1027,9 +1032,9 @@ get_supplier_items = "SELECT supplier_item_info.item_id, item_general_info.brand
                         
 set_supplier_items = "INSERT INTO supplier_item_info VALUES (?,?,1)"
 
-get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
+get_item_supplier_name = "SELECT supp_id, supp_name FROM supplier_item_info\
                             LEFT JOIN supplier_info ON supplier_info.supp_id = supplier_item_info.supplier_id\
-                            WHERE supplier_item_info.item_id = ?"
+                            WHERE supplier_item_info.item_id = ? AND active = 1"
                 
 update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date <= CURRENT_DATE"
 
@@ -1425,3 +1430,21 @@ find_item_id_by_metainfo = "SELECT UID\
                             FROM item_general_info\
                             WHERE brand = ?\
                                 AND (CONCAT(name, ' (', unit, ')')) = ?"
+                                
+                                
+get_service_search_query ="SELECT UID, service_name\
+                            FROM service_info_test\
+                            WHERE service_name LIKE '%?%' or UID LIKE '%?%'"
+                            
+get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name, ' (', unit,')') ELSE name END\
+                    FROM item_general_info ORDER BY name"
+                    
+get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
+
+get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
+
+get_all_service_schedule_by_id = "SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM services_transaction_content\
+                                  WHERE transaction_uid = ?\
+                                  UNION ALL\
+                                  SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM service_preceeding_schedule\
+                                  WHERE transaction_uid = ?"

@@ -7,12 +7,10 @@ from functools import partial
 from util import brighten_color
 import re
 from tkinter import messagebox;
-from customtkinter.windows.widgets.font import CTkFont
-from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
 from tkcalendar import Calendar
-import Theme
 import datetime
 from PIL import Image
+import sql_commands
 
 class customcustomtkinter:
     class ctkButtonFrame(ctk.CTkFrame):
@@ -944,8 +942,97 @@ class customcustomtkinter:
                 self.select_callback(self.get_date())
             #self.selected_date = self.get_date()
             #return temp
-        
+    
+    def cctkSelector(master, info:Optional[tuple], 
+                     title:str='SELECTORS',
+                     selector_search_query:str=None,
+                     selector_table_setup:str=f'/No:40-#r/ID:80-tc/Name:x-tl/Sample:100-tr!33!35',
+                     selector_table_query:str=None,
+                     command_callback:callable=None,):
+        class instance(ctk.CTkFrame):
+            def __init__(self, master, info:Optional[tuple]):
+                width = info[0]
+                height = info[1]
+                super().__init__(master, corner_radius= 0, fg_color=Color.White_Platinum)
+                self.selected_value = None 
                 
+                def reset():
+                    self.grab_release()
+                    self.place_forget()
+                
+                def select():
+                    if self.data_view.get_selected_data():
+                        self.ret = self.data_view.get_selected_data()
+                        if command_callback: command_callback()
+                        reset()
+                    else:
+                        messagebox.showwarning("Warning", "No selected data", parent = self)
+                
+                def search_callback():
+                    if len(self.search_bar.get()) == 1:
+                        self.ret = list_filterer(source=self.search_bar.get(), reference=self.data)[0]
+                        if command_callback: command_callback()
+                        reset()
+                    else:
+                        self.data_view.update_table(list_filterer(source=self.search_bar.get(), reference=self.data))
+                
+                self.grid_columnconfigure(0, weight=1)
+                self.grid_rowconfigure(0, weight=1)
+                
+                self.main_frame = ctk.CTkFrame(self, width=width*0.775, height=height*0.825 ,corner_radius=0, fg_color=Color.White_Lotion)
+                self.main_frame.grid(row=0, column=0, padx=1, pady=1)
+                self.main_frame.grid_propagate(0)
+                self.main_frame.grid_columnconfigure(0, weight=1)
+                self.main_frame.grid_rowconfigure(1, weight=1)
+                
+                self.top_frame = ctk.CTkFrame(self.main_frame,fg_color=Color.Blue_Yale, corner_radius=0, height=height*0.05)
+                self.top_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+                ctk.CTkLabel(self.top_frame, text=title.upper(), text_color="white", font=("DM Sans Medium", 14)).pack(side="left",padx=width*0.005)
+                ctk.CTkButton(self.top_frame, text="X",width=width*0.0225, command=reset).pack(side="right", padx=(0,width*0.01),pady=height*0.005)
+
+                self.content_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Lotion)
+                self.content_frame.grid(row=1, column=0, sticky='nsew')
+                
+                self.search_bar_frame =ctk.CTkFrame(self.content_frame, fg_color='transparent')
+                self.search_bar_frame.pack(fill='x', expand=0,)
+                
+                self.treeview_frame = ctk.CTkFrame(self.content_frame, fg_color='transparent')
+                self.treeview_frame.pack()
+                
+                self.data_view = customcustomtkinter.cctkTreeView(self.treeview_frame,width= width * .765, height= height * .65, corner_radius=0,
+                                           column_format=selector_table_setup)
+                self.data_view.pack()
+                
+                
+                self.action_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Platinum)
+                self.action_frame.grid(row=2, column=0, sticky='nsew', padx=(width*0.005), pady=(width*0.005))
+                
+                self.cancel_button = ctk.CTkButton(self.action_frame, text="Cancel", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,font=("DM Sans Medium",16), width=width*0.1, height=height*0.05, command=reset)
+                self.cancel_button.pack(side='left', padx=(width*0.005),pady=(width*0.005))
+                
+                self.select_button = ctk.CTkButton(self.action_frame, text="Select", font=("DM Sans Medium",16), width=width*0.1, height=height*0.05, command=select)
+                self.select_button.pack(side='right', padx=(width*0.005),pady=(width*0.005))
+                
+                self.search_bar = customcustomtkinter.cctkSearchBar(self.search_bar_frame, height=height*0.055, width=width*0.35, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=search_callback,
+                                                 close_command_callback=None,
+                                             quary_command=selector_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
+                self.search_bar.pack(side='left', padx=(width*0.005), pady=(width*0.005))
+                
+                #self.data_view.update_table([('Test','Test','Test')])
+                
+            def get(self):
+                return self.ret
+            
+            def place(self, **kwargs):
+                self.grab_set()
+                self.data = database.fetch_data(selector_table_query)
+                self.data_view.update_table(self.data)
+                
+                return super().place(**kwargs)
+                
+        return instance(master, info)  
+         
 class customcustomtkinterutil:
     class button_manager:
         def __init__(self, buttons: list, hold_color: str = 'transparent', switch: bool = False,
@@ -1039,3 +1126,6 @@ class customcustomtkinterutil:
 
         ret.trace_add("write", callback = limit)
         return ret
+    
+    
+    

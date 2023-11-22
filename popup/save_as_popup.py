@@ -1598,7 +1598,8 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     ctr = 0
     for x in inventory_report_data:
         temp_data = []
-        temp_data.append(x[3])
+        #temp_data.append(x[3])
+        #comment by chris
         length_counter = 0
         item_name = x[0]
         itm_name = ''

@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import json
 import sql_commands
-import tkcalendar
 import tkinter as tk
 from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
 from Theme import Color
@@ -9,12 +8,10 @@ from tkinter import messagebox
 from constants import action
 from PIL import Image
 import datetime
-from functools import partial
 from typing import *
 from util import *
-from datetime import date, datetime as dt, timedelta
+from datetime import date, datetime as dt
 from Theme import Icons
-from tkcalendar import Calendar
 
 SETTINGS_VAL : dict = json.load(open("Resources\\general_settings.json"))
 
@@ -252,4 +249,3 @@ def calendar_with_scheduling(master, info:tuple, parent_ui: ctk.CTkLabel | ctk.C
             return super().place(**kwargs)
 
     return add_service(master, info, parent_ui, date_format, min_date)
-#That place is not for any man or particles of bread

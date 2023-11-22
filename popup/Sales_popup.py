@@ -1,19 +1,14 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
 import sql_commands
-import tkcalendar
 from Theme import Color
 from util import database
 from util import *
 from tkinter import messagebox
-from constants import action
-from PIL import Image
-import tkinter as tk
-from tkinter import ttk
 from popup import preview_pdf_popup as ppdfp
 from util import *
 from datetime import date
-from popup import mini_popup, Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup
+from popup import mini_popup
 
 def show_sales_record_info(master, info:tuple) -> ctk.CTkFrame:
     class sales_record(ctk.CTkFrame):
