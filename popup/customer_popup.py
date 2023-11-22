@@ -30,8 +30,6 @@ def new_customer(master, info:tuple, command_callback: callable = None):
                 self.customer_name_entry.delete(0, ctk.END)
                 self.customer_num_entry.delete(0, ctk.END)
                 self.customer_address_entry.delete(0, ctk.END)
-                #self.birthday_entry.configure(text = 'Set Birthday')
-                self.button.configure(state='normal')
                 self.place_forget()
                 
             def validate_contact(var, mode, index):

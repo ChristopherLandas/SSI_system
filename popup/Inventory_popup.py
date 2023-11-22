@@ -35,7 +35,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                 self.change_entries_state('normal')
                 for entries in self.supplier_entries: entries.delete(0,ctk.END)
                 self.change_entries_state('disabled')
-                self.supplier_entry.set("")
+                self.supplier_entry.configure(text='Select a supplier')
                 self.expiry_switch.deselect()
                 self.stock_entry.set(0)
                 self.item_num_unit_entry.delete(0, ctk.END)
@@ -56,7 +56,6 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                     else:
                         output = database.exec_nonquery([[sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0])],
                                                 [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 0)],
-                                                [sql_commands.add_item_supplier, (self.item_name_id._text, self.supplier_id)],
                                                 [sql_commands.set_supplier_items, (self.supplier_id, self.item_name_id._text)],
                                                 [sql_commands.add_item_inventory, (self.item_name_id._text, self.stock_entry.get(), _date)],
                                                 [sql_commands.add_item_statistic, (self.item_name_id._text, )]])
@@ -126,18 +125,20 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                         self.expiry_switch.select(); self.expiry_switch.configure(state='disabled', text='Required') if self.data[i][1] == 1 else self.expiry_switch.configure(state='normal', text=''); self.expiry_switch.deselect()
                 expiry_switch_event()
                 
-            def supplier_callback(supplier):
-                for res in self.supplier_data:
-                    if supplier in res:
-                        self.change_entries_state('normal')
-                        for entries in self.supplier_entries: entries.delete(0,ctk.END)
-                        self.supplier_id = res[0]
-                        self.contact_person_entry.insert(0, f"{res[2]}")
-                        self.contact_num_entry.insert(0, f"{res[3]}")
-                        self.contact_email_entry.insert(0, f"{res[4] or ''}")
-                        self.address_entry.insert(0,  f"{res[5]}")
-                        self.change_entries_state('disabled')
-            
+            def supplier_callback():
+                supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info WHERE supp_id = ?", (self.supplier_selector.get()[0],))[0]
+                
+                self.change_entries_state('normal')
+                for entries in self.supplier_entries: entries.delete(0,ctk.END)
+                self.supplier_id = supplier_data[0]
+                self.supplier_entry.configure(text=supplier_data[1])
+                self.contact_person_entry.insert(0, f"{supplier_data[2]}")
+                self.contact_num_entry.insert(0, f"{supplier_data[3]}")
+                self.contact_email_entry.insert(0, f"{supplier_data[4] or ''}")
+                self.address_entry.insert(0,  f"{supplier_data[5]}")
+                self.change_entries_state('disabled') 
+
+                print(self.supplier_id)
             def uom_callback():
                 if self.uom_var.get() == 'off':
                     self.item_num_unit_entry.delete(0, ctk.END)
@@ -170,8 +171,9 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.brand_list = []
             self.unit_var = ctk.StringVar()
         
-            self.main_frame = ctk.CTkFrame(self, width= width*0.75, fg_color=Color.White_Color[3], corner_radius=0, border_color=Color.White_Platinum, border_width=1)
+            self.main_frame = ctk.CTkFrame(self, width= width*0.815, height=height*0.885,fg_color=Color.White_Color[3], corner_radius=0, border_color=Color.White_Platinum, border_width=1)
             self.main_frame.grid(row=0, column=0)
+            self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure((1,2),weight=1)
 
@@ -187,6 +189,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.item_frame = ctk.CTkFrame(self.main_frame, fg_color=Color.White_Color[2])
             self.item_frame.grid(row = 1, column = 0, sticky = 'nsew', padx =(width*0.005), pady = (height*0.01,0))
             self.item_frame.columnconfigure((0), weight=1)
+            self.item_frame.rowconfigure((0), weight=1)
         
             self.item_name_frame = ctk.CTkFrame(self.item_frame, fg_color=Color.White_Lotion, width=width*0.35)
             self.item_name_frame.grid(row=0,column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.007),)
@@ -200,12 +203,12 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             
             '''ITEM CATEGORY'''
             ctk.CTkLabel(self.item_name_frame, text='Item Category: ', anchor='e', font=("DM Sans Medium", 14),  width=width*0.075,).grid(row = 2, column = 0, sticky = 'nsew',  pady = (0,height*0.01), padx = (width*0.005,0))
-            self.category_entry = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=self.item_category, font=("DM Sans Medium",14), height=height*0.0475, width=width*0.275 ,command=category_expiry_callback)
+            self.category_entry = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=self.item_category, font=("DM Sans Medium",14), height=height*0.0475, width=width*0.275 ,command=category_expiry_callback,dropdown_font=("DM Sans Medium",14))
             self.category_entry.grid(row = 2, column = 1, sticky = 'nsew', pady = (height*0.01), padx = (0, width*0.01), columnspan=5)
             
             '''ITEM BRAND'''
             ctk.CTkLabel(self.item_name_frame, text='Item Brand*: ', anchor='e', font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent",).grid(row = 3, column = 0, sticky = 'nsew',  pady = (0,height*0.01), padx = (width*0.005,0))
-            self.item_brand_entry = ctk.CTkComboBox(self.item_name_frame, values=self.brand_list, corner_radius=5, font=("DM Sans Medium",14), height=height*0.0475)
+            self.item_brand_entry = ctk.CTkComboBox(self.item_name_frame, values=self.brand_list, corner_radius=5, font=("DM Sans Medium",14), height=height*0.0475, dropdown_font=("DM Sans Medium",14))
             self.item_brand_entry.set('')
             self.item_brand_entry.grid(row = 3, column = 1,sticky = 'ew', pady = (0, height*0.01), padx = (0, width*0.01), columnspan=5)
             
@@ -224,7 +227,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.item_num_unit_entry.grid(row = 5, column = 1, columnspan=1, sticky = 'ew', pady = (0,height*0.01), padx = (0, width*0.004))
             self.unit_var.trace_add('write', is_digit_valid)
             
-            self.item_unit_dbox = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=uom, font=("DM Sans Medium",14), height=height*0.0475)
+            self.item_unit_dbox = ctk.CTkOptionMenu(self.item_name_frame, corner_radius=5, values=uom, font=("DM Sans Medium",14), height=height*0.0475, dropdown_font=("DM Sans Medium",14))
             self.item_unit_dbox.set('')
             self.item_unit_dbox.grid(row = 5, column = 2, sticky = 'ew', pady = (0, height*0.01), padx = (0, width*0.01), columnspan=5)
             
@@ -264,9 +267,9 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             ctk.CTkLabel(self.supplier_name_frame, text='SUPPLIER', anchor='w',  font=("DM Sans Medium", 14)).grid(row = 0, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx= (width*0.01))
             '''SUPPLIER NAME'''
             ctk.CTkLabel(self.supplier_name_frame, text='Supplier Name*: ', anchor='e', font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
-            self.supplier_entry = ctk.CTkOptionMenu(self.supplier_name_frame, corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045, command=supplier_callback)
+            self.supplier_entry = ctk.CTkButton(self.supplier_name_frame, text='Select a supplier',corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045,anchor='w', command=lambda:self.supplier_selector.place(relx=0.5, rely=0.5, anchor='c')) #command=supplier_callback)
             self.supplier_entry.grid(row = 1, column = 1, columnspan=2, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
-            self.supplier_entry.set("")
+            #self.supplier_entry.set("")
 
             '''CONTACT PERSON'''
             ctk.CTkLabel(self.supplier_name_frame, text='Contact Person: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
@@ -338,7 +341,17 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             
             self.item_brand_entry._entry.configure(textvariable = self.item_brand_limiter)
             self.item_name_entry.configure(textvariable = self.desc_limiter)
+            
+            self.supplier_selector = cctk.cctkSelector(self, (width, height), title="Supplier Selector",
+                                                        selector_table_query=sql_commands.get_all_supplier,
+                                                        selector_table_setup=f'/No:{int(width*0.035)}-#r/SupplierID:{int(width*0.085)}-tc/SupplierName:x-tl/ContactPersonel:{int(width*0.225)}-tl!33!35',
+                                                        selector_search_query=sql_commands.get_supplier_search_query,
+                                                        command_callback=supplier_callback)
+            
+            
             expiry_switch_event()
+            
+            
             
         def change_entries_state(self, state):
             if 'disabled' in state:
@@ -349,15 +362,15 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             
         def set_categories(self):
             self.data = database.fetch_data("SELECT * FROM categories where state = 1")
-            self.supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info")
+            #self.supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info")
             
-            self.supplier_option = [data[1] for data in self.supplier_data]
+            #self.supplier_option = [data[1] for data in self.supplier_data]
             
             self.category_data = []
             for i in range(len(self.data)):
                 self.category_data.append(self.data[i][0])
             
-            self.supplier_entry.configure(values = self.supplier_option)
+            #self.supplier_entry.configure(values = self.supplier_option)
             self.category_entry.configure(values=self.category_data)
             self.category_entry.set(self.category_data[0])
   
@@ -387,34 +400,44 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             def reset():
                 self.place_forget()
 
-            def validate_acc(_):
-                item_info  = split_unit(self.item_name_entry.get())
+            def validate_acc():
+                self.item_selector.place(relx=0.5, rely=0.5, anchor='c')
+                
+                
+            def selector_callback():
+                self.item_name_entry.configure(text=self.item_selector.get()[-1])
+                
+                item_info  = split_unit(self.item_name_entry._text)
                 query = f"SELECT uid FROM item_general_info WHERE name = '{item_info[0]}' AND unit IS NULL" if len(item_info) == 1 else f"SELECT uid FROM item_general_info WHERE name = '{item_info[0]}' AND unit = '{item_info[1]}'"
                 
                 self.item_uid = database.fetch_data(query)[0][0]
-                self.supplier = database.fetch_data(sql_commands.get_supplier_base_item, (self.item_uid, ) )[0]
-                
-                self.supplier_code.configure(text=self.supplier[0])
-                self.supplier_name_entry.set(self.supplier[1])
-                
                 self.item_code.configure(text=self.item_uid)    
-                self.supplier_name_entry.configure(values=[data[0] for data in database.fetch_data(sql_commands.get_item_supplier_name, (self.item_code._text,))])
+                
+                #self.supplier = database.fetch_data(sql_commands.get_supplier_base_item, (self.item_uid, ) )[0]
+                
+                self.supplier_data = database.fetch_data(sql_commands.get_item_supplier_name, (self.item_code._text,))
+                if len(self.supplier_data) > 0:
+                    self.supplier_name_entry.configure(values=[data[1] for data in self.supplier_data])
+                    self.supplier_code.configure(text=self.supplier_data[0][0])
+                    self.supplier_name_entry.set(self.supplier_data[0][1])
 
-                self.stock_entry.configure(state = ctk.NORMAL)
-                self.stock_entry.set(1)
-                self.add_btn.configure(state = ctk.NORMAL)
+                    self.stock_entry.configure(state = ctk.NORMAL)
+                    self.stock_entry.set(1)
+                    self.add_btn.configure(state = ctk.NORMAL)
+                else:
+                    messagebox.showwarning("Warning","This item has no supplier set into it\nKindly go to suppliers tab and add this item into a supplier", parent=self)
                 
             def supplier_callback(_):
                 self.supplier_id = database.fetch_data("SELECT supp_id FROM supplier_info WHERE supp_name = ?", (self.supplier_name_entry.get(),))[0][0]
                 self.supplier_code.configure(text=self.supplier_id)
                 
             def recieve_stock():
-                if self.item_name_entry.get() == "Select an Item" or self.item_code._text=="" or self.supplier_code._text=="":
+                if self.item_name_entry._text == "Select an Item" or self.item_code._text=="" or self.supplier_code._text=="":
                     messagebox.showerror("Info Missing", "Fill the required information", parent = self)
                     return
 
                 
-                data = (generateId('R', 6).upper(), self.item_name_entry.get(), self.item_uid, acc_name[0], self.stock_entry.get(), self.stock_entry.get(), self.supplier_code._text, None)
+                data = (generateId('R', 6).upper(), self.item_name_entry._text, self.item_uid, acc_name[0], self.stock_entry.get(), self.stock_entry.get(), self.supplier_code._text, None)
                 database.exec_nonquery([[sql_commands.record_recieving_item, data]])
                 if data_view :
                     #data_view.update_table(database.fetch_data(sql_commands.get_recieving_items_state))
@@ -444,16 +467,17 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             ctk.CTkLabel(self.item_frame, text='ITEM', anchor='w', font=('DM Sans Medium', 16), text_color=Color.Blue_Maastricht).grid(row = 0, column = 0, columnspan=2,sticky = 'nsew', pady = (height*0.01,0), padx= (width*0.01))
 
             '''ITEM CODE'''
-            ctk.CTkLabel(self.item_frame, text='Item Code: ', anchor='e', font=('DM Sans Medium', 14), width=width*0.09).grid(row = 1, column = 0, padx= (0,width*0.01), pady = (0), sticky = 'nsew')
+            ctk.CTkLabel(self.item_frame, text='Item ID: ', anchor='e', font=('DM Sans Medium', 14), width=width*0.09).grid(row = 1, column = 0, padx= (0,width*0.01), pady = (0), sticky = 'nsew')
             self.item_code = ctk.CTkLabel(self.item_frame, height = height *0.05, width=width*0.1, text="", fg_color=Color.White_Platinum, font=('DM Sans Medium', 14), corner_radius=5)
             self.item_code.grid(row =1, column = 1, columnspan=2, sticky = 'nsw',padx= (0), pady = (0))
             
             '''ITEM NAME'''
             ctk.CTkLabel(self.item_frame, text='Item Name: ', font=('DM Sans Medium', 14), anchor='e',  width=width*0.09).grid(row = 2, column = 0, pady = (height*0.01), padx= (width*0.01), sticky = 'nsew')
             
-            self.item_name_entry = ctk.CTkOptionMenu(self.item_frame,  width=width*0.35, height=height*0.05, font=('DM Sans Medium', 14), command= validate_acc)
+            self.item_name_entry = ctk.CTkButton(self.item_frame,  width=width*0.35, height=height*0.05, font=('DM Sans Medium', 14), command= validate_acc,
+                                                 anchor="w", text="Select an item")
             self.item_name_entry.grid(row = 2, column = 1, columnspan=2, sticky = 'nsew', pady = (height*0.01), padx= (0,width*0.01))
-            self.item_name_entry.set("")
+            
 
             '''INVENTORY INFO'''
             self.restock_border = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Platinum)
@@ -471,16 +495,6 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             ctk.CTkLabel(self.restock_frame, text='Order Quantity: ', anchor='e', font=('DM Sans Medium', 14), width=width*0.09).grid(row = 1, column = 0, pady = (height*0.01), padx= (width*0.01), sticky = 'nsew')
             self.stock_entry = cctk.cctkSpinnerCombo(self.restock_frame, entry_font=("DM Mono Medium",14), val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), state=ctk.DISABLED)
             self.stock_entry.grid(row = 1, column = 1, columnspan=2, sticky = 'w',padx=(0,width*0.01), pady = (height*0.01))
-            
-            '''EXPIRY'''
-            #ctk.CTkLabel(self.restock_frame, text='Expiration Date: ', font=('DM Sans Medium', 14), anchor='e',  width=width*0.09).grid(row = 2, column = 0, padx= (width*0.01), sticky = 'nsew')
-            #self.expiry_date_entry = ctk.CTkLabel(self.restock_frame, height * .05, fg_color=Color.White_Platinum, text="Set Expiry Date", font=('DM Sans Medium', 14), text_color="grey", corner_radius=3)
-            #self.expiry_date_entry.grid(row =2, column = 1, columnspan=2, sticky = 'nsew',padx= (0), pady = (height*0.01))
-            
-            #self.show_calendar = ctk.CTkButton(self.restock_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Grey_Davy, state = ctk.DISABLED,
-            #                                   command=lambda: cctk.tk_calendar(self.expiry_date_entry, "%s", date_format="numerical", min_date=datetime.now()))
-            #self.show_calendar.grid(row=2, column=3, padx = (width*0.005,width*0.01), pady = (height*0.01), sticky="w")
-            
             
             '''SUPPLIER INFO'''
             self.supplier_border = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Platinum)
@@ -501,7 +515,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             '''SUPPLIER NAME'''
             ctk.CTkLabel(self.supplier_frame, text='Supplier Name: ', font=('DM Sans Medium', 14), anchor='e',  width=width*0.09).grid(row = 2, column = 0, pady = (height*0.01), padx= (width*0.01), sticky = 'nsew')
             
-            self.supplier_name_entry = ctk.CTkOptionMenu(self.supplier_frame,  width=width*0.35, height=height*0.05, font=('DM Sans Medium', 14), command= supplier_callback)
+            self.supplier_name_entry = ctk.CTkOptionMenu(self.supplier_frame, values=[], width=width*0.35, height=height*0.05, font=('DM Sans Medium', 14), command= supplier_callback)
             self.supplier_name_entry.grid(row = 2, column = 1, columnspan=2, sticky = 'nsew', pady = (height*0.01), padx= (0,width*0.01))
             self.supplier_name_entry.set("")
             
@@ -517,11 +531,19 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             self.add_btn = ctk.CTkButton(self.action_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Place Order',
                                          command=recieve_stock)
             self.add_btn.pack(side="right", padx=(width*0.005), pady=(height*0.01))
+            
+            #Selector
+            self.item_selector = cctk.cctkSelector(self.master, (width, height), title="ITEM SELECTOR", 
+                                                   selector_table_setup=f'/No:{int(width*0.035)}-#r/ItemID:{int(width*0.08)}-tc/ItemBrand:{int(width*0.08)}-tl/ItemDescription:x-tl!33!35',
+                                                   selector_table_query=sql_commands.get_all_items,
+                                                   selector_search_query=sql_commands.get_item_search_query,
+                                                   command_callback = selector_callback)
 
+            #f'/No:{int(width*.035)}-#r/Rate:{int(width*.045)}-tc/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.085)}-tr/Price:{int(width*.085)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.1)}-tc!33!35',
         def set_selections(self):
             self.item = [c[0] for c in database.fetch_data(sql_commands.show_all_items, None)]
             self.supplier_selection = [c[0] for c in database.fetch_data("SELECT supp_name FROM supplier_info")]
-            self.item_name_entry.set("Select an item")
+            self.item_name_entry.configure(text="Select an item")
             self.supplier_name_entry.set("")
             self.item_code.configure(text="")
             self.supplier_code.configure(text="")
@@ -535,7 +557,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
                 self.item_name_entry._command(None)
             else:
                 self.set_selections()
-            self.item_name_entry.configure(values = item_unit(database.fetch_data(sql_commands.show_all_items, None)))
+            #self.item_name_entry.configure(values = item_unit(database.fetch_data(sql_commands.show_all_items, None)))
             return super().place(**kwargs)
 
         def stock (self, inventory_info: Optional[Union[tuple, cctk.cctkTreeView]] = None, acc_name: str = None):
@@ -1159,8 +1181,8 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
             
                 
             def add_item_to_supplier():
-                exist = database.fetch_data(sql_commands.get_supplier_item_info_if_exist, (self.supplier_id, self.item_treeview.get_selected_data()[0]))[0][0]
                 if self.item_treeview.get_selected_data():
+                    exist = database.fetch_data(sql_commands.get_supplier_item_info_if_exist, (self.supplier_id, self.item_treeview.get_selected_data()[0]))[0][0]
                     if exist:
                         #print("IF")
                         database.exec_nonquery([[sql_commands.update_supplier_item_info_active, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
@@ -1168,11 +1190,11 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
                         #print("ELSE")
                         database.exec_nonquery([[sql_commands.set_supplier_items, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
                     messagebox.showinfo("Item Added", "Item added to supplier delivery.", parent = self)
+                    reset()
+                    if self.command_callback: self.command_callback()
                 else:
                     messagebox.showwarning('Warning','No record is selected', parent = self)
-                self.refresh_table()
-                if self.command_callback:
-                    self.command_callback()
+                #self.refresh_table()
                     
                     
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], border_width=1, border_color=Color.Platinum)
@@ -1209,7 +1231,7 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
             self.cancel_btn.pack(side="left", pady=(height*0.01), padx=(height*0.01,0))
         
         def refresh_table(self):
-            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info")
+            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info ORDER BY name")
             self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in not_in_set(self.raw_item_data, self.items)]
             self.item_treeview.update_table(self.item_data)
                 
@@ -1868,7 +1890,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
             height = info[1]
             acc_user = info[2][0][0]
             
-            super().__init__(master, width=width*0.4, height=height*0.685, corner_radius= 0, fg_color='transparent')
+            super().__init__(master, width=width*0.4, height=height*0.685, corner_radius= 0, fg_color=Color.White_Platinum)
             
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
@@ -1931,7 +1953,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
                 reset()  
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
-            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
             self.main_frame.grid_rowconfigure(1, weight=1)
