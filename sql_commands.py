@@ -1440,3 +1440,5 @@ get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name,
                     FROM item_general_info ORDER BY name"
                     
 get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
+
+get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
