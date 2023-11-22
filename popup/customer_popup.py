@@ -38,8 +38,6 @@ def new_customer(master, info:tuple, command_callback: callable = None):
                 self.customer_name_entry.delete(0, ctk.END)
                 self.customer_num_entry.delete(0, ctk.END)
                 self.customer_address_entry.delete(0, ctk.END)
-                #self.birthday_entry.configure(text = 'Set Birthday')
-                self.button.configure(state='normal')
                 self.place_forget()
                 
             def validate_contact(var, mode, index):
@@ -177,9 +175,7 @@ def new_customer(master, info:tuple, command_callback: callable = None):
                 self._callback()
             self.place_forget()
             
-        def place(self, button,**kwargs):
-            self.button = button
-            self.button.configure(state='disabled')
+        def place(self,**kwargs):
             self.customer_id_entry.configure(text = generateId('CU',7).upper())
             return super().place(**kwargs)
             
