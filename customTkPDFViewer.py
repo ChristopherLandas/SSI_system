@@ -2,10 +2,8 @@ try:
     from tkinter import*
     import customtkinter as ctk
     import fitz
-    from tkinter.ttk import Progressbar
     from threading import Thread
-    import math
-    from typing import Optional, Required
+    from typing import Optional
 except Exception as e:
     print(f"This error occured while importing neccesary modules or library {e}")
 
