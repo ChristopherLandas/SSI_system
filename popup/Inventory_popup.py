@@ -167,6 +167,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.item_category = []
             self.supplier_id = None
             uom = ['milligram (mg)','gram (g)','kilogram (kg)','milliliter (mL)','liter (L)','millimeter (mm)','centimeter (cm)','meter (m)']
+            som = ['packs', 'bottles', 'pieces', 'vials','box','sack']
             self.uom_var = ctk.StringVar(value='on')
             self.brand_list = []
             self.unit_var = ctk.StringVar()
@@ -302,16 +303,21 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.inventory_frame.grid_columnconfigure(0, weight=1)
             self.inventory_frame.grid_rowconfigure(0, weight=1)
             
-            self.inventory_name_frame = ctk.CTkFrame(self.inventory_frame, corner_radius=5, fg_color=Color.White_Lotion,  width=width*0.225, )
+            self.inventory_name_frame = ctk.CTkFrame(self.inventory_frame, corner_radius=5, fg_color=Color.White_Lotion,  width=width*0.225, height=height*0.25)
             self.inventory_name_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.007),)
             self.inventory_name_frame.grid_propagate(0)
-            self.inventory_name_frame.grid_columnconfigure((1), weight=1)
+            #self.inventory_name_frame.grid_rowconfigure(1, weight=1)
+            self.inventory_name_frame.grid_columnconfigure((2), weight=1)
              
             ctk.CTkLabel(self.inventory_name_frame, text='INVENTORY', anchor='w', font=('DM Sans Medium', 14)).grid(row = 0, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx= (width*0.01))
             
             ctk.CTkLabel(self.inventory_name_frame, text='Initial Stock: ',anchor="e", font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
             self.stock_entry = cctk.cctkSpinnerCombo(self.inventory_name_frame, entry_font=("DM Mono Medium",14), val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL))
-            self.stock_entry.grid(row = 1, column = 1, columnspan=2 ,pady = (height*0.005, height*0.01), padx = (0, width*0.01), sticky="w")
+            self.stock_entry.grid(row = 1, column = 1, columnspan=1 ,pady = (height*0.005, height*0.01), padx = (0, width*0.005), sticky="nw")
+            
+            self.stock_unit = ctk.CTkOptionMenu(self.inventory_name_frame, corner_radius=5, values=som, font=("DM Sans Medium",14), height=height*0.0475, dropdown_font=("DM Sans Medium",14))
+            self.stock_unit.set('')
+            self.stock_unit.grid(row = 1, column = 2, sticky = 'nw', pady = (height*0.005, height*0.01), padx = (0, width*0.01), columnspan=5)
             
             ctk.CTkLabel(self.inventory_name_frame, text='Expiration Date: ', anchor='w', font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx = (width*0.0075,0))
 
@@ -321,11 +327,11 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.expiry_switch.grid(row=2,column=1, sticky="w")
             
             self.expiration_date_entry = ctk.CTkLabel(self.inventory_name_frame, corner_radius= 5, text='Set Expiry Date',fg_color=Color.Grey_Bright_2,height=height*0.05, font=("DM Sans Medium", 14), text_color="grey")
-            self.expiration_date_entry.grid(row = 3, column = 0, columnspan=2, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
+            self.expiration_date_entry.grid(row = 3, column = 0, columnspan=3, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
 
             self.show_calendar = ctk.CTkButton(self.inventory_name_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
                                                command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s", date_format="raw", min_date=datetime.now()), corner_radius=5, state="disabled",  )
-            self.show_calendar.grid(row=3, column=2, pady = (height*0.005,height*0.01), padx = (0, width*0.01), sticky="e")
+            self.show_calendar.grid(row=3, column=3, pady = (height*0.005,height*0.01), padx = (width*0.005,width*0.01), sticky="e")
 
             '''Action Frame'''
             self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2], height=height*0.085)
@@ -2206,14 +2212,14 @@ def item_disposal_confirmation(master, info:tuple, command_callback: callable = 
             
             self.item_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
             self.item_frame.grid(row=0, column=0, sticky='nsew', pady = (height*0.025,height*0.01), padx = (width*0.005))
-            ctk.CTkLabel(self.item_frame, text="Reason: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            #ctk.CTkLabel(self.item_frame, text="Reason: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
             self.item_name = ctk.CTkLabel(self.item_frame, text="🐱", font=("DM Sans Medium", 14))
             self.item_name.pack(side='left',pady = (height*0.01), padx = (0))
             
             
             ctk.CTkLabel(self.confirm_frame, text="Enter Adminisrator Password: ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
             self.disposal_entry = ctk.CTkEntry(self.confirm_frame, font=("DM Sans Medium",14), height=height*0.045,show='*')
-            self.disposal_entry.grid(row = 2, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
+            #self.disposal_entry.grid(row = 2, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
             
             '''Action Frame'''
             self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2])
@@ -2233,15 +2239,14 @@ def item_disposal_confirmation(master, info:tuple, command_callback: callable = 
             self.place_forget()
                 
         def dispose_confirm(self):
-            if self.disposal_entry.get() == 'testing':
-                temp= [(data[0], f"{data[1]} ({data[2]})", data[3]) if data[2] else (data[0],data[1],data[3]) for data in (database.fetch_data(sql_commands.get_expired_items_to_dispose, None))]
-                [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("DIS",6).upper(), None, items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
-                database.exec_nonquery([[sql_commands.update_expired_items, None]])
-                messagebox.showinfo("Item Disposal", "Item is fully disposed", parent = self)
-                self.command_callback()
-                self.reset()
-            else: 
-                messagebox.showwarning("Wrong Password","Input does not match", parent = self)
+            
+            temp= [(data[0], f"{data[1]} ({data[2]})", data[3]) if data[2] else (data[0],data[1],data[3]) for data in (database.fetch_data(sql_commands.get_expired_items_to_dispose, None))]
+            [database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("DIS",6).upper(), None, items[0], items[1], items[2],  "Expired", self.acc_user)]]) for items in temp] 
+            database.exec_nonquery([[sql_commands.update_expired_items, None]])
+            messagebox.showinfo("Item Disposal", "Item is fully disposed", parent = self)
+            self.command_callback()
+            self.reset()
+            
         def place(self, data, **kwargs):
             self.item_name.configure(text=data)
             return super().place(**kwargs)

@@ -633,9 +633,8 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height), source='dashboard')
         self.receiving_entity.start_receiving()
         
-        self.selector_test = cctk.cctkSelector(self,(width, height), command_callback=self.test_self) 
-        #self.selector_test.place(relx=0.5, rely=0.5, anchor='c')
-
+        #self.authorization = mini_popup.authorization(self,(width, height), command_callback=None)
+        #self.authorization.place(relx=0.5, rely=0.5, anchor='c')
     
     def test_self(self):
         print(self.selector_test.get())
@@ -1779,7 +1778,7 @@ class inventory_frame(ctk.CTkFrame):
         def batch_dispose():
             if self.data_view1._data:
                 if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?", parent = self):
-                    self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired')
+                    self.authorization.place(relx=0.5, rely=0.5, anchor='c')
                 else:
                     print("Thank you for saving a trash like me")
             else:
@@ -2210,6 +2209,7 @@ class inventory_frame(ctk.CTkFrame):
         self.order_info = Inventory_popup.order_info_screen(self, (width, height))
         self.new_supplier_popup = Inventory_popup.new_supplier(self, (width, height, acc_cred, acc_info), command_callback=refresh_supplier_table)
         self.view_supplier_popup = Inventory_popup.view_supplier(self, (width, height, acc_cred, acc_info), command_callback=refresh_supplier_table)
+        self.authorization = mini_popup.authorization(self,(width, height), command_callback=lambda:self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired'))
         
         sort_status_callback("View by Levels")
         load_main_frame(0)
