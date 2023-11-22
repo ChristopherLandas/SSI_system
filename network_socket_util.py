@@ -1,8 +1,7 @@
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable
 import socket
 import threading
 from typing import *
-from typing import Any
 
 def server_listener(HOST: str, PORT: int, callable_event_trigger: callable, buffer_size: int = 1024, **kwargs) -> callable:
 
