@@ -1442,3 +1442,9 @@ get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name,
 get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
 
 get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
+
+get_all_service_schedule_by_id = "SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM services_transaction_content\
+                                  WHERE transaction_uid = ?\
+                                  UNION ALL\
+                                  SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM service_preceeding_schedule\
+                                  WHERE transaction_uid = ?"
