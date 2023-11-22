@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Tuple
 import customtkinter as ctk
 from tkinter import messagebox
 from tkextrafont import Font

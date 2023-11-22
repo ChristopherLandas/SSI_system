@@ -1,15 +1,9 @@
 from typing import *
 from tkinter import*
-import tkinter as tk
-from tkinter import messagebox
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 import customtkinter as ctk
 from os.path import exists
-from tkinter import filedialog
 import datetime
-from PIL import Image
-#from util import *
-#import sql_commands
 import ctypes
 from Theme import Color, Icons
 from functools import partial
@@ -21,26 +15,18 @@ from functools import partial
 from datetime import datetime
 import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
-
     
 def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, deduction: int, old_receipt_name = None, is_replaced = False, service_prov: str = r'n/a'):
-    from reportlab.graphics.shapes import Drawing, Rect, String
-    from reportlab.graphics.charts.piecharts import Pie
-    from reportlab.pdfgen.canvas import Canvas
-    from datetime import datetime as datetime_temp
     from reportlab.lib import colors
-    from reportlab.graphics.charts.barcharts import VerticalBarChart
-    from reportlab.graphics import renderPDF
     from reportlab.platypus import SimpleDocTemplate
     from reportlab.lib.pagesizes import letter
     from reportlab.platypus import Table
     from reportlab.platypus import TableStyle
-    from PyPDF2 import PdfWriter, PdfReader
-    import math
+    from PyPDF2 import PdfWriter
     import os
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2, PageMerge as pdfrw
+    from pdfrw import PdfReader as pdfrw1, PdfWriter as pdfrw2
 
     #importing of fonts
     ttfFile = os.path.join('C:\Windows\Fonts', 'Times.ttf')

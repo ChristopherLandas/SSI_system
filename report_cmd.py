@@ -5,12 +5,9 @@ from tkinter import messagebox
 from constants import *
 import datetime
 
-
 def generate_report(report_type: str, acc_name_preparator: str, date_creation: str, monthly_month: str|int, monthly_year: str|int, daily_full_date: str, file_path: str, yearly_year: str|int, master: any):
             from reportlab.graphics.shapes import Drawing, Rect, String
             from reportlab.graphics.charts.piecharts import Pie
-            from reportlab.pdfgen.canvas import Canvas
-            from datetime import datetime as datetime_temp
             from reportlab.lib import colors
             from reportlab.graphics.charts.barcharts import VerticalBarChart
             from reportlab.graphics import renderPDF

@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Tuple
 import customtkinter as ctk
 from typing import *
 import datetime
@@ -6,7 +6,6 @@ from Theme import Color
 from PIL import Image
 from customcustomtkinter import customcustomtkinter as cctk
 from tkinter import messagebox
-import re
 from util import database
 from util import *
 from popup import service_popup

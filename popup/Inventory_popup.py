@@ -2,9 +2,7 @@ import tkinter as tk
 import re
 import customtkinter as ctk
 import sql_commands
-import tkcalendar
-import util
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
 from Theme import Color
 from util import database, generateId
@@ -13,7 +11,6 @@ from tkinter import messagebox
 from datetime import date, datetime
 from constants import action
 from PIL import Image
-from functools import partial
 from typing import *
 
 def add_item(master, info:tuple, command_callback :Optional[callable] = None):
@@ -1717,7 +1714,7 @@ def show_category(master, info:tuple):
             return super().place(**kwargs)
     return show_category(master, info)
 
-def show_disabled_category(master, info:tuple, table_update_callback: callable):
+'''def show_disabled_category(master, info:tuple, table_update_callback: callable):
     class show_disabled_category(ctk.CTkFrame):
         def __init__(self, master, info:tuple, table_update_callback: callable):
             width = info[0]
@@ -1802,7 +1799,7 @@ def show_disabled_category(master, info:tuple, table_update_callback: callable):
             self.conv_data()
             
             return super().place(**kwargs)
-    return show_disabled_category(master, info, table_update_callback)
+    return show_disabled_category(master, info, table_update_callback)'''
 
 def add_category(master, info:tuple, table_update_callback: callable):
     class add_category(ctk.CTkFrame):
@@ -2321,7 +2318,6 @@ def audit_info(master, info:tuple, title: Optional[str] = "Record Information"):
             
     return audit_info(master, info, title)
 
-
 def order_info_screen(master, info:tuple):
     class order_info_screen(ctk.CTkFrame):
         def __init__(self, master, info:tuple):
@@ -2465,7 +2461,6 @@ def order_info_screen(master, info:tuple):
             
     return order_info_screen(master, info)
 
-
 def add_service_item(master, info:tuple, command_callback: callable = None):
     class add_service_item(ctk.CTkFrame):
         def __init__(self, master, info:tuple, command_callback ):
@@ -2589,7 +2584,6 @@ def cancel_orders(master, info:tuple,):
             return super().place(**kwargs)
 
     return cancel_orders(master, info)
-
 
 def deplted_history(master, info:tuple,):
     class deplted_history(ctk.CTkFrame):

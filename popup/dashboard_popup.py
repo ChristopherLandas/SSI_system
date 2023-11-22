@@ -1,20 +1,14 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-from customcustomtkinter import customcustomtkinterutil as cctku
 
 import sql_commands
-import tkcalendar
 from Theme import Color, Icons
-from util import database, generateId
+from util import database
 from tkinter import messagebox
-from constants import action
 from PIL import Image
-from functools import partial
 from typing import *
-import tkinter as tk
 from util import *
-import util
-from datetime import date, timedelta, datetime
+from datetime import date, datetime
 
 def status_bar(master, info: tuple, height, width, text: str, icon_color: str, count: Optional[int] = 0, command:callable = None, icon:Optional[ctk.CTkImage] = None,
                fg_color:str = Color.White_AntiFlash, hover_color:str = Color.Platinum, display_warning: bool=True, indicator_space:bool = True, display_count: bool=True):
@@ -74,7 +68,6 @@ def status_bar(master, info: tuple, height, width, text: str, icon_color: str, c
 
 
     return instance(master, info, height, width, text, icon_color, fg_color, hover_color)
-
 
 def sales_history_popup(master, info:tuple):
     class instance(ctk.CTkFrame):

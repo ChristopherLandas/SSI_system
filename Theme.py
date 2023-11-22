@@ -1,8 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-import screeninfo
 import copy
-
 
 class Color:
     White_Lotion = "#FCFCFC"

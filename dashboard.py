@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
-from matplotlib import pyplot as plt
 import datetime;
 import _tkinter
 import sql_commands
@@ -23,18 +22,10 @@ from constants import action
 from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup, customer_popup, mini_popup
 from math import *
 import random
-import copy
 import calendar
 import acc_creation
 import network_socket_util as nsu
 import json
-#test
-import screeninfo
-import ctypes
-
-#print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
-#scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
-#scaling = 1
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -139,7 +130,6 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
-        """ 
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -151,14 +141,18 @@ class dashboard(ctk.CTkToplevel):
             acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (datakey[0][0], ))
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
-            del datakey """
+            del datakey
         #for preventing security breach through python code; enable it to test it
         
+        
+        """
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
        
+        """ 
+
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
         self.dashboard_icon = Icons.get_image('dashboard_icon',size=(22,22))
@@ -1138,7 +1132,7 @@ class payment_frame(ctk.CTkFrame):
                 temp.update_table()
             if isinstance(i, histlog_frame):
                 temp: histlog_frame = i
-                temp.load_both()
+                #temp.load_both()
 
 class customer_frame(ctk.CTkFrame):
     global width, height, IP_Address, PORT_NO, SETTINGS_VAL
@@ -1436,7 +1430,6 @@ class services_frame(ctk.CTkFrame):
         self.svc_item_treeview.update_table(database.fetch_data(sql_commands.load_svc_item))
         
     def update_table(self):
-        return
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
         return

@@ -1,6 +1,5 @@
 from typing import *
 from tkinter import *
-from tkinter import messagebox
 import customtkinter as ctk
 
 def popup_name_here(master, obj, info:tuple) -> ctk.CTkFrame:
@@ -84,11 +83,7 @@ def popup_name_here(master, obj, info:tuple) -> ctk.CTkFrame:
             self.vac_history_lbl = ctk.CTkLabel(self.vac_history_frame, text='Vaccination History',font=("Poppins", 35),text_color='#06283D')
             self.vac_history_lbl.grid(row=0, column=0, padx=10, pady=10, sticky="nw", columnspan=2)
 
-
-            #on out
-
     return add_item(master, obj, info)
-    #return the class as the frame
 
 x,y = 1920,1080
 ctk1 = ctk.CTk()
@@ -98,4 +93,3 @@ ctk1.attributes("-fullscreen", True)
 frame = popup_name_here(ctk1, None, (x * .8, y * .8))
 frame.place(relx = .5, rely = .5, anchor = 'c')
 ctk1.mainloop()
-#for running and testing

@@ -1,18 +1,10 @@
 import customtkinter as ctk
-from customcustomtkinter import customcustomtkinter as cctk
-import tkcalendar
 from Theme import Color
 from util import database, generateId
 from tkinter import messagebox
-from constants import action
-from PIL import Image
 from Theme import Color, Icons
 from customcustomtkinter import customcustomtkinterutil as cctku
-from functools import partial
 import sql_commands
-import tkinter as tk
-from tkinter import ttk
-import datetime
 from util import *
 from popup import audit_popup
 
