@@ -7,10 +7,7 @@ from functools import partial
 from util import brighten_color
 import re
 from tkinter import messagebox;
-from customtkinter.windows.widgets.font import CTkFont
-from customtkinter.windows.widgets.core_widget_classes import DropdownMenu
 from tkcalendar import Calendar
-import Theme
 import datetime
 from PIL import Image
 
