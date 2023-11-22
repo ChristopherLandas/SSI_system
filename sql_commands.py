@@ -246,7 +246,7 @@ add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, 
 
 
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
-add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?)"
+add_item_supplier = "INSERT INTO supplier_item_info VALUES(?, ?, 1)"
 
 add_item_statistic = "INSERT INTO item_statistic_info VALUES(?, MONTH(CURRENT_DATE), 0, 'm')"
 
@@ -949,6 +949,7 @@ get_supplier_record = f"SELECT supp_id, supp_name, telephone, contact_person, co
 get_supplier_base_item = f"SELECT item_supplier_info.supp_id, supplier_info.supp_name\
                             FROM item_supplier_info INNER JOIN supplier_info ON item_supplier_info.supp_id = supplier_info.supp_id\
                             WHERE item_supplier_info.UID = ?"
+#OBSOLETE
                         
 #UPDATES
 
@@ -1031,9 +1032,9 @@ get_supplier_items = "SELECT supplier_item_info.item_id, item_general_info.brand
                         
 set_supplier_items = "INSERT INTO supplier_item_info VALUES (?,?,1)"
 
-get_item_supplier_name = "SELECT  supp_name FROM supplier_item_info\
+get_item_supplier_name = "SELECT supp_id, supp_name FROM supplier_item_info\
                             LEFT JOIN supplier_info ON supplier_info.supp_id = supplier_item_info.supplier_id\
-                            WHERE supplier_item_info.item_id = ?"
+                            WHERE supplier_item_info.item_id = ? AND active = 1"
                 
 update_expired_items = "UPDATE item_inventory_info SET state = -1 WHERE Expiry_Date <= CURRENT_DATE"
 
@@ -1434,3 +1435,8 @@ find_item_id_by_metainfo = "SELECT UID\
 get_service_search_query ="SELECT UID, service_name\
                             FROM service_info_test\
                             WHERE service_name LIKE '%?%' or UID LIKE '%?%'"
+                            
+get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name, ' (', unit,')') ELSE name END\
+                    FROM item_general_info ORDER BY name"
+                    
+get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"

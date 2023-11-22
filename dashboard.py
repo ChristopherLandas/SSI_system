@@ -181,7 +181,7 @@ class dashboard(ctk.CTkToplevel):
         '''Main Information'''
         side_frame_w = round(width * 0.175)
         self.default_menubar_width = .15
-        default_menubar_height = .3
+        default_menubar_height = .25
         acc_menubar_width = .2
 
         unselected_btn_color = Color.Blue_Yale
@@ -192,7 +192,6 @@ class dashboard(ctk.CTkToplevel):
         temp_icons = [self.dashboard_icon,  self.reception_icon, self.payment_icon,  self.customer_icon, self.services_icon, self.sales_icon, self.inventory_icon, self.patient_icon, self.report_icon, self.user_setting_icon, self.settings_icon, self.histlog_icon]
         temp_main_frames = [dashboard_frame, reception_frame, payment_frame, customer_frame, services_frame, sales_frame, inventory_frame, patient_info_frame, reports_frame, user_setting_frame,  admin_settings_frame, histlog_frame]
 
-        print(acc_info)
         temp_user_lvl_access = list(database.fetch_data('Select * from account_access_level WHERE usn = ?', (acc_info[0][0], ))[0][1:])
         self.labels = []
         self.icons = []
@@ -275,6 +274,8 @@ class dashboard(ctk.CTkToplevel):
         self.sidebar_btn_mngr.click(self.sidebar_btn_mngr._default_active, None)
 
         '''Top Frame'''
+        user_icon = {"Owner":"Owner", "Assisstant":"Assisstant","Cashier":"Cashier","Receiptionist":"Receiptionist",}
+        print(user_icon.get(acc_info[0][2]) or user_icon.get("Receiptionist"))
         self.top_frame = ctk.CTkFrame(self, height=round(height * 0.1), width=round(width* 0.825),
                                       corner_radius=0,fg_color=Color.White_Lotion)
         self.top_frame.grid(row=0, column=1, sticky="nsew")
@@ -313,12 +314,27 @@ class dashboard(ctk.CTkToplevel):
                                           position=(1 - self.default_menubar_width * 1.5 / 2 - .003, .55, 'c'))
         
         
-        self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, 0, fg_color=Color.White_Ghost,
-                                         position= (1 - acc_menubar_width/2,
-                                                    self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,
-                                                    'c'))
-        self.logout_btn = ctk.CTkButton(self.acc_menu_bar, width * acc_menubar_width * .85, height * default_menubar_height * .2, text = 'Logout', command= self.log_out)
-        self.logout_btn.pack(pady = (height * .005, 0))
+        self.acc_menu_bar = cctk.menubar(self, width * acc_menubar_width, height * default_menubar_height, fg_color=Color.White_Ghost,
+                                         corner_radius=0, border_width= 1, border_color=Color.White_Platinum,
+                                         position= (1 - acc_menubar_width/2, self.top_frame.winfo_height()/ self.winfo_height() + default_menubar_height/2,'c'))
+        
+        self.acc_menu_bar.grid_columnconfigure((0,1), weight=1)
+        self.acc_menu_bar.grid_rowconfigure((3), weight = 1)
+        
+        ctk.CTkLabel(self.acc_menu_bar,font=("DM Sans Medium", 16), text="Name: ", width=width*0.015, fg_color="transparent").grid(row=0, column=0, sticky="nse", padx=(width*0.01,0), pady=(width*0.015,width*0.005))
+        self.acc_name  = ctk.CTkLabel(self.acc_menu_bar, font=("DM Sans Medium", 16), text=acc_info[0][1], fg_color="transparent", anchor='w')
+        self.acc_name.grid(row=0, column=1,sticky='nsw', padx=(0, width*0.005), pady=(width*0.015,width*0.005))   
+        
+        ctk.CTkLabel(self.acc_menu_bar,font=("DM Sans Medium", 16), text="Username: ", width=width*0.015, fg_color="transparent").grid(row=1, column=0, sticky="nse", padx=(width*0.01,0), pady=(0))
+        self.usn_name  = ctk.CTkLabel(self.acc_menu_bar, font=("DM Sans Medium", 16), text=acc_info[0][0], fg_color="transparent", anchor='w')
+        self.usn_name.grid(row=1, column=1,sticky='nsw', padx=(0, width*0.005), pady=(0))
+        
+        ctk.CTkLabel(self.acc_menu_bar,font=("DM Sans Medium", 16), text="Position: ", width=width*0.015, fg_color="transparent").grid(row=2, column=0, sticky="nse", padx=(width*0.01,0), pady=(width*0.005))
+        self.pos_name  = ctk.CTkLabel(self.acc_menu_bar, font=("DM Sans Medium", 16), text=acc_info[0][2], fg_color="transparent", anchor='w')
+        self.pos_name.grid(row=2, column=1,sticky='nsw', padx=(0, width*0.005), pady=(width*0.005))
+        
+        self.logout_btn = ctk.CTkButton(self.acc_menu_bar, width * acc_menubar_width * .85, height * default_menubar_height * .2, text = 'Logout', command= self.log_out, font=("DM Sans Medium", 14))
+        self.logout_btn.grid(row=3, column=0, columnspan=2)
 
         self.top_frame_button_mngr = cctku.button_manager([self.notif_btn, self.acc_btn], Color.Platinum, True,
                                                           children=[self.notif_menu_bar, self.acc_menu_bar], active_double_click_nullified= False)
@@ -622,8 +638,14 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height), source='dashboard')
         self.receiving_entity.start_receiving()
-    
+        
+        self.selector_test = cctk.cctkSelector(self,(width, height), command_callback=self.test_self) 
+        #self.selector_test.place(relx=0.5, rely=0.5, anchor='c')
 
+    
+    def test_self(self):
+        print(self.selector_test.get())
+        
     def load_scheduled_service(self):
         data= database.fetch_data(sql_commands.get_scheduled_clients_today, None)
         self.sched_data_treeview.update_table(data)
@@ -1934,7 +1956,7 @@ class inventory_frame(ctk.CTkFrame):
 
         def restocking_callback():
             update_table_callback()
-            self.inventory_button.response()
+            #self.inventory_button.response()
             refresh_rs_data_view1()
             pass
             
