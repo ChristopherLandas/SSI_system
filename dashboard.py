@@ -1216,7 +1216,7 @@ class customer_frame(ctk.CTkFrame):
         self.customer_table_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(0,width*0.005))
        
         self.customer_treeview = cctk.cctkTreeView(self.customer_table_frame, data = [], width=width*0.805, height=height*0.8,
-                                               column_format=f'/No:{int(width*.035)}-#r/CustomerID:{int(width*.115)}-tc/CustomerName:x-tl/CustomerType:{int(width*.115)}-tc/ContactNo:{int(width*.15)}-tr!33!35',
+                                               column_format=f'/No:{int(width*.035)}-#r/CustomerID:{int(width*.115)}-tc/CustomerName:x-tl/CustomerType:{int(width*.115)}-tc/ContactNumber:{int(width*.15)}-tr!33!35',
                                                conditional_colors={3 : {"Non-Regular":Color.Near_Expire_Color, "Regular": "green"}})
         self.customer_treeview.pack()
         #self.no_sales_data = ctk.CTkLabel(self.sales_table_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
@@ -2181,7 +2181,7 @@ class inventory_frame(ctk.CTkFrame):
         self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
         self.supplier_treeview = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .8, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/SupplierNo:{int(width*.115)}-tc/SupplierName:x-tl/ContactPerson:{int(width*.15)}-tl/ContactNo:{int(width*.135)}-tc/Address:{int(width*.185)}-tl!33!35')
+                                           column_format=f'/No:{int(width*.035)}-#r/SupplierNo:{int(width*.115)}-tc/SupplierName:x-tl/ContactPerson:{int(width*.15)}-tl/ContactNumber:{int(width*.135)}-tc/Address:{int(width*.185)}-tl!33!35')
         self.supplier_treeview.pack()
         
         self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
@@ -2336,7 +2336,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.data = database.fetch_data(sql_commands.get_pet_record)
         
         self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .79, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/PetBreed:{int(width*.2)}-tl/OwnerName:{int(width*.15)}-tl/ContactNo:{int(width*.115)}-tc!33!35',)
+                                           column_format=f'/No:{int(width*.035)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/PetBreed:{int(width*.2)}-tl/OwnerName:{int(width*.15)}-tl/ContactNumber:{int(width*.115)}-tc!33!35',)
         self.pet_data_view.pack()
         
         '''BOTTOM FRAME'''
@@ -3433,4 +3433,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'admin', datetime.datetime.now)
+dashboard(None, 'admin', datetime.datetime.now())

@@ -26,13 +26,12 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.grid_rowconfigure(0, weight=1)
 
             '''EVENTS'''
-            def automate_fields(value):
-                print(value)
-                if  self.owner_name_entry.get():
-                    data = database.fetch_data(f"SELECT owner_name, address, contact_number FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'")[0]
+            def automate_fields():
+                self.owner_name_entry.configure(text=self.customer_selector.get()[1])
+                if  self.owner_name_entry._text:
+                    data = database.fetch_data(f"SELECT owner_name, address, contact_number FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry._text}'")[0]
                     self.contact_entry.configure(state = ctk.NORMAL)
                     self.address_entry.configure(state = ctk.NORMAL)
-                    self.owner_name_entry.set(f'{value}')
                     self.address_entry.delete(0, ctk.END)
                     self.address_entry.insert(0, data[1])
                     self.contact_entry.delete(0, ctk.END)
@@ -47,7 +46,7 @@ def new_record(master, info:tuple, table_update_callback: callable):
             def reset():
                 self.address_entry.configure(state=ctk.NORMAL)
                 self.contact_entry.configure(state=ctk.NORMAL)
-                self.owner_name_entry.set('')
+                self.owner_name_entry.configure(text='Select a customer')
                 self.patient_name_entry.delete(0, ctk.END)
                 self.breed_option.set("")
                 self.type_option.set("")
@@ -59,19 +58,19 @@ def new_record(master, info:tuple, table_update_callback: callable):
                 self.place_forget()
                 
             def proceed():
-                if (self.owner_name_entry.get() == '' and self.patient_name_entry.get() == '' and self.breed_option.get() == ''
+                if (self.owner_name_entry._text == '' and self.patient_name_entry.get() == '' and self.breed_option.get() == ''
                     and self.type_option.get() == '' and self.sex_option.get() == '' and self.address_entry.get() == ''
                     and self.address_entry.get() == '' and self.contact_entry.get() == '') or self.birthday_entry._text == 'Set Birthday':
                     messagebox.showwarning('Missing Fields', 'Complete all fields', parent = self)
                     return
                 else:
                     bday = str(self.birthday_entry._text)
-                    if self.owner_name_entry.get() not in self.data:
-                        database.exec_nonquery([[sql_commands.insert_new_pet_owner, (f'{self.owner_name_entry.get()}',f'{self.address_entry.get()}',f'{self.contact_entry.get()}')]])
+                    if self.owner_name_entry._text not in self.data:
+                        database.exec_nonquery([[sql_commands.insert_new_pet_owner, (f'{self.owner_name_entry._text}',f'{self.address_entry.get()}',f'{self.contact_entry.get()}')]])
                     if self.breed_option.get() not in self.values:
                         database.exec_nonquery([[sql_commands.insert_new_pet_breed, (f'{self.type_option.get()}',f'{self.breed_option.get()}')]])
                     
-                    owner_id = (database.fetch_data(f"SELECT owner_id FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry.get()}'"))[0][0]
+                    owner_id = (database.fetch_data(f"SELECT owner_id FROM pet_owner_info WHERE owner_name = '{self.owner_name_entry._text}'"))[0][0]
                     database.exec_nonquery([[sql_commands.insert_new_pet_info, (self.pet_id._text, self.patient_name_entry.get(), owner_id, self.breed_option.get(),
                                                                                     self.type_option.get(), self.sex_option.get(), self.weight_entry.get(), bday, acc_cred[0][0])]])
             
@@ -143,10 +142,12 @@ def new_record(master, info:tuple, table_update_callback: callable):
             
             self.owners = [s[0] for s in database.fetch_data(sql_commands.get_owners)] or []
             ctk.CTkLabel(self.owner_frame, text="Owner's Name: ",font=("DM Sans Medium", 14), text_color=Color.Blue_Maastricht, fg_color="transparent", width=width*0.085, anchor="e").pack(side="left", padx=(width*0.005, 0),  pady=(height*0.01))
-            self.owner_name_entry = ctk.CTkOptionMenu(self.owner_frame,values=self.owners, anchor="w", font=("DM Sans Medium", 14), width=width*0.08, height=height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Platinum,
-                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=automate_fields)
+            """ self.owner_name_entry = ctk.CTkOptionMenu(self.owner_frame,values=self.owners, anchor="w", font=("DM Sans Medium", 14), width=width*0.08, height=height*0.05, dropdown_fg_color=Color.White_AntiFlash,  fg_color=Color.White_Platinum,
+                                                 text_color=Color.Blue_Maastricht, button_color=Color.Blue_Tufts, command=automate_fields) """
+            self.owner_name_entry = ctk.CTkButton(self.owner_frame, anchor="w", font=("DM Sans Medium", 14), width=width*0.08, height=height*0.05,
+                                                  command=lambda: self.customer_selector.place(relx=0.5, rely=0.5, anchor='c'), text="Select a customer",)
             self.owner_name_entry.pack(fill="x", expand=1, padx=(0, width*0.0025), pady=(height*0.005))
-            self.owner_name_entry.set("Select A Customer")
+            #self.owner_name_entry.set("Select A Customer")
             '''PET TYPE ENTRY'''
             self.type_frame = ctk.CTkFrame(self.sub_frame, fg_color="transparent", height=height*0.085)
             self.type_frame.grid(row=3, column=0, sticky="nsew", padx=(width*0.005,0), pady=(0,height*0.01))
@@ -229,6 +230,12 @@ def new_record(master, info:tuple, table_update_callback: callable):
             self.add_btn = ctk.CTkButton(self.bot_frame, width=width*0.125, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Add Record',
                                          command=proceed)
             self.add_btn.pack(side="right",)
+            
+            self.customer_selector = cctk.cctkSelector(self.master, (width, height), title="Customer Selector",
+                                                        selector_table_query=sql_commands.get_all_customer,
+                                                        selector_table_setup=f'/No:{int(width*0.035)}-#r/CustomerID:{int(width*0.085)}-tc/CustomerName:x-tl/ContactNumber:{int(width*0.225)}-tl!33!35',
+                                                        selector_search_query=sql_commands.get_customer_quary_command,
+                                                        command_callback=automate_fields)
 
             self.breed_option.set("")
             self.type_option.set("")

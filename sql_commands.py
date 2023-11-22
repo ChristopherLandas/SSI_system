@@ -1444,3 +1444,5 @@ get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info
 
 get_account_search_query = "SELECT full_name, usn FROM acc_info WHERE usn LIKE '%?%' or full_name LIKE '%?%'"
 get_account_deac_search_query = "SELECT full_name, usn FROM acc_info WHERE (usn LIKE '%?%' or full_name LIKE '%?%') AND state = 0"
+
+get_all_customer = "SELECT owner_id, owner_name, contact_number FROM pet_owner_info"
