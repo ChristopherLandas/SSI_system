@@ -1,7 +1,5 @@
 from typing import *
 import customtkinter as ctk
-import sys
-import os
 from util import database
 from util import encrypt
 from tkinter import messagebox
