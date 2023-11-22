@@ -1452,3 +1452,12 @@ get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC L
 
 get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
 
+
+get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
+
+get_all_service_schedule_by_id = "SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM services_transaction_content\
+                                  WHERE transaction_uid = ?\
+                                  UNION ALL\
+                                  SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM service_preceeding_schedule\
+                                  WHERE transaction_uid = ?"
+
