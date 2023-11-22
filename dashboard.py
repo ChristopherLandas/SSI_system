@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
-from matplotlib import pyplot as plt
 import datetime;
 import _tkinter
 import sql_commands
@@ -23,18 +22,10 @@ from constants import action
 from popup import Inventory_popup, Pet_info_popup, service_popup, transaction_popups, Sales_popup, dashboard_popup, save_as_popup, service_popup, admin_popup, customer_popup, customer_popup, mini_popup
 from math import *
 import random
-import copy
 import calendar
 import acc_creation
 import network_socket_util as nsu
 import json
-#test
-import screeninfo
-import ctypes
-
-#print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
-#scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
-#scaling = 1
 
 ctk.set_appearance_mode('light')
 ctk.set_default_color_theme('blue')
@@ -1115,7 +1106,7 @@ class payment_frame(ctk.CTkFrame):
                 temp.update_table()
             if isinstance(i, histlog_frame):
                 temp: histlog_frame = i
-                temp.load_both()
+                #temp.load_both()
 
 class customer_frame(ctk.CTkFrame):
     global width, height, IP_Address, PORT_NO, SETTINGS_VAL
