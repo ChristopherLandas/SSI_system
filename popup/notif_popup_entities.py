@@ -1,5 +1,4 @@
 from typing import *
-import datetime
 from typing import Callable, Optional, Tuple, Union
 from customcustomtkinter import customcustomtkinter as cctk
 import customtkinter as ctk
@@ -91,7 +90,7 @@ def create_entity(master: any,
     instance.update_children()
     return instance
 
-def notif_info_popup(master: any, info: tuple) -> ctk.CTkFrame:
+'''def notif_info_popup(master: any, info: tuple) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple,):
             width = info[0]
@@ -115,7 +114,7 @@ def notif_info_popup(master: any, info: tuple) -> ctk.CTkFrame:
                 kwargs.pop('text_info')
             return super().place(**kwargs)
         
-    return instance(master= master, info=info)
+    return instance(master= master, info=info)'''
 
 '''def calculate_day(date_time: datetime.datetime, return_type: Literal['datetime', 'strform'] = 'strform') -> datetime.timedelta | str:
     time_difference = datetime.datetime.now() - date_time

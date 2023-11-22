@@ -1,19 +1,10 @@
-import tkinter as tk
-import re
 import customtkinter as ctk
-import sql_commands
-import tkcalendar
-import util
-from typing import Optional, Tuple, Union
-from customcustomtkinter import customcustomtkinter as cctk
+from typing import Optional
 from Theme import Color
-from util import database, generateId
+from util import database
 from util import *
 from tkinter import messagebox
-from datetime import date, datetime
-from constants import action
 from PIL import Image
-from functools import partial
 from typing import *
 
 def authorization(master, info:tuple, command_callback :Optional[callable] = None):

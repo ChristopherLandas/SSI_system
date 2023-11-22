@@ -1,17 +1,10 @@
 import customtkinter as ctk
-from customcustomtkinter import customcustomtkinter as cctk
 import sql_commands
-import tkcalendar
 from Theme import Color
 from util import database
 from util import *
 from tkinter import messagebox
-from constants import action
 from PIL import Image
-import tkinter as tk
-from tkinter import ttk
-
-
 
 def show_service_info(master, info:tuple) -> ctk.CTkFrame:
     class instance(ctk.CTkFrame):

@@ -1,22 +1,8 @@
-import tkinter as tk
-import re
 import customtkinter as ctk
-import sql_commands
-import tkcalendar
-import util
-from typing import Optional, Tuple, Union
-from customcustomtkinter import customcustomtkinter as cctk
+from typing import Optional
 from Theme import Color
-from util import database, generateId
 from util import *
-from tkinter import messagebox
-from datetime import date, datetime
-from constants import action
-from PIL import Image
-from functools import partial
 from typing import *
-
-
 
 def audit_info(master, info:tuple, title: Optional[str] = "Record Information"):
     class audit_info(ctk.CTkFrame):

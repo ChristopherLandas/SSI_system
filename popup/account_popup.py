@@ -1,17 +1,9 @@
 import customtkinter as ctk
-from customcustomtkinter import customcustomtkinter as cctk
-import sql_commands
-import tkcalendar
 from Theme import Color
-from util import database, generateId
+from util import database
 from tkinter import messagebox
-from constants import action
-import datetime
 from PIL import Image
-import datetime
-from functools import partial
 from typing import *
-import tkinter as tk
 from util import encrypt
 
 def change_password(master, info:tuple,):
@@ -99,4 +91,3 @@ def change_password(master, info:tuple,):
             #print(new_pass)
 
     return change_password(master, info)
-#That place is not for  any man or particles of bread

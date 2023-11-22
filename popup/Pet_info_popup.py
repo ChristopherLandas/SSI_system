@@ -1,17 +1,13 @@
 import customtkinter as ctk
 from customcustomtkinter import customcustomtkinter as cctk
-import tkcalendar
 from Theme import Color
 from util import database, generateId
 from tkinter import messagebox
-from constants import action
 from PIL import Image
 from Theme import Color, Icons
 from customcustomtkinter import customcustomtkinterutil as cctku
-from functools import partial
 import sql_commands
 import tkinter as tk
-from tkinter import ttk
 import datetime
 from popup import audit_popup
 
@@ -284,7 +280,6 @@ def new_record(master, info:tuple, table_update_callback: callable):
             #self.owner_name_entry.configure(values = [s[0] for s in database.fetch_data(sql_commands.get_owners)])
             return super().place(**kwargs)
     return instance(master, info, table_update_callback)
-
 
 def view_record(master, info:tuple, table_update_callback: callable):
     class instance(ctk.CTkFrame):
