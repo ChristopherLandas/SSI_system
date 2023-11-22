@@ -1442,5 +1442,9 @@ get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name,
                     
 get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
 
+
 get_account_search_query = "SELECT full_name, usn FROM acc_info WHERE usn LIKE '%?%' or full_name LIKE '%?%'"
 get_account_deac_search_query = "SELECT full_name, usn FROM acc_info WHERE (usn LIKE '%?%' or full_name LIKE '%?%') AND state = 0"
+
+get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
+

@@ -130,7 +130,10 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
-        """ datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+
+        """ 
+        datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -150,8 +153,6 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-       
-        
 
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
@@ -3433,4 +3434,6 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-dashboard(None, 'admin', datetime.datetime.now)
+
+dashboard(None, 'admin', datetime.datetime.now())
+

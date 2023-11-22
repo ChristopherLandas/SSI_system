@@ -314,6 +314,7 @@ class pets(ctk.CTkFrame):
                         
                 total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
+                #what causes the error
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
                 self.change_total_val_serv_callback(-previous_price)
                 self.change_total_val_serv_callback(price_format_to_float(total_price_lbl._text[1:]))
