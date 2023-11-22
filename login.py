@@ -6,12 +6,10 @@ from Theme import Color
 from dashboard import dashboard as _db
 from constants import db
 from util import *
-from os import walk
 import sql_commands
 import datetime
 import _tkinter
-import screeninfo
-import ctypes
+from functools import partial
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 
