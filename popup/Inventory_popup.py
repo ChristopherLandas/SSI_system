@@ -56,7 +56,8 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                         messagebox.showerror("Duplicate Entry", "The item is already in the inventory", parent = self)
                     else:
                         output = database.exec_nonquery([[sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0])],
-                                                [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 0)],
+                                                #[sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 0)],
+                                                [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get()) / float(self.unit_price_entry.get()), .85, .5, self.stock_entry.get(), 0)],
                                                 [sql_commands.set_supplier_items, (self.supplier_id, self.item_name_id._text)],
                                                 [sql_commands.add_item_inventory, (self.item_name_id._text, self.stock_entry.get(), _date)],
                                                 [sql_commands.add_item_statistic, (self.item_name_id._text, )]])
@@ -87,7 +88,6 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
 
             
             def selling_callback(_ = None, *__):
-                
                 if re.search(r'[0-9\.]$', self.markup_price_entry.get() or "") is None and self.markup_price_entry._is_focused and self.markup_price_entry.get():
                         #print(self.markup_price_entry.get())
                         l = len(self.markup_price_entry.get())
@@ -104,11 +104,12 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                     return
 
                 if  self.markup_price_entry.get() and self.unit_price_entry.get():
-                    markup = 1 + (float(self.markup_price_entry.get() or 0)/100)
+                    #markup = 1 + (float(self.markup_price_entry.get() or 0)/100)
+                    markup = float(self.markup_price_entry.get())
                     price = float(self.unit_price_entry.get())
                     self.selling_price_entry.configure(state = ctk.NORMAL)
                     self.selling_price_entry.delete(0, ctk.END)
-                    self.selling_price_entry.insert(0, format((markup * price), ".2f"))
+                    self.selling_price_entry.insert(0, format((markup + price), ".2f"))
                     self.selling_price_entry.configure(state = 'readonly')
                     
             def expiry_switch_event():
@@ -250,7 +251,6 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.markup_price_entry = ctk.CTkEntry(self.item_name_frame, width=width*0.05, textvariable= ctk.StringVar(), height=height*0.0475, justify="right",  font=("DM Sans Medium",14),corner_radius=5,)
             self.markup_price_entry._textvariable.trace_add('write', selling_callback)
             self.markup_price_entry.grid(row = 6, column = 3, sticky = 'nsew', pady = (0,height*0.01), padx = (0))
-            ctk.CTkLabel(self.item_name_frame, text=' %', font=("DM Sans Medium", 14), anchor="w").grid(row = 6, column = 4, sticky="nsew",pady = (0,height*0.01), padx = (0))
             
             '''ITEM SELLING'''
             ctk.CTkLabel(self.item_name_frame, text='Selling Price: ', font=("DM Sans Medium", 14), width=width*0.075, anchor="e").grid(row = 7, column = 0, sticky="nsew",pady = (0,height*0.01), padx = (width*0.005,0))
