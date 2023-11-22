@@ -302,7 +302,7 @@ class accounts_frame(ctk.CTkFrame):
         #print(self.data)
         self.account_treeview.update_table(self.data)
         self.account_treeview.pack()
-
+  
     def deactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:
             messagebox.showerror("Invalid", "Select an account to Deactivate", parent = self)
@@ -414,7 +414,7 @@ class creation_frame(ctk.CTkFrame):
         def check_for_names():
             txt = self.fullname_entry.get()
             char_format = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM-' "
-
+            print(txt)
             if str.islower(txt[0]):
                 temp = txt[0].upper()
                 self.fullname_entry.delete(0, 1)
@@ -588,14 +588,14 @@ class roles_frame(ctk.CTkFrame):
         self.fullname_entry.configure(textvariable = self.fullname_limiter)
 
     def grid(self, **kwargs):
-        if self.usn_option._values == ['CTkOptionMenu']:
-            pos = [s[0] for s in database.fetch_data("SELECT DISTINCT Title FROM user_level_access")]
-            emp = [s[0] for s in database.fetch_data("SELECT DISTINCT usn FROM acc_info ORDER BY usn ")]
-            print(pos, emp)
-            self.usn_option.configure(values = emp)
-            self.position_selection.configure(values = pos)
-            self.usn_option.set("_")
-            self.position_selection.set("_")
+        pos = [s[0] for s in database.fetch_data("SELECT DISTINCT Title FROM user_level_access")]
+        emp = [s[0] for s in database.fetch_data("SELECT DISTINCT usn FROM acc_info ORDER BY usn ")]
+        
+        self.usn_option.configure(values = emp)
+        self.position_selection.configure(values = pos)
+        self.usn_option.set("_")
+        self.fullname_entry.delete(0,'end')
+        self.position_selection.set("_")
         return super().grid(**kwargs)
     
     def select_username_callback(self, _: any = None):
@@ -609,18 +609,15 @@ class roles_frame(ctk.CTkFrame):
         self.activate_positions()
 
     def activate_positions(self, from_select_username_callback: bool = True, _: any = None):
-        access: tuple = database.fetch_data(sql_commands.get_level_acessess, (self.position_selection.get(), ))[0][1:]
-        #access:list = list(access)
-        #access.pop(0)
+        
+        access = database.fetch_data(sql_commands.get_acc_specific_access, (self.usn_option.get(),))[0][1:]
         self.values = {k: v for k,v in zip(self.access_lvls, access)}
-
         for k in self.values.keys():
             self.check_boxes[k].configure(state = ctk.NORMAL)
             if self.values[k] == 1:
                 if from_select_username_callback:
                     self.check_boxes[k].select()
             else:
-                #self.check_boxes[k].configure(state = ctk.DISABLED)
                 self.check_boxes[k].deselect()
 
     def update_roles(self):
@@ -642,6 +639,8 @@ class roles_frame(ctk.CTkFrame):
         for k in self.check_boxes.keys():
             self.check_boxes[k].configure(state = ctk.DISABLED)
             self.check_boxes[k].deselect()
+    
+    
 
 class deactivated_frame(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):

@@ -365,17 +365,15 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             
         def set_categories(self):
             self.data = database.fetch_data("SELECT * FROM categories where state = 1")
-            #self.supplier_data = database.fetch_data("SELECT supp_id, supp_name, contact_person, contact_number, contact_email, address FROM supplier_info")
-            
-            #self.supplier_option = [data[1] for data in self.supplier_data]
-            
             self.category_data = []
-            for i in range(len(self.data)):
-                self.category_data.append(self.data[i][0])
-            
-            #self.supplier_entry.configure(values = self.supplier_option)
-            self.category_entry.configure(values=self.category_data)
-            self.category_entry.set(self.category_data[0])
+            if len(self.data) > 0:
+                for i in range(len(self.data)):
+                    self.category_data.append(self.data[i][0])
+                
+                    self.category_entry.configure(values=self.category_data)
+                    self.category_entry.set(self.category_data[0])
+            else:
+                messagebox.showwarning("Warning","There is no recorded categories yet.\nConsider adding a new catergory.")
   
         def place(self, **kwargs):
             self.brand_list = [brand[0] for brand in database.fetch_data('SELECT DISTINCT brand FROM item_general_info')]
@@ -518,7 +516,7 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
             '''SUPPLIER NAME'''
             ctk.CTkLabel(self.supplier_frame, text='Supplier Name: ', font=('DM Sans Medium', 14), anchor='e',  width=width*0.09).grid(row = 2, column = 0, pady = (height*0.01), padx= (width*0.01), sticky = 'nsew')
             
-            self.supplier_name_entry = ctk.CTkOptionMenu(self.supplier_frame, values=[], width=width*0.35, height=height*0.05, font=('DM Sans Medium', 14), command= supplier_callback)
+            self.supplier_name_entry = ctk.CTkOptionMenu(self.supplier_frame, values=[], width=width*0.35, height=height*0.05, font=('DM Sans Medium', 14), command= supplier_callback, dropdown_font=("DM Sans Medium", 14))
             self.supplier_name_entry.grid(row = 2, column = 1, columnspan=2, sticky = 'nsew', pady = (height*0.01), padx= (0,width*0.01))
             self.supplier_name_entry.set("")
             
@@ -556,8 +554,26 @@ def restock( master, info:tuple, data_view: Optional[cctk.cctkTreeView] = None, 
         def place(self, default_data: Optional[str] = None, update_cmds: callable = None, **kwargs):
             self.update_cmds = update_cmds
             if default_data:
-                self.item_name_entry.set(default_data[2])
-                self.item_name_entry._command(None)
+                self.item_name_entry.configure(text=default_data[2])
+                #self.item_name_entry._command(None)
+                item_info  = split_unit(default_data[2])
+                query = f"SELECT uid FROM item_general_info WHERE name = '{item_info[0]}' AND unit IS NULL" if len(item_info) == 1 else f"SELECT uid FROM item_general_info WHERE name = '{item_info[0]}' AND unit = '{item_info[1]}'"
+                
+                self.item_uid = database.fetch_data(query)[0][0]
+                self.item_code.configure(text=self.item_uid)    
+                
+                self.supplier_data = database.fetch_data(sql_commands.get_item_supplier_name, (self.item_code._text,))
+                if len(self.supplier_data) > 0:
+                    self.supplier_name_entry.configure(values=[data[1] for data in self.supplier_data])
+                    self.supplier_code.configure(text=self.supplier_data[0][0])
+                    self.supplier_name_entry.set(self.supplier_data[0][1])
+
+                    self.stock_entry.configure(state = ctk.NORMAL)
+                    self.stock_entry.set(1)
+                    self.add_btn.configure(state = ctk.NORMAL)
+                else:
+                    messagebox.showwarning("Warning","This item has no supplier set into it\nKindly go to suppliers tab and add this item into a supplier", parent=self)
+                
             else:
                 self.set_selections()
             #self.item_name_entry.configure(values = item_unit(database.fetch_data(sql_commands.show_all_items, None)))
@@ -1332,7 +1348,7 @@ def receive_history(master, info:tuple,):
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=reset)
             self.close_btn.pack(side="right", padx=width*0.005)
                         
-            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width= height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color=Color.Green_Button_Hover_Color,
+            self.refresh_btn = ctk.CTkButton(self.main_frame,text="", width= height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color=Color.Green_Button_Hover_Color, 
                                              command=refresh_treeview)
             self.refresh_btn.grid(row=1, column=1, sticky="w", padx=(0,width*0.005))
             
@@ -1380,11 +1396,7 @@ def receive_history(master, info:tuple,):
             #.grid(row=1, column=1, sticky="w", padx=(0,width*0.005))
             refresh_treeview()
         def place(self, **kwargs):
-            month_year = date.today().strftime('%B %Y')
-            #self.raw_data = database.fetch_data(sql_commands.show_receiving_hist_by_date, (f'{month_year}',))
-
-            #self.data_view1.update_table(data)
-            #self.no_order_data.place(relx=0.5, rely=0.5, anchor='c') if not data else self.no_order_data.place_forget()
+            self.refresh_btn.invoke()
             return super().place(**kwargs)
 
     return receive_history(master, info)
