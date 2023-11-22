@@ -805,7 +805,7 @@ insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, ?, CURRENT_TIM
 update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
 update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
-update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
+update_deactivate_account = "UPDATE acc_info SET state = 0, reason = ? WHERE usn = ?"
 
 #TESTING - James
 
@@ -823,7 +823,7 @@ insert_service = "INSERT INTO service_info_test VALUES( ?, ?, ?, NULL, ?, ?, ?)"
 
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
-create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
+create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1, NULL)"
 create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Reception = ?, Payment=?, Customer=?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet = ?, Report = ?, User = ?, Settings = ?, History=?\
@@ -1441,3 +1441,6 @@ get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name,
                     FROM item_general_info ORDER BY name"
                     
 get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
+
+get_account_search_query = "SELECT full_name, usn FROM acc_info WHERE usn LIKE '%?%' or full_name LIKE '%?%'"
+get_account_deac_search_query = "SELECT full_name, usn FROM acc_info WHERE (usn LIKE '%?%' or full_name LIKE '%?%') AND state = 0"

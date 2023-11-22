@@ -9,7 +9,7 @@ from tkinter import messagebox
 import sql_commands
 from popup import account_popup
 from datetime import datetime
-from util import encrypt
+from util import *
 
 class accounts_frame(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -17,7 +17,10 @@ class accounts_frame(ctk.CTkFrame):
         
         width = self._current_width
         height = self._current_height       
-         
+        
+        def search_callback():
+            self.account_treeview.update_table(list_filterer(source=self.search_bar.get(), reference=self.data))
+            
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
         
@@ -27,20 +30,11 @@ class accounts_frame(ctk.CTkFrame):
         self.top_frame = ctk.CTkFrame(self, fg_color='transparent')
         self.top_frame.grid(row=0, column=0, sticky="ew", padx=(width*0.005), pady=(height*0.01,0))
         
-        """ self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side="left",padx=(0,width*0.005))
-        self.search_frame.pack_propagate(0)
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
-
         self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color='#74bc8a',
                                          command=self.refresh_table)
-        self.refresh_btn.pack(side="left")
         
-        self.deactivate_acc_btn = ctk.CTkButton(self.top_frame, height = height*0.05, text="Deactivate Account",fg_color="#ff6464", font=("DM Sans Medium", 14), text_color="white", command= self.deactivate_acc)
+        
+        self.deactivate_acc_btn = ctk.CTkButton(self.top_frame, height = height*0.05, text="Deactivate Account",fg_color="#ff6464", font=("DM Sans Medium", 14), text_color="white", command= self.deactivate_acc, hover_color=Color.Red_Pastel_Hover)
         self.deactivate_acc_btn.pack(side='right')
         
         self.password_change_btn = ctk.CTkButton(self.top_frame, height = height*0.05, text="Change Password", font=("DM Sans Medium", 14), text_color="white",
@@ -51,16 +45,25 @@ class accounts_frame(ctk.CTkFrame):
         self.treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
 
         self.account_treeview = cctk.cctkTreeView(self.treeview_frame, height= height*0.735, width=width*0.8025,
-                                           column_format=f'/No:{int(width*.025)}-#r/Username:x-tl/FullName:{int(width*.3)}-tl/Position:{int(width*.185)}-tl!30!30',)
+                                           column_format=f'/No:{int(width*.035)}-#r/Username:{int(width*.225)}-tl/FullName:x-tl/Position:{int(width*.185)}-tl!33!35',)
         self.account_treeview.pack()
         
         self.refresh_table()
-
+        self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.35, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=search_callback,
+                                                 close_command_callback=self.refresh_table,
+                                             quary_command=sql_commands.get_account_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
+        self.search_bar.pack(side='left')
+        self.refresh_btn.pack(side="left", padx=(width*0.005))
+        
+        self.reason_deactivation = reason_deactivation(self,(width, height), command_callback=self.refresh_table)
+        
     def refresh_table(self):
+        self.refresh_btn.configure(state='disabled')
+        self.account_treeview.pack_forget()
         self.data = database.fetch_data("SELECT usn, full_name, job_position FROM acc_info WHERE state = 1")
-        #print(self.data)
         self.account_treeview.update_table(self.data)
         self.account_treeview.pack()
+        self.after(100, lambda:self.refresh_btn.configure(state='normal'))
 
     def deactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:
@@ -70,10 +73,8 @@ class accounts_frame(ctk.CTkFrame):
             messagebox.showerror("Invalid", "You cannot deactive all of the owner account", parent = self)
             return
         else:
-            if messagebox.askyesno("Warning", f"Are you sure you want to deactivate {self.account_treeview.get_selected_data()[0]}", parent = self):
-                database.exec_nonquery([[sql_commands.update_deactivate_account, (self.account_treeview.get_selected_data()[0], )]])
-                messagebox.showwarning("Success ", "Account Deactivated", parent = self)
-                self.refresh_table()
+            self.reason_deactivation.place(relx=0.5, rely=0.5, anchor='c', data=self.account_treeview.get_selected_data())
+            
      
 class creation_frame(ctk.CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
@@ -221,7 +222,7 @@ class creation_frame(ctk.CTkFrame):
                 self.username_entry.insert(0, st)
             if(self.password_entry.get() == ""):
                 self.password_entry.delete(0, ctk.END)
-                self.password_entry.insert(0, self.fullname_entry.get().replace(" ", '_')+datetime.now().strftime('%m%d%y'))
+                self.password_entry.insert(0, self.fullname_entry.get().replace(" ", '_')+datetime.datetime.now().strftime('%m%d%y'))
 
     def create_acc(self, _: any = None):
         if self.fullname_entry.get() == "" or self.position_selection.get() == "_" or self.username_entry.get() == "" or self.password_entry.get() == "":
@@ -282,14 +283,7 @@ class roles_frame(ctk.CTkFrame):
         self.left_inner_frame = ctk.CTkFrame(self.left_sub_frame, fg_color=Color.White_Lotion)
         self.left_inner_frame.pack(fill="both", expand=1, padx=(width*0.005), pady=(height*0.01))
         self.left_inner_frame.grid_columnconfigure(0, weight=1)
-        #remove account picture and camera button
-        '''PICTURE FRAME'''
-        #self.picture_frame = ctk.CTkFrame(self.left_inner_frame, fg_color=Color.White_Platinum, width=width*0.135, height=height*0.235)
-        #self.picture_frame.grid(row=0, column=0, sticky="w", padx=(width*0.005),  pady=(height*0.01))
-        #self.picture_frame.pack_propagate(0)
-        #self.acc_pic = ctk.CTkLabel(self.picture_frame, text='', corner_radius=5, image=self.pet_sample_icon)
-        #self.acc_pic.pack(fill="both",expan=1,padx=(width*0.005), pady=(height*0.01))
-       
+ 
         '''FULL NAME ENTRY'''
         self.fullname_frame = ctk.CTkFrame(self.left_inner_frame, fg_color=Color.White_Platinum)
         self.fullname_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005),  pady=(height*0.02,height*0.01))
@@ -302,8 +296,7 @@ class roles_frame(ctk.CTkFrame):
         self.position_frame = ctk.CTkFrame(self.left_inner_frame, fg_color=Color.White_Platinum)
         self.position_frame.grid(row=2, column=0,  sticky="nsew", padx=(width*0.005),  pady=(0,height*0.01))
         ctk.CTkLabel(self.position_frame, text='Position: ', font=("DM Sans Medium", 14), anchor='e', corner_radius=5, width=width*0.075, text_color=Color.Blue_Maastricht).pack(side="left", padx=(width*0.005,0),  pady=(height*0.01))
-        #self.position_entry = ctk.CTkEntry(self.position_frame, border_width=0, placeholder_text="Type Here...", placeholder_text_color="light grey", height=height*0.045 ,font=("DM Sans Medium", 14), fg_color=Color.White_Lotion, border_color=Color.Blue_Maastricht)
-        #self.position_entry.pack(side="left", fill="x", expand=1, padx=(0,width*0.005),  pady=(height*0.01))
+        
         self.position_selection = ctk.CTkOptionMenu(self.position_frame, height=height*0.045 ,font=("DM Sans Medium", 14), command= lambda _: self.activate_positions(from_select_username_callback= False), state= ctk.DISABLED)
         self.position_selection.pack(side="left", fill="x", expand=1, padx=(0,width*0.005),  pady=(height*0.01))
 
@@ -350,7 +343,7 @@ class roles_frame(ctk.CTkFrame):
 
     def grid(self, **kwargs):
         pos = [s[0] for s in database.fetch_data("SELECT DISTINCT Title FROM user_level_access")]
-        emp = [s[0] for s in database.fetch_data("SELECT DISTINCT usn FROM acc_info ORDER BY usn ")]
+        emp = [s[0] for s in database.fetch_data("SELECT DISTINCT usn FROM acc_info WHERE state = 1 ORDER BY usn ")]
         
         self.usn_option.configure(values = emp)
         self.position_selection.configure(values = pos)
@@ -409,38 +402,42 @@ class deactivated_frame(ctk.CTkFrame):
         self.grid_columnconfigure(0,weight=1)
         self.grid_rowconfigure(1, weight=1)
         
+        def search_callback():
+            self.account_treeview.update_table(list_filterer(source=self.search_bar.get(), reference=database.fetch_data('SELECT usn, full_name, job_position, reason FROM acc_info WHERE state = 0')))
+        
         self.search = ctk.CTkImage(light_image=Image.open("image/searchsmol.png"),size=(16,15))
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(20,20))
 
         self.top_frame = ctk.CTkFrame(self, fg_color='transparent')
         self.top_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.01))
 
-        """ self.search_frame = ctk.CTkFrame(self.top_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        self.search_frame.pack(side="left",padx=(0,width*0.005))
-        self.search_frame.pack_propagate(0)
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey", width=width*0.005)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
-
         self.refresh_btn = ctk.CTkButton(self.top_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", hover_color='#74bc8a', command= self.load_deactivated_acc)
-        self.refresh_btn.pack(side="left", padx=(0, width*0.005))
-        #reactivate button
+        
         self.reactivate_acc_btn = ctk.CTkButton(self.top_frame, width=width*0.08, height = height*0.05, text="Reactivate Account", font=("DM Sans Medium", 14), command= self.reactivate_acc)
-        self.reactivate_acc_btn.pack(side="left", padx=(0, width*0.005))
+        self.reactivate_acc_btn.pack(side="right", padx=(0))
 
         self.treeview_frame = ctk.CTkFrame(self, fg_color=Color.White_Platinum, corner_radius=0)
         self.treeview_frame.grid(row=1, column=0, sticky="nsew", padx=(width*0.005), pady=(0,height*0.01))
 
         self.account_treeview = cctk.cctkTreeView(self.treeview_frame, height= height*0.735, width=width*0.8025,
-                                           column_format=f'/No:{int(width*.025)}-#r/Username:x-tl/Role:{int(width*.175)}-tr!30!30',)
+                                           column_format=f'/No:{int(width*.035)}-#r/Username:{int(width*.175)}-tl/FullName:x-tl/Role:{int(width*.15)}-tl/Reason:{int(width*.15)}-tl!33!35',)
         self.account_treeview.pack()
         self.load_deactivated_acc()
+        
+        self.search_bar = cctk.cctkSearchBar(self.top_frame, height=height*0.055, width=width*0.35, m_height=height, m_width=width, fg_color=Color.Platinum, command_callback=search_callback,
+                                                 close_command_callback=self.load_deactivated_acc,
+                                             quary_command=sql_commands.get_account_deac_search_query, dp_width=width*0.25, place_height=height*0, place_width=width*0, font=("DM Sans Medium", 14))
+        self.search_bar.pack(side='left')
+        self.refresh_btn.pack(side="left", padx=(width*0.005))
+        
     
     def load_deactivated_acc(self):
-        self.account_treeview.update_table(database.fetch_data('SELECT usn, job_position FROM acc_info WHERE state = 0'))
-
+        self.refresh_btn.configure(state='disabled')
+        self.account_treeview.pack_forget()
+        self.account_treeview.update_table(database.fetch_data('SELECT usn, full_name, job_position, reason FROM acc_info WHERE state = 0'))
+        self.account_treeview.pack()
+        self.after(100, lambda:self.refresh_btn.configure(state='normal'))
+        
     def reactivate_acc(self):
         if self.account_treeview.get_selected_data() is None:
             messagebox.showerror("Invalid", "Select an account to Reactivate", parent = self)
@@ -454,241 +451,88 @@ class deactivated_frame(ctk.CTkFrame):
     def grid(self, **kwargs):
         return super().grid(**kwargs)
     
-""" class frame2(ctk.CTkFrame):
-    def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
-        super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
-        self._fg_color ="light grey"
-        self.pack_propagate(0)
-
-        self.upperframe = ctk.CTkFrame(self, self._current_width * .95, self._current_height * .85, 0, fg_color='transparent')
-        self.upperframe.pack(padx = (self._current_width * .025, self._current_width * .025), pady = (self. _current_height * 0.025, 0))
-        self.pack_propagate(0)
-
-        self.left_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.left_frame.pack(side = 'left', padx = (0, self._current_width * .0125))
-        self.left_frame.grid_propagate(0)
-        ctk.CTkLabel(self.left_frame, text= "Account", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0), pady=(12,0), sticky="w")
-
-        '''ctk.CTkLabel(self.left_frame, text= "Full name", font=("Arial", 15)).grid(row = 1, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.name_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.name_entry.grid(row = 2, column = 0, padx = (7, 0))'''
-
-        ctk.CTkLabel(self.left_frame, text= "Username", font=("Arial", 15)).grid(row = 3, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
-        self.usn_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.usn_option.grid(row = 4, column = 0, padx = (7, 0))
-        self.usn_option.set("Select a user")
-
-        ctk.CTkLabel(self.left_frame, text= "Position", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
-        self.selected_role_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8, state=ctk.DISABLED)
-        self.selected_role_option.grid(row = 6, column = 0, padx = (7, 0))
-        self.selected_role_option.set("Job Position")
-
-        '''ctk.CTkLabel(self.left_frame, text= "USN", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.usn_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.usn_entry.grid(row = 6, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Password", font=("Arial", 15)).grid(row = 7, column = 0, padx = (7, 0), pady = (7, 0), sticky = 'w')
-        self.pss_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.pss_entry.grid(row = 8, column = 0, padx = (7, 0))'''
-
-        self.right_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.right_frame.pack(side = 'left', padx = (self._current_width * .0125, 0));
-        self.right_frame.grid_propagate(0)
-        ctk.CTkLabel(self.right_frame, text= "Access Level", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0))
-
-        self.access_lvl_frame = ctk.CTkFrame(self.right_frame, self.right_frame._current_width * .91, self.right_frame._current_height * .91, fg_color='white')
-        self.access_lvl_frame.grid(row = 1, column = 0, sticky = 'we', padx = 7, pady = 7)
-        self.access_lvl_frame.grid_propagate(0)
-
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log']
-        self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
-        for i in range(len(self.access_lvls)):
-            self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24,
-                                                                    text=self.access_lvls[i], state=ctk.DISABLED);
-            self.check_boxes[self.access_lvls[i]].grid(row = i, column = 0, padx = 7, pady = 7);
+def reason_deactivation(master, info:tuple, command_callback: callable = None):
+    class reason_deactivation(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, width=width*0.4, height=height*0.4, corner_radius= 0, fg_color='transparent')
             
+            self.command_callback = command_callback
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
 
-        self.accept_button = ctk.CTkButton(self, 140, 50, 12, text="Proceed")
-        self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125))
-
-
-
-class frame(ctk.CTkFrame):
-    def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
-        super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
-        self.pack_propagate(0)
-
-        self.upperframe = ctk.CTkFrame(self, self._current_width * .95, self._current_height * .85, 0, fg_color='transparent')
-        self.upperframe.pack(padx = (self._current_width * .025, self._current_width * .025), pady = (self. _current_height * 0.025, 0))
-        self.pack_propagate(0)
-
-        self.left_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.left_frame.pack(side = 'left', padx = (0, self._current_width * .0125));
-        self.left_frame.grid_propagate(0)
-        ctk.CTkLabel(self.left_frame, text= "Account Credentials", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Full name", font=("Arial", 15)).grid(row = 1, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.name_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.name_entry.grid(row = 2, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Position", font=("Arial", 15)).grid(row = 3, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
-        self.position_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.position_option.grid(row = 4, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "USN", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.usn_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.usn_entry.grid(row = 6, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Password", font=("Arial", 15)).grid(row = 7, column = 0, padx = (7, 0), pady = (7, 0), sticky = 'w')
-        self.pss_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.pss_entry.grid(row = 8, column = 0, padx = (7, 0))
-
-        self.right_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.right_frame.pack(side = 'left', padx = (self._current_width * .0125, 0));
-        self.right_frame.grid_propagate(0)
-        ctk.CTkLabel(self.right_frame, text= "Access Level", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0))
-
-        self.access_lvl_frame = ctk.CTkFrame(self.right_frame, self.right_frame._current_width * .91, self.right_frame._current_height * .91, fg_color='white')
-        self.access_lvl_frame.grid(row = 1, column = 0, sticky = 'we', padx = 7, pady = 7)
-        self.access_lvl_frame.grid_propagate(0)
-
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log']
-        self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
-        for i in range(len(self.access_lvls)):
-            self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24,
-                                                                    text=self.access_lvls[i], state=ctk.DISABLED);
-            self.check_boxes[self.access_lvls[i]].grid(row = i, column = 0, padx = 7, pady = 7);
+            self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
             
-
-        self.accept_button = ctk.CTkButton(self, 140, 50, 12, text="Proceed")
-        self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125)) """
-
-""" class body(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-        self.state("zoomed")
-        self.update()
-        self.attributes("-fullscreen", True)
-        self.update()
-        width = self.winfo_vrootwidth()
-        height = self.winfo_vrootheight()
-
-        self.frame = frame2(self, width * .4, height * .5, 12, fg_color= 'gray')
-        self.frame.place(relx = .5, rely = .5, anchor = 'c')
-
-        self.mainloop() """
-
-""" class frame2(ctk.CTkFrame):
-    def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
-        super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
-        self._fg_color ="white"
-        self.pack_propagate(0)
-
-        self.upperframe = ctk.CTkFrame(self, self._current_width * .95, self._current_height * .85, 0, fg_color='transparent')
-        self.upperframe.pack(padx = (self._current_width * .025, self._current_width * .025), pady = (self. _current_height * 0.025, 0))
-        self.pack_propagate(0)
-
-        self.left_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.left_frame.pack(side = 'left', anchor='nw', padx = (0, self._current_width * .0125))
-        self.left_frame.grid_propagate(0)
-        ctk.CTkLabel(self.left_frame, text= "Account", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0), pady=(12,0), sticky="w")
-
-        '''ctk.CTkLabel(self.left_frame, text= "Full name", font=("Arial", 15)).grid(row = 1, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.name_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.name_entry.grid(row = 2, column = 0, padx = (7, 0))'''
-
-        ctk.CTkLabel(self.left_frame, text= "Username", font=("Arial", 15)).grid(row = 3, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
-        self.usn_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.usn_option.grid(row = 4, column = 0, padx = (7, 0))
-        self.usn_option.set("Select a user")
-
-        ctk.CTkLabel(self.left_frame, text= "Position", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
-        self.selected_role_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8, state=ctk.DISABLED)
-        self.selected_role_option.grid(row = 6, column = 0, padx = (7, 0))
-        self.selected_role_option.set("Job Position")
-
-        '''ctk.CTkLabel(self.left_frame, text= "USN", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.usn_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.usn_entry.grid(row = 6, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Password", font=("Arial", 15)).grid(row = 7, column = 0, padx = (7, 0), pady = (7, 0), sticky = 'w')
-        self.pss_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.pss_entry.grid(row = 8, column = 0, padx = (7, 0))'''
-
-        self.right_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.right_frame.pack(side = 'left', padx = (self._current_width * .0125, 0));
-        self.right_frame.grid_propagate(0)
-        ctk.CTkLabel(self.right_frame, text= "Access Level", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0))
-
-        self.access_lvl_frame = ctk.CTkFrame(self.right_frame, self.right_frame._current_width * .91, self.right_frame._current_height * .91, fg_color='white')
-        self.access_lvl_frame.grid(row = 1, column = 0, sticky = 'we', padx = 7, pady = 7)
-        self.access_lvl_frame.grid_propagate(0)
-
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log']
-        self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
-        for i in range(len(self.access_lvls)):
-            self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24,
-                                                                    text=self.access_lvls[i], state=ctk.DISABLED);
-            self.check_boxes[self.access_lvls[i]].grid(row = i, column = 0, padx = 7, pady = 7);
+            disp_reason = ['Terminated', 'Retired']
             
-
-        self.accept_button = ctk.CTkButton(self, 140, 50, 12, text="Proceed")
-        self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125))
-
-class frame(ctk.CTkFrame):
-    def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: int | str | None = None, border_width: int | str | None = None, bg_color: str | Tuple[str, str] = "transparent", fg_color: str | Tuple[str, str] | None = None, border_color: str | Tuple[str, str] | None = None, background_corner_colors: Tuple[str | Tuple[str, str]] | None = None, overwrite_preferred_drawing_method: str | None = None, **kwargs):
-        super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
-        self.pack_propagate(0)
-
-        self.upperframe = ctk.CTkFrame(self, self._current_width * .95, self._current_height * .85, 0, fg_color='transparent')
-        self.upperframe.pack(padx = (self._current_width * .025, self._current_width * .025), pady = (self. _current_height * 0.025, 0))
-        self.pack_propagate(0)
-
-        self.left_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.left_frame.pack(side = 'left', padx = (0, self._current_width * .0125));
-        self.left_frame.grid_propagate(0)
-        ctk.CTkLabel(self.left_frame, text= "Account Credentials", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Full name", font=("Arial", 15)).grid(row = 1, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.name_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.name_entry.grid(row = 2, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Position", font=("Arial", 15)).grid(row = 3, column = 0, padx = (7, 0), pady = (12, 0), sticky = 'w')
-        self.position_option = ctk.CTkOptionMenu(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8)
-        self.position_option.grid(row = 4, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "USN", font=("Arial", 15)).grid(row = 5, column = 0, padx = (7, 0), pady = (24, 0), sticky = 'w')
-        self.usn_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.usn_entry.grid(row = 6, column = 0, padx = (7, 0))
-
-        ctk.CTkLabel(self.left_frame, text= "Password", font=("Arial", 15)).grid(row = 7, column = 0, padx = (7, 0), pady = (7, 0), sticky = 'w')
-        self.pss_entry = ctk.CTkEntry(self.left_frame, self.left_frame._current_width * .95, self.left_frame._current_height * .075, 8,
-                                      state = 'readonly')
-        self.pss_entry.grid(row = 8, column = 0, padx = (7, 0))
-
-        self.right_frame = ctk.CTkFrame(self.upperframe, self._current_width * .475, self._current_height * .85, 12, fg_color='transparent');
-        self.right_frame.pack(side = 'left', padx = (self._current_width * .0125, 0));
-        self.right_frame.grid_propagate(0)
-        ctk.CTkLabel(self.right_frame, text= "Access Level", font=("Arial", 25)).grid(row = 0, column = 0, padx = (7, 0))
-
-        self.access_lvl_frame = ctk.CTkFrame(self.right_frame, self.right_frame._current_width * .91, self.right_frame._current_height * .91, fg_color='white')
-        self.access_lvl_frame.grid(row = 1, column = 0, sticky = 'we', padx = 7, pady = 7)
-        self.access_lvl_frame.grid_propagate(0)
-
-        self.access_lvls: List[str] = ['Dashboard', 'Transaction', 'Services', 'Sales', 'Inventory', 'Pet Information', 'Report', 'Users', 'Action Log']
-        self.check_boxes: Dict[str, ctk.CTkCheckBox] = {}
-        for i in range(len(self.access_lvls)):
-            self.check_boxes[self.access_lvls[i]] = ctk.CTkCheckBox(self.access_lvl_frame, self.access_lvl_frame._current_width * .95, 24,
-                                                                    text=self.access_lvls[i], state=ctk.DISABLED);
-            self.check_boxes[self.access_lvls[i]].grid(row = i, column = 0, padx = 7, pady = 7);
+            self.combo_var = ctk.StringVar(value="")
             
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
+            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
 
-        self.accept_button = ctk.CTkButton(self, 140, 50, 12, text="Proceed")
-        self.accept_button.pack(anchor = 'e', padx = (0, self._current_width * .025), pady = (self._current_width * .0125)) """
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='REASON FOR DEACTIVATION', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.confirm_frame= ctk.CTkFrame(self.main_frame,fg_color=Color.White_Color[2],)
+            self.confirm_frame.grid(row=1,column=0, sticky="nsew",  padx=(width*0.005), pady = (height*0.01))
+            self.confirm_frame.grid_columnconfigure(0, weight=1)
+            
+            self.item_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
+            self.item_frame.grid(row=0, column=0, sticky='nsew', pady = (height*0.025,height*0.01), padx = (width*0.005))
+            ctk.CTkLabel(self.item_frame, text="Userame: ", font=("DM Sans Medium", 14), width=width*0.025, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            self.item_name = ctk.CTkLabel(self.item_frame, text="🐱", font=("DM Sans Medium", 14))
+            self.item_name.pack(side='left',pady = (height*0.01), padx = (0))
+            
+            ctk.CTkLabel(self.confirm_frame, text="Reason for Deactivation ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
+            self.deact_entry = ctk.CTkComboBox(self.confirm_frame, font=("DM Sans Medium",14), height=height*0.045, values=disp_reason, variable=self.combo_var, button_color=Color.Blue_Tufts,
+                                                  button_hover_color=Color.Blue_Steel)
+            self.deact_entry.grid(row = 2, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
+            self.deact_entry.set("")
+            
+            '''Action Frame'''
+            self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2])
+            self.action_frame.grid(row = 2, column = 0, sticky = 'nsew', padx=(width*0.005), pady = (0,height*0.01))
+            self.action_frame.grid_columnconfigure((0,1), weight=1)
+            
+            self.cancel_btn = ctk.CTkButton(self.action_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
+                                            font=("DM Sans Medium", 16), text='Cancel', command= self.reset)
+            self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
+            
+            self.dispose_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
+                                             command=self.dispose_confirm)
+            self.dispose_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
+        
+        def reset(self):
+            self.command_callback()
+            self.deact_entry.set("")
+            self.place_forget()
+                
+        def dispose_confirm(self):
+            if self.combo_var.get() == "":
+                messagebox.showerror('Missing Field','Enter a reason for deactivation', parent = self)
+            else:
+                if messagebox.askyesno("Warning", f"Are you sure you want to deactivate {self.item_name._text}", parent = self):
+                    database.exec_nonquery([[sql_commands.update_deactivate_account, (self.deact_entry.get(),self.item_name._text)]])
+                else:
+                    return
+                
+                messagebox.showinfo("Success ", "Account Deactivated", parent = self)
+                self.reset()
+        def place(self, data, **kwargs):
+            self.data = data
+            self.item_name.configure(text=self.data[0])
+            return super().place(**kwargs)
+            
+    return reason_deactivation(master, info, command_callback)
+    

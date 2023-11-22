@@ -268,8 +268,11 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             '''SUPPLIER NAME'''
             ctk.CTkLabel(self.supplier_name_frame, text='Supplier Name*: ', anchor='e', font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
             self.supplier_entry = ctk.CTkButton(self.supplier_name_frame, text='Select a supplier',corner_radius= 5, font=("DM Sans Medium",14), height=height*0.045,anchor='w', command=lambda:self.supplier_selector.place(relx=0.5, rely=0.5, anchor='c')) #command=supplier_callback)
-            self.supplier_entry.grid(row = 1, column = 1, columnspan=2, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            self.supplier_entry.grid(row = 1, column = 1, columnspan=1, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.0025))
             #self.supplier_entry.set("")
+            
+            self.add_new_supplier = ctk.CTkButton(self.supplier_name_frame, text="", image=Icons.get_image("add_icon", (12,12)), height=height*0.045, width=height*0.045, cursor="hand2", command=lambda:self.new_supplier.place(relx=0.5, rely=0.5, anchor='c'))
+            self.add_new_supplier.grid(row = 1, column = 2, columnspan=1, sticky="ew", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
 
             '''CONTACT PERSON'''
             ctk.CTkLabel(self.supplier_name_frame, text='Contact Person: ', anchor='e', font=("DM Sans Medium",14), width=width*0.085,).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
@@ -348,6 +351,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                                                         selector_search_query=sql_commands.get_supplier_search_query,
                                                         command_callback=supplier_callback)
             
+            self.new_supplier = new_supplier(self, info, command_callback=None)
             
             expiry_switch_event()
             
@@ -807,6 +811,7 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
             def reset():
                 for entries in self.entries: entries.delete(0, "end")
                 self.place_forget()
+                self.grab_release()
             
             def validate_contact(var, mode, index):
                 if not validate_contact_num(self.contact_var.get()):
@@ -958,7 +963,7 @@ def new_supplier(master, info:tuple, command_callback: Optional[callable] = None
 
         def place(self, **kwargs):
             self.supplier_id.configure(text=generateId(initial = 'SUP', length = 6).upper())
-            
+            self.grab_set()
             return super().place(**kwargs)
         
     return new_supplier(master, info, command_callback)
