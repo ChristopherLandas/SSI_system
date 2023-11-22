@@ -1,3 +1,6 @@
 {
-    "Test":"Test"
+    "database": "ssi",
+    "user": "root",
+    "password": "hello123",
+    "port_no": 3306
 }
