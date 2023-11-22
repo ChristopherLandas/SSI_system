@@ -502,8 +502,8 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
             self.client_name_label = ctk.CTkLabel(self.client_name_frame, text="Client:",font=("DM Sans Medium", 15))
             self.client_name_label.pack(side="left",  padx=(width*0.01, 0), pady=(height*0.01))
 
-            self.client_name_entry = ctk.CTkComboBox(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color=Color.Blue_Maastricht, command= change_customer_callback, dropdown_font=("DM Sans Medium", 14),
-                                                     height=height*0.055, border_width=0, button_color=Color.Blue_Steel, button_hover_color=Color.Blue_Cobalt)
+            self.client_name_entry = ctk.CTkOptionMenu(self.client_name_frame,font=("DM Sans Medium", 15), fg_color="white", text_color=Color.Blue_Maastricht, command= change_customer_callback, dropdown_font=("DM Sans Medium", 14),
+                                                     height=height*0.055, button_color=Color.Blue_Steel, button_hover_color=Color.Blue_Cobalt)
             self.client_name_entry.set('')
             self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
             self.client_name_entry.configure(values = self.client_names)
@@ -584,6 +584,7 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
                     self.price_total_amount.configure(text = format_price(0))
                     self.service_dict.clear()
                     self.invoice_id_label.configure(text = "__")
+                    print(self.transact_treeview.data_frames.__len__())
                 else:
                     return
             self.place_forget()  
@@ -591,6 +592,8 @@ def add_invoice(master, info:tuple, treeview_content_update_callback: callable, 
         def place(self, **kwargs):
             self.client_names = [s[0] for s in database.fetch_data(sql_commands.get_owners)]
             self.client_name_entry.configure(values = self.client_names)
+            client_name = database.fetch_data("SELECT CONCAT('client ', FORMAT(COUNT(*), .3),' ', DATE_FORMAT(CURRENT_DATE, '%m/%d/%y')) FROM invoice_record WHERE invoice_uid LIKE DATE_FORMAT(CURRENT_DATE, '%y%m%d%')")[0][0]
+            self.client_name_entry.set(client_name)
 
             if self.invoice_id_label._text.endswith("_"):
                 count = database.fetch_data("SELECT COUNT(*) FROM invoice_record WHERE invoice_uid LIKE CONCAT(DATE_FORMAT(CURRENT_DATE, '%y%m%d'), '%')")[0][0]

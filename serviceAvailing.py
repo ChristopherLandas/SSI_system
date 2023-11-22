@@ -311,10 +311,9 @@ class pets(ctk.CTkFrame):
                     quan_list.append(0)
 
                 frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback = decrease_callback, increase_callback = increase_callback)
-                        
                 total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
+                print(self._root_treeview._data.__len__(), self._root_treeview.data_frames.index(self.parent_frame_tab), len(self._root_treeview.data_frames))
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
-                #what causes the error
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
                 self.change_total_val_serv_callback(-previous_price)
                 self.change_total_val_serv_callback(price_format_to_float(total_price_lbl._text[1:]))
@@ -381,6 +380,8 @@ class pets(ctk.CTkFrame):
         return data
     
     def place(self, service_dict: dict, root_treeview: tuple, change_total_val_serv_callback: callable, master_frame: any, master_btn: ctk.CTkButton, **kwargs):
+        #self.parent_frame_tab = self.parent_frame_tab or master_frame
+        print((master_frame))
         self.parent_frame_tab = master_frame
         self._root_treeview = root_treeview
         self.parent_service_dict = service_dict
