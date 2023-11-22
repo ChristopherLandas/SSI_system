@@ -1450,3 +1450,9 @@ get_all_customer = "SELECT owner_id, owner_name, contact_number FROM pet_owner_i
 
 get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
 
+
+get_all_service_schedule_by_id = "SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM services_transaction_content\
+                                  WHERE transaction_uid = ?\
+                                  UNION ALL\
+                                  SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM service_preceeding_schedule\
+                                  WHERE transaction_uid = ?"

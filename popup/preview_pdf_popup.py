@@ -15,6 +15,8 @@ from functools import partial
 from datetime import datetime
 import customTkPDFViewer as cpdf
 scaling = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+from util import database
+import sql_commands
     
 def generate_report(or_number: str, cashier_name: str, client_name: str, pet_name: str, item_particulars, service_particulars, total_amount, amount_paid, old: int, deduction: int, old_receipt_name = None, is_replaced = False, service_prov: str = r'n/a'):
     from reportlab.lib import colors
@@ -132,6 +134,10 @@ def generate_report(or_number: str, cashier_name: str, client_name: str, pet_nam
                         length_counter = len(s_name)
                         serv_name += '\n'
                     serv_name += f'{s_name} '
+
+                temp_sched =  database.fetch_data(sql_commands.get_all_service_schedule_by_id, (or_number, or_number))
+                for i in range(len(temp_sched)):
+                    serv_name += f"\nSched{i+1}: {temp_sched[i][0]}"
 
                 receipt_content.append([serv_name, '1', "P{:,.2f}".format(float(p[6])), "P{:,.2f}".format(float(p[6]))])
         if not item_particulars is None:
