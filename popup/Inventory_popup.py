@@ -1941,7 +1941,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
                 if(self.stock_spinner.value == 0):
                     messagebox.showerror("Fail to proceed", "Stock must be at least 1", parent = self)
                     return
-                self.place_forget()
+                #self.place_forget()
                 recieving_info = database.fetch_data("SELECT * FROM recieving_item WHERE id = ?", (self.receiving_id.get(), ))[0]
 
                 '''if self.does_expire and self.expiry_date_entry._text == "Set Expiry Date":
@@ -1974,13 +1974,19 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
                     database.exec_nonquery([[sql_commands.update_recieving_item, (acc_user, self.receiving_id.get())]])
                     messagebox.showinfo("Restocking Sucess", "The item has beed restocked", parent = self)
                 else:
-                    database.exec_nonquery([[sql_commands.update_recieving_item_partially_received_with_date_receiver, (self.stock_spinner.value, acc_user, self.receiving_id.get())],
-                                            [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, acc_user)]])
-                    messagebox.showinfo("Partially Restocking Success", "The item has been partially restocked", parent = self)
+                    self.partial_orders.place(relx=0.5, rely=0.5, anchor='c', data=self.item_name_entry.get())
+                    
                 expiry = self.expiry_date_entry._text if self.does_expire else None
                 database.exec_nonquery([[sql_commands.insert_receiving_history, (self.receiving_id.get(), self.stock_spinner.value, acc_user, expiry )]])
                 self.command_callback()
-                reset()  
+                reset() 
+            
+            def partial_restocking():
+                self.partial_orders.get()
+                database.exec_nonquery([[sql_commands.update_recieving_item_partially_received_with_date_receiver, (self.stock_spinner.value, acc_user, self.receiving_id.get())],
+                                        [sql_commands.record_partially_received_item, (self.receiving_id.get(), self.item_name_entry.get(), self.stock_spinner.value, self.supplier_name_entry.get(), None, acc_user, self.partial_orders.get())]])
+                messagebox.showinfo("Partially Restocking Success", "The item has been partially restocked", parent = self)
+                self.command_callback()
 
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
             self.main_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
@@ -2052,7 +2058,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
 
             #self.does_expire =  database.fetch_data(sql_commands.check_if_item_does_expire, (self.item_uid, ))[0][0] == 1
             #self.place_forget()
-
+            self.partial_orders = partial_orders(self.master, (width, height), command_callback=partial_restocking)
             self.entries=[self.receiving_id, self.item_id_entry, self.item_name_entry, self.supplier_name_entry]
 
         def control_entries(self, value: str):
@@ -2219,12 +2225,12 @@ def item_disposal_confirmation(master, info:tuple, command_callback: callable = 
             
             self.item_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
             self.item_frame.grid(row=0, column=0, sticky='nsew', pady = (height*0.025,height*0.01), padx = (width*0.005))
-            #ctk.CTkLabel(self.item_frame, text="Reason: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            ctk.CTkLabel(self.item_frame, text="Reason: ", font=("DM Sans Medium", 14), width=width*0.015, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
             self.item_name = ctk.CTkLabel(self.item_frame, text="🐱", font=("DM Sans Medium", 14))
             self.item_name.pack(side='left',pady = (height*0.01), padx = (0))
             
             
-            ctk.CTkLabel(self.confirm_frame, text="Enter Adminisrator Password: ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
+            #ctk.CTkLabel(self.confirm_frame, text="Enter Adminisrator Password: ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
             self.disposal_entry = ctk.CTkEntry(self.confirm_frame, font=("DM Sans Medium",14), height=height*0.045,show='*')
             #self.disposal_entry.grid(row = 2, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
             
@@ -2342,7 +2348,7 @@ def order_info_screen(master, info:tuple):
             height = info[1]
             super().__init__(master, corner_radius= 0, fg_color='transparent')
 
-            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, height=height*0.765, width=width*0.45, fg_color=Color.White_Color[3], border_width=1, border_color=Color.White_Gray)
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, height=height*0.85, width=width*0.45, fg_color=Color.White_Color[3], border_width=1, border_color=Color.White_Gray)
             self.main_frame.grid(row=0, column=0, sticky="nsew")
             self.main_frame.grid_propagate(0)
             self.main_frame.grid_columnconfigure(0, weight=1)
@@ -2353,7 +2359,7 @@ def order_info_screen(master, info:tuple):
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='', image=Icons.get_image("info_icon", (35,35)), anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
-            ctk.CTkLabel(self.top_frame, text='ORDER INFO', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            ctk.CTkLabel(self.top_frame, text='ORDER INFORMATION', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=height*0.04, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
@@ -2426,10 +2432,19 @@ def order_info_screen(master, info:tuple):
             ctk.CTkLabel(self.pending_info_frame, text="Partial Quantity:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
             self.pending_num_label = ctk.CTkLabel(self.pending_info_frame, text="100", font=("DM Sans Medium", 14), fg_color=Color.White_AntiFlash, corner_radius=5)
             self.pending_num_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.0035), pady=(width*0.0035))
-                        
+            
+            '''PENDING REASON FRAME'''
+            self.pending_reason_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.3)
+            self.pending_reason_frame.grid(row=6, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.pending_reason_frame.pack_propagate(0)
+            ctk.CTkLabel(self.pending_reason_frame, text="Pending Reason:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            self.pending_label = ctk.CTkLabel(self.pending_reason_frame, text="", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
+            self.pending_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
+            
+            
             '''SUPPLIER CODE FRAME'''
             self.supplier_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
-            self.supplier_info_frame.grid(row=6, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(height*0.015, height*0.0075))
+            self.supplier_info_frame.grid(row=7, column=0, columnspan=1, sticky="nsew", padx=(height*0.015,0), pady=(height*0.015, height*0.0075))
             self.supplier_info_frame.pack_propagate(0)
             ctk.CTkLabel(self.supplier_info_frame, text="Supplier Code:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
             self.supplier_num_label = ctk.CTkLabel(self.supplier_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent")
@@ -2437,7 +2452,7 @@ def order_info_screen(master, info:tuple):
             
             '''SUPPLIER NAME FRAME'''
             self.sup_name_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
-            self.sup_name_info_frame.grid(row=7, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.sup_name_info_frame.grid(row=8, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
             self.sup_name_info_frame.pack_propagate(0)
             ctk.CTkLabel(self.sup_name_info_frame, text="Supplier Name:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
             self.sup_name_label = ctk.CTkLabel(self.sup_name_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
@@ -2445,7 +2460,7 @@ def order_info_screen(master, info:tuple):
             
             '''SUPPLIER PERSON FRAME'''
             self.supp_person_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
-            self.supp_person_info_frame.grid(row=8, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.supp_person_info_frame.grid(row=9, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
             self.supp_person_info_frame.pack_propagate(0)
             ctk.CTkLabel(self.supp_person_info_frame, text="Contact Person:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
             self.supp_person_num_label = ctk.CTkLabel(self.supp_person_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
@@ -2453,7 +2468,7 @@ def order_info_screen(master, info:tuple):
             
             '''SUPPLIER CONTACT FRAME'''
             self.supp_contact_info_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.185)
-            self.supp_contact_info_frame.grid(row=9, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
+            self.supp_contact_info_frame.grid(row=10, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
             self.supp_contact_info_frame.pack_propagate(0)
             ctk.CTkLabel(self.supp_contact_info_frame, text="Contact Number:  " , font=("DM Sans Medium", 14), width=width*0.1, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
             self.supp_contact_num_label = ctk.CTkLabel(self.supp_contact_info_frame, text="100", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
@@ -2473,6 +2488,8 @@ def order_info_screen(master, info:tuple):
                 
         def place(self, data, **kwargs):
             self.data = (database.fetch_data(sql_commands.get_order_info, (data[0],)))[0]
+            reason = database.fetch_data(sql_commands.get_top_partial_reason, (data[0],))
+            self.pending_label.configure(text=f"{'No partial orders' if not reason else reason[0][0] }")
             self.set_label()
             return super().place(**kwargs)
             
@@ -2659,3 +2676,184 @@ def deplted_history(master, info:tuple,):
             return super().place(**kwargs)
 
     return deplted_history(master, info)
+
+def partial_orders(master, info:tuple, command_callback: callable = None):
+    class partial_orders(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback):
+            width = info[0]
+            height = info[1]
+            super().__init__(master, width=width*0.4, height=height*0.4, corner_radius= 0, fg_color='transparent')
+            
+            self.command_callback = command_callback
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+
+            self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
+            
+            disp_reason = ['Expired', 'Defective/Damaged']
+            
+            self.combo_var = ctk.StringVar(value="")
+            
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
+            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='', image=self.restock, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
+            ctk.CTkLabel(self.top_frame, text='PARTIAL ORDER', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.confirm_frame= ctk.CTkFrame(self.main_frame,fg_color=Color.White_Color[2],)
+            self.confirm_frame.grid(row=1,column=0, sticky="nsew",  padx=(width*0.005), pady = (height*0.01))
+            self.confirm_frame.grid_columnconfigure(0, weight=1)
+            
+            self.item_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
+            self.item_frame.grid(row=0, column=0, sticky='nsew', pady = (height*0.025,height*0.01), padx = (width*0.005))
+            ctk.CTkLabel(self.item_frame, text="Item Name: ", font=("DM Sans Medium", 14), width=width*0.025, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            self.item_name = ctk.CTkLabel(self.item_frame, text="🐱", font=("DM Sans Medium", 14))
+            self.item_name.pack(side='left',pady = (height*0.01), padx = (0))
+            
+            ctk.CTkLabel(self.confirm_frame, text="Reason for partial restocking", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=1, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
+            self.disposal_entry = ctk.CTkComboBox(self.confirm_frame, font=("DM Sans Medium",14), height=height*0.045, values=disp_reason, variable=self.combo_var, button_color=Color.Blue_Tufts,
+                                                  button_hover_color=Color.Blue_Steel)
+            self.disposal_entry.grid(row = 2, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
+            self.disposal_entry.set("")
+            
+            '''Action Frame'''
+            self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2])
+            self.action_frame.grid(row = 2, column = 0, sticky = 'nsew', padx=(width*0.005), pady = (0,height*0.01))
+            self.action_frame.grid_columnconfigure((0,1), weight=1)
+            
+            self.cancel_btn = ctk.CTkButton(self.action_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
+                                            font=("DM Sans Medium", 16), text='Cancel', command= self.reset)
+            self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
+            
+            self.dispose_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
+                                             command=self.dispose_confirm)
+            self.dispose_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
+        
+        def reset(self):
+            
+            self.disposal_entry.set("")
+            self.place_forget()
+                
+        def dispose_confirm(self):
+            if self.combo_var.get() == "":
+                messagebox.showerror('Missing Field','Enter a reason', parent = self)
+            else:
+                self.command_callback()
+                self.reset()
+        
+        def get(self):
+            return self.disposal_entry.get()
+        
+        def place(self, data, **kwargs):
+            self.data = data
+            self.item_name.configure(text=self.data)
+            return super().place(**kwargs)
+            
+    return partial_orders(master, info, command_callback)
+
+def stock_disposal(master, info:tuple, command_callback: callable = None):
+    class stock_disposal(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback):
+            width = info[0]
+            height = info[1]
+            self.acc_user = info[2][0][0]
+            super().__init__(master, width=width*0.4, height=height*0.55, corner_radius= 0, fg_color='transparent')
+            
+            self.command_callback = command_callback
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_propagate(0)
+
+            self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,20))
+            self.calendar_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"),size=(18,20))
+            
+            disp_reason = ['Expired', 'Defective/Damaged']
+            
+            self.combo_var = ctk.StringVar(value="")
+            
+            self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3],)
+            self.main_frame.grid(row=0, column=0, sticky="nsew")
+            self.main_frame.grid_propagate(0)
+            self.main_frame.grid_columnconfigure(0, weight=1)
+            self.main_frame.grid_rowconfigure(1, weight=1)
+
+            self.top_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.grid(row=0, column=0, columnspan=4,sticky="nsew")
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='', image=self.restock, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
+            ctk.CTkLabel(self.top_frame, text='STOCK DISPOSAL', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.confirm_frame= ctk.CTkFrame(self.main_frame,fg_color=Color.White_Color[2],)
+            self.confirm_frame.grid(row=1,column=0, sticky="nsew",  padx=(width*0.005), pady = (height*0.01))
+            self.confirm_frame.grid_columnconfigure(0, weight=1)
+            
+            """NAME"""
+            self.item_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
+            self.item_frame.grid(row=0, column=0, sticky='nsew', pady = (height*0.025,height*0.01), padx = (width*0.005))
+            ctk.CTkLabel(self.item_frame, text="Item Name: ", font=("DM Sans Medium", 14), width=width*0.025, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            self.item_name = ctk.CTkLabel(self.item_frame, text="", font=("DM Sans Medium", 14))
+            self.item_name.pack(side='left',pady = (height*0.01), padx = (0))
+            
+            
+            """EXPIRY"""
+            self.expiry_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
+            self.expiry_frame.grid(row=1, column=0, sticky='nsew', pady = (width*0.005), padx = (width*0.005))
+            ctk.CTkLabel(self.expiry_frame, text="Expiration Date: ", font=("DM Sans Medium", 14), width=width*0.025, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            
+            self.expiration_date_entry = ctk.CTkLabel(self.expiry_frame, corner_radius= 5, text='Set Expiry Date',fg_color=Color.Grey_Bright_2,height=height*0.05, font=("DM Sans Medium", 14),)
+            self.expiration_date_entry.pack(side='left', fill='x', expand=1,pady = (height*0.01), padx = (width*0.005))
+
+            self.show_calendar = ctk.CTkButton(self.expiry_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
+                                               command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s", date_format="raw", min_date=datetime.now()), corner_radius=5, state="normal",  )
+            self.show_calendar.pack(side='left',pady = (height*0.01), padx = (0,width*0.005))
+            
+            '''QUANTITY'''
+            self.quantity_frame = ctk.CTkFrame(self.confirm_frame, fg_color=Color.White_Lotion)
+            self.quantity_frame.grid(row=2, column=0, sticky='nsew', pady = (width*0.005), padx = (width*0.005))
+            ctk.CTkLabel(self.quantity_frame, text="Item Quantity: ", font=("DM Sans Medium", 14), width=width*0.025, ).pack(side='left',pady = (height*0.01), padx = (width*0.05,0))
+            self.stock_entry = cctk.cctkSpinnerCombo(self.quantity_frame, entry_font=("DM Mono Medium",14), val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL))
+            self.stock_entry.pack(side='left',pady = (height*0.01), padx = (0))
+
+            ctk.CTkLabel(self.confirm_frame, text="Reason for disposal ", font=("DM Sans Medium", 14), width=width*0.06, anchor="e").grid(row=4, column=0, sticky="nsw",pady = (height*0.01,0), padx = (width*0.01))
+            self.disposal_entry = ctk.CTkComboBox(self.confirm_frame, font=("DM Sans Medium",14), height=height*0.055, values=disp_reason, variable=self.combo_var, button_color=Color.Blue_Tufts,
+                                                  button_hover_color=Color.Blue_Steel)
+            self.disposal_entry.grid(row = 5, column = 0,sticky = 'nsew', pady = (0,height*0.01), padx = (width*0.01))
+            self.disposal_entry.set("")
+            
+            '''Action Frame'''
+            self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2])
+            self.action_frame.grid(row = 2, column = 0, sticky = 'nsew', padx=(width*0.005), pady = (0,height*0.01))
+            self.action_frame.grid_columnconfigure((0,1), weight=1)
+            
+            self.cancel_btn = ctk.CTkButton(self.action_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
+                                            font=("DM Sans Medium", 16), text='Cancel', command= self.reset)
+            self.cancel_btn.pack(side="left",  padx = (width*0.0075,0), pady= height*0.01) 
+            
+            self.dispose_btn = ctk.CTkButton(self.action_frame, width=width*0.1, height=height*0.05,corner_radius=5, font=("DM Sans Medium", 16), text='Confirm',
+                                             command=None)
+            self.dispose_btn.pack(side="right",  padx = (width*0.0075), pady= height*0.01)
+
+            '''PLACEMENT'''
+            # Inventory_popup.stock_disposal(self,(width, height, acc_cred, acc_info), command_callback=None).place(relx=0.5, rely=0.5,anchor='c')
+        def reset(self):
+            self.place_forget()
+        
+        def place(self, **kwargs):
+            return super().place(**kwargs)
+            
+    return stock_disposal(master, info, command_callback)

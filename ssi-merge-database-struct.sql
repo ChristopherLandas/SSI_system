@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=315 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=316 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
 -- Data exporting was unselected.
 
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   PRIMARY KEY (`id`),
   KEY `UID` (`UID`),
   CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=137 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 -- Data exporting was unselected.
 
@@ -299,6 +299,7 @@ CREATE TABLE IF NOT EXISTS `partially_recieving_item` (
   `exp_date` date DEFAULT NULL,
   `reciever` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
   `date_recieved` datetime DEFAULT NULL,
+  `reason` varchar(128) DEFAULT NULL,
   KEY `FK_partially_recieving_item_recieving_item` (`id`),
   CONSTRAINT `FK_partially_recieving_item_recieving_item` FOREIGN KEY (`id`) REFERENCES `recieving_item` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;

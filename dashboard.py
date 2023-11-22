@@ -634,6 +634,8 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height), source='dashboard')
         self.receiving_entity.start_receiving()
         
+        #Inventory_popup.stock_disposal(self,(width, height, acc_cred, acc_info), command_callback=None).place(relx=0.5, rely=0.5,anchor='c')
+        
         #self.authorization = mini_popup.authorization(self,(width, height), command_callback=None)
         #self.authorization.place(relx=0.5, rely=0.5, anchor='c')
     

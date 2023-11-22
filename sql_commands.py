@@ -386,7 +386,7 @@ get_supplier = "SELECT * from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3, current_stock = current_stock - ? WHERE id = ?"
-record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
+record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)"
 
 update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving_item SET state = 3, current_stock = current_stock - ?, date_recieved = CURRENT_TIMESTAMP,\
                                                                 reciever = ?\
@@ -1449,4 +1449,6 @@ get_account_deac_search_query = "SELECT full_name, usn FROM acc_info WHERE (usn 
 get_all_customer = "SELECT owner_id, owner_name, contact_number FROM pet_owner_info"
 
 get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
+
+get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
 
