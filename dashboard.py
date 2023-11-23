@@ -633,11 +633,6 @@ class dashboard_frame(ctk.CTkFrame):
         self.sales_history = dashboard_popup.sales_history_popup(self, (width, height))
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height), source='dashboard')
         self.receiving_entity.start_receiving()
-        
-        #Inventory_popup.stock_disposal(self,(width, height, acc_cred, acc_info), command_callback=None).place(relx=0.5, rely=0.5,anchor='c')
-        
-        #self.authorization = mini_popup.authorization(self,(width, height), command_callback=None)
-        #self.authorization.place(relx=0.5, rely=0.5, anchor='c')
     
     def test_self(self):
         print(self.selector_test.get())
@@ -1910,7 +1905,7 @@ class inventory_frame(ctk.CTkFrame):
         self.tree_view_frame.grid(row=1, column=0,columnspan=6, sticky="nsew",padx=(width*0.005))
 
         self.data_view1 = cctk.cctkTreeView(self.tree_view_frame, data = [], width= width*0.8, height= height*0.7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/Rate:{int(width*.045)}-tc/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/StockPcs:{int(width*.085)}-tr/Price:{int(width*.085)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.1)}-tc!33!35',
+                                           column_format=f'/No:{int(width*.035)}-#r/Rate:{int(width*.045)}-tc/ItemBrand:{int(width*.08)}-tl/ItemDescription:x-tl/Stock:{int(width*.085)}-tr/Price:{int(width*.085)}-tr/ExpirationDate:{int(width*.1)}-tc/Status:{int(width*.1)}-tc!33!35',
                                            conditional_colors= {7: {'Reorder':'#ff7900', 'Critical':'red','Normal':'green', 'Out Of Stock': '#555555', 'Safe':'green', 'Nearly Expire':'#FFA500','Expired':'red'},
                                                                 1: {'🠉': 'green', '🠋': 'red', '-' : '#AAAAAA'}},)
         self.data_view1.pack()
@@ -2027,7 +2022,7 @@ class inventory_frame(ctk.CTkFrame):
 
         self.rs_data = []
         self.rs_data_view1 = cctk.cctkTreeView(self.rs_treeview_frame, data=self.rs_data, width= width*0.8, height= height*0.7, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/QuantityPcs:{int(width*.1)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!33!35',
+                                           column_format=f'/No:{int(width*.035)}-#r/OrderNo:{int(width *.07)}-tc/Status:{int(width *.07)}-tc/ItemName:x-tl/Quantity:{int(width*.1)}-tr/Supplier:{int(width*.135)}-tl/OrderBy:{int(width*.1)}-tl/Action:{int(width*.05)}-bD!33!35',
                                            double_click_command= _restock, bd_commands= disposal_callback, conditional_colors={2:{'On Order':'orange', 'Partial':'red'}} , 
                                            bd_message='Are you sure you want to cancel this order?')
         self.rs_data_view1.pack()
@@ -2134,7 +2129,7 @@ class inventory_frame(ctk.CTkFrame):
         self.ds_treeview_frame.grid(row=1, column=0, columnspan=5, sticky="nsew", padx=width*0.005)
 
         self.ds_data_view1 = cctk.cctkTreeView(self.ds_treeview_frame, data = None, width= width * .805, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/DisposalID:{int(width*0.085)}-tc/ItemName:x-tl/QuantityPcs:{int(width*0.1)}-tr/Reason:{int(width*.135)}-tl/DisposedDate:{int(width*.1)}-tc/DisposedBy:{int(width*.1)}-tl!33!35',)
+                                           column_format=f'/No:{int(width*.035)}-#r/DisposalID:{int(width*0.085)}-tc/ItemName:x-tl/Quantity:{int(width*0.1)}-tr/Reason:{int(width*.135)}-tl/DisposedDate:{int(width*.1)}-tc/DisposedBy:{int(width*.1)}-tl!33!35',)
         self.ds_data_view1.pack()
         
         self.no_disposal_data = ctk.CTkLabel(self.ds_data_view1, text="No disposal data for this filter option.", font=("DM Sans Medium", 14))

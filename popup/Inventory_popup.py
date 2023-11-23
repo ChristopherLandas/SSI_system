@@ -47,7 +47,10 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             def add_item_callback():
                 unit = unit_process()
                 if (self.item_brand_entry.get() and self.item_name_entry.get() and self.unit_price_entry.get() and self.markup_price_entry.get()
-                   and self.category_entry.get() and self.stock_entry.get() and ((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get()) or self.expiry_switch_val.get() == 'disabled') and ((self.uom_var.get() == 'on' and self.item_num_unit_entry.get() and self.item_unit_dbox.get()) or (self.uom_var.get() == 'off'))):
+                   and self.category_entry.get() and self.stock_entry.get() and 
+                   ((self.expiration_date_entry._text != 'Set Expiry Date' and self.expiry_switch_val.get()) or self.expiry_switch_val.get() == 'disabled') and 
+                   ((self.uom_var.get() == 'on' and self.item_num_unit_entry.get() and self.item_unit_dbox.get()) or (self.uom_var.get() == 'off')) and
+                   (self.safe_stock_entry.get() and self.reorder_fact_entry.get() and self.crit_fact_entry.get()) and self.stock_unit.get()):
                     
                     _date = None if str(self.expiration_date_entry._text).startswith("Set") else self.expiration_date_entry._text
                     
@@ -55,7 +58,9 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                     if (self.item_brand_entry.get(), self.item_name_entry.get(), unit) in database.fetch_data('SELECT brand,name, unit from item_general_info'):
                         messagebox.showerror("Duplicate Entry", "The item is already in the inventory", parent = self)
                     else:
-                        output = database.exec_nonquery([[sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0])],
+                        #print((self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0], self.stock_unit.get()))
+                        output = database.exec_nonquery([
+                                                [sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, self.stock_unit.get(),acc_info[0])],
                                                 #[sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 0)],
                                                 [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get()) / float(self.unit_price_entry.get()), .85, .5, self.stock_entry.get(), 0)],
                                                 [sql_commands.set_supplier_items, (self.supplier_id, self.item_name_id._text)],
@@ -311,7 +316,7 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             self.inventory_frame.grid_columnconfigure(0, weight=1)
             self.inventory_frame.grid_rowconfigure(0, weight=1)
             
-            self.inventory_name_frame = ctk.CTkFrame(self.inventory_frame, corner_radius=5, fg_color=Color.White_Lotion,  width=width*0.225, height=height*0.25)
+            self.inventory_name_frame = ctk.CTkFrame(self.inventory_frame, corner_radius=5, fg_color=Color.White_Lotion,  width=width*0.225, height=height*0.315)
             self.inventory_name_frame.grid(row=0, column=0, sticky="nsew", padx=(width*0.005), pady=(height*0.007),)
             self.inventory_name_frame.grid_propagate(0)
             #self.inventory_name_frame.grid_rowconfigure(1, weight=1)
@@ -319,27 +324,45 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
              
             ctk.CTkLabel(self.inventory_name_frame, text='INVENTORY', anchor='w', font=('DM Sans Medium', 14)).grid(row = 0, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx= (width*0.01))
             
-            ctk.CTkLabel(self.inventory_name_frame, text='Initial Stock: ',anchor="e", font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
+            ctk.CTkLabel(self.inventory_name_frame, text='Initial Stock: ',anchor="e", font=("DM Sans Medium", 14), width=width*0.065,).grid(row = 1, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
             self.stock_entry = cctk.cctkSpinnerCombo(self.inventory_name_frame, entry_font=("DM Mono Medium",14), val_range=(0, cctk.cctkSpinnerCombo.MAX_VAL))
-            self.stock_entry.grid(row = 1, column = 1, columnspan=1 ,pady = (height*0.005, height*0.01), padx = (0, width*0.005), sticky="nw")
+            self.stock_entry.grid(row = 1, column = 1, columnspan=1 ,pady = (height*0.005, height*0.01), padx = (0, width*0.005), sticky="nsw")
             
-            self.stock_unit = ctk.CTkOptionMenu(self.inventory_name_frame, corner_radius=5, values=som, font=("DM Sans Medium",14), height=height*0.0475, dropdown_font=("DM Sans Medium",14))
+            self.stock_unit = ctk.CTkOptionMenu(self.inventory_name_frame, corner_radius=5, values=som, font=("DM Sans Medium",14), height=height*0.055, dropdown_font=("DM Sans Medium",14))
             self.stock_unit.set('')
             self.stock_unit.grid(row = 1, column = 2, sticky = 'nw', pady = (height*0.005, height*0.01), padx = (0, width*0.01), columnspan=5)
+        
+            self.stock_factors_frame = ctk.CTkFrame(self.inventory_name_frame , height=height*0.1, fg_color='transparent')
+            self.stock_factors_frame.grid(row=2, column = 0, columnspan=4, sticky='nsew', padx=(width*0.005))
+            self.stock_factors_frame.rowconfigure(0, weight=1)
             
-            ctk.CTkLabel(self.inventory_name_frame, text='Expiration Date: ', anchor='w', font=("DM Sans Medium", 14), width=width*0.085, ).grid(row = 2, column = 0, sticky = 'nsew', pady = (height*0.005,0), padx = (width*0.0075,0))
+            ctk.CTkLabel(self.stock_factors_frame, text='Safe Stock: ', anchor='e', font=("DM Sans Medium",14), width=width*0.065,).grid(row = 0, column = 0, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
+            self.safe_stock_entry = ctk.CTkEntry(self.stock_factors_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14), height=height*0.055, width=width*0.05, justify='right')
+            self.safe_stock_entry.grid(row = 0, column = 1, columnspan=1, sticky="w", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            
+            ctk.CTkLabel(self.stock_factors_frame, text='Reorder Stock: ', anchor='e', font=("DM Sans Medium",14), width=width*0.065,).grid(row = 0, column = 2, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
+            self.reorder_fact_entry = ctk.CTkEntry(self.stock_factors_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14), height=height*0.055, width=width*0.05, justify='right')
+            self.reorder_fact_entry.grid(row = 0, column = 3, columnspan=1, sticky="w", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            
+            ctk.CTkLabel(self.stock_factors_frame, text='Critical Stock: ', anchor='e', font=("DM Sans Medium",14), width=width*0.065,).grid(row = 0, column = 4, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.005,0))
+            self.crit_fact_entry = ctk.CTkEntry(self.stock_factors_frame, corner_radius=5, placeholder_text='', font=("DM Sans Medium",14), height=height*0.055, width=width*0.05, justify='right')
+            self.crit_fact_entry.grid(row = 0, column = 5, columnspan=1, sticky="w", pady = (height*0.005, height*0.01), padx = (0, width*0.01))
+            
+            self.expiration_frame = ctk.CTkFrame(self.inventory_name_frame , height=height*0.1, fg_color='transparent')
+            self.expiration_frame.grid(row=3, column = 0, columnspan=4, sticky='nsew', padx=(width*0.005))
+            self.expiration_frame.rowconfigure(0, weight=1)
 
+            ctk.CTkLabel(self.expiration_frame, text='Expiration Date: ', anchor='e', font=("DM Sans Medium", 14), width=width*0.085, ).pack(side='left')
             self.expiry_switch_val= ctk.StringVar(value="disabled")
-            self.expiry_switch = ctk.CTkSwitch(self.inventory_name_frame, text="", variable=self.expiry_switch_val, onvalue="normal", offvalue="disabled",
-                                               command=expiry_switch_event, font=("DM Sans Medium", 14))
-            self.expiry_switch.grid(row=2,column=1, sticky="w")
+            self.expiry_switch = ctk.CTkSwitch(self.expiration_frame, text="", variable=self.expiry_switch_val, onvalue="normal", offvalue="disabled", command=expiry_switch_event, font=("DM Sans Medium", 14))
+            self.expiry_switch.pack(side='left')
             
             self.expiration_date_entry = ctk.CTkLabel(self.inventory_name_frame, corner_radius= 5, text='Set Expiry Date',fg_color=Color.Grey_Bright_2,height=height*0.05, font=("DM Sans Medium", 14), text_color="grey")
-            self.expiration_date_entry.grid(row = 3, column = 0, columnspan=3, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
+            self.expiration_date_entry.grid(row = 4, column = 0, columnspan=3, sticky = 'nsew', pady = (height*0.005,height*0.01), padx = (width*0.0075,0))
 
             self.show_calendar = ctk.CTkButton(self.inventory_name_frame, text="",image=self.calendar_icon, height=height*0.05,width=width*0.03, fg_color=Color.Blue_Yale,
                                                command=lambda: cctk.tk_calendar(self.expiration_date_entry, "%s", date_format="raw", min_date=datetime.now()), corner_radius=5, state="disabled",  )
-            self.show_calendar.grid(row=3, column=3, pady = (height*0.005,height*0.01), padx = (width*0.005,width*0.01), sticky="e")
+            self.show_calendar.grid(row=4, column=3, pady = (height*0.005,height*0.01), padx = (width*0.005,width*0.01), sticky="e")
 
             '''Action Frame'''
             self.action_frame = ctk.CTkFrame(self.main_frame, corner_radius=5, fg_color=Color.White_Color[2], height=height*0.085)
@@ -1327,6 +1350,7 @@ def receive_history(master, info:tuple,):
 
             def search_callback():
                 temp = database.fetch_data(sql_commands.show_receiving_history)
+                print(temp)
                 set_table(list_filterer(self.search_bar.get(), temp))
                 
             def page_callback():
@@ -1389,7 +1413,7 @@ def receive_history(master, info:tuple,):
             self.treeview_frame.grid(row=2, column=0, columnspan=5, sticky="ew", padx=width*0.005, pady=(0,height*0.01))
 
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * 0.8, height= height * 0.685, corner_radius=0,
-                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.09)}-tc/ItemName:x-tl/StockPcs:{int(width*0.075)}-tr/SupplierName:{int(width*0.15)}-tl/DateReceived:{int(width*.12)}-tc/ReceivedBy:{int(width*.1)}-tl!33!35',
+                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.09)}-tc/ItemName:x-tl/Stock:{int(width*0.1)}-tr/SupplierName:{int(width*0.15)}-tl/DateReceived:{int(width*.12)}-tc/ReceivedBy:{int(width*.1)}-tl!33!35',
                                             double_click_command=view_details)
             self.data_view1.pack()
             
@@ -1592,7 +1616,7 @@ def detail_orders(master, info:tuple):
             self.treeview_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=(height*0.01), pady=(height*0.01))
 
             self.order_details_treeview = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * 0.635, height= height * 0.5, corner_radius=0,
-                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.1)}-tc/QuantityPcs:{int(width*0.1)}-tr/Expiry:{int(width*0.125)}-tc/ReceivedBy:x-tl/DateReceived:{int(width*0.125)}-tc!33!35',)
+                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.1)}-tc/Stock:{int(width*0.1)}-tr/Expiry:{int(width*0.125)}-tc/ReceivedBy:x-tl/DateReceived:{int(width*0.125)}-tc!33!35',)
             self.order_details_treeview.pack()
             
             self.order_label = [self.order_num_label, self.item_name_label, self.date_num_label, self.orderer_name_label]
@@ -1705,9 +1729,9 @@ def show_category(master, info:tuple):
                                              command=self.refresh_table)
             self.refresh_btn.grid(row=1, column=2, sticky="w")
             
-            #self.dis_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Disabled Categories", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,  font=("DM Sans Medium", 14),
-            #                                      command=lambda:show_disabled_category(self,(width, height, user[0][0]), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
-            #self.dis_category_btn.grid(row=3, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01))
+            """ self.dis_category_btn = ctk.CTkButton(self.main_frame,width=width*0.1, height = height*0.05, text="Disabled Categories", fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,  font=("DM Sans Medium", 14),
+                                                  command=lambda:show_disabled_category(self,(width, height, user[0][0]), self.refresh_table).place(relx=0.5, rely=0.5, anchor="c"))
+            self.dis_category_btn.grid(row=3, column=0, sticky="w", padx=(width*0.005), pady=(height*0.01)) """
 
             self.treeview_frame = ctk.CTkFrame(self.main_frame,fg_color="transparent")
             self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.005))
@@ -1732,7 +1756,7 @@ def show_category(master, info:tuple):
             return super().place(**kwargs)
     return show_category(master, info)
 
-'''def show_disabled_category(master, info:tuple, table_update_callback: callable):
+""" def show_disabled_category(master, info:tuple, table_update_callback: callable):
     class show_disabled_category(ctk.CTkFrame):
         def __init__(self, master, info:tuple, table_update_callback: callable):
             width = info[0]
@@ -1817,7 +1841,7 @@ def show_category(master, info:tuple):
             self.conv_data()
             
             return super().place(**kwargs)
-    return show_disabled_category(master, info, table_update_callback)'''
+    return show_disabled_category(master, info, table_update_callback) """
 
 def add_category(master, info:tuple, table_update_callback: callable):
     class add_category(ctk.CTkFrame):
@@ -1933,6 +1957,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
             self.restock = ctk.CTkImage(light_image=Image.open("image/restock_plus.png"), size=(20,18))
             
             def reset():
+                self.stock_spinner.configure(value = 1)
                 self.expiry_date_entry.configure(text="Set Expiry Date")
                 self.place_forget()
 
@@ -2078,8 +2103,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
             
             
 
-            self.stock_spinner.configure(val_range = (1, self.restocking_info[3]))
-            #self.stock_spinner.set(self.restocking_info[3])
+            self.stock_spinner.configure(val_range = (1, int(self.restocking_info[3].split()[0])))
             
 
         def place_expiry(self):
@@ -2093,6 +2117,7 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
             self.place_expiry()
             self.restocking_info = restocking_info
             self.entry_setup()
+            #print(self.restocking_info[3].split()[0])
             
             return super().place(**kwargs)
             
@@ -2173,8 +2198,9 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             if self.combo_var.get() == "":
                 messagebox.showerror('Missing Field','Enter a reason', parent = self)
             else:
+                #print(self.data[3].split()[0])
                 item_id = database.fetch_data("Select item_uid from recieving_item where id = ?", (self.data[0], ))[0][0]
-                database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), self.data[0], item_id, self.data[2], self.data[3], f'{self.disposal_entry.get()}', self.acc_user)],
+                database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), self.data[0], item_id, self.data[2], self.data[3].split()[0], f'{self.disposal_entry.get()}', self.acc_user)],
                                             ["UPDATE recieving_item SET state = -1 WHERE id = ?", (self.data[0], )]])
                 messagebox.showinfo("Succeed", "Order sucessfully cancelled", parent = self)
                 self.reset()
@@ -2437,7 +2463,7 @@ def order_info_screen(master, info:tuple):
             self.pending_reason_frame = ctk.CTkFrame(self.info_frame, fg_color=Color.White_Lotion, height=height*0.055, width=width*0.3)
             self.pending_reason_frame.grid(row=6, column=0, columnspan=2, sticky="nsew", padx=(height*0.015), pady=(0, height*0.0075))
             self.pending_reason_frame.pack_propagate(0)
-            ctk.CTkLabel(self.pending_reason_frame, text="Pending Reason:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
+            ctk.CTkLabel(self.pending_reason_frame, text="Partial Reason:  " , font=("DM Sans Medium", 14), width=width*0.075, fg_color="transparent", anchor="e").pack(side="left", padx=(width*0.005,0), pady=(width*0.005))
             self.pending_label = ctk.CTkLabel(self.pending_reason_frame, text="", font=("DM Sans Medium", 14), fg_color="transparent", anchor="w")
             self.pending_label.pack(side="left", expand=1, fill="both", padx=(0, width*0.005), pady=(width*0.005))
             
@@ -2602,7 +2628,7 @@ def cancel_orders(master, info:tuple,):
             self.treeview_frame.grid(row=1, column=0, columnspan=5, sticky="ew", padx=width*0.005, pady=(width*0.005))
 
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * 0.8, height= height * 0.8, corner_radius=0,
-                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.09)}-tc/ItemName:x-tl/StockPcs:{int(width*0.075)}-tr/Reason:{int(width*0.15)}-tl/CancelledBy:{int(width*.135)}-tc!33!35',
+                                            column_format=f'/No:{int(width*.035)}-#r/OrderID:{int(width*0.09)}-tc/ItemName:x-tl/Quantity:{int(width*0.1)}-tr/Reason:{int(width*0.15)}-tl/CancelledBy:{int(width*.135)}-tc!33!35',
                                             )
             self.data_view1.pack()
             
