@@ -8,7 +8,7 @@ from customcustomtkinter import customcustomtkinter as cctk
 from tkinter import messagebox
 from util import database
 from util import *
-from popup import service_popup
+from popup import service_popup, mini_popup
 
 
 class pet_info_frame(ctk.CTkFrame):
@@ -258,7 +258,7 @@ class pets(ctk.CTkFrame):
                 cancel_command()
             self.place_forget()
 
-        def proceed_sequence():
+        def initial_proceeding():
             for fr in self.frames:
                 if fr.name.get() == "" or fr.first_date_entry._text == "Set Date":
                     messagebox.showerror("Fail to proceed", "Fill all the required info", parent = self)
@@ -274,7 +274,9 @@ class pets(ctk.CTkFrame):
                         messagebox.showerror("Fail to proceed", "Fill all the required info", parent = self)
                         return
             #for checking the missing informattion like patient, date, etc.
+            self.authorization.place(relx = .5, rely = .5, anchor = 'c')
 
+        def proceed_sequence():
             original_price = price_format_to_float(self.parent_frame_tab.winfo_children()[1]._text[1:])
             previous_price = price_format_to_float(self.parent_frame_tab.winfo_children()[3]._text[1:])
             total_price_lbl = self.parent_frame_tab.winfo_children()[3]
@@ -311,10 +313,9 @@ class pets(ctk.CTkFrame):
                     quan_list.append(0)
 
                 frame_spinner.configure(command = new_frame_spn_cmd, decrease_callback = decrease_callback, increase_callback = increase_callback)
-                        
                 total_price_lbl.configure(text = f"₱{format_price(float(original_price) * modified_price)}", fg_color = 'yellow')
+                print(self._root_treeview._data.__len__(), self._root_treeview.data_frames.index(self.parent_frame_tab), len(self._root_treeview.data_frames))
                 data = self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)]
-                #what causes the error
                 self._root_treeview._data[self._root_treeview.data_frames.index(self.parent_frame_tab)] = (data[0], data[1], data[2], total_price_lbl._text)
                 self.change_total_val_serv_callback(-previous_price)
                 self.change_total_val_serv_callback(price_format_to_float(total_price_lbl._text[1:]))
@@ -369,7 +370,10 @@ class pets(ctk.CTkFrame):
         self.cancel_btn = ctk.CTkButton(self.bot_frame, width=width*0.125, height=height*0.055, text='Cancel', command=cancel_sequence,
                                          fg_color=Color.Red_Pastel, hover_color=Color.Red_Pastel_Hover,font=("DM Sans Medium", 16))
         self.cancel_btn.pack(side="left",  padx=(width*0.005), pady=width*0.005)
-        self.proceed_btn = ctk.CTkButton(self.bot_frame, width=width*0.125, height=height*0.055, text='Proceed', command= proceed_sequence, font=("DM Sans Medium", 16),)
+
+        self.authorization = mini_popup.authorization(self, (width, height), proceed_sequence, "('Service Provider')")
+
+        self.proceed_btn = ctk.CTkButton(self.bot_frame, width=width*0.125, height=height*0.055, text='Proceed', command= initial_proceeding,)
         self.proceed_btn.pack(side="right", padx=(width*0.005), pady=width*0.005)
 
 
@@ -381,6 +385,7 @@ class pets(ctk.CTkFrame):
         return data
     
     def place(self, service_dict: dict, root_treeview: tuple, change_total_val_serv_callback: callable, master_frame: any, master_btn: ctk.CTkButton, **kwargs):
+        #self.parent_frame_tab = self.parent_frame_tab or master_frame
         self.parent_frame_tab = master_frame
         self._root_treeview = root_treeview
         self.parent_service_dict = service_dict
