@@ -176,7 +176,7 @@ def sched_info_popup(master, info:tuple, source:Optional[str] = None):
             self.top_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.top_frame, text='', image=self.sched_icon, anchor='w', fg_color="transparent").pack(side="left", padx=(width*0.01,0))    
-            ctk.CTkLabel(self.top_frame, text='SCHEDULE INFO', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            ctk.CTkLabel(self.top_frame, text='SCHEDULE INFORMATION', anchor='w', corner_radius=0, font=("DM Sans Medium", 16), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
             
             self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
             self.close_btn.pack(side="right", padx=width*0.005)
