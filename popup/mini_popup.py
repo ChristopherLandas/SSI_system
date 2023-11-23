@@ -7,7 +7,7 @@ from tkinter import messagebox
 from PIL import Image
 from typing import *
 
-def authorization(master, info:tuple, command_callback :Optional[callable] = None):
+def authorization(master, info:tuple, command_callback :Optional[callable] = None, roles: str = "('Assisstant', 'Owner')"):
     class instance(ctk.CTkFrame):
         def __init__(self, master, info:tuple, command_callback :Optional[callable]):
             width = info[0] * .4
@@ -16,6 +16,7 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
             self.command_callback = command_callback
             self.user_name_authorized_by = None
             self.pack_propagate(0)
+            self.authorized_roles = roles
 
             self.user_icon = ctk.CTkImage(light_image=Image.open("image/user_icon.png"),size=(30,30))
             self.pass_icon = ctk.CTkImage(light_image=Image.open("image/pass_icon.png"),size=(30,30))
@@ -27,7 +28,7 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
             self.upper_frame.pack_propagate(0)
 
             ctk.CTkLabel(self.upper_frame, text = 'Authorization', font=("DM Sans Medium", 18), text_color= 'white').pack(side = 'left', padx = (width * .01, 0))
-            self.close_btn = ctk.CTkButton(self.upper_frame,  height * .12, height * .12, text= 'x')
+            self.close_btn = ctk.CTkButton(self.upper_frame,  height * .12, height * .12, text= 'x', command= self.place_forget)
             self.close_btn.pack(side = ctk.RIGHT, padx = (0, width * .005))
             
             self.main_frame = ctk.CTkFrame(self, fg_color= 'transparent',height= height *.87, corner_radius= 0)
@@ -79,13 +80,14 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
                 self.password_entry.delete(0, ctk.END)
                 messagebox.showinfo('Error', 'Username Or Password Incorrect', parent = self)
                 return
-            _db = "SELECT COUNT(*)\
+            _db = f"SELECT COUNT(*)\
                   FROM acc_cred\
                   JOIN acc_info\
                       ON acc_cred.usn = acc_info.usn\
                   WHERE acc_cred.usn COLLATE LATIN1_GENERAL_CS = ?\
                           AND acc_cred.pss = ?\
-                          AND acc_info.job_position IN ('Assisstant', 'Owner')"
+                          AND acc_info.job_position IN {self.authorized_roles}"
+            print(_db)
             count = database.fetch_data(_db ,(self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
             if count[0][0] == 0:
                 self.password_entry.delete(0, ctk.END)
