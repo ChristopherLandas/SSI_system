@@ -130,8 +130,10 @@ class dashboard(ctk.CTkToplevel):
         update_frame(0)
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
+
         """ 
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
             self.destroy()
@@ -143,9 +145,10 @@ class dashboard(ctk.CTkToplevel):
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
-        #for preventing security breach through python code; enable it to test it
+        #for preventing security breach through python code; enable it to test it """
         
-        """
+        
+        
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
@@ -631,9 +634,10 @@ class dashboard_frame(ctk.CTkFrame):
         self.sched_info = dashboard_popup.sched_info_popup(self, (width, height), source='dashboard')
         self.receiving_entity.start_receiving()
         
-        self.selector_test = cctk.cctkSelector(self,(width, height), command_callback=self.test_self) 
-        #self.selector_test.place(relx=0.5, rely=0.5, anchor='c')
-
+        #Inventory_popup.stock_disposal(self,(width, height, acc_cred, acc_info), command_callback=None).place(relx=0.5, rely=0.5,anchor='c')
+        
+        #self.authorization = mini_popup.authorization(self,(width, height), command_callback=None)
+        #self.authorization.place(relx=0.5, rely=0.5, anchor='c')
     
     def test_self(self):
         print(self.selector_test.get())
@@ -1185,8 +1189,8 @@ class customer_frame(ctk.CTkFrame):
         self.refresh_btn = ctk.CTkButton(self.top_frame, text="", width=height*0.05, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command= self.refresh_treeview)
         self.refresh_btn.grid(row=0, column=1, padx=(0, width*0.005), pady=(height*0.01,0))
 
-        self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,)
-        self.add_customer._command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c', button=self.add_customer)
+        self.add_customer = ctk.CTkButton(self.top_frame, text="Add Record", image=self.add_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
+                                          command = lambda: self.add_customer_popup.place(relx = .5, rely = .5, anchor = 'c',))
         self.add_customer.grid(row=0, column=2, padx=(0, width*0.005), pady=(height*0.01,0))
 
         self.view_record_btn = ctk.CTkButton(self.top_frame, text="View Record", image=self.view_icon, font=("DM Sans Medium", 14), width=width*0.1,height = height*0.05,
@@ -1215,7 +1219,7 @@ class customer_frame(ctk.CTkFrame):
         self.customer_table_frame.pack(fill='both', expand=1, padx=(width*0.005), pady=(0,width*0.005))
        
         self.customer_treeview = cctk.cctkTreeView(self.customer_table_frame, data = [], width=width*0.805, height=height*0.8,
-                                               column_format=f'/No:{int(width*.035)}-#r/CustomerID:{int(width*.115)}-tc/CustomerName:x-tl/CustomerType:{int(width*.115)}-tc/ContactNo:{int(width*.15)}-tr!33!35',
+                                               column_format=f'/No:{int(width*.035)}-#r/CustomerID:{int(width*.115)}-tc/CustomerName:x-tl/CustomerType:{int(width*.115)}-tc/ContactNumber:{int(width*.15)}-tr!33!35',
                                                conditional_colors={3 : {"Non-Regular":Color.Near_Expire_Color, "Regular": "green"}})
         self.customer_treeview.pack()
         #self.no_sales_data = ctk.CTkLabel(self.sales_table_frame, text="No sales history data for this filter option", font=("DM Sans Medium", 14) , fg_color='transparent')
@@ -1777,7 +1781,7 @@ class inventory_frame(ctk.CTkFrame):
         def batch_dispose():
             if self.data_view1._data:
                 if messagebox.askyesnocancel("Disposal Confirmation", f"Are you sure you want to dispose {len(self.data_view1._data)} item/s?", parent = self):
-                    self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired')
+                    self.authorization.place(relx=0.5, rely=0.5, anchor='c')
                 else:
                     print("Thank you for saving a trash like me")
             else:
@@ -2180,7 +2184,7 @@ class inventory_frame(ctk.CTkFrame):
         self.treeview_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", padx=width*0.005, pady=(0,height*0.01))
 
         self.supplier_treeview = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * .8, height= height * .725, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/SupplierNo:{int(width*.115)}-tc/SupplierName:x-tl/ContactPerson:{int(width*.15)}-tl/ContactNo:{int(width*.135)}-tc/Address:{int(width*.185)}-tl!33!35')
+                                           column_format=f'/No:{int(width*.035)}-#r/SupplierNo:{int(width*.115)}-tc/SupplierName:x-tl/ContactPerson:{int(width*.15)}-tl/ContactNumber:{int(width*.135)}-tc/Address:{int(width*.185)}-tl!33!35')
         self.supplier_treeview.pack()
         
         self.supplier_treeview.update_table(database.fetch_data(sql_commands.get_supplier_info))
@@ -2208,6 +2212,7 @@ class inventory_frame(ctk.CTkFrame):
         self.order_info = Inventory_popup.order_info_screen(self, (width, height))
         self.new_supplier_popup = Inventory_popup.new_supplier(self, (width, height, acc_cred, acc_info), command_callback=refresh_supplier_table)
         self.view_supplier_popup = Inventory_popup.view_supplier(self, (width, height, acc_cred, acc_info), command_callback=refresh_supplier_table)
+        self.authorization = mini_popup.authorization(self,(width, height), command_callback=lambda:self.disposal_confirmation.place(relx=0.5, rely=0.5, anchor='c', data='Expired'))
         
         sort_status_callback("View by Levels")
         load_main_frame(0)
@@ -2334,7 +2339,7 @@ class patient_info_frame(ctk.CTkFrame):
         self.data = database.fetch_data(sql_commands.get_pet_record)
         
         self.pet_data_view = cctk.cctkTreeView(self.treeview_frame, data=self.data,width= width * .805, height= height * .79, corner_radius=0,
-                                           column_format=f'/No:{int(width*.035)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/PetBreed:{int(width*.2)}-tl/OwnerName:{int(width*.15)}-tl/ContactNo:{int(width*.115)}-tc!33!35',)
+                                           column_format=f'/No:{int(width*.035)}-#r/PetID:{int(width*.075)}-tc/PetName:x-tl/PetBreed:{int(width*.2)}-tl/OwnerName:{int(width*.15)}-tl/ContactNumber:{int(width*.115)}-tc!33!35',)
         self.pet_data_view.pack()
         
         '''BOTTOM FRAME'''
@@ -3430,5 +3435,6 @@ class admin_settings_frame(ctk.CTkFrame):
     def load_both(self):
         self.load_inventory_data()
         self.load_service_data()    
+
 
 dashboard(None, 'admin', datetime.datetime.now())

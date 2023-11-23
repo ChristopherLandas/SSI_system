@@ -371,6 +371,7 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 #USER LEVEL ACCESS
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 get_all_position_titles = "SELECT Title from user_level_access"
+get_acc_specific_access = "SELECT * FROM account_access_level WHERE usn = ?"
 
 #RECIEVING ITEMS
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? , NULL, ?, 1, CURRENT_TIMESTAMP, Null)"
@@ -385,7 +386,7 @@ get_supplier = "SELECT * from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3, current_stock = current_stock - ? WHERE id = ?"
-record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
+record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)"
 
 update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving_item SET state = 3, current_stock = current_stock - ?, date_recieved = CURRENT_TIMESTAMP,\
                                                                 reciever = ?\
@@ -804,7 +805,7 @@ insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, ?, CURRENT_TIM
 update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
 update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
-update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
+update_deactivate_account = "UPDATE acc_info SET state = 0, reason = ? WHERE usn = ?"
 
 #TESTING - James
 
@@ -822,7 +823,7 @@ insert_service = "INSERT INTO service_info_test VALUES( ?, ?, ?, NULL, ?, ?, ?)"
 
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
-create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
+create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1, NULL)"
 create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Reception = ?, Payment=?, Customer=?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet = ?, Report = ?, User = ?, Settings = ?, History=?\
@@ -1441,10 +1442,22 @@ get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name,
                     
 get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
 
+
+get_account_search_query = "SELECT full_name, usn FROM acc_info WHERE usn LIKE '%?%' or full_name LIKE '%?%'"
+get_account_deac_search_query = "SELECT full_name, usn FROM acc_info WHERE (usn LIKE '%?%' or full_name LIKE '%?%') AND state = 0"
+
+get_all_customer = "SELECT owner_id, owner_name, contact_number FROM pet_owner_info"
+
 get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
+
+get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
+
+
+get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
 
 get_all_service_schedule_by_id = "SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM services_transaction_content\
                                   WHERE transaction_uid = ?\
                                   UNION ALL\
                                   SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM service_preceeding_schedule\
                                   WHERE transaction_uid = ?"
+
