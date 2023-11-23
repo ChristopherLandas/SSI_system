@@ -920,8 +920,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         )
         #header
         report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                        ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                        ['+ 02 774 6090']]
+                        ['SJDM City, Bulacan Hardware 2000 Bldg.'],
+                            ['Brgy. Graceville, SJDM City, Bulacan'],
+                            ['Tel.: 8994-9043'],
+                            ['Cel.: 0922-976-9287 / 0927-887-0270 /'],
+                            [' 0922-408-7709']]
         report_header = Table(report_header_temp)
         tbl_header_style = TableStyle(
             [
@@ -931,10 +934,10 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
             ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
             ('FONTSIZE', (0, 0), (0, 0), 18),
-            ('FONTSIZE', (0, 1), (0, 2), 12),
+            ('FONTSIZE', (0, 1), (0, -1), 12),
             #space at the bottom
             ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-            ('BOTTOMPADDING', (0, 2), (0, 2), 25),
+            ('BOTTOMPADDING', (0, len(report_header_temp)-1), (0, len(report_header_temp)-1), 25),
             ]
         )
 
@@ -1093,8 +1096,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         )
         #header
         report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                        ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                        ['+ 02 774 6090']]
+                        ['SJDM City, Bulacan Hardware 2000 Bldg.'],
+                            ['Brgy. Graceville, SJDM City, Bulacan'],
+                            ['Tel.: 8994-9043'],
+                            ['Cel.: 0922-976-9287 / 0927-887-0270 /'],
+                            [' 0922-408-7709']]
         report_header = Table(report_header_temp)
         tbl_header_style = TableStyle(
             [
@@ -1104,10 +1110,10 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
             ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
             ('FONTSIZE', (0, 0), (0, 0), 18),
-            ('FONTSIZE', (0, 1), (0, 2), 12),
+            ('FONTSIZE', (0, 1), (0, -1), 12),
             #space at the bottom
             ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-            ('BOTTOMPADDING', (0, 2), (0, 2), 25),
+            ('BOTTOMPADDING', (0, len(report_header_temp)-1), (0, len(report_header_temp)-1), 25),
             ]
         )
 
@@ -1242,8 +1248,11 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
         )
         #header
         report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                        ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                        ['+ 02 774 6090']]
+                        ['SJDM City, Bulacan Hardware 2000 Bldg.'],
+                            ['Brgy. Graceville, SJDM City, Bulacan'],
+                            ['Tel.: 8994-9043'],
+                            ['Cel.: 0922-976-9287 / 0927-887-0270 /'],
+                            [' 0922-408-7709']]
         report_header = Table(report_header_temp)
         tbl_header_style = TableStyle(
             [
@@ -1253,10 +1262,10 @@ def generate_report(report_type: str, acc_name_preparator: str, acc_full_name: s
             ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
             ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
             ('FONTSIZE', (0, 0), (0, 0), 18),
-            ('FONTSIZE', (0, 1), (0, 2), 12),
+            ('FONTSIZE', (0, 1), (0, -1), 12),
             #space at the bottom
             ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-            ('BOTTOMPADDING', (0, 2), (0, 2), 25),
+            ('BOTTOMPADDING', (0, len(report_header_temp)-1), (0, len(report_header_temp)-1), 25),
             ]
         )
 
@@ -1568,8 +1577,11 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     )
     #header
     report_header_temp = [['Dr. Joseph Z. Angeles Veterinary Clinic'],
-                    ['Gov F. Halili Ave, Brgy. Gaya-gaya, San Jose Del Monte City, Bulacan'],
-                    ['+ 02 774 6090']]
+                    ['SJDM City, Bulacan Hardware 2000 Bldg.'],
+                        ['Brgy. Graceville, SJDM City, Bulacan'],
+                        ['Tel.: 8994-9043'],
+                        ['Cel.: 0922-976-9287 / 0927-887-0270 /'],
+                        [' 0922-408-7709']]
     report_header = Table(report_header_temp)
     tbl_header_style = TableStyle(
         [
@@ -1579,10 +1591,10 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
         ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
         ('FONTNAME', (0, 1), (0, -1), 'Times-New-Roman'),
         ('FONTSIZE', (0, 0), (0, 0), 18),
-        ('FONTSIZE', (0, 1), (0, 2), 12),
+        ('FONTSIZE', (0, 1), (0, -1), 12),
         #space at the bottom
         ('BOTTOMPADDING', (0, 0), (0, 0), 20),
-        ('BOTTOMPADDING', (0, 2), (0, 2), 25),
+        ('BOTTOMPADDING', (0, len(report_header_temp)-1), (0, len(report_header_temp)-1), 25),
         ]
     )
 
@@ -1599,8 +1611,10 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
     for x in inventory_report_data:
         temp_data = []
         #temp_data.append(x[3])
+        #new comment, not yet applied for quantity unit name
+        #comment by chris
         length_counter = 0
-        item_name = x[0]
+        item_name = x[2]
         itm_name = ''
         for i_name in item_name.split():
             length_counter += len(i_name)
@@ -1609,8 +1623,8 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
                 itm_name += f'\n{i_name}'
             else:
                 itm_name += f'{i_name} '
+        temp_data.append(x[0])
         temp_data.append(itm_name)
-        temp_data.append(x[2])
         temp_data.append(x[3])
         inventory_report_data_temp.append(temp_data)
     table_content = Table(inventory_report_data_temp)
@@ -1628,7 +1642,7 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
         #font style
         ('FONTNAME', (0, 0), (0, 0), 'Times-New-Roman-Bold'),
         ('FONTNAME', (0, 1), (-1, -1), 'Times-New-Roman'),
-        ('FONTSIZE', (0, 0), (-1, -1), 16),
+        ('FONTSIZE', (0, 0), (-1, -1), 14),
         #space at the bottom
         ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
         ('LEFTPADDING', (1, 0), (1, -1), 10),
@@ -1670,9 +1684,33 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
         ('ALIGN', (0, 1), (-1, 1), 'LEFT'),
     ])
     table_content.setStyle(ts)
+
+    footer_content = [['', '', ''],
+                    ['Prepared by:', '', 'Prepared Date/Time:'],
+                    [f'{acc_full_name}', '', f'{datetime.datetime.now().strftime("%x     %I:%M:%S %p")}'],
+                    [f'{acc_pos}', '', ''],]
+    table_footer = Table(footer_content)
+    tbl_footer_style = TableStyle(
+        [
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        #font style
+        ('FONTNAME', (0, 0), (-1, -1), 'Times-New-Roman'),
+        ('FONTSIZE', (0, -1), (-1, -1), 14),
+        ('FONTSIZE', (0, 3), (0, 3), 8),
+        #space at the bottom
+        ('TOPPADDING', (0, 3), (0, 3), -40),
+        ('TOPPADDING', (0, 2), (0, 2), 20),
+        ('RIGHTPADDING', (1, 1), (1, -1), 200),
+        #Signature line
+        ('LINEBELOW', (0,2), (0,2), 0.5, colors.black),
+        ]
+    )
+    table_footer.setStyle(tbl_footer_style)
+
     elems = []
     elems.append(report_header)
     elems.append(table_content)
+    elems.append(table_footer)
     pdf.build(elems)
     #pdf compilation
     
@@ -1693,20 +1731,20 @@ def generate_inventory_report(acc_name_preparator: str, file_name: str, acc_full
         Writing.close()
         writing_output.close()
         stop_foot_gen2 = 1
-    
+
     p1 = pdfrw1(filename)
     footer_generator(len(p1.pages))
     p2 = pdfrw1("image/footer.pdf")
     footer_gen2()
-    p3 = pdfrw1("image/footer2.pdf")
+    #p3 = pdfrw1("image/footer2.pdf")
     for page in range(len(p1.pages)):
         merger = pdfrw(p1.pages[page])
         merger.add(p2.pages[page]).render()
-        if page == (len(p1.pages)-1):
-            if not stop_foot_gen2:
-                merger.add(p3.pages[0]).render()
-        else:
-            merger.add(p2.pages[page]).render()
+        #if page == (len(p1.pages)-1):
+        #    if not stop_foot_gen2:
+        #        merger.add(p3.pages[0]).render()
+        #else:
+        #    merger.add(p2.pages[page]).render()
 
     
     writer.write(filename, p1)

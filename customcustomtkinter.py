@@ -419,7 +419,7 @@ class customcustomtkinter:
         def delete_all_data(self):
             for frm in self.data_frames:
                 frm.destroy()
-                self.data_frames.pop(0)
+                self.data_frames.pop()
             #self.data_grid_btn_mng._buttons.clear()
             #self.data_grid_btn_mng._og_color.clear()
             self.data_grid_btn_mng = customcustomtkinterutil.button_manager(self.data_frames, self._selected_color, True, None)

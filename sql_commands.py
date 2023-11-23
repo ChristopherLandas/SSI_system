@@ -501,7 +501,7 @@ get_inventory_info_with_uid = "SELECT item_general_info.UID,\
                                     INNER JOIN item_settings ON item_general_info.UID = item_settings.UID\
                                     WHERE item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL\
                                     GROUP BY item_general_info.UID\
-                                    ORDER BY item_inventory_info.Stock, item_general_info.name;"
+                                    ORDER BY item_general_info.name;"
 
 get_all_bought_items_group_by_name = "SELECT item_general_info.UID,\
                                     CASE WHEN item_general_info.unit IS NULL THEN item_general_info.name\
