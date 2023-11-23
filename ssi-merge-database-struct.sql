@@ -18,6 +18,9 @@
 -- Dumping database structure for ssi_test2
 CREATE DATABASE IF NOT EXISTS `ssi_test2` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
 USE `ssi_test2`;
+-- Dumping database structure for ssi_test2
+CREATE DATABASE IF NOT EXISTS `ssi_test2` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+USE `ssi_test2`;
 
 -- Dumping structure for table ssi_test2.account_access_level
 CREATE TABLE IF NOT EXISTS `account_access_level` (

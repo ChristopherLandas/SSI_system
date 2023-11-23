@@ -131,8 +131,10 @@ class dashboard(ctk.CTkToplevel):
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
 
+
         """ 
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
+
 
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -146,6 +148,9 @@ class dashboard(ctk.CTkToplevel):
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
         #for preventing security breach through python code; enable it to test it """
+        #for preventing security breach through python code; enable it to test it """
+        
+        
         
         
         
