@@ -214,7 +214,7 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 #self.item_category_entry.pack(side=ctk.LEFT, fill="x", expand=1, padx=(0,width*0.0025), pady=(height*0.005))
 
                 if database.exec_nonquery([["UPDATE item_general_info SET name =?, Category =? WHERE UID =?", (self.item_name_entry.get(), self.item_category_entry.get(), self.item_id_label._text)],
-                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, rate_mode = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/float(self.item_unit_price_entry.get()), float(self.item_reorder_entry.get()), float(self.item_crit_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._values.index(self.item_rate_entry.get())), self.item_id_label._text)]]):
+                                           ["UPDATE item_settings SET Cost_price =?, Markup_Factor =?, Reorder_Factor =?, Crit_Factor =?, Safe_Stock =?, rate_mode = ? WHERE UID = ?", (float(self.item_unit_price_entry.get()), float(self.item_markup_entry.get())/float(self.item_unit_price_entry.get()), float(self.item_reorder_entry.get()) / float(self.item_safe_stock_entry.get()), float(self.item_crit_entry.get()) / float(self.item_safe_stock_entry.get()), int(self.item_safe_stock_entry.get()), int(self.item_rate_entry._values.index(self.item_rate_entry.get())), self.item_id_label._text)]]):
                     messagebox.showinfo("Success", "Item Updated\nRestart the system to apply changes", parent = self)
                     self.reload_item()
                     self.place_forget()
@@ -385,7 +385,6 @@ def show_item_info(master, info:tuple) -> ctk.CTkFrame:
                 '''if i == 4:
                     self.entries[i].insert(0, f"{raw_data[i+1]*100}" )
                     continue'''
-                
                 self.entries[i].insert(0, raw_data[i+1])
             self.set_entries('disabled')
             

@@ -934,8 +934,8 @@ get_inventory = f"SELECT item_general_info.UID,\
                     ORDER BY name"
 
 get_inventory_info = "SELECT item_general_info.UID, item_general_info.name, COALESCE(item_general_info.unit, ''), item_general_info.Category, ROUND(item_settings.Cost_Price, 2) AS unit_cost,\
-                      ROUND(item_settings.Cost_Price * item_settings.Markup_Factor,2), ROUND(item_settings.Cost_Price*(item_settings.Markup_Factor+1), 2) AS selling, item_settings.Reorder_factor,\
-                      item_settings.Crit_factor, item_settings.Safe_stock, item_settings.rate_mode\
+                      ROUND(item_settings.Cost_Price * item_settings.Markup_Factor,2), ROUND(item_settings.Cost_Price*(item_settings.Markup_Factor+1), 2) AS selling, CAST(ROUND(item_settings.Safe_stock * item_settings.Reorder_factor) AS INT),\
+                      CAST(ROUND(item_settings.Safe_stock * item_settings.Crit_factor) AS INT), item_settings.Safe_stock, item_settings.rate_mode\
                       FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
 
 check_if_item_does_expire = "SELECT does_expire\
