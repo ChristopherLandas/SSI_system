@@ -167,9 +167,7 @@ def new_customer(master, info:tuple, command_callback: callable = None):
                 self._callback()
             self.place_forget()
             
-        def place(self, button,**kwargs):
-            self.button = button
-            #self.button.configure(state='disabled')
+        def place(self,**kwargs):
             self.customer_id_entry.configure(text = generateId('CU',7).upper())
             return super().place(**kwargs)
             

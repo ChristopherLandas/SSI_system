@@ -10,7 +10,7 @@ get_item_brand = "SELECT brand FROM item_general_info WHERE UID = ?"
 
 #SHOWING INFORMATION OF ITEM IN INVENTORY
 get_inventory_by_group = f"SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                  CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                CONCAT(CAST(SUM(item_inventory_info.Stock) AS INT),' ',item_general_info.stock_unit) AS stocks,\
                                   CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)) as cost_price,\
                                   DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                   CASE WHEN SUM(item_inventory_info.Stock) < 1\
@@ -33,7 +33,7 @@ get_inventory_by_group = f"SELECT item_general_info.brand, item_general_info.nam
                             ELSE 4 End ASC"
 
 get_normal_inventory = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                            CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                            CONCAT(CAST(SUM(item_inventory_info.Stock) AS INT),' ',item_general_info.stock_unit) AS stocks,\
                             CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                             DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                             case when SUM(item_inventory_info.Stock) > item_settings.Safe_stock * item_settings.Reorder_factor then 'Normal' ELSE null END AS status\
@@ -46,7 +46,7 @@ get_normal_inventory = "SELECT item_general_info.brand, item_general_info.name, 
                         ORDER BY item_general_info.UID"
 
 get_reorder_inventory = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                            CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                            CONCAT(CAST(SUM(item_inventory_info.Stock) AS INT),' ',item_general_info.stock_unit) AS stocks,\
                             CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                             DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                             case when SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Reorder_factor AND SUM(item_inventory_info.Stock) > item_settings.Safe_stock * item_settings.Crit_factor then 'Reorder' ELSE null END AS status\
@@ -59,7 +59,7 @@ get_reorder_inventory = "SELECT item_general_info.brand, item_general_info.name,
                         ORDER BY item_general_info.UID"
 
 get_critical_inventory = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                CONCAT(CAST(SUM(item_inventory_info.Stock) AS INT),' ',item_general_info.stock_unit) AS stocks,\
                                 CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                 DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                 case when SUM(item_inventory_info.Stock) <= item_settings.Safe_stock * item_settings.Crit_factor AND SUM(item_inventory_info.Stock) > 0 then 'Critical' ELSE null END AS status\
@@ -72,7 +72,7 @@ get_critical_inventory = "SELECT item_general_info.brand, item_general_info.name
                           ORDER BY item_general_info.UID"
                           
 get_out_of_stock_inventory = f"SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                CONCAT(CAST(SUM(item_inventory_info.Stock) AS INT),' ',item_general_info.stock_unit) AS stocks,\
                                 CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                 DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                 case when item_inventory_info.Stock = 0 then 'Out of Stock' END AS status\
@@ -85,7 +85,7 @@ get_out_of_stock_inventory = f"SELECT item_general_info.brand, item_general_info
                                 ORDER BY item_general_info.UID"
 #WHERE (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS NULL)\
 get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                  item_inventory_info.Stock,\
+                                  CONCAT(item_inventory_info.Stock,' ', item_general_info.stock_unit),\
                                   CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                   DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                   case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
@@ -108,7 +108,7 @@ get_inventory_by_expiry = f"SELECT DISTINCT item_general_info.brand, item_genera
                                       ELSE 1 END DESC"
 
 get_expired_inventory = "SELECT DISTINCT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                            item_inventory_info.Stock,\
+                            CONCAT(item_inventory_info.Stock,' ', item_general_info.stock_unit),\
                             CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                             DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                             case when item_inventory_info.Expiry_Date <= CURRENT_DATE\
@@ -120,7 +120,7 @@ get_expired_inventory = "SELECT DISTINCT item_general_info.brand, item_general_i
                          HAVING stat = 'Expired'"
 
 get_near_expire_inventory = "SELECT DISTINCT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                     item_inventory_info.Stock,\
+                                     CONCAT(item_inventory_info.Stock,' ', item_general_info.stock_unit),\
                                      CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                      DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                      case when item_inventory_info.Expiry_Date > CURRENT_DATE AND item_inventory_info.Expiry_Date < DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
@@ -132,7 +132,7 @@ get_near_expire_inventory = "SELECT DISTINCT item_general_info.brand, item_gener
                              HAVING stat = 'Nearly Expire'"
 
 get_safe_expire_inventory = "SELECT DISTINCT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                     item_inventory_info.Stock,\
+                                     CONCAT(item_inventory_info.Stock,' ', item_general_info.stock_unit),\
                                      CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                      DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                      case when item_inventory_info.Expiry_Date > DATE_ADD(CURRENT_DATE, INTERVAL 14 DAY)\
@@ -144,7 +144,7 @@ get_safe_expire_inventory = "SELECT DISTINCT item_general_info.brand, item_gener
                              HAVING stat = 'Safe'"
 
 get_non_expiry_inventory = "SELECT DISTINCT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                    item_inventory_info.Stock,\
+                                    CONCAT(item_inventory_info.Stock,' ', item_general_info.stock_unit),\
                                     CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                     DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                     case when item_inventory_info.Expiry_Date IS null\
@@ -156,7 +156,7 @@ get_non_expiry_inventory = "SELECT DISTINCT item_general_info.brand, item_genera
                             HAVING stat = 'N/A'"
 
 get_category_specific_inventory = "SELECT item_general_info.brand, item_general_info.name, item_general_info.unit,\
-                                            CAST(SUM(item_inventory_info.Stock) AS INT) AS stocks,\
+                                            CONCAT(CAST(SUM(item_inventory_info.Stock) AS INT),' ',item_general_info.stock_unit),\
                                             CONCAT('₱', FORMAT((item_settings.Cost_Price * (item_settings.Markup_Factor + 1)),2)),\
                                             DATE_FORMAT(item_inventory_info.Expiry_Date, '%b %d, %Y') AS expiry,\
                                             case when SUM(item_inventory_info.Stock) < 1\
@@ -217,31 +217,42 @@ update_expiry_stock = "UPDATE item_inventory_info SET Stock = STOCK + ? WHERE UI
 show_all_items = "SELECT name, unit FROM item_general_info"
 insert_receiving_history = f"INSERT INTO receiving_history_info VALUES(?, ?, ?, ?, CURRENT_TIMESTAMP)"
 
-get_order_info_history = "SELECT receiving_id, order_quantity, expiry, receiver, CAST(date_received AS DATE) FROM receiving_history_info WHERE receiving_id = ?"
+get_order_info_history = "SELECT receiving_id, CONCAT( order_quantity, ' ', item_general_info.stock_unit), expiry, receiver, CAST(date_received AS DATE)\
+                            FROM receiving_history_info\
+                            INNER JOIN recieving_item ON receiving_history_info.receiving_id = recieving_item.id\
+                            INNER JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
+                            WHERE receiving_id = ?"
+                            
 get_order_info_history_id = "SELECT id, NAME, CAST(date_set AS DATE),ordered_by FROM recieving_item WHERE id = ?"
 
 show_receiving_hist = "SELECT NAME, initial_stock, supp_name, date_recieved, reciever FROM recieving_item WHERE state = 2"
 
-show_receiving_hist_by_date = f"SELECT id, NAME, CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
-                                WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock\
-                                END AS received_stock,\
-                                supplier_info.supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
-                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+show_receiving_hist_by_date = f"SELECT recieving_item.id, recieving_item.NAME,\
+                                CONCAT(CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
+                                WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock END,' ', item_general_info.stock_unit) AS received_stock,\
+                                supplier_info.supp_name,\
+                                CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item\
+                                INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+                                INNER JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
                                 WHERE (state = 2 OR state = 3 OR state = -1)\
                                 AND DATE_FORMAT(date_recieved, '%M %Y') = ?\
                                 ORDER BY date_recieved DESC"
                                 
-show_receiving_history = f"SELECT id, NAME, CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
-                                WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock\
-                                END AS received_stock,\
-                                supplier_info.supp_name, CAST(date_recieved AS DATE) AS received_date, reciever\
-                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+show_receiving_history = f"SELECT recieving_item.id, recieving_item.NAME,\
+                                CONCAT(CASE WHEN state = 2 then initial_stock WHEN state = 3 then initial_stock - current_stock\
+                                WHEN (state = -1  AND initial_stock != current_stock) then initial_stock - current_stock END,' ', item_general_info.stock_unit) AS received_stock,\
+                                supplier_info.supp_name,\
+                                CAST(date_recieved AS DATE) AS received_date, reciever\
+                                FROM recieving_item\
+                                INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+                                INNER JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
                                 WHERE (state = 2 OR state = 3 OR state = -1)\
                                 ORDER BY date_recieved DESC"
 
 
 #ADDING ITEMS THROUGH THE INVENTORY
-add_item_general = "INSERT INTO item_general_info (UID, name, Category, brand, unit, added_by, added_date) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
+add_item_general = "INSERT INTO item_general_info (UID, name, Category, brand, unit, stock_unit, added_by, added_date) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
 add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, state, added_date) VALUES (?, ?, ?, 1, CURRENT_DATE)"
 
 
@@ -371,21 +382,26 @@ get_usn = "SELECT usn FROM acc_cred WHERE usn = ?"
 #USER LEVEL ACCESS
 get_level_acessess = "SELECT * FROM user_level_access WHERE title = ?"
 get_all_position_titles = "SELECT Title from user_level_access"
+get_acc_specific_access = "SELECT * FROM account_access_level WHERE usn = ?"
 
 #RECIEVING ITEMS
 record_recieving_item = "INSERT INTO recieving_item VALUES (?, ?, ?, ?, ?, ?, ? , NULL, ?, 1, CURRENT_TIMESTAMP, Null)"
 get_recieving_items = "SELECT id, NAME, initial_stock, current_stock, supp_id from recieving_item where state = 1"
 
-get_recieving_items_state = f"SELECT id, case When state = 3 then 'Partial' when state = 1 then 'On Order' END AS stats,\
-                                NAME, current_stock, supplier_info.supp_name, ordered_by\
-                                FROM recieving_item INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+get_recieving_items_state = f"SELECT recieving_item.id, case When state = 3 then 'Partial' when state = 1 then 'On Order' END AS stats,\
+                                recieving_item.NAME,\
+                                CONCAT(recieving_item.current_stock,' ',item_general_info.stock_unit) as stocks,\
+                                supplier_info.supp_name, recieving_item.ordered_by\
+                                FROM recieving_item\
+                                INNER JOIN supplier_info ON recieving_item.supp_id = supplier_info.supp_id\
+                                INNER JOIN item_general_info ON recieving_item.item_uid = item_general_info.UID\
                                 WHERE state = 1 OR state = 3 ORDER BY date_set DESC, state ASC"
 
 get_supplier = "SELECT * from item_supplier_info where UID = ?"
 get_receiving_expiry_by_id = "SELECT date_format(exp_date, '%Y-%m-%d') from recieving_item WHERE id = ?"
 update_recieving_item = "UPDATE recieving_item SET reciever = ?, state = 2, date_recieved = CURRENT_TIMESTAMP WHERE id = ?"
 update_recieving_item_partially_received = "UPDATE recieving_item SET state = 3, current_stock = current_stock - ? WHERE id = ?"
-record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, Current_date)"
+record_partially_received_item = "INSERT INTO partially_recieving_item VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)"
 
 update_recieving_item_partially_received_with_date_receiver = f"UPDATE recieving_item SET state = 3, current_stock = current_stock - ?, date_recieved = CURRENT_TIMESTAMP,\
                                                                 reciever = ?\
@@ -804,7 +820,7 @@ insert_new_category = "INSERT INTO categories VALUES (?, ?, ?, 1, ?, CURRENT_TIM
 update_category_deac = "Update categories Set state = 0, disabled_by = ?, disabled_date = CURRENT_TIMESTAMP where categ_name = ?"
 update_category_reac = "Update categories Set state = 1 where categ_name = ?"
 
-update_deactivate_account = "UPDATE acc_info SET state = 0 WHERE usn = ?"
+update_deactivate_account = "UPDATE acc_info SET state = 0, reason = ? WHERE usn = ?"
 
 #TESTING - James
 
@@ -822,7 +838,7 @@ insert_service = "INSERT INTO service_info_test VALUES( ?, ?, ?, NULL, ?, ?, ?)"
 
 #ACCOUNTS
 create_acc_cred = "INSERT INTO acc_cred VALUES (?, ?, ?, NULL)"
-create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1)"
+create_acc_info = "INSERT INTO acc_info VALUES (?, ?, ?, 1, NULL)"
 create_acc_access_level = "INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 update_acc_access_level = "UPDATE account_access_level SET Dashboard = ?, Reception = ?, Payment=?, Customer=?, Services = ?, Sales = ?,\
                                                            Inventory = ?, Pet = ?, Report = ?, User = ?, Settings = ?, History=?\
@@ -918,8 +934,8 @@ get_inventory = f"SELECT item_general_info.UID,\
                     ORDER BY name"
 
 get_inventory_info = "SELECT item_general_info.UID, item_general_info.name, COALESCE(item_general_info.unit, ''), item_general_info.Category, ROUND(item_settings.Cost_Price, 2) AS unit_cost,\
-                      ROUND(item_settings.Cost_Price * item_settings.Markup_Factor,2), ROUND(item_settings.Cost_Price*(item_settings.Markup_Factor+1), 2) AS selling, item_settings.Reorder_factor,\
-                      item_settings.Crit_factor, item_settings.Safe_stock, item_settings.rate_mode\
+                      ROUND(item_settings.Cost_Price * item_settings.Markup_Factor,2), ROUND(item_settings.Cost_Price*(item_settings.Markup_Factor+1), 2) AS selling, CAST(ROUND(item_settings.Safe_stock * item_settings.Reorder_factor) AS INT),\
+                      CAST(ROUND(item_settings.Safe_stock * item_settings.Crit_factor) AS INT), item_settings.Safe_stock, item_settings.rate_mode\
                       FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
 
 check_if_item_does_expire = "SELECT does_expire\
@@ -1282,7 +1298,7 @@ get_supplier_search_query = "SELECT supp_id, supp_name FROM supplier_info WHERE 
 get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by FROM disposal_history\
                                 WHERE date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
                                 
-get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+get_disposed_filter = "SELECT id, item_name, CONCAT(initial_quantity, ' ',item_general_info.stock_unit), reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
                         WHERE item_general_info.Category = ? AND reason = ?\
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
@@ -1293,12 +1309,12 @@ get_supplier_search_query = "SELECT supp_id, supp_name FROM supplier_info WHERE 
 get_disposal_item_by_date = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal as DATE), disposed_by FROM disposal_history\
                                 WHERE date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
                                 
-get_disposed_filter = "SELECT id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+get_disposed_filter = "SELECT id, item_name, CONCAT(initial_quantity, ' ',item_general_info.stock_unit), reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
                         WHERE item_general_info.Category = ? AND reason = ? AND receive_id IS NULL\
                         AND date_of_disposal BETWEEN ? AND ? ORDER BY date_of_disposal DESC"
 
-get_cancel_filter = "SELECT receive_id, item_name, initial_quantity, reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
+get_cancel_filter = "SELECT receive_id, item_name, CONCAT(initial_quantity,' ',item_general_info.stock_unit), reason, CAST(date_of_disposal AS DATE), disposed_by from disposal_history\
                         LEFT JOIN item_general_info ON disposal_history.item_uid = item_general_info.UID\
                         WHERE  receive_id IS NOT NULL ORDER BY date_of_disposal DESC"
 
@@ -1441,10 +1457,29 @@ get_all_items = "SELECT UID, brand, CASE WHEN unit is NOT NULL THEN CONCAT(name,
                     
 get_all_supplier = "SELECT supp_id, supp_name, contact_person from supplier_info"
 
+
+get_account_search_query = "SELECT full_name, usn FROM acc_info WHERE usn LIKE '%?%' or full_name LIKE '%?%'"
+get_account_deac_search_query = "SELECT full_name, usn FROM acc_info WHERE (usn LIKE '%?%' or full_name LIKE '%?%') AND state = 0"
+
+get_all_customer = "SELECT owner_id, owner_name, contact_number FROM pet_owner_info"
+
 get_new_supplier = "SELECT supp_id FROM supplier_info ORDER BY date_added DESC LIMIT 1"
+
+get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
+
+
+get_top_partial_reason = "SELECT reason FROM partially_recieving_item WHERE id = ? ORDER BY date_recieved DESC LIMIT 1"
 
 get_all_service_schedule_by_id = "SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM services_transaction_content\
                                   WHERE transaction_uid = ?\
                                   UNION ALL\
                                   SELECT DATE_FORMAT(scheduled_date, '%m/%d/%y') FROM service_preceeding_schedule\
                                   WHERE transaction_uid = ?"
+
+get_uid_by_brand_and_mofidied_name = "SELECT uid FROM item_general_info WHERE (brand = ? AND CONCAT(NAME, ' (', unit,')') = ? AND unit IS NOT NULL) OR (brand = ? AND NAME = ?)"
+get_all_expiry_of_items_by_id = "SELECT DATE_FORMAT(expiry_date, '%b %d, %Y') FROM item_inventory_info WHERE uid = ? ORDER BY expiry_date ASC"
+get_all_item_quantity_by_id = "SELECT CAST(COALESCE(SUM(stock), 0) AS INT) FROM item_inventory_info WHERE uid = ?"
+get_all_item_quantity_by_id_and_expiry = "SELECT CAST(COALESCE(SUM(stock), 0) AS INT) FROM item_inventory_info WHERE uid = ? AND expiry_date = ?"
+
+get_specific_stock_ordered_by_date_added_including_not_sellable = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL) ORDER BY added_date"
+get_specific_stock_ordered_by_date_added_including_not_sellable_for_expiry = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date = ?)"

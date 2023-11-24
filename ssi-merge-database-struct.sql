@@ -15,11 +15,14 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
--- Dumping database structure for ssi_merged
-CREATE DATABASE IF NOT EXISTS `ssi_merged` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
-USE `ssi_merged`;
+-- Dumping database structure for ssi_test2
+CREATE DATABASE IF NOT EXISTS `ssi_test2` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+USE `ssi_test2`;
+-- Dumping database structure for ssi_test2
+CREATE DATABASE IF NOT EXISTS `ssi_test2` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+USE `ssi_test2`;
 
--- Dumping structure for table ssi_merged.account_access_level
+-- Dumping structure for table ssi_test2.account_access_level
 CREATE TABLE IF NOT EXISTS `account_access_level` (
   `usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
   `Dashboard` int(1) NOT NULL,
@@ -41,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `account_access_level` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.acc_cred
+-- Dumping structure for table ssi_test2.acc_cred
 CREATE TABLE IF NOT EXISTS `acc_cred` (
   `usn` varchar(128) NOT NULL,
   `pss` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -52,12 +55,13 @@ CREATE TABLE IF NOT EXISTS `acc_cred` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.acc_info
+-- Dumping structure for table ssi_test2.acc_info
 CREATE TABLE IF NOT EXISTS `acc_info` (
   `usn` varchar(128) NOT NULL,
   `full_name` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `job_position` varchar(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `state` int(1) NOT NULL,
+  `reason` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`usn`),
   KEY `job_position` (`job_position`),
   CONSTRAINT `acc_info_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`),
@@ -66,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `acc_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.action_history
+-- Dumping structure for table ssi_test2.action_history
 CREATE TABLE IF NOT EXISTS `action_history` (
   `Column 5` int(11) NOT NULL AUTO_INCREMENT,
   `usn` varchar(128) NOT NULL,
@@ -76,16 +80,17 @@ CREATE TABLE IF NOT EXISTS `action_history` (
   PRIMARY KEY (`Column 5`),
   KEY `usn` (`usn`),
   CONSTRAINT `action_history_ibfk_1` FOREIGN KEY (`usn`) REFERENCES `acc_cred` (`usn`)
-) ENGINE=InnoDB AUTO_INCREMENT=307 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+) ENGINE=InnoDB AUTO_INCREMENT=337 DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.categories
+-- Dumping structure for table ssi_test2.categories
 CREATE TABLE IF NOT EXISTS `categories` (
   `categ_name` varchar(50) NOT NULL,
   `does_expire` int(1) NOT NULL,
   `creator` varchar(50) NOT NULL,
   `state` int(11) NOT NULL,
+  `Sellable` int(1) NOT NULL,
   `date_created` datetime DEFAULT NULL,
   `disabled_by` varchar(50) DEFAULT NULL,
   `disabled_date` datetime DEFAULT NULL,
@@ -94,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.disposal_history
+-- Dumping structure for table ssi_test2.disposal_history
 CREATE TABLE IF NOT EXISTS `disposal_history` (
   `id` varchar(8) NOT NULL DEFAULT '0',
   `receive_id` varchar(6) DEFAULT NULL,
@@ -113,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `disposal_history` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.invoice_item_content
+-- Dumping structure for table ssi_test2.invoice_item_content
 CREATE TABLE IF NOT EXISTS `invoice_item_content` (
   `invoice_uid` varchar(8) NOT NULL,
   `Item_uid` varchar(6) NOT NULL,
@@ -127,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `invoice_item_content` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.invoice_record
+-- Dumping structure for table ssi_test2.invoice_record
 CREATE TABLE IF NOT EXISTS `invoice_record` (
   `invoice_uid` varchar(8) NOT NULL,
   `Attendant_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
@@ -138,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `invoice_record` (
   `State` int(1) NOT NULL DEFAULT 0,
   `Date_transacted` date DEFAULT NULL,
   `process_type` int(11) NOT NULL,
+  `Service_provider` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`invoice_uid`),
   KEY `Attendant_usn` (`Attendant_usn`) USING BTREE,
   CONSTRAINT `invoice_record_ibfk_1` FOREIGN KEY (`Attendant_usn`) REFERENCES `acc_cred` (`usn`)
@@ -145,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `invoice_record` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.invoice_service_content
+-- Dumping structure for table ssi_test2.invoice_service_content
 CREATE TABLE IF NOT EXISTS `invoice_service_content` (
   `invoice_uid` varchar(8) NOT NULL,
   `service_uid` varchar(6) NOT NULL,
@@ -166,13 +172,14 @@ CREATE TABLE IF NOT EXISTS `invoice_service_content` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.item_general_info
+-- Dumping structure for table ssi_test2.item_general_info
 CREATE TABLE IF NOT EXISTS `item_general_info` (
   `UID` varchar(6) NOT NULL,
   `name` varchar(64) NOT NULL,
   `Category` varchar(64) NOT NULL,
   `brand` varchar(50) NOT NULL,
   `unit` varchar(50) DEFAULT NULL,
+  `stock_unit` varchar(50) NOT NULL,
   `added_by` varchar(50) NOT NULL,
   `added_date` datetime NOT NULL,
   `updated_by` varchar(50) DEFAULT NULL,
@@ -184,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `item_general_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.item_inventory_info
+-- Dumping structure for table ssi_test2.item_inventory_info
 CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `UID` varchar(6) NOT NULL,
@@ -195,11 +202,11 @@ CREATE TABLE IF NOT EXISTS `item_inventory_info` (
   PRIMARY KEY (`id`),
   KEY `UID` (`UID`),
   CONSTRAINT `item_inventory_info_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `item_general_info` (`UID`)
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.item_settings
+-- Dumping structure for table ssi_test2.item_settings
 CREATE TABLE IF NOT EXISTS `item_settings` (
   `UID` varchar(6) NOT NULL,
   `Cost_Price` float NOT NULL,
@@ -214,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `item_settings` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.item_statistic_info
+-- Dumping structure for table ssi_test2.item_statistic_info
 CREATE TABLE IF NOT EXISTS `item_statistic_info` (
   `UID` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `month` int(2) NOT NULL DEFAULT 0,
@@ -226,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `item_statistic_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.item_supplier_info
+-- Dumping structure for table ssi_test2.item_supplier_info
 CREATE TABLE IF NOT EXISTS `item_supplier_info` (
   `UID` varchar(6) NOT NULL,
   `supp_id` varchar(8) NOT NULL,
@@ -238,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `item_supplier_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.item_transaction_content
+-- Dumping structure for table ssi_test2.item_transaction_content
 CREATE TABLE IF NOT EXISTS `item_transaction_content` (
   `transaction_uid` varchar(8) NOT NULL,
   `Item_uid` varchar(6) NOT NULL,
@@ -253,7 +260,7 @@ CREATE TABLE IF NOT EXISTS `item_transaction_content` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.login_report
+-- Dumping structure for table ssi_test2.login_report
 CREATE TABLE IF NOT EXISTS `login_report` (
   `attempt_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
   `usn_used` varchar(128) NOT NULL,
@@ -264,7 +271,7 @@ CREATE TABLE IF NOT EXISTS `login_report` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.log_history
+-- Dumping structure for table ssi_test2.log_history
 CREATE TABLE IF NOT EXISTS `log_history` (
   `usn` varchar(128) NOT NULL,
   `date_logged` date NOT NULL,
@@ -276,7 +283,7 @@ CREATE TABLE IF NOT EXISTS `log_history` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for procedure ssi_merged.newUser
+-- Dumping structure for procedure ssi_test2.newUser
 DELIMITER //
 CREATE PROCEDURE `newUser`()
 BEGIN
@@ -287,7 +294,7 @@ BEGIN
 END//
 DELIMITER ;
 
--- Dumping structure for table ssi_merged.partially_recieving_item
+-- Dumping structure for table ssi_test2.partially_recieving_item
 CREATE TABLE IF NOT EXISTS `partially_recieving_item` (
   `id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
   `NAME` varchar(64) NOT NULL,
@@ -296,13 +303,14 @@ CREATE TABLE IF NOT EXISTS `partially_recieving_item` (
   `exp_date` date DEFAULT NULL,
   `reciever` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs DEFAULT NULL,
   `date_recieved` datetime DEFAULT NULL,
+  `reason` varchar(128) DEFAULT NULL,
   KEY `FK_partially_recieving_item_recieving_item` (`id`),
   CONSTRAINT `FK_partially_recieving_item_recieving_item` FOREIGN KEY (`id`) REFERENCES `recieving_item` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.pet_breed
+-- Dumping structure for table ssi_test2.pet_breed
 CREATE TABLE IF NOT EXISTS `pet_breed` (
   `type` varchar(32) NOT NULL,
   `breed` varchar(50) NOT NULL
@@ -310,7 +318,7 @@ CREATE TABLE IF NOT EXISTS `pet_breed` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.pet_info
+-- Dumping structure for table ssi_test2.pet_info
 CREATE TABLE IF NOT EXISTS `pet_info` (
   `id` varchar(6) NOT NULL,
   `p_name` varchar(128) NOT NULL,
@@ -331,7 +339,7 @@ CREATE TABLE IF NOT EXISTS `pet_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.pet_owner_info
+-- Dumping structure for table ssi_test2.pet_owner_info
 CREATE TABLE IF NOT EXISTS `pet_owner_info` (
   `owner_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `owner_name` varchar(128) NOT NULL,
@@ -347,7 +355,7 @@ CREATE TABLE IF NOT EXISTS `pet_owner_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.receiving_history_info
+-- Dumping structure for table ssi_test2.receiving_history_info
 CREATE TABLE IF NOT EXISTS `receiving_history_info` (
   `receiving_id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
   `order_quantity` int(11) NOT NULL,
@@ -360,7 +368,7 @@ CREATE TABLE IF NOT EXISTS `receiving_history_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.recieving_item
+-- Dumping structure for table ssi_test2.recieving_item
 CREATE TABLE IF NOT EXISTS `recieving_item` (
   `id` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
   `NAME` varchar(64) NOT NULL,
@@ -383,7 +391,7 @@ CREATE TABLE IF NOT EXISTS `recieving_item` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.replacement_items
+-- Dumping structure for table ssi_test2.replacement_items
 CREATE TABLE IF NOT EXISTS `replacement_items` (
   `rep_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `item_id` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -395,7 +403,7 @@ CREATE TABLE IF NOT EXISTS `replacement_items` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.replacement_record
+-- Dumping structure for table ssi_test2.replacement_record
 CREATE TABLE IF NOT EXISTS `replacement_record` (
   `rep_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `transction_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -409,7 +417,7 @@ CREATE TABLE IF NOT EXISTS `replacement_record` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.services_transaction_content
+-- Dumping structure for table ssi_test2.services_transaction_content
 CREATE TABLE IF NOT EXISTS `services_transaction_content` (
   `transaction_uid` varchar(8) NOT NULL,
   `service_uid` varchar(6) NOT NULL,
@@ -431,7 +439,7 @@ CREATE TABLE IF NOT EXISTS `services_transaction_content` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.service_category_test
+-- Dumping structure for table ssi_test2.service_category_test
 CREATE TABLE IF NOT EXISTS `service_category_test` (
   `category` varchar(64) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `state` int(11) NOT NULL DEFAULT 0,
@@ -440,7 +448,7 @@ CREATE TABLE IF NOT EXISTS `service_category_test` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.service_info
+-- Dumping structure for table ssi_test2.service_info
 CREATE TABLE IF NOT EXISTS `service_info` (
   `UID` varchar(6) NOT NULL,
   `service_name` varchar(256) NOT NULL,
@@ -454,7 +462,7 @@ CREATE TABLE IF NOT EXISTS `service_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.service_info_test
+-- Dumping structure for table ssi_test2.service_info_test
 CREATE TABLE IF NOT EXISTS `service_info_test` (
   `UID` varchar(6) NOT NULL,
   `service_name` varchar(256) NOT NULL,
@@ -469,7 +477,7 @@ CREATE TABLE IF NOT EXISTS `service_info_test` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.service_preceeding_schedule
+-- Dumping structure for table ssi_test2.service_preceeding_schedule
 CREATE TABLE IF NOT EXISTS `service_preceeding_schedule` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `transaction_uid` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '0',
@@ -483,11 +491,11 @@ CREATE TABLE IF NOT EXISTS `service_preceeding_schedule` (
   KEY `FK__service_info_test` (`service_uid`) USING BTREE,
   CONSTRAINT `FK__service_info_test` FOREIGN KEY (`service_uid`) REFERENCES `service_info_test` (`UID`),
   CONSTRAINT `FK__services_transaction_content` FOREIGN KEY (`transaction_uid`) REFERENCES `services_transaction_content` (`transaction_uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.supplier_info
+-- Dumping structure for table ssi_test2.supplier_info
 CREATE TABLE IF NOT EXISTS `supplier_info` (
   `supp_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `supp_name` varchar(128) NOT NULL,
@@ -506,7 +514,7 @@ CREATE TABLE IF NOT EXISTS `supplier_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.supplier_item_info
+-- Dumping structure for table ssi_test2.supplier_item_info
 CREATE TABLE IF NOT EXISTS `supplier_item_info` (
   `supplier_id` varchar(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `item_id` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -519,7 +527,7 @@ CREATE TABLE IF NOT EXISTS `supplier_item_info` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.transaction_record
+-- Dumping structure for table ssi_test2.transaction_record
 CREATE TABLE IF NOT EXISTS `transaction_record` (
   `transaction_uid` varchar(8) NOT NULL,
   `Attendant_usn` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
@@ -536,7 +544,25 @@ CREATE TABLE IF NOT EXISTS `transaction_record` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table ssi_merged.user_level_access
+-- Dumping structure for table ssi_test2.used_items_in_services
+CREATE TABLE IF NOT EXISTS `used_items_in_services` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `item_uid` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `expiration_date` date DEFAULT NULL,
+  `added_by` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
+  `added_date` date NOT NULL,
+  `state` int(1) NOT NULL DEFAULT 1,
+  `depleted_date` date DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `FK_used_items_in_services_item_general_info` (`item_uid`),
+  KEY `FK_used_items_in_services_acc_cred` (`added_by`),
+  CONSTRAINT `FK_used_items_in_services_acc_cred` FOREIGN KEY (`added_by`) REFERENCES `acc_cred` (`usn`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_used_items_in_services_item_general_info` FOREIGN KEY (`item_uid`) REFERENCES `item_general_info` (`UID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table ssi_test2.user_level_access
 CREATE TABLE IF NOT EXISTS `user_level_access` (
   `Title` varchar(32) NOT NULL,
   `Dashboard` int(1) NOT NULL,
@@ -548,9 +574,9 @@ CREATE TABLE IF NOT EXISTS `user_level_access` (
   `Inventory` int(1) NOT NULL,
   `Pet_Info` int(1) NOT NULL,
   `Report` int(1) NOT NULL,
-  `User_settings` int(1) NOT NULL,
-  `Gen_Settings` int(1) NOT NULL,
-  `History` int(1) NOT NULL,
+  `User` int(1) NOT NULL,
+  `Action` int(1) NOT NULL,
+  `Gen_Settings` int(11) NOT NULL,
   PRIMARY KEY (`Title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
