@@ -59,10 +59,18 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                         messagebox.showerror("Duplicate Entry", "The item is already in the inventory", parent = self)
                     else:
                         #print((self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0], self.stock_unit.get()))
+                        if int(self.safe_stock_entry.get()) < int(self.reorder_fact_entry.get()):
+                            messagebox.showinfo("Cannot Proceed", "Safe stock must be higher than the reorder level")
+                            return
+                        elif int(self.reorder_fact_entry.get()) < int(self.crit_fact_entry.get()):
+                            messagebox.showinfo("Cannot Proceed", "Reorder Level must be higher than the critical level")
+                            return
+                        reorder_factor = float(self.reorder_fact_entry.get()) / float(self.safe_stock_entry.get())
+                        critical_factor = float(self.crit_fact_entry.get()) / float(self.safe_stock_entry.get())
                         output = database.exec_nonquery([
                                                 [sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, self.stock_unit.get(),acc_info[0])],
                                                 #[sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 0)],
-                                                [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get()) / float(self.unit_price_entry.get()), .85, .5, self.stock_entry.get(), 0)],
+                                                [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get()) / float(self.unit_price_entry.get()), reorder_factor, critical_factor, int(self.safe_stock_entry.get()), 0)],
                                                 [sql_commands.set_supplier_items, (self.supplier_id, self.item_name_id._text)],
                                                 [sql_commands.add_item_inventory, (self.item_name_id._text, self.stock_entry.get(), _date)],
                                                 [sql_commands.add_item_statistic, (self.item_name_id._text, )]])
