@@ -206,17 +206,15 @@ def stock_disposal(master, info:tuple, command_callback: callable = None):
             '''PLACEMENT'''
             # Inventory_popup.stock_disposal(self,(width, height, acc_cred, acc_info), command_callback=None).place(relx=0.5, rely=0.5,anchor='c')
         def proceed(self):
-            date = datetime.strptime(self.expiry_selection.get(), '%b %d, %Y')
-
-            if date > datetime.now() and 'Expired' in self.disposal_entry.get():
-                messagebox.showerror("Cannot proceed","Item aren't expired yet", parent = self)
-                return
-            
             if self.disposal_entry.get() == "Select a Reason":
                 messagebox.showerror("Cannot proceed","Select a reason to continue", parent = self)
                 return
             
             if self.is_expiry_type:
+                date = datetime.strptime(self.expiry_selection.get(), '%b %d, %Y')
+                if date > datetime.now() and 'Expired' in self.disposal_entry.get():
+                    messagebox.showerror("Cannot proceed","Item aren't expired yet", parent = self)
+                    return
                 quantity_needed = self.stock_entry.get()
                 stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_date_added_including_not_sellable, (self.uid, ))
                 
