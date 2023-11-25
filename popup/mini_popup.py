@@ -216,7 +216,7 @@ def stock_disposal(master, info:tuple, command_callback: callable = None):
                     messagebox.showerror("Cannot proceed","Item aren't expired yet", parent = self)
                     return
                 quantity_needed = self.stock_entry.get()
-                stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_date_added_including_not_sellable, (self.uid, ))
+                stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_date_added_including_not_sellable_for_expiry, (self.uid, date))
                 
                 for st in stocks:
                     if st[2] == quantity_needed and st == stocks[-1]:
@@ -232,7 +232,7 @@ def stock_disposal(master, info:tuple, command_callback: callable = None):
                         #if the stock needed is higher than stock instance
             else:
                 quantity_needed = self.stock_entry.get()
-                stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_date_added_including_not_sellable_for_expiry, (self.uid, ))
+                stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_date_added_including_not_sellable, (self.uid, ))
                 
                 for st in stocks:
                     if st[2] == quantity_needed and st == stocks[-1]:
@@ -248,7 +248,7 @@ def stock_disposal(master, info:tuple, command_callback: callable = None):
                         #if the stock needed is higher than stock instance
             record_action(self.acc_user, action.DISPOSAL_TYPE, action.ITEM_DISPOSAL % (self.uid, self.stock_entry.get(), self.acc_user))
             database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("DIS",6).upper(), None, self.uid, self.data[2], self.stock_entry.get(), self.disposal_entry.get(), self.acc_user)]])
-            messagebox.showinfo("Success", "Itemp Dispose\nNote! this will be recorded")
+            messagebox.showinfo("Success", "Itemp Dispose\nNote! this will be recorded", parent = self)
             self.stock_entry.set(1)
             self.reset()
         
