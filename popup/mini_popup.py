@@ -253,6 +253,7 @@ def stock_disposal(master, info:tuple, command_callback: callable = None):
             self.reset()
         
         def reset(self):
+            self.command_callback()
             self.place_forget()
 
         def set_quantity_limit(self):

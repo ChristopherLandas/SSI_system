@@ -2208,7 +2208,7 @@ class inventory_frame(ctk.CTkFrame):
         self.history_popup = Inventory_popup.receive_history(self, (width, height, acc_cred, acc_info))
         self.cancel_orders = Inventory_popup.cancel_orders(self, (width, height, acc_cred, acc_info))
         self.restock_popup = Inventory_popup.restock(self, (width, height, acc_cred, acc_info), self.rs_data_view1, command_callback=refresh_rs_data_view1)
-        self.dispose_popup = mini_popup.stock_disposal(self, (width, height, acc_cred, acc_info), lambda: None)
+        self.dispose_popup = mini_popup.stock_disposal(self, (width, height, acc_cred, acc_info), update_table_callback)
         self.add_item_popup = Inventory_popup.add_item(self, (width, height, acc_cred, acc_info), command_callback=update_table_callback)
         self.supplier_list_popup = Inventory_popup.supplier_list(self,(width, height, acc_cred, acc_info))
         self.category_popup = Inventory_popup.show_category(self, (width, height, acc_cred, acc_info))
