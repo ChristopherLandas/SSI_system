@@ -203,21 +203,25 @@ class loginUI(ctk.CTk):
         return super().wm_deiconify()
 
 if __name__ == '__main__':
-    Data = subprocess.check_output(['wmic', 'product', 'get', 'name']) 
-    a = str(Data) 
-    try: 
-        for i in range(len(a)): 
-            app = a.split("\\r\\r\\n")[6:][i]
-            if 'MariaDB' in app:
-                if float(app.split(' ')[1]) < 11:
-                    messagebox.showwarning("Old MariaDB Version", "The Version of your MariaDB was\nbelow the requirements (v 11.0)\nInstall the version 11.0 or latest")
-                    break
-                else:
-                    app = loginUI()
-                    app.mainloop()
-                    break
-    except IndexError as e: 
-        messagebox.showerror("Unable to proceed", "MariaDB is not installed on your computer,\nInstall version 11.0 or the latest")
+    if database.fetch_db_profile() is None:
+        messagebox.showerror("Database Error", "Unable to Connect to the database\nProceed to database and network settings")
+    else:
+        Data = subprocess.check_output(['wmic', 'product', 'get', 'name']) 
+        a = str(Data) 
+        try: 
+            
+            for i in range(len(a)): 
+                app = a.split("\\r\\r\\n")[6:][i]
+                if 'MariaDB' in app:
+                    if float(app.split(' ')[1]) < 11:
+                        messagebox.showwarning("Old MariaDB Version", "The Version of your MariaDB was\nbelow the requirements (v 11.0)\nInstall the version 11.0 or latest")
+                        break
+                    else:
+                        app = loginUI()
+                        app.mainloop()
+                        break
+        except IndexError as e: 
+            messagebox.showerror("Unable to proceed", "MariaDB is not installed on your computer,\nInstall version 11.0 or the latest")
 
     #app = loginUI()
     #app.mainloop()
