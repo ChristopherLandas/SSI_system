@@ -60,10 +60,11 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                         messagebox.showerror("Duplicate Entry", "The item is already in the inventory", parent = self)
                     else:
                         output = database.exec_nonquery([[sql_commands.add_item_general, (self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0])],
-                                                [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 5)],
+                                                [sql_commands.add_item_settings, (self.item_name_id._text, float(self.unit_price_entry.get()), float(self.markup_price_entry.get())/100, .85, .5, self.stock_entry.get(), 0)],
                                                 [sql_commands.add_item_supplier, (self.item_name_id._text, self.supplier_id)],
                                                 [sql_commands.set_supplier_items, (self.supplier_id, self.item_name_id._text)],
-                                                [sql_commands.add_item_inventory, (self.item_name_id._text, self.stock_entry.get(), _date)],])
+                                                [sql_commands.add_item_inventory, (self.item_name_id._text, self.stock_entry.get(), _date)],
+                                                [sql_commands.add_item_statistic, (self.item_name_id._text, )]])
                         
                         if output:
                             messagebox.showinfo('Item Added Succesfully', f"{self.item_name_entry.get()} is added in the inventory", parent = self)
