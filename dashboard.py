@@ -1336,6 +1336,13 @@ class sales_frame(ctk.CTkFrame):
 class inventory_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, mainframes, IP_Address, PORT_NO
     def __init__(self, master):
+        current_month = datetime.datetime.now().month
+
+        #if it is the end of the month
+        if (datetime.datetime.now() + datetime.timedelta(days= 1)).month != current_month:
+            item_statistics = database.fetch_data(sql_commands.get_updated_avg_of_old_statistics, (current_month, ))
+            database.exec_nonquery([[sql_commands.update_statistics_info, (s[1], s[2], s[0])] for s in item_statistics])
+
         super().__init__(master,corner_radius=0,fg_color=Color.White_Platinum)
 
         self.refresh_icon = ctk.CTkImage(light_image=Image.open("image/refresh.png"), size=(18,18))
