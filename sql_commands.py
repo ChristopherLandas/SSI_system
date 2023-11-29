@@ -233,6 +233,8 @@ add_item_inventory = "INSERT INTO item_inventory_info (uid, Stock, Expiry_Date, 
 add_item_settings = "INSERT INTO item_settings VALUES(?, ?, ?, ?, ?, ?, ?)"
 add_item_supplier = "INSERT INTO item_supplier_info VALUES(?, ?)"
 
+add_item_statistic = "INSERT INTO item_statistic_info VALUES(?, MONTH(CURRENT_DATE), 0, 'm')"
+
 #RECORDING ANY TRANSACTION
 generate_id_transaction = "SELECT COUNT(*) FROM transaction_record"
 record_transaction = "INSERT INTO transaction_record VALUES(?, ?, ?, ?, CURRENT_DATE)"
@@ -648,13 +650,13 @@ get_invoice_item_content_by_id = "SELECT item_name, quantity, FORMAT((price * qu
 get_current_invoice_count = "SELECT COUNT(*) FROM recieving_item where id like '?%'"
 
 #fast or slow moving item
-get_selling_rate = "SELECT CASE when SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
+get_selling_rate1 = "SELECT CASE when SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
                                                         then item_transaction_content.quantity\
-                                                        ELSE 0 END) > item_settings.Average_monthly_selling_rate\
+                                                        ELSE 0 END) > item_settings.rate_mode\
                                         then '🠉'\
                                     when SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
                                                         then item_transaction_content.quantity\
-                                                        ELSE 0 END) < item_settings.Average_monthly_selling_rate\
+                                                        ELSE 0 END) < item_settings.rate_mode\
                                         then '🠋'\
                                         ELSE '-'end as rate,\
                     item_general_info.brand, item_general_info.name, item_general_info.unit\
@@ -669,6 +671,25 @@ get_selling_rate = "SELECT CASE when SUM(case when MONTH(transaction_record.tran
                         ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
                     GROUP BY item_general_info.UID\
                     ORDER BY item_inventory_info.UID"
+
+get_selling_rate = "SELECT case when item_settings.rate_mode = 0\
+                                        then case when item_statistic_info.rate_symbol = 'u'\
+                                                        then '🠉'\
+                                                    when item_statistic_info.rate_symbol = 'd'\
+                                                        then '🠋'\
+                                                        ELSE '-' end\
+                                    when item_settings.rate_mode = 0\
+                                        then '🠉'\
+                                        ELSE '🠋' END AS rate,\
+                            item_general_info.brand,\
+                            item_general_info.name,\
+                            item_general_info.unit\
+                    FROM item_general_info\
+                    INNER JOIN item_statistic_info\
+                        ON item_general_info.UID = item_statistic_info.UID\
+                    INNER JOIN item_settings\
+                        ON item_general_info.UID = item_settings.UID\
+                    GROUP BY item_general_info.UID"
 
 #LOG
 get_raw_action_history = "SELECT *\
@@ -810,7 +831,7 @@ get_inventory = f"SELECT item_general_info.UID, item_general_info.name, item_gen
 
 get_inventory_info= f"SELECT item_general_info.UID, item_general_info.name, item_general_info.Category, FORMAT(item_settings.Cost_Price,2) AS unit_cost,\
                         item_settings.Markup_Factor, FORMAT(item_settings.Cost_Price*(item_settings.Markup_Factor+1),2)AS selling, item_settings.Reorder_factor,\
-                        item_settings.Crit_factor, item_settings.Safe_stock, item_settings.Average_monthly_selling_rate\
+                        item_settings.Crit_factor, item_settings.Safe_stock, item_settings.rate_mode\
                         FROM item_general_info INNER JOIN item_settings ON item_general_info.UID = item_settings.UID WHERE item_general_info.UID = ?"
 
 check_if_item_does_expire = "SELECT does_expire\
@@ -1043,3 +1064,32 @@ get_all_schedule = "SELECT CONCAT('TR# ', service_preceeding_schedule.transactio
                                                     AND process_type = 1\
                                                 GROUP BY invoice_record.invoice_uid\
                     ORDER BY shceduled_date"
+
+get_updated_avg_of_old_statistics = "SELECT item_general_info.UID,\
+                                         avg((COALESCE(item_transaction_content.quantity, 0))),\
+                                         case when item_statistic_info.monthly_average < SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
+                                                                                                                         then item_transaction_content.quantity ELSE 0 END)\
+                                                         then 'u'\
+                                                     when item_statistic_info.monthly_average = 0 AND SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
+		 																		 			  then item_transaction_content.quantity ELSE 0 END) = 0\
+                                                         then 'd'\
+                                                     when item_statistic_info.monthly_average = 0\
+                                                         OR round(item_statistic_info.monthly_average) = SUM(case when MONTH(transaction_record.transaction_date) = MONTH(CURRENT_DATE)\
+                                                                                                                                 then item_transaction_content.quantity ELSE 0 END)\
+                                                         then 'm'\
+                                                     ELSE 'd' END\
+                                     FROM item_general_info\
+                                     INNER JOIN item_transaction_content\
+                                         ON item_general_info.UID = item_transaction_content.Item_uid\
+                                     INNER JOIN item_statistic_info\
+                                         ON item_general_info.UID = item_statistic_info.UID\
+                                     LEFT JOIN transaction_record\
+                                         ON item_transaction_content.transaction_uid = transaction_record.transaction_uid\
+                                     WHERE item_statistic_info.`month` != ?\
+                                     GROUP BY item_general_info.UID;"
+
+update_statistics_info = "UPDATE item_statistic_info\
+                          SET month = MONTH(CURRENT_DATE),\
+                              monthly_average = ?,\
+                              rate_symbol = ?\
+                          WHERE UID = ?"
