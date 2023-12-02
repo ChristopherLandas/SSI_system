@@ -209,7 +209,6 @@ if __name__ == '__main__':
         Data = subprocess.check_output(['wmic', 'product', 'get', 'name']) 
         a = str(Data) 
         try: 
-            
             for i in range(len(a)): 
                 app = a.split("\\r\\r\\n")[6:][i]
                 if 'MariaDB' in app:
