@@ -15,12 +15,14 @@ ctk.set_appearance_mode('light')
 IP_Address: dict = json.load(open("Resources\\network_settings.json"))
 
 
-class ip_setup(ctk.CTk):
+class ip_setup(ctk.CTkToplevel):
     global IP_Address
-    def __init__(self, fg_color: str | Tuple[str, str] | None = None, **kwargs):
-        super().__init__(fg_color, **kwargs)
-        self.check_ethernet_port()
+    def __init__(self, master:ctk.CTk):
+        super().__init__()
+        self._master = master
+        self._master.withdraw()
 
+        self.check_ethernet_port()
         try:
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
@@ -139,10 +141,13 @@ class ip_setup(ctk.CTk):
         for interface, t in interfaces.items():
             if 'ethernet' in interface.lower():
                 ethernet_prescence = True
-            print(interface, t[0].family, t[0].address)
 
         if not ethernet_prescence:
             messagebox.showerror("Unable to proceed", "Your ethernet port is disabled\n(System will not work for networks)\ngo to network settings and enable it", parent = self)
+        
+    def destroy(self):
+        self._master.deiconify()
+        return super().destroy()
 
 if __name__ == '__main__':
     app = ip_setup()

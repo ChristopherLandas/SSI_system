@@ -15,11 +15,14 @@ IP_Address: dict = json.load(open("Resources\\network_settings.json"))
 DB_SETTINGS: dict = json.load(open("Resources\\db_settings.json"))
 
 
-class ip_setup(ctk.CTk):
+class db_setup(ctk.CTkToplevel):
     global IP_Address, DB_SETTINGS
-    def __init__(self, fg_color: str | Tuple[str, str] | None = None, **kwargs):
-        super().__init__(fg_color, **kwargs)
-        
+    def __init__(self, master:ctk.CTk):
+        super().__init__()
+        self._master = master
+        self._master.withdraw()
+
+        self.grab_set()
         try:
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
@@ -113,8 +116,12 @@ class ip_setup(ctk.CTk):
         finally:
             messagebox.showinfo("Success", "Database profile change, proceed to login\nIf there's an error, proceed to Network setup", parent = self)
             self.destroy()
+
+    def destroy(self):
+        self._master.deiconify()
+        return super().destroy()
              
 
 if __name__ == '__main__':
-    app = ip_setup()
+    app = db_setup()
     app.mainloop()

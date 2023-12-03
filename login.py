@@ -11,11 +11,12 @@ import datetime
 import _tkinter
 from functools import partial
 import subprocess 
+from IP_add_set import ip_setup
+from DB_profile_set import db_setup
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 
 class loginUI(ctk.CTk):
-
     __is_PasswordVisible = True
 
     def __init__(self):
@@ -186,6 +187,8 @@ class loginUI(ctk.CTk):
 
         '''shortcut key'''
         self.bind('<Return>', login)
+        self.bind('<Control-Shift-D>', lambda _: ip_setup(master = self).mainloop())
+        self.bind('<Control-Shift-I>', lambda _: db_setup(master = self).mainloop())
 
     '''For showing the password'''
     def show_pass(self):
