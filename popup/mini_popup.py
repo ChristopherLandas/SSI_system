@@ -22,6 +22,7 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
             self.pack_propagate(0)
             self._border_color = Color.White_Platinum
             self.authorized_roles = roles
+            self.is_placed = False
 
             self.user_icon = ctk.CTkImage(light_image=Image.open("image/user_icon.png"),size=(30,30))
             self.pass_icon = ctk.CTkImage(light_image=Image.open("image/pass_icon.png"),size=(30,30))
@@ -93,7 +94,6 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
                   WHERE acc_cred.usn COLLATE LATIN1_GENERAL_CS = ?\
                           AND acc_cred.pss = ?\
                           AND acc_info.job_position IN {self.authorized_roles}"
-            print(_db)
             count = database.fetch_data(_db ,(self.user_entry.get(), encrypt.pass_encrypt(self.password_entry.get(), salt)['pass']))
             if count[0][0] == 0:
                 self.password_entry.delete(0, ctk.END)
@@ -106,14 +106,25 @@ def authorization(master, info:tuple, command_callback :Optional[callable] = Non
                 self.user_name_authorized_by = self.user_entry.get()
 
                 if callable(self.command_callback):
+                    self.grab_release()
                     self.command_callback()
                 self.reset()
 
         def reset(self):
+            self.grab_release()
             self.password_entry.delete(0, ctk.END)
             self.user_entry.delete(0, ctk.END)
             self.place_forget()
             pass
+
+        def place(self, **kwargs):
+            self.grab_set()
+            self.is_placed = True
+            return super().place(**kwargs)
+        
+        def place_forget(self):
+            self.is_placed = False
+            return super().place_forget()
 
     return instance(master, info, command_callback)
 

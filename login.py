@@ -13,6 +13,7 @@ from functools import partial
 import subprocess 
 from IP_add_set import ip_setup
 from DB_profile_set import db_setup
+from popup import mini_popup
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
 
@@ -99,12 +100,6 @@ class loginUI(ctk.CTk):
         title_name = "J.Z. Angeles Veterinary Clinic"
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
-        #print(set_scale((width, height)))
-        
-        
-        #ctk.set_widget_scaling(set_scale((width, height)))
-        #ctk.set_window_scaling(set_scale((width, height)))
-        #print( width, height, '|', set_scale((width, height)))
         
         root_w = 500
         root_h = 600
@@ -187,8 +182,17 @@ class loginUI(ctk.CTk):
 
         '''shortcut key'''
         self.bind('<Return>', login)
-        self.bind('<Control-Shift-D>', lambda _: ip_setup(master = self).mainloop())
-        self.bind('<Control-Shift-I>', lambda _: db_setup(master = self).mainloop())
+
+        def authorize_sequence(authorization_popup: mini_popup.authorization):
+            self.state('zoomed')
+            authorization_popup.place(relx = .5, rely = .5, anchor = 'c')
+
+        self.ip_authorization = mini_popup.authorization(self, (width, height), lambda : ip_setup(master = self).mainloop(), "('Owner')")
+        self.db_authorization = mini_popup.authorization(self, (width, height), lambda : db_setup(master = self).mainloop(), "('Owner')")
+
+        self.bind('<Control-Shift-I>', lambda _: authorize_sequence(self.ip_authorization))
+        self.bind('<Control-Shift-D>', lambda _: authorize_sequence(self.db_authorization))
+        #self.bind('<Control-Shift-I>', lambda _: db_authorization.place(relx = .5, rely = .5, anchor = 'c'))
 
     '''For showing the password'''
     def show_pass(self):
@@ -200,10 +204,13 @@ class loginUI(ctk.CTk):
             self.password_entry.configure(show="*")
             self.show_pass_btn.configure(image=self.hide_icon)
             self.__is_PasswordVisible = True
+    
+    def deiconify(self) -> None:
+        print(self.ip_authorization.winfo_ismapped(), self.db_authorization.winfo_ismapped())
+        if self.ip_authorization.is_placed or self.db_authorization.is_placed:
+            self.state('zoomed')
+        return super().deiconify()
 
-    def wm_deiconify(self) -> None:
-        self.password_entry.delete(0, ctk.END)
-        return super().wm_deiconify()
 
 if __name__ == '__main__':
     if database.fetch_db_profile() is None:
