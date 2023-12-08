@@ -1420,25 +1420,36 @@ get_the_first_item_to_inv = "SELECT id, uid, stock, expiry_date\
                                  AND (stock > 0)\
                              ORDER BY case when expiry_date IS NULL then added_date ELSE expiry_date END"
 
-insert_instance_to_used_in_services = "INSERT INTO used_items_in_services (item_uid, expiration_date, added_by, added_date, state) VALUES (?, ?, ?, CURRENT_DATE, 1)"
+insert_instance_to_used_in_services = "INSERT INTO used_items_in_services (item_uid, added_by, stock, added_date, state) VALUES (?, ?, ?, CURRENT_DATE, 1)"
+insert_deplete_to_used_in_services = "INSERT INTO used_items_in_services (item_uid, added_by, stock, added_date, state) VALUES (?, ?, ?, CURRENT_DATE, -1)"
 delete_instance_of_inventory = "DELETE FROM item_inventory_info WHERE id = ?"
 empty_instance_of_inventory = "UPDATE item_inventory_info SET stock = 0  WHERE id = ?"
 deduct_1_stock_of_inventory = "UPDATE item_inventory_info SET stock = stock - 1  WHERE id = ?"
 deduct_1_stock_of_inventory = "UPDATE item_inventory_info SET stock = stock - 1  WHERE id = ?"
+get_item_svc_by_id = "SELECT * FROM used_items_in_services WHERE item_uid = ? AND state = 1"
+get_depleted_item_svc_by_id = "SELECT * FROM used_items_in_services WHERE item_uid = ? AND state = -1"
+update_item_svc = "UPDATE used_items_in_services SET stock = stock + ? WHERE item_uid = ? and state = 1"
+update_depleted_item_svc = "UPDATE used_items_in_services SET stock = stock + ? WHERE item_uid = ? and state = -1"
 
 load_svc_item = "SELECT item_general_info.brand,\
                          CONCAT(item_general_info.name, ' (', item_general_info.unit, ')'),\
-                         case when used_items_in_services.expiration_date IS NULL\
-                             then 'No-Expiry'\
-                         when used_items_in_services.expiration_date <= CURRENT_DATE\
-                             then 'Expired'\
-                             ELSE 'Normal'\
-                         END,\
-                         COALESCE(DATE_FORMAT(used_items_in_services.expiration_date, '%M %d, %Y'), 'None')\
+                         SUM(used_items_in_services.stock) as stocks\
                  FROM used_items_in_services\
                  JOIN item_general_info\
                      ON used_items_in_services.item_uid = item_general_info.UID\
-                 WHERE state = 1"
+                 WHERE state = 1\
+                 GROUP BY item_general_info.UID\
+                 HAVING stocks > 0"
+
+load_depleted_svc_item = "SELECT item_general_info.brand,\
+                         CONCAT(item_general_info.name, ' (', item_general_info.unit, ')'),\
+                         SUM(used_items_in_services.stock) as stocks\
+                 FROM used_items_in_services\
+                 JOIN item_general_info\
+                     ON used_items_in_services.item_uid = item_general_info.UID\
+                 WHERE state = -1\
+                 GROUP BY item_general_info.UID\
+                 HAVING stocks > 0"
 
 set_data_to_depleted = "UPDATE used_items_in_services SET state = 0, depleted_date = CURRENT_DATE WHERE item_uid = ? AND (expiration_date = ? OR expiration_date IS null)"
 
@@ -1483,3 +1494,15 @@ get_all_item_quantity_by_id_and_expiry = "SELECT CAST(COALESCE(SUM(stock), 0) AS
 
 get_specific_stock_ordered_by_date_added_including_not_sellable = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date IS NULL) ORDER BY added_date"
 get_specific_stock_ordered_by_date_added_including_not_sellable_for_expiry = "SELECT * FROM item_inventory_info WHERE UID = ? AND (Expiry_Date = ?)"
+
+get_service_available_item = "SELECT item_general_info.uid,\
+                                      item_general_info.brand,\
+                                      COALESCE(CONCAT(NAME, ' (', unit, ')'), NAME),\
+                                      SUM(case when (item_inventory_info.Expiry_Date > CURRENT_DATE OR item_inventory_info.Expiry_Date IS null)\
+                                                  then item_inventory_info.Stock\
+                                                  ELSE 0 end) as total_quantity\
+                              FROM item_general_info\
+                              JOIN item_inventory_info\
+                                  ON item_general_info.UID = item_inventory_info.UID\
+                              GROUP BY uid\
+                              HAVING total_quantity > 0"

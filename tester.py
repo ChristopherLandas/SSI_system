@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Union
 import customtkinter as ctk
 from tkinter import messagebox
 from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
-from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup, mini_popup, dashboard_popup, transaction_popups
+from popup import notif_popup_entities as ntf, service_popup as svc_p, customer_popup, mini_popup, dashboard_popup, Inventory_popup
 #from decimal import Decimal
 from util import *
 #import sql_commands
@@ -37,7 +37,9 @@ class body(ctk.CTk):
 
         #transaction_popups.svc_provider(self, self.screen).place(relx = .5, rely = .5, anchor = 'c')
         #mini_popup.stock_disposal(self, self.screen + ([['Cherrie']],), None).place(relx = .5, rely = .5, anchor = 'c', data = ())
-        print(sys.maxsize)
+        #print(sys.maxsize)
+
+        Inventory_popup.select_quantity_selected_svc_item(self, self.screen, lambda: None).place(relx = .5, rely = .5, anchor = 'c')
         self.mainloop()
 
         '''self.entry = ctk.CTkEntry(self, font= ('Arial', 24))

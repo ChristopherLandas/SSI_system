@@ -131,6 +131,7 @@ class dashboard(ctk.CTkToplevel):
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
 
+        """ 
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -150,7 +151,6 @@ class dashboard(ctk.CTkToplevel):
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
-        """ 
 
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
@@ -994,9 +994,6 @@ class payment_frame(ctk.CTkFrame):
 
         '''PAYMENT FRAME: START'''
         self.trash_icon = ctk.CTkImage(light_image=Image.open("image/trash.png"), size=(20,20))
-        #self.add_icon = ctk.CTkImage(light_image=Image.open("image/plus.png"), size=(17,17))
-        #self.service_icon = ctk.CTkImage(light_image=Image.open("image/services.png"), size=(20,20))
-        #self.item_icon = ctk.CTkImage(light_image=Image.open("image/inventory.png"), size=(20,20))
         self.cal_icon = ctk.CTkImage(light_image=Image.open("image/calendar.png"), size=(20,20))
         self.proceed_icon = ctk.CTkImage(light_image=Image.open("image/rightarrow.png"), size=(15,15))
         self.invoice_icon = ctk.CTkImage(light_image=Image.open("image/histlogs.png"), size=(18,21))
@@ -1012,18 +1009,6 @@ class payment_frame(ctk.CTkFrame):
 
         self.upper_frame = ctk.CTkFrame(self.content_frame, height = height*0.05, fg_color = 'transparent')
         self.upper_frame.grid(row = 0, column = 0, sticky = 'nsew', columnspan = 4)
-    
-        """ self.search_frame = ctk.CTkFrame(self.upper_frame,width=width*0.3, height = height*0.05, fg_color=Color.Platinum)
-        #self.search_frame.grid(row=0, column=0,sticky="nsew", padx=(width*0.005), pady=(height*0.01))
-        self.search_frame.pack(side = ctk.LEFT, padx=(width*0.005), pady=(height*0.01))
-        self.search_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.search_frame,text="Search", font=("DM Sans Medium", 14), text_color="grey", fg_color="transparent").pack(side="left", padx=(width*0.0075,width*0.005))
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Type here...", border_width=0, corner_radius=5, fg_color="white",placeholder_text_color="light grey", font=("DM Sans Medium", 14))
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1)
-        self.search_btn = ctk.CTkButton(self.search_frame, text="", image=self.search, fg_color="white", hover_color="light grey",
-                                        width=width*0.005, command = self.search_callback)
-        self.search_btn.pack(side="left", padx=(0, width*0.0025)) """
 
         self.refresh_btn = ctk.CTkButton(self.upper_frame,text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command = self.update_payment_treeview)
         self.refresh_btn.pack(side = ctk.LEFT, padx=(width*0.005), pady=(height*0.01))
@@ -1348,6 +1333,9 @@ class services_frame(ctk.CTkFrame):
         self.svc_add_item = ctk.CTkButton(self.svc_button_frame, text="Add Item", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, image=self.plus,
                                          command=lambda: self.add_service_item.place(relx=0.5, rely=0.5, anchor="c"))
         self.svc_add_item.pack(side="left", padx=(0,width*0.005), pady=(0))
+        self.svc_deplete_item = ctk.CTkButton(self.svc_button_frame, text="Deplete Item", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, fg_color= Color.Red_Pastel,
+                                         command=self.deplete_command)
+        self.svc_deplete_item.pack(side="left", padx=(0,width*0.005), pady=(0))
         
         self.svc_refresh_btn = ctk.CTkButton(self.svc_button_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh)
         self.svc_refresh_btn.pack(side="left", padx=(0,width*0.005), pady=(0)) 
@@ -1363,42 +1351,18 @@ class services_frame(ctk.CTkFrame):
         #self.svc_item_data = database.fetch_data(sql_commands.get_service_data_test, None)
         
         self.svc_item_treeview = cctk.cctkTreeView(self.svc_item_data_frame, data =[] , width=width*0.805, height=height*0.8,
-                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.125)}-tc/ItemDescription:x-tl/Status:{int(width*.175)}-tl/ExpirationDate:{int(width*.115)}-tr/Action:{int(width*.085)}-bD!33!35',
+                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.125)}-tc/ItemDescription:x-tl/Stock:{int(width*.125)}-tr!33!35',
                                                bd_message="Are you sure you want to remove one (1) quantity of this item?")
         self.svc_item_treeview.pack()
 
         load_main_frame(0)
-        self.add_service_item = Inventory_popup.add_service_item(self, (width, height), command_callback= None)
+        self.add_service_item = Inventory_popup.add_service_item(self, (width, height, acc_cred), command_callback= None)
         self.deplted_history = Inventory_popup.deplted_history(self, (width, height))
-        """SERVICE ITEMS"""
-        
-        self.svc_button_frame = ctk.CTkFrame(self.service_item_frame, fg_color='transparent', corner_radius=0, height=height*0.055)
-        self.svc_button_frame.pack_propagate(0)
-        self.svc_button_frame.pack(fill="x", expand = 1, padx=(width*0.005), pady=(width*0.005))
-        
-        self.svc_add_item = ctk.CTkButton(self.svc_button_frame, text="Add Item", font=("DM Sans Medium", 14), width=width*0.1, height = height*0.05, image=self.plus,
-                                         command=lambda: self.add_service_item.place(relx=0.5, rely=0.5, anchor="c"))
-        self.svc_add_item.pack(side="left", padx=(0,width*0.005), pady=(0))
-        
-        self.svc_refresh_btn = ctk.CTkButton(self.svc_button_frame, text="", width=width*0.025, height = height*0.05, image=self.refresh_icon, fg_color="#83BD75", command=refresh)
-        self.svc_refresh_btn.pack(side="left", padx=(0,width*0.005), pady=(0)) 
-        
-        
-        self.svc_item_data_frame = ctk.CTkFrame(self.service_item_frame, fg_color=Color.White_Platinum, corner_radius=0)
-        self.svc_item_data_frame.pack(pady=(0, width*0.005))
-
-        #self.svc_item_data = database.fetch_data(sql_commands.get_service_data_test, None)
-        
-        self.svc_item_treeview = cctk.cctkTreeView(self.svc_item_data_frame, data =[] , width=width*0.805, height=height*0.8,
-                                               column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*.125)}-tc/ItemDescription:x-tl/Status:{int(width*.175)}-tl/ExpirationDate:{int(width*.115)}-tr/Action:{int(width*.085)}-bD!33!35',
-                                               bd_message="Are you sure you want to remove one (1) quantity of this item?")
-        self.svc_item_treeview.pack()
-        self.update_items_svc()
         
         def svc_item_bd_command (m):
             data = self.svc_item_treeview._data[m]
             uid = database.fetch_data(sql_commands.find_item_id_by_metainfo, (data[0], data[1]))[0][0]
-            database.exec_nonquery([[sql_commands.set_data_to_depleted, (uid, data[3])]])
+            Inventory_popup.select_quantity_for_depletion_svc_item(self, (width, height, acc_cred[0][0]), self.update_items_svc).place(relx = .5, rely = .5, anchor = 'c', item_id= uid, max_quantity= 10)
             self.update_items_svc()
         
         self.svc_item_treeview.bd_commands = svc_item_bd_command
@@ -1410,9 +1374,19 @@ class services_frame(ctk.CTkFrame):
         self.svc_item_treeview.update_table(database.fetch_data(sql_commands.load_svc_item))
         
     def update_table(self):
+        self.update_items_svc()
         self.services_data = database.fetch_data(sql_commands.get_service_data_test, None)
         self.services_treeview.update_table(self.services_data)
         return
+    
+    def deplete_command(self):
+        data = self.svc_item_treeview.get_selected_data()
+        if data is not None:
+            uid = database.fetch_data(sql_commands.find_item_id_by_metainfo, (data[0], data[1]))[0][0]
+            Inventory_popup.select_quantity_for_depletion_svc_item(self, (width, height, acc_cred[0][0]), self.update_items_svc).place(relx = .5, rely = .5, anchor = 'c', item_id= uid, max_quantity= 10)
+            self.update_items_svc()
+        else:
+            messagebox.showerror("Unable to proceed", "Select an item to deplete")
 
 class sales_frame(ctk.CTkFrame):
     global width, height, acc_cred, acc_info, IP_Address, PORT_NO
@@ -3335,4 +3309,4 @@ class admin_settings_frame(ctk.CTkFrame):
         self.load_inventory_data()
         self.load_service_data()    
 
-#dashboard(None, 'admin', datetime.datetime.now())
+dashboard(None, 'admin', datetime.datetime.now())

@@ -2,7 +2,7 @@ import tkinter as tk
 import re
 import customtkinter as ctk
 import sql_commands
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 from customcustomtkinter import customcustomtkinter as cctk, customcustomtkinterutil as cctku
 from Theme import Color
 from util import database, generateId
@@ -58,7 +58,6 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                     if (self.item_brand_entry.get(), self.item_name_entry.get(), unit) in database.fetch_data('SELECT brand,name, unit from item_general_info'):
                         messagebox.showerror("Duplicate Entry", "The item is already in the inventory", parent = self)
                     else:
-                        #print((self.item_name_id._text, self.item_name_entry.get(), self.category_entry.get(), self.item_brand_entry.get(), unit, acc_info[0], self.stock_unit.get()))
                         if int(self.safe_stock_entry.get()) < int(self.reorder_fact_entry.get()):
                             messagebox.showinfo("Cannot Proceed", "Safe stock must be higher than the reorder level")
                             return
@@ -102,7 +101,6 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
             
             def selling_callback(_ = None, *__):
                 if re.search(r'[0-9\.]$', self.markup_price_entry.get() or "") is None and self.markup_price_entry._is_focused and self.markup_price_entry.get():
-                        #print(self.markup_price_entry.get())
                         l = len(self.markup_price_entry.get())
                         self.markup_price_entry.delete(l-1, l)
 
@@ -153,11 +151,8 @@ def add_item(master, info:tuple, command_callback :Optional[callable] = None):
                 self.address_entry.insert(0,  f"{supplier_data[5]}")
                 self.change_entries_state('disabled') 
 
-                print(self.supplier_id)
-
             def new_supplier_callback():
                 new_supplier_id = database.fetch_data(sql_commands.get_new_supplier)[0][0]
-                print(new_supplier_id)
                 supplier_callback(new_supplier_id)
 
             def uom_callback():
@@ -1221,7 +1216,6 @@ def view_supplier(master, info:tuple, command_callback: Optional[callable] = Non
             self.set_entries()
             self.raw_item_data = database.fetch_data(sql_commands.get_supplier_items, (self.record_id,))
             self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
-            #print(self.item_data)
             self.item_treeview.update_table(self.item_data)
             
             return super().place(**kwargs)
@@ -1249,17 +1243,14 @@ def add_supplier_item(master, info:tuple, command_callback: callable = None):
                 if self.item_treeview.get_selected_data():
                     exist = database.fetch_data(sql_commands.get_supplier_item_info_if_exist, (self.supplier_id, self.item_treeview.get_selected_data()[0]))[0][0]
                     if exist:
-                        #print("IF")
                         database.exec_nonquery([[sql_commands.update_supplier_item_info_active, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
                     else:
-                        #print("ELSE")
                         database.exec_nonquery([[sql_commands.set_supplier_items, (self.supplier_id, self.item_treeview.get_selected_data()[0])]])
                     messagebox.showinfo("Item Added", "Item added to supplier delivery.", parent = self)
                     reset()
                     if self.command_callback: self.command_callback()
                 else:
                     messagebox.showwarning('Warning','No record is selected', parent = self)
-                #self.refresh_table()
                     
                     
             self.main_frame = ctk.CTkFrame(self, corner_radius= 0, fg_color=Color.White_Color[3], border_width=1, border_color=Color.Platinum)
@@ -1358,7 +1349,6 @@ def receive_history(master, info:tuple,):
 
             def search_callback():
                 temp = database.fetch_data(sql_commands.show_receiving_history)
-                print(temp)
                 set_table(list_filterer(self.search_bar.get(), temp))
                 
             def page_callback():
@@ -2125,7 +2115,6 @@ def restock_confirmation(master, info:tuple, command_callback: Optional[callable
             self.place_expiry()
             self.restocking_info = restocking_info
             self.entry_setup()
-            #print(self.restocking_info[3].split()[0])
             
             return super().place(**kwargs)
             
@@ -2206,7 +2195,6 @@ def disposal_confirmation(master, info:tuple, command_callback: callable = None)
             if self.combo_var.get() == "":
                 messagebox.showerror('Missing Field','Enter a reason', parent = self)
             else:
-                #print(self.data[3].split()[0])
                 item_id = database.fetch_data("Select item_uid from recieving_item where id = ?", (self.data[0], ))[0][0]
                 database.exec_nonquery([[sql_commands.set_expired_items_from_inventory, (generateId("D",8).upper(), self.data[0], item_id, self.data[2], self.data[3].split()[0], f'{self.disposal_entry.get()}', self.acc_user)],
                                             ["UPDATE recieving_item SET state = -1 WHERE id = ?", (self.data[0], )]])
@@ -2535,11 +2523,13 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             width = info[0]
             height = info[1]
             super().__init__(master, width*0.65, height=height*0.65, corner_radius= 0, fg_color='transparent')
+            self.screen = (width, height)
             self.grid_columnconfigure(0, weight=1)
             self.grid_rowconfigure(0, weight=1)
             self.grid_propagate(0)
             
             self.command_callback = command_callback
+            self.acc= info[-1][0][0]
             
             def reset():
                 self.grab_release()
@@ -2564,7 +2554,7 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.item_treeview_frame.grid(row=1, column=0, sticky="nsew", pady=(height*0.01), padx=(height*0.01))
             
             self.item_treeview = cctk.cctkTreeView(self.item_treeview_frame, data=[],width= width*0.64, height= height*0.5, corner_radius=0,
-                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.085)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl!33!35',
+                                           column_format=f'/No:{int(width*.03)}-#r/ItemCode:{int(width *.085)}-tc/ItemBrand:{int(width *.1)}-tl/ItemDescription:x-tl/Quantity:{int(width *.1)}-tr!33!35',
                                            bd_message="Are you sure you want to remove this item to this supplier?")
             self.item_treeview.pack()
             
@@ -2572,7 +2562,7 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.bottom_frame.grid(row=2, column=0, sticky="nsew", pady=(0, height*0.01), padx=(height*0.01))
             
             self.add_item_btn = ctk.CTkButton(self.bottom_frame, height = height*0.05, text="Add Item", font=("DM Sans Medium", 14),
-                                             command=None)
+                                             command=self.add_item_command)
             self.add_item_btn.pack(side="right", pady=(height*0.01), padx=(height*0.01))
             
             self.cancel_btn = ctk.CTkButton(self.bottom_frame, width=width*0.075, height=height*0.05,corner_radius=5,  fg_color=Color.Red_Pastel, hover_color=Color.Red_Tulip,
@@ -2580,14 +2570,24 @@ def add_service_item(master, info:tuple, command_callback: callable = None):
             self.cancel_btn.pack(side="left", pady=(height*0.01), padx=(height*0.01,0))
         
         def refresh_table(self):
-            self.raw_item_data = database.fetch_data("SELECT UID, brand, name, unit FROM item_general_info")
-            self.item_data = [(item[0], item[1], f'{item[2]} ({item[3]})') if item[3] else (item[0], item[1], item[2]) for item in self.raw_item_data]
-            self.item_treeview.update_table(self.item_data)
+            self.item_treeview.update_table(database.fetch_data(sql_commands.get_service_available_item))
+            pass
                 
         def place(self,  **kwargs):
             self.grab_set()
             self.refresh_table()
             return super().place(**kwargs)
+        
+        def callback_sequence(self):
+            self.command_callback()
+            self.place_forget()
+        
+        def add_item_command(self):
+            if self.item_treeview.get_selected_data() is not None:
+                data = self.item_treeview.get_selected_data()
+                select_quantity_selected_svc_item(self, self.screen + (self.acc, ), self.callback_sequence).place(relx = .5, rely = .5, anchor = 'c', max_quantity= int(data[-1]), item_id=data[0])
+            else:
+                messagebox.showwarning("Cannot Proceed", "Select an Item to add")
         
     return add_service_item(master, info, command_callback)
 
@@ -2698,15 +2698,14 @@ def deplted_history(master, info:tuple,):
             self.treeview_frame.grid(row=1, column=0, columnspan=5, sticky="ew", padx=width*0.005, pady=(width*0.005))
 
             self.data_view1 = cctk.cctkTreeView(self.treeview_frame, data=[],width= width * 0.8, height= height * 0.8, corner_radius=0,
-                                            column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*0.09)}-tc/ItemDescription:x-tl/StockPcs:{int(width*0.075)}-tr/DepletionDate:{int(width*0.15)}-tl!33!35',
+                                            column_format=f'/No:{int(width*.035)}-#r/ItemBrand:{int(width*0.09)}-tc/ItemDescription:x-tl/StockPcs:{int(width*0.075)}-tr!33!35',
                                             )
             self.data_view1.pack()
             
             self.no_order_data = ctk.CTkLabel(self.data_view1, text="No order data yet to show.", font=("DM Sans Medium", 14))
-            
         
         def place(self, **kwargs):
-            #self.data_view1.update_table(database.fetch_data(sql_commands.get_cancel_filter))
+            self.data_view1.update_table(database.fetch_data(sql_commands.load_depleted_svc_item))
             return super().place(**kwargs)
 
     return deplted_history(master, info)
@@ -2891,3 +2890,150 @@ def stock_disposal(master, info:tuple, command_callback: callable = None):
             return super().place(**kwargs)
             
     return stock_disposal(master, info, command_callback)
+
+def select_quantity_selected_svc_item(master, info:tuple, command_callback):
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback):
+            width = info[0]
+            height = info[1]
+            self.acc = info[-1]
+            super().__init__(master, width=width*0.35, height=height*0.3, corner_radius= 0)
+            self.pack_propagate(0)
+            self.command_callback = command_callback
+
+            self.top_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.pack(fill = 'x')
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='Select Quantity', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.main_frame = ctk.CTkFrame(self, fg_color= Color.Grey_Bright_2, corner_radius= 0, height = height* 0.26)
+            self.main_frame.pack(fill = 'x')
+            self.main_frame.pack_propagate(0)
+
+            self.id_frame = ctk.CTkFrame(self.main_frame, height= height *.06, fg_color='transparent')
+            self.id_frame.pack(fill = 'x', padx = (width * .04), pady = (height * .03, height * .01))
+            self.id_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.id_frame, text = 'Item Code:', font = ('Arial', 20)).pack(anchor = 'w', padx = (width * .005, 0), pady = (height * .01), side = 'left')
+            self.item_id = ctk.CTkLabel(self.id_frame, text = 'test', font = ('Arial', 24))
+            self.item_id.pack(anchor = 'w', padx = (width * .005, 0), pady = (height * .01), side = 'left')
+
+            self.quantity_frame = ctk.CTkFrame(self.main_frame, height= height *.06, fg_color='transparent')
+            self.quantity_frame.pack(fill = 'x', padx = (width * .04), pady = (0, height * .01))
+            self.quantity_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.quantity_frame, text = 'Quantity:', font = ('Arial', 20)).pack(anchor = 'w', padx = (width * .005, 0), pady = (height * .01), side = 'left')
+            self.quantity_spinner = cctk.cctkSpinnerCombo(self.quantity_frame, width= width* .06, height= height *.045, val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), entry_font=('Arial', 24), button_font=('Arial', 20))
+            self.quantity_spinner.pack(anchor = 'w', padx = (width * .005, 0), side = 'left')
+
+            self.add_button = ctk.CTkButton(self.main_frame, height= height *.05, text='Add Item', font=('Arial', 20), command = self.add_command)
+            self.add_button.pack(pady = (height * .02, 0))
+
+        def add_command(self):
+            if len(database.fetch_data(sql_commands.get_item_svc_by_id, (self.item_id._text, ))) == 0:
+                database.exec_nonquery([[sql_commands.insert_instance_to_used_in_services, (self.item_id._text, self.acc, int(self.quantity_spinner.get()))]])
+            else:
+                database.exec_nonquery([[sql_commands.update_item_svc, ( int(self.quantity_spinner.get()), self.item_id._text)]])
+            does_expire = bool(database.fetch_data(sql_commands.check_item_if_it_expire_by_categ, (self.item_id._text, ))[0][0])
+            quantity_needed = int(self.quantity_spinner.get())
+            stocks = database.fetch_data(sql_commands.get_specific_stock_ordered_by_expiry if does_expire
+                                            else sql_commands.get_specific_stock_ordered_by_date_added, (self.item_id._text, ))
+            
+            for st in stocks:
+                if st[2] == quantity_needed and st == stocks[-1]:
+                    database.exec_nonquery([[sql_commands.null_stocks_by_id, (st[0], )]])
+                elif st[2] > quantity_needed:
+                    database.exec_nonquery([[sql_commands.deduct_stocks_by_id, (quantity_needed, st[0])]])
+                    quantity_needed = 0
+                    break
+                    #if the  stock of an instance is higher than needed stock
+                elif st[2] <= quantity_needed:
+                    database.exec_nonquery([[sql_commands.delete_stocks_by_id, (st[0], )]])
+                    quantity_needed -= st[2]
+                    #if the stock needed is higher than stock instance
+
+            messagebox.showinfo("Success", "Item move into service Item")
+            self.grab_release()
+            self.command_callback()
+            self.destroy()
+
+        def reset(self):
+            self.grab_release()
+            self.destroy()
+
+        def place(self, item_id: str, max_quantity: int, **kwargs):
+            self.item_id.configure(text = item_id)
+            self.quantity_spinner.configure(val_range = (1, max_quantity))
+            self.grab_set()
+            return super().place(**kwargs)
+    return instance(master, info, command_callback)
+
+def select_quantity_for_depletion_svc_item(master, info:tuple, command_callback):
+    class instance(ctk.CTkFrame):
+        def __init__(self, master, info:tuple, command_callback):
+            width = info[0]
+            height = info[1]
+            self.acc = info[-1]
+            super().__init__(master, width=width*0.35, height=height*0.3, corner_radius= 0)
+            self.pack_propagate(0)
+            self.command_callback = command_callback
+
+            self.top_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=Color.Blue_Yale, height=height*0.05)
+            self.top_frame.pack(fill = 'x')
+            self.top_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.top_frame, text='Select Quantity (depletion)', anchor='w', corner_radius=0, font=("DM Sans Medium", 14), text_color=Color.White_Color[3]).pack(side="left", padx=(width*0.0025,0))
+            
+            self.close_btn= ctk.CTkButton(self.top_frame, text="X", height=height*0.04, width=width*0.025, command=self.reset)
+            self.close_btn.pack(side="right", padx=width*0.005)
+
+            self.main_frame = ctk.CTkFrame(self, fg_color= Color.Grey_Bright_2, corner_radius= 0, height = height* 0.26)
+            self.main_frame.pack(fill = 'x')
+            self.main_frame.pack_propagate(0)
+
+            self.id_frame = ctk.CTkFrame(self.main_frame, height= height *.06, fg_color='transparent')
+            self.id_frame.pack(fill = 'x', padx = (width * .04), pady = (height * .03, height * .01))
+            self.id_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.id_frame, text = 'Item Code:', font = ('Arial', 20)).pack(anchor = 'w', padx = (width * .005, 0), pady = (height * .01), side = 'left')
+            self.item_id = ctk.CTkLabel(self.id_frame, text = 'test', font = ('Arial', 24))
+            self.item_id.pack(anchor = 'w', padx = (width * .005, 0), pady = (height * .01), side = 'left')
+
+            self.quantity_frame = ctk.CTkFrame(self.main_frame, height= height *.06, fg_color='transparent')
+            self.quantity_frame.pack(fill = 'x', padx = (width * .04), pady = (0, height * .01))
+            self.quantity_frame.pack_propagate(0)
+
+            ctk.CTkLabel(self.quantity_frame, text = 'Quantity:', font = ('Arial', 20)).pack(anchor = 'w', padx = (width * .005, 0), pady = (height * .01), side = 'left')
+            self.quantity_spinner = cctk.cctkSpinnerCombo(self.quantity_frame, width= width* .06, height= height *.045, val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), entry_font=('Arial', 24), button_font=('Arial', 20))
+            self.quantity_spinner.pack(anchor = 'w', padx = (width * .005, 0), side = 'left')
+
+            self.deplete_button = ctk.CTkButton(self.main_frame, height= height *.05, text='Deplete Item', font=('Arial', 20), command = self.deplete_command)
+            self.deplete_button.pack(pady = (height * .02, 0))
+
+        def deplete_command(self):
+            database.exec_nonquery([[sql_commands.update_item_svc, (-int(self.quantity_spinner.get()), self.item_id._text)]])
+            if len(database.fetch_data(sql_commands.get_depleted_item_svc_by_id, (self.item_id._text, ))) == 0:
+                #database.exec_nonquery([[sql_commands.insert_deplete_to_used_in_services, (self.item_id._text, self.acc, int(self.quantity_spinner.get()))]])
+                pass
+            else:
+                database.exec_nonquery([[sql_commands.update_depleted_item_svc, (int(self.quantity_spinner.get()), self.item_id._text)]])
+
+            messagebox.showinfo("Success", "Item depleted")
+            self.command_callback()
+            self.grab_release()
+            self.destroy()
+
+        def reset(self):
+            self.grab_release()
+            self.destroy()
+
+        def place(self, item_id: str, max_quantity: int, **kwargs):
+            self.item_id.configure(text = item_id)
+            self.quantity_spinner.configure(val_range = (1, max_quantity))
+            self.grab_set()
+            return super().place(**kwargs)
+    return instance(master, info, command_callback)

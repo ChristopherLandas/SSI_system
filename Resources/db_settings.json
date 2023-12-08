@@ -1,6 +1,6 @@
 {
-  "database": "ssi",
+  "database": "ssi1",
   "user": "root",
-  "password": "gerger",
+  "password": "hello123",
   "port_no": 3306
 }

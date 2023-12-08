@@ -430,6 +430,7 @@ CREATE TABLE IF NOT EXISTS `item_transaction_content` (
 CREATE TABLE IF NOT EXISTS `used_items_in_services` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `item_uid` varchar(6) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `stock` int(11) NOT NULL DEFAULT 0,
   `expiration_date` date DEFAULT NULL,
   `added_by` varchar(128) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
   `added_date` date NOT NULL,
