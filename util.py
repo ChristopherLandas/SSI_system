@@ -9,6 +9,7 @@ from typing import *
 import datetime
 from random import randint
 import customtkinter as ctk
+import sys, ctypes
 
 class encrypt:
     def pass_encrypt(pss, slt = None):
@@ -26,6 +27,15 @@ class encrypt:
         return {"pass": encrypted_password, "salt": salt}
 
 class database:
+    def fetch_maria_db_profile():
+        try:
+            mdb = mariadb.connect(user= db.DB_USERNAME, password= db.PASSWORD, host= db.HOST, port= db.PORT)
+            return mdb
+        except mariadb.Error as e:
+            print(e)
+            pass
+        return None
+
     def fetch_db_profile():
         try:
             mdb = mariadb.connect(user= db.DB_USERNAME, password= db.PASSWORD, host= db.HOST, port= db.PORT, database= db.DB)
@@ -273,3 +283,30 @@ def text_overflow_ellipsis(lbl: ctk.CTkLabel, width: int = None, lines: int = 1,
 
     txt_dvd[-1] = ellipse(" ".join(txt_dvd[-1]))
     lbl.configure(text = '\n'.join([" ".join(s) for s in txt_dvd]))
+
+def run_as_admin():
+    if sys.platform == 'win32':
+        try:
+            ctypes.windll.shell32.ShellExecuteW(
+                None,
+                "runas",
+                sys.executable,
+                " ".join(sys.argv),
+                None,
+                1
+            )
+            return True
+        except Exception as e:
+            # Handle the case where the user cancels the UAC prompt
+            print(f"Error: {e}")
+            return False
+    else:
+        return False
+
+def run_with_admin_privileges(callback: callable):
+    if ctypes.windll.shell32.IsUserAnAdmin() == 0:
+        if run_as_admin():
+            if callable(callback):
+                callback()
+        else:
+            sys.exit(1)

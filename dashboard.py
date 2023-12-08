@@ -66,7 +66,7 @@ class dashboard(ctk.CTkToplevel):
         title_name = "J.Z. Angeles Veterinary Clinic"
         
         '''Fonts'''
-        try:
+        '''try:
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
@@ -78,7 +78,7 @@ class dashboard(ctk.CTkToplevel):
             Font(file="Font/DMMono-Regular.ttf")
 
         except _tkinter.TclError:
-            pass
+            pass'''
         #for testing purposes, might delete after the development
         
         '''Loading Screen'''
@@ -131,7 +131,6 @@ class dashboard(ctk.CTkToplevel):
         
         global acc_info, acc_cred, date_logged, mainframes, IP_Address, PORT_NO
 
-        """ 
         datakey = database.fetch_data(f'SELECT {db.USERNAME} from {db.ACC_CRED} where {db.acc_cred.ENTRY_OTP} = ?', (entry_key, ))
         if not datakey or entry_key == None:
             messagebox.showwarning('Warning', 'Invalid entry method\ngo to log in instead')
@@ -144,13 +143,14 @@ class dashboard(ctk.CTkToplevel):
             acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (datakey[0][0], ))
             database.exec_nonquery([[f'UPDATE {db.ACC_CRED} SET {db.acc_cred.ENTRY_OTP} = NULL WHERE {db.USERNAME} = ?', (datakey[0][0], )]])
             del datakey
-        #for preventing security breach through python code; enable it to test it """
-        #for preventing security breach through python code; enable it to test it """
+        #for preventing security breach through python code; enable it to test it
         
+        """
         acc_cred = database.fetch_data(f'SELECT * FROM {db.ACC_CRED} where {db.USERNAME} = ?', (entry_key, ))
         acc_info = database.fetch_data(f'SELECT * FROM {db.ACC_INFO} where {db.USERNAME} = ?', (entry_key, ))
         date_logged = _date_logged;
         #temporary for free access; disable it when testing the security breach prevention or deleting it if deploying the system
+        """ 
 
         '''Import Images'''
         self.inv_logo = ctk.CTkImage(light_image=Image.open("image/logo1.png"),size=(37,35))
@@ -2607,24 +2607,12 @@ class reports_frame(ctk.CTkFrame):
 
         #region: inv rep
         '''INVENTORY REPORT'''
-        """  self.search_frame = ctk.CTkFrame(self.inventory_report_frame,width=width*0.3, height = height*0.05, fg_color=Color.White_Platinum)
-        self.search_frame.grid(row=0, column=0,sticky="w", padx=(width*0.0025), pady=(height*0.005,0))
-        self.search_frame.pack_propagate(0)
-
-        ctk.CTkLabel(self.search_frame,text="", image=self.search).pack(side="left", padx=width*0.005)
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search", border_width=0,font=("DM Sans Medium", 14), text_color="black", fg_color=Color.White_Color[3])
-        self.search_entry.pack(side="left", padx=(0, width*0.0025), fill="x", expand=1) """
-
         self.rep_refresh_btn = ctk.CTkButton(self.inventory_report_frame, text="", width=width*0.03, height = height*0.0575, image=self.refresh_icon, fg_color="#83BD75")
         self.rep_refresh_btn.grid(row=0, column=1, sticky="w", pady=(height*0.005), padx=(width*0.005))
         
         self.generate_rep_btn = ctk.CTkButton(self.inventory_report_frame,  image=self.generate_report_icon, width=width*0.175,  text="Generate Inventory Report", height=height*0.0575, font=("DM Sans Medium", 14),
                                               command = lambda: self.save_as_inventory_rep_popup.place(relx = .5, rely = .5, anchor = 'c'))
         self.generate_rep_btn.grid(row=0, column=0, sticky="w", pady=(height*0.005))
-
-        #self.receive_btn = ctk.CTkButton(self.inventory_report_frame, text="Receive History", height=height*0.0575, font=("DM Sans Medium", 14),
-        #                                      command = lambda: self.receive_report.place(relx= 0.5, rely=0.5, anchor='c'))
-        #self.receive_btn.grid(row=0, column=2, sticky="w", pady=(height*0.005))
 
         self.bought_item_con_col = None
 
@@ -2637,8 +2625,7 @@ class reports_frame(ctk.CTkFrame):
         
         self.update_invetory_graph()
         self.update_invetory_graph()
-        #endregion
-
+        #endregion  
 
         self.save_as_popup = save_as_popup.show_popup(self, (width , height), acc_cred[0][0], acc_info[0][1], acc_info[0][2])
         self.save_as_inventory_rep_popup = save_as_popup.show_popup_inventory(self, (width, height), acc_cred[0][0], acc_info[0][1], acc_info[0][2])
@@ -2648,12 +2635,6 @@ class reports_frame(ctk.CTkFrame):
 
     def update_invetory_graph(self):
         current_stock = database.fetch_data(sql_commands.get_inventory_report)
-        #bought_item = database.fetch_data(sql_commands.get_all_bought_items_group_by_name)
-        #bought_item_dict = {s[0]: s[1] for s in bought_item}
-        #bought_item_con_col = {1: {s[0]: 'blue' for s in bought_item}}
-
-        #inventory_report_data = [(s[0], s[1] + (0 if s[0] not in bought_item_dict else bought_item_dict[s[0]]), s[1]) for s in current_stock]
-        #self.inventory_rep_treeview._conditional_colors = bought_item_con_col
         self.inventory_rep_treeview.update_table(current_stock)
 
 
@@ -2672,9 +2653,7 @@ class reports_frame(ctk.CTkFrame):
         pie_figure= Figure(figsize=(width, height), dpi=100)
         pie_figure.set_facecolor(fg_color)
         ax =pie_figure.add_subplot(111)
-        #ax.pie(data, labels=label, autopct='%1.1f%%', startangle=90,counterclock=0, textprops={'fontsize':12, 'color':"black", 'family':'monospace'}, colors=[Color.Light_Green,Color.Blue_Cornflower])
         
-        #pie chart copied from dashboard
         ax.pie(data, labels=label, autopct=f"{'%1.1f%%'if self.data[0] + self.data[1] > 0 else ''}", 
                startangle=90, counterclock=0, explode=(0.1,0), colors=[Color.Light_Green, Color.Blue_Cornflower] if self.data[0] + self.data[1] > 0 else [Color.White_Gray],
                 textprops={'fontsize':17, 'color': Color.Blue_Maastricht, 'family':'monospace', 'weight':'bold' },)
@@ -2885,68 +2864,6 @@ class user_setting_frame(ctk.CTkFrame):
         self.button_manager._state = (lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),
                                         lambda: self.button_manager.active.winfo_children()[0].configure(fg_color="transparent"),)
         self.button_manager.click(self.button_manager._default_active, None)
-
-        """
-        self.creationFrame = acc_creation.creation_frame(self.acc_creation_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
-        self.creationFrame.grid(row=1, column=1, sticky="w")
-
-        self.rolesFrame = acc_creation.roles_frame(self.roles_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
-        self.rolesFrame.grid(row=1, column=1, sticky="w")
-
-        self.deactivatedFrame = acc_creation.deactivated_frame(self.deactivated_frame, width * .85, height * .82, fg_color= 'white', corner_radius=5)
-        self.deactivatedFrame.grid(row=1, column=1, sticky="w")
-        #self.changeFrame.usn_option.configure(values = [s [0] for s in database.fetch_data('SELECT usn from acc_cred')], command = set_checkBox)
-        #self.changeFrame.accept_button.configure(state = ctk.DISABLED, command = update_staff_acc);
-
-        #account creation tab
-        #account creation frame
-        self.box_frame = ctk.CTkFrame(self.inventory_report_frame,fg_color="white")
-        self.box_frame.pack(fill=tk.BOTH, expand=True)
-
-        def create_new_acc():
-            password1 = encrypt.pass_encrypt(self.acc_create.name_entry.get())
-            aula = (self.acc_create.name_entry.get(),)
-            temp = []
-            for i in range(len(self.acc_create.access_lvls)):
-                temp.append(self.acc_create.check_boxes[self.acc_create.access_lvls[i]].get())
-            aula = aula + tuple(temp);
-            database.exec_nonquery([['INSERT INTO acc_cred VALUES(?, ?, ?, NULL)',(self.acc_create.name_entry.get(), password1['pass'], password1['salt'])],
-                                    ['INSERT INTO acc_info VALUES(?, ?, ?)', (self.acc_create.name_entry.get(), self.acc_create.name_entry.get(), self.acc_create.position_option.get())],
-                                    ['INSERT INTO account_access_level VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', aula]])
-            #add_new_acc()
-            #clear_acc_creation_fields()
-            #get_staff_name()
-            #refresh_staff_names()
-
-        '''ACCOUNT CREATION: START'''
-        
-        '''temporary implementation'''
-        
-        def enable_checkboxes(e:any = None):
-            data = database.fetch_data('SELECT * FROM user_level_access WHERE Title = ?', (self.acc_create.position_option.get(),))[0]
-
-            self.acc_create.access_lvls
-            self.acc_create.check_boxes
-            for i in range(len(self.acc_create.access_lvls)):
-                if data[i+2] == 1:
-                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(state = ctk.NORMAL) 
-                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].select(False)
-                else:
-                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].deselect(False)
-                    self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(state = ctk.DISABLED)
-                #self.acc_create.check_boxes[self.acc_create.access_lvls[i]].configure(value = data[i + 2])
-
-        self.acc_create = acc_creation.creation_frame(self.box_frame, width * .85, height * .82, 5, fg_color= 'light grey')
-        self.acc_create.grid(row=1, column=1, sticky="w")
-        '''
-        roles_list = database.fetch_data('SELECT title FROM user_level_access')
-        roles_list = [s[0] for s in roles_list]
-        #roles = roles_list = [s[0] for s in roles_list]
-        self.acc_create.position_option.set('Select Position');
-        self.acc_create.position_option.configure(values = roles_list, command = enable_checkboxes)
-
-        self.acc_create.accept_button.configure(command = create_new_acc)
-        ''' """
         load_main_frame(0)
 
 class histlog_frame(ctk.CTkFrame):

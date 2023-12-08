@@ -12,18 +12,16 @@ from customcustomtkinter import customcustomtkinter as cctk
 import psutil
 
 ctk.set_appearance_mode('light')
-IP_Address: dict = json.load(open("Resources\\network_settings.json"))
 
 
 class ip_setup(ctk.CTkToplevel):
-    global IP_Address
     def __init__(self, master:ctk.CTk):
         super().__init__()
         self._master = master
         self._master.withdraw()
 
         self.check_ethernet_port()
-        try:
+        '''try:
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
@@ -35,7 +33,7 @@ class ip_setup(ctk.CTkToplevel):
             Font(file="Font/DMMono-Regular.ttf")
 
         except _tkinter.TclError:
-            pass
+            pass'''
         
         title_name = "J.Z. Angeles Veterinary Clinic Network Setup"
         width = self.winfo_screenwidth()
@@ -91,6 +89,7 @@ class ip_setup(ctk.CTkToplevel):
         self.set_save()
 
     def set_save(self):
+        IP_Address: dict = json.load(open("Resources\\network_settings.json"))
         self.own_address.setIP(IP_Address['MY_NETWORK_IP'])
         self.reception_address.setIP(IP_Address['RECEPTIONIST_IP'])
         self.cashier_address.setIP(IP_Address['CASHIER_IP'])

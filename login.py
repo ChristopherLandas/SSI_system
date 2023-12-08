@@ -8,22 +8,30 @@ from constants import db
 from util import *
 import sql_commands
 import datetime
-import _tkinter
 from functools import partial
 import subprocess 
 from IP_add_set import ip_setup
 from DB_profile_set import db_setup
 from popup import mini_popup
+import json, os
+import ctypes
+import sys
+from tkinter import _get_temp_root, _destroy_temp_root
+
+Gen_settings: dict = json.load(open("Resources\\general_settings.json"))
+IP_Address: dict = json.load(open("Resources\\network_settings.json"))
 
 #print(ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100) 
-
 class loginUI(ctk.CTk):
+    global Gen_settings
     __is_PasswordVisible = True
 
     def __init__(self):
         super().__init__()
+        self.need_for_creation = False
         self.attempt = 0
-        try:
+        
+        '''try:
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
@@ -35,7 +43,7 @@ class loginUI(ctk.CTk):
             Font(file="Font/DMMono-Regular.ttf")
 
         except _tkinter.TclError:
-            pass
+            pass'''
 
         '''functions and processes'''
         def report_exceed_attempt():
@@ -85,8 +93,7 @@ class loginUI(ctk.CTk):
             
             if resolution:
                return scaling_dictionary.get(resolution)
-            
-            
+                
         '''Import Icons and Images'''
         self.bg_img = ctk.CTkImage(light_image=Image.open("image/bg.png"),size=(1920,1080))
         self.logo_img = ctk.CTkImage(light_image=Image.open("image/logo.png"),size=(80,80))
@@ -187,11 +194,8 @@ class loginUI(ctk.CTk):
             self.state('zoomed')
             authorization_popup.place(relx = .5, rely = .5, anchor = 'c')
 
-        self.ip_authorization = mini_popup.authorization(self, (width, height), lambda : ip_setup(master = self).mainloop(), "('Owner')")
-        self.db_authorization = mini_popup.authorization(self, (width, height), lambda : db_setup(master = self).mainloop(), "('Owner')")
-
-        self.bind('<Control-Shift-I>', lambda _: authorize_sequence(self.ip_authorization))
-        self.bind('<Control-Shift-D>', lambda _: authorize_sequence(self.db_authorization))
+        self.bind('<Control-Shift-I>', lambda _: ip_setup(master = self).mainloop())
+        self.bind('<Control-Shift-D>', lambda _: db_setup(master = self).mainloop())
         #self.bind('<Control-Shift-I>', lambda _: db_authorization.place(relx = .5, rely = .5, anchor = 'c'))
 
     '''For showing the password'''
@@ -205,32 +209,117 @@ class loginUI(ctk.CTk):
             self.show_pass_btn.configure(image=self.hide_icon)
             self.__is_PasswordVisible = True
     
-    def deiconify(self) -> None:
-        print(self.ip_authorization.winfo_ismapped(), self.db_authorization.winfo_ismapped())
-        if self.ip_authorization.is_placed or self.db_authorization.is_placed:
-            self.state('zoomed')
-        return super().deiconify()
+    def mainloop(self, *args, **kwargs):
+        if ctypes.windll.shell32.IsUserAnAdmin() == 0:
+            return
+        
+        if not Gen_settings['Database_created']:
+            #if the database hasn't been created yet
+            class db_stp(db_setup):
+                def __init__(self, master: ctk.CTk):
+                    super().__init__(master)
+
+                def save(self):
+                    try:
+                        mariadb.connect(user = self.db_user.get(), password = self.db_password.get(), host = IP_Address['ADMIN_IP'], port = int(self.db_port.get()))
+                    except mariadb.Error as e:
+                        messagebox.showerror("Database Credential Error", "You've enter the wrong credential")
+                        return
+                    val = super().save(True)
+                    return val
+                
+            if database.fetch_maria_db_profile() is None:
+                db_stp(master= self)
+
+            if database.fetch_db_profile() is None and database.fetch_maria_db_profile() is not None:
+                messagebox.showinfo("Note", "Database is being created")
+                self.create_database()
+                self.set_database_is_loaded()
+            
+        elif database.fetch_db_profile() is None:
+            messagebox.showerror("Database Error", "Unable to Connect to the database\nProceed to database and network settings")
+
+        return super().mainloop(*args, **kwargs)
+    
+    def create_database(self):
+        mariadb_profile = database.fetch_maria_db_profile()
+        
+        try:
+            db_cur = mariadb_profile.cursor()
+            db_cur.execute('CREATE DATABASE ssi')
+            mariadb_profile.commit()
+        except mariadb.IntegrityError as e:
+            return False , e
+        
+        sql_table_file = open(os.path.abspath('Resources\\ssi-merge-database-struct.sql'), 'r')
+        sql_table = sql_table_file.read()
+        sql_table_file.close()
+        del sql_table_file
+
+        sql_data_file = open(os.path.abspath('Resources\\ssi-merge-database-data.sql'), 'r')
+        sql_default_data = sql_data_file.read()
+        sql_data_file.close
+
+        db_cur.close()
+        mariadb_profile.close()
+
+        del db_cur
+
+        db_con = database.fetch_db_profile()
+        db_cur = db_con.cursor()
+        
+        for command in sql_table.split(';'):
+            try:
+                db_cur.execute(command)
+                db_con.commit()
+            except mariadb.IntegrityError as e:
+                return False , e
+            except:
+                print('Error')
+
+        for command in sql_default_data.split(';'):
+            database.exec_nonquery([[command, (None, )]])
+
+        db_cur.close()
+        db_con.close()
+
+    def set_database_is_loaded(self):
+        try:
+            with open(os.path.abspath('Resources\\general_settings.json'), 'r') as file:
+                data = json.load(file)
+
+            data['Database_created'] = True
+
+            with open(os.path.abspath('Resources\\general_settings.json'), 'w') as file:
+                json.dump(data, file, indent=2) 
+        finally:
+                pass
 
 
 if __name__ == '__main__':
-    if database.fetch_db_profile() is None:
-        messagebox.showerror("Database Error", "Unable to Connect to the database\nProceed to database and network settings")
-    else:
-        Data = subprocess.check_output(['wmic', 'product', 'get', 'name']) 
-        a = str(Data) 
-        try: 
-            for i in range(len(a)): 
-                app = a.split("\\r\\r\\n")[6:][i]
-                if 'MariaDB' in app:
-                    if float(app.split(' ')[1]) < 11:
-                        messagebox.showwarning("Old MariaDB Version", "The Version of your MariaDB was\nbelow the requirements (v 11.0)\nInstall the version 11.0 or latest")
-                        break
-                    else:
-                        app = loginUI()
-                        app.mainloop()
-                        break
-        except IndexError as e: 
-            messagebox.showerror("Unable to proceed", "MariaDB is not installed on your computer,\nInstall version 11.0 or the latest")
+    is_compatible = False
+    mainapp = loginUI()
 
-    #app = loginUI()
-    #app.mainloop()
+    try:
+        mariadb.connect(host = db.HOST)
+    except mariadb.Error as e:
+        if 'Can\'t connect' in str(e):
+            if IP_Address['MY_NETWORK_IP'] == '127.0.0.1':
+                messagebox.showerror("Unable to proceed", "MariaDB is not installed on your computer,\nInstall version 11.0 or the latest")
+        elif 'Access denied' in str(e):
+            is_compatible = True
+    #check the database condition
+
+    if is_compatible:
+        #mainapp.mainloop()
+        admin_priveledged : bool = ctypes.windll.shell32.IsUserAnAdmin() == 1
+
+        if not admin_priveledged:
+            run_as_admin()
+            admin_priveledged = True
+        
+        if admin_priveledged:
+            mainapp.mainloop()
+
+
+#dashboard(None, 'admin', datetime.datetime.now)

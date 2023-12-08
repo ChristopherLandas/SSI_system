@@ -12,18 +12,17 @@ from customcustomtkinter import customcustomtkinter as cctk
 
 ctk.set_appearance_mode('light')
 IP_Address: dict = json.load(open("Resources\\network_settings.json"))
-DB_SETTINGS: dict = json.load(open("Resources\\db_settings.json"))
 
 
 class db_setup(ctk.CTkToplevel):
-    global IP_Address, DB_SETTINGS
     def __init__(self, master:ctk.CTk):
         super().__init__()
         self._master = master
-        self._master.withdraw()
+        if isinstance(master, ctk.CTk):
+            self._master.withdraw()
 
         self.grab_set()
-        try:
+        '''try:
             #Transitioning to new font style
             Font(file="Font/DMSans-Bold.ttf")
             Font(file="Font/DMSans-Medium.ttf")
@@ -35,7 +34,7 @@ class db_setup(ctk.CTkToplevel):
             Font(file="Font/DMMono-Regular.ttf")
 
         except _tkinter.TclError:
-            pass
+            pass'''
         
         title_name = "J.Z. Angeles Veterinary Clinic Database Setup"
         width = self.winfo_screenwidth()
@@ -94,12 +93,13 @@ class db_setup(ctk.CTkToplevel):
         self.db_password.delete(0, ctk.END)
         self.db_port.delete(0, ctk.END)
 
+        DB_SETTINGS: dict = json.load(open("Resources\\db_settings.json"))
         self.db_name.insert(0, DB_SETTINGS['database'])
         self.db_user.insert(0, DB_SETTINGS['user'])
         self.db_password.insert(0, DB_SETTINGS['password'])
         self.db_port.insert(0, DB_SETTINGS['port_no'])
 
-    def save(self):
+    def save(self, destroy_master = False):
         if self.db_name.get() == "" or self.db_password.get() == "" or self.db_port.get() == "" or self.db_user.get() == "":
             messagebox.showerror("Unable to proceed", 'fill all the entries', parent = self)
             return
@@ -115,11 +115,19 @@ class db_setup(ctk.CTkToplevel):
                 json.dump(data, file, indent=2)
         finally:
             messagebox.showinfo("Success", "Database profile change, proceed to login\nIf there's an error, proceed to Network setup", parent = self)
-            self.destroy()
+            self.destroy(destroy_master)
 
-    def destroy(self):
-        self._master.deiconify()
+    def destroy(self, destroy_master = False):
+        if isinstance(self._master, ctk.CTk):
+            if destroy_master:
+                self._master.destroy()
+                return
+            else:
+                self._master.deiconify()
         return super().destroy()
+    
+    def mainloop(self, n: int = 0) -> None:
+        return super().mainloop(n)
              
 
 if __name__ == '__main__':
