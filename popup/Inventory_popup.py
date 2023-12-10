@@ -12,6 +12,7 @@ from datetime import date, datetime
 from constants import action
 from PIL import Image
 from typing import *
+from popup import mini_popup
 
 def add_item(master, info:tuple, command_callback :Optional[callable] = None):
     class add_item(ctk.CTkFrame):
@@ -2930,9 +2931,12 @@ def select_quantity_selected_svc_item(master, info:tuple, command_callback):
             self.quantity_spinner = cctk.cctkSpinnerCombo(self.quantity_frame, width= width* .06, height= height *.045, val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), entry_font=('Arial', 24), button_font=('Arial', 20))
             self.quantity_spinner.pack(anchor = 'w', padx = (width * .005, 0), side = 'left')
 
-            self.add_button = ctk.CTkButton(self.main_frame, height= height *.05, text='Add Item', font=('Arial', 20), command = self.add_command)
+            self.add_button = ctk.CTkButton(self.main_frame, height= height *.05, text='Add Item', font=('Arial', 20))
             self.add_button.pack(pady = (height * .02, 0))
 
+            self.authorization_add = mini_popup.authorization(self.master, (width, height), self.add_command)
+            self.add_button.configure(command = lambda:self.authorization_add.place(relx = .5, rely = .5, anchor = 'c'))
+            
         def add_command(self):
             if len(database.fetch_data(sql_commands.get_item_svc_by_id, (self.item_id._text, ))) == 0:
                 database.exec_nonquery([[sql_commands.insert_instance_to_used_in_services, (self.item_id._text, self.acc, int(self.quantity_spinner.get()))]])
@@ -2955,7 +2959,8 @@ def select_quantity_selected_svc_item(master, info:tuple, command_callback):
                     database.exec_nonquery([[sql_commands.delete_stocks_by_id, (st[0], )]])
                     quantity_needed -= st[2]
                     #if the stock needed is higher than stock instance
-
+            
+            record_action(self.acc, action.ADD_ITEM_TO_SERVICE, action.ENCODE_ITEM_TO_SVC % (self.item_id._text, int(self.quantity_spinner.get()), self.acc, self.authorization_add.user_name_authorized_by))
             messagebox.showinfo("Success", "Item move into service Item")
             self.grab_release()
             self.command_callback()
@@ -3011,8 +3016,11 @@ def select_quantity_for_depletion_svc_item(master, info:tuple, command_callback)
             self.quantity_spinner = cctk.cctkSpinnerCombo(self.quantity_frame, width= width* .06, height= height *.045, val_range=(1, cctk.cctkSpinnerCombo.MAX_VAL), entry_font=('Arial', 24), button_font=('Arial', 20))
             self.quantity_spinner.pack(anchor = 'w', padx = (width * .005, 0), side = 'left')
 
-            self.deplete_button = ctk.CTkButton(self.main_frame, height= height *.05, text='Deplete Item', font=('Arial', 20), command = self.deplete_command)
+            self.deplete_button = ctk.CTkButton(self.main_frame, height= height *.05, text='Deplete Item', font=('Arial', 20))
             self.deplete_button.pack(pady = (height * .02, 0))
+
+            self.authorization_deplete = mini_popup.authorization(self.master, (width, height), self.deplete_command)
+            self.deplete_button.configure(command = lambda:self.authorization_deplete.place(relx = .5, rely = .5, anchor = 'c'))
 
         def deplete_command(self):
             database.exec_nonquery([[sql_commands.update_item_svc, (-int(self.quantity_spinner.get()), self.item_id._text)]])
@@ -3022,6 +3030,7 @@ def select_quantity_for_depletion_svc_item(master, info:tuple, command_callback)
             else:
                 database.exec_nonquery([[sql_commands.update_depleted_item_svc, (int(self.quantity_spinner.get()), self.item_id._text)]])
 
+            record_action(self.acc, action.ITEM_DEPLETION_TYPE, action.ITEM_DEPLETION % (self.item_id._text,  (int(self.quantity_spinner.get())), self.acc, self.authorization_deplete.user_name_authorized_by))
             messagebox.showinfo("Success", "Item depleted")
             self.command_callback()
             self.grab_release()

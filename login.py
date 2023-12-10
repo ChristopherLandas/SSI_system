@@ -227,8 +227,9 @@ class loginUI(ctk.CTk):
                         return
                     val = super().save(True)
                     return val
-                
+            print(database.fetch_maria_db_profile())
             if database.fetch_maria_db_profile() is None:
+                messagebox.showinfo("Database Credential", "You need to register the database credential")
                 db_stp(master= self)
 
             if database.fetch_db_profile() is None and database.fetch_maria_db_profile() is not None:
@@ -303,9 +304,12 @@ if __name__ == '__main__':
     try:
         mariadb.connect(host = db.HOST)
     except mariadb.Error as e:
+        print(e)
         if 'Can\'t connect' in str(e):
             if IP_Address['MY_NETWORK_IP'] == '127.0.0.1':
                 messagebox.showerror("Unable to proceed", "MariaDB is not installed on your computer,\nInstall version 11.0 or the latest")
+            else:
+                is_compatible = True
         elif 'Access denied' in str(e):
             is_compatible = True
     #check the database condition
@@ -320,6 +324,5 @@ if __name__ == '__main__':
         
         if admin_priveledged:
             mainapp.mainloop()
-
 
 #dashboard(None, 'admin', datetime.datetime.now)

@@ -1383,7 +1383,7 @@ class services_frame(ctk.CTkFrame):
         data = self.svc_item_treeview.get_selected_data()
         if data is not None:
             uid = database.fetch_data(sql_commands.find_item_id_by_metainfo, (data[0], data[1]))[0][0]
-            Inventory_popup.select_quantity_for_depletion_svc_item(self, (width, height, acc_cred[0][0]), self.update_items_svc).place(relx = .5, rely = .5, anchor = 'c', item_id= uid, max_quantity= 10)
+            Inventory_popup.select_quantity_for_depletion_svc_item(self, (width, height, acc_cred[0][0]), self.update_items_svc).place(relx = .5, rely = .5, anchor = 'c', item_id= uid, max_quantity= int(data[-1]))
             self.update_items_svc()
         else:
             messagebox.showerror("Unable to proceed", "Select an item to deplete")
