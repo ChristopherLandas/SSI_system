@@ -2,7 +2,7 @@ INSERT INTO `user_level_access` (`Title`, `Dashboard`, `Reception`, `Payment`, `
 	('Owner', 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 	('Assistant', 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0),
 	('Cashier', 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-	('Receptionist', 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0),
+	('Receptionist', 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0),
 	('Service Provider', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 INSERT INTO `pet_breed` (`type`, `breed`) VALUES
